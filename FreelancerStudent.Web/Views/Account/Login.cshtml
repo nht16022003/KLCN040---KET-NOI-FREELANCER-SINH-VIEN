@@ -1,0 +1,207 @@
+@model FreelancerStudent.Web.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="login-wrapper py-4 my-auto">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+            
+            <!-- Card đăng nhập -->
+            <div class="card border-0 shadow-lg login-card">
+                <!-- Header Card -->
+                <div class="card-header bg-transparent text-center border-0 pt-4 pb-2">
+                    <div class="brand-badge mb-3 mx-auto">
+                        <i class="bi bi-mortarboard-fill fs-1 text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">Đăng Nhập</h3>
+                    <p class="text-muted small">Cổng kết nối Freelancer Sinh viên & Nhà tuyển dụng</p>
+                </div>
+
+                <div class="card-body p-4 pt-2">
+                    <!-- Thông báo lỗi tổng quát nếu có -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <!-- Form Đăng nhập -->
+                    <form asp-controller="Account" asp-action="Login" method="post" id="loginForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <!-- Tên đăng nhập / Email -->
+                        <div class="mb-3">
+                            <label asp-for="UsernameOrEmail" class="form-label fw-semibold text-secondary small"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-person text-muted"></i>
+                                </span>
+                                <input asp-for="UsernameOrEmail" 
+                                       class="form-control bg-light border-start-0 ps-0" 
+                                       placeholder="Nhập tên đăng nhập hoặc email..." 
+                                       autocomplete="username" />
+                            </div>
+                            <span asp-validation-for="UsernameOrEmail" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label asp-for="Password" class="form-label fw-semibold text-secondary small mb-0"></label>
+                                <a href="#" class="small text-decoration-none text-primary fw-medium" tabindex="-1">Quên mật khẩu?</a>
+                            </div>
+                            <div class="input-group mt-1">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-lock text-muted"></i>
+                                </span>
+                                <input asp-for="Password" 
+                                       type="password" 
+                                       class="form-control bg-light border-start-0 border-end-0 ps-0" 
+                                       placeholder="••••••••" 
+                                       id="passwordInput"
+                                       autocomplete="current-password" />
+                                <button class="btn btn-light border border-start-0" type="button" id="togglePasswordBtn" title="Hiện/ẩn mật khẩu">
+                                    <i class="bi bi-eye text-muted" id="togglePasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <!-- Ghi nhớ đăng nhập -->
+                        <div class="mb-4 d-flex align-items-center">
+                            <div class="form-check">
+                                <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck">
+                                <label class="form-check-label text-muted small user-select-none" for="rememberMeCheck">
+                                    Ghi nhớ phiên đăng nhập
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Nút Submit -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm fw-semibold py-2">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Phân cách -->
+                    <div class="position-relative text-center my-4">
+                        <hr class="text-muted opacity-25" />
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                            Tài khoản mẫu thử nghiệm
+                        </span>
+                    </div>
+
+                    <!-- Gợi ý tài khoản demo (Dành cho việc test nhanh bản nháp) -->
+                    <div class="bg-light p-3 rounded-3 mb-3 border">
+                        <div class="text-muted small fw-semibold mb-2">
+                            <i class="bi bi-info-circle me-1"></i> Nhấn để tự động điền nhanh tài khoản nháp:
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary quick-fill-btn" 
+                                    data-user="freelancer_sv1" data-pass="hash_pass_789">
+                                <i class="bi bi-person-badge"></i> Sinh viên
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-success quick-fill-btn" 
+                                    data-user="khachhang_a" data-pass="hash_pass_456">
+                                <i class="bi bi-briefcase"></i> Khách hàng
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-dark quick-fill-btn" 
+                                    data-user="admin_sys" data-pass="hash_pass_123">
+                                <i class="bi bi-shield-lock"></i> Quản trị viên
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer link -->
+                    <div class="text-center mt-3 pt-2 border-top">
+                        <span class="text-muted small">Chưa có tài khoản? </span>
+                        <a asp-controller="Account" asp-action="Register" class="text-primary fw-semibold small text-decoration-none">
+                            Đăng ký ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer ghi chú -->
+            <p class="text-center text-muted small mt-3">
+                &copy; @DateTime.Now.Year FreelancerStudent - Nền tảng tuyển dụng sinh viên
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-card {
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .brand-badge {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: rgba(13, 110, 253, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .input-group .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: none;
+    }
+    .input-group-text {
+        border-color: #dee2e6;
+    }
+    .form-control {
+        border-color: #dee2e6;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
+    }
+    .quick-fill-btn {
+        font-size: 0.8rem;
+        border-radius: 20px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Hiện / ẩn mật khẩu
+            const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+            const passwordInput = document.getElementById("passwordInput");
+            const togglePasswordIcon = document.getElementById("togglePasswordIcon");
+
+            if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
+                togglePasswordBtn.addEventListener("click", function () {
+                    const isPassword = passwordInput.type === "password";
+                    passwordInput.type = isPassword ? "text" : "password";
+                    togglePasswordIcon.classList.toggle("bi-eye", !isPassword);
+                    togglePasswordIcon.classList.toggle("bi-eye-slash", isPassword);
+                });
+            }
+
+            // Nút bấm điền nhanh tài khoản nháp
+            const quickFillBtns = document.querySelectorAll(".quick-fill-btn");
+            const usernameInput = document.querySelector('input[name="UsernameOrEmail"]');
+
+            quickFillBtns.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const user = this.getAttribute("data-user");
+                    const pass = this.getAttribute("data-pass");
+                    if (usernameInput) usernameInput.value = user;
+                    if (passwordInput) passwordInput.value = pass;
+                });
+            });
+        });
+    </script>
+}

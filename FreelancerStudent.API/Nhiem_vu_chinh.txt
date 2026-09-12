@@ -1,0 +1,6 @@
+﻿Hiển thị giao diện .cshtml
+Nhận request từ Browser
+Gọi API
+Nhận JSON từ API
+Đưa dữ liệu vào View
+Quản lý Cookie Authentication phía Web
