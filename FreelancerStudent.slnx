@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FreelancerStudent.API/FreelancerStudent.API.csproj" />
+  <Project Path="FreelancerStudent.Web/FreelancerStudent.Web.csproj" />
+</Solution>

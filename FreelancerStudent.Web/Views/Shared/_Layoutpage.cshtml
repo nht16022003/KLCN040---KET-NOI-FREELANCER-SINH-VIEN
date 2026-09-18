@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Freelancer Students</title>
+    
+    <!-- CSS Tùy chỉnh riêng cho Layout -->
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <!-- Lucide / FontAwesome Icons (dùng CDN nhẹ hoặc SVG nội bộ) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="app-body">
+
+    <!-- APP CONTAINER: Cấu trúc Layout chính chia 2 cột Sidebar + Main Content -->
+    <div class="app-container">
+
+        <!-- SECTION 1: SIDEBAR NAVIGATION -->
+        <aside class="app-sidebar">
+            <!-- Brand Logo -->
+            <div class="sidebar-logo">
+                <a asp-controller="Home" asp-action="Index" class="logo-link">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div class="logo-text">
+                        <span class="brand-title">Freelancer</span>
+                        <span class="brand-title">Students</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a asp-controller="Dashboard" asp-action="Index" class="nav-link active">
+                            <i class="nav-icon fa-solid fa-house"></i>
+                            <span class="nav-label">Trang tổng quan</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Jobs" asp-action="Search" class="nav-link">
+                            <i class="nav-icon fa-solid fa-magnifying-glass"></i>
+                            <span class="nav-label">Tìm công việc</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Jobs" asp-action="MyJobs" class="nav-link">
+                            <i class="nav-icon fa-solid fa-briefcase"></i>
+                            <span class="nav-label">Công việc của tôi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Jobs" asp-action="Saved" class="nav-link">
+                            <i class="nav-icon fa-regular fa-bookmark"></i>
+                            <span class="nav-label">Công việc đã lưu</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Projects" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-solid fa-file-contract"></i>
+                            <span class="nav-label">Hợp đồng & Dự án</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Chat" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-regular fa-comment-dots"></i>
+                            <span class="nav-label">Chat & Trao đổi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Wallet" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-solid fa-wallet"></i>
+                            <span class="nav-label">Ví doanh thu</span>
+                        </a>
+                    </li>
+
+                    <!-- Submenu: Hồ sơ cá nhân -->
+                    <li class="nav-item has-submenu open">
+                        <a href="javascript:void(0)" class="nav-link submenu-toggle" onclick="toggleSubmenu(this)">
+                            <i class="nav-icon fa-regular fa-user"></i>
+                            <span class="nav-label">Hồ sơ cá nhân</span>
+                            <i class="fa-solid fa-chevron-down submenu-arrow"></i>
+                        </a>
+                        <ul class="submenu-list">
+                            <li><a asp-controller="Profile" asp-action="Account" class="submenu-link">Thông tin tài khoản</a></li>
+                            <li><a asp-controller="Profile" asp-action="Academic" class="submenu-link">Hồ sơ học tập</a></li>
+                            <li><a asp-controller="Profile" asp-action="Skills" class="submenu-link">Kỹ năng</a></li>
+                            <li><a asp-controller="Profile" asp-action="Portfolio" class="submenu-link">Portfolio</a></li>
+                            <li><a asp-controller="Profile" asp-action="Verify" class="submenu-link">Xác minh sinh viên</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a asp-controller="Schedule" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-regular fa-calendar-days"></i>
+                            <span class="nav-label">Lịch học & Lịch thi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Reviews" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-regular fa-star"></i>
+                            <span class="nav-label">Đánh giá & Uy tín</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Disputes" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-solid fa-shield-halved"></i>
+                            <span class="nav-label">Trung tâm bảo vệ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Notifications" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-regular fa-bell"></i>
+                            <span class="nav-label">Thông báo</span>
+                            <span class="nav-badge">3</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-divider"></li>
+
+                    <li class="nav-item">
+                        <a asp-controller="Settings" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fa-solid fa-gear"></i>
+                            <span class="nav-label">Cài đặt tài khoản</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Account" asp-action="Logout" class="nav-link logout-link">
+                            <i class="nav-icon fa-solid fa-arrow-right-from-bracket"></i>
+                            <span class="nav-label">Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Bottom Banner Illustration Card -->
+            <div class="sidebar-banner">
+                <div class="banner-content">
+                    <p class="banner-tagline">Học tập - Làm freelancer - Tạo giá trị thật</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- SECTION 2: MAIN CONTENT WRAPPER -->
+        <div class="app-wrapper">
+            
+            <!-- HEADER TOP BAR -->
+            <header class="app-header">
+                <!-- Search Box -->
+                <div class="header-search">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Tìm kiếm công việc, dự án, kỹ năng..." />
+                </div>
+
+                <!-- Header Right Actions -->
+                <div class="header-actions">
+                    <div class="action-item lang-selector">
+                        <span class="lang-text">VI</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+
+                    <a asp-controller="Notifications" asp-action="Index" class="action-item notification-btn">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </a>
+
+                    <div class="user-profile-widget">
+                        <img src="~/images/avatar-default.png" alt="Avatar" class="user-avatar" />
+                        <div class="user-info">
+                            <span class="user-name">Nguyễn Minh Quân</span>
+                            <span class="user-role">Sinh viên năm 3</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE BODY -->
+            <main class="app-main">
+                @RenderBody()
+            </main>
+            <!--FOOTER-->
+             <footer class="app-footer">
+                <div class="footer-left">
+                    <p class="copyright-text">
+                        &copy; @DateTime.Now.Year <strong>Freelancer Students</strong>. Nền tảng kết nối công việc cho sinh viên.
+                    </p>
+                </div>
+                <div class="footer-right">
+                    <a asp-controller="Home" asp-action="Terms" class="footer-link">Điều khoản dịch vụ</a>
+                    <span class="footer-divider">•</span>
+                    <a asp-controller="Home" asp-action="Privacy" class="footer-link">Chính sách bảo mật</a>
+                    <span class="footer-divider">•</span>
+                    <a asp-controller="Support" asp-action="Index" class="footer-link">Hỗ trợ & Trợ giúp</a>
+                    <span class="footer-version">v1.0.0</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        function toggleSubmenu(element) {
+            const parent = element.parentElement;
+            parent.classList.toggle('open');
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

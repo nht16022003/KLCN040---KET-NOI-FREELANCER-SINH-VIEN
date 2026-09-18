@@ -1,0 +1,369 @@
+﻿@model FreelancerStudent.Web.ViewModels.AccountInforViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    Layout = "~/Views/Shared/_Layoutpage.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="profile-page-wrapper">
+
+    <!-- 1. HERO PROFILE CARD -->
+    <section class="profile-hero-card">
+        <!-- Cover Background with Leaf Pattern -->
+        <div class="hero-banner-bg"></div>
+
+        <div class="hero-body">
+            <!-- Avatar Circle -->
+            <div class="avatar-container">
+                <img src="~/images/avatar-default.png" alt="@Model.userName" class="user-avatar-img" />
+                <button class="btn-avatar-camera" title="Đổi ảnh đại diện">
+                    <i class="fa-solid fa-camera"></i>
+                </button>
+            </div>
+
+            <!-- Main Info Center -->
+            <div class="hero-main-info">
+                <div class="user-title-row">
+                    <h1 class="user-display-name">@Model.userName</h1>
+                </div>
+
+                <p class="user-academic-title">
+                    <i class="fa-solid fa-graduation-cap icon-cap"></i>
+                    Sinh viên năm @(Model.AcademicYearStart.HasValue ? (DateTime.Now.Year - Model.AcademicYearStart.Value + 1) : @Model.AcademicYearStart) - @Model.university
+                </p>
+                <p class="user-major-name">@Model.major</p>
+
+                <!-- Meta Badges Row -->
+                <div class="user-meta-row">
+                    <span class="meta-item rating-badge">
+                        <i class="fa-solid fa-star star-filled"></i> <strong>4.8</strong> <span class="review-count">(32 đánh giá)</span>
+                    </span>
+                    <span class="meta-item verified-badge">
+                        <i class="fa-solid fa-circle-check"></i> Đã xác thực
+                    </span>
+                    <span class="meta-item location-badge">
+                        <i class="fa-solid fa-location-dot"></i> @Model.address
+                    </span>
+                    <span class="meta-item student-years-badge">
+                        <i class="fa-regular fa-id-card"></i> Sinh viên (@Model.AcademicYearStart - @Model.AcademicYearEnd)
+                    </span>
+                </div>
+
+                <p class="user-quote-text">
+                    "Luôn sẵn sàng học hỏi, trau dồi kỹ năng và mang lại giá trị tốt nhất cho khách hàng."
+                </p>
+            </div>
+
+            <!-- Header Action Buttons -->
+            <div class="hero-action-buttons">
+                <a href="#" class="btn-hero btn-edit-profile">
+                    <i class="fa-regular fa-pen-to-square"></i> Chỉnh sửa hồ sơ
+                </a>
+                <a href="#" class="btn-hero btn-preview-profile">Xem trước</a>
+            </div>
+        </div>
+
+        <!-- Horizontal Sub-Tabs Bar -->
+        <div class="profile-tabs-nav">
+            <ul class="tabs-menu-list">
+                <li class="tab-menu-item active"><a href="#overview">Tổng quan</a></li>
+                <li class="tab-menu-item"><a href="#skills">Kỹ năng</a></li>
+                <li class="tab-menu-item"><a href="#academic">Học tập</a></li>
+                <li class="tab-menu-item"><a href="#certificates">Chứng chỉ</a></li>
+                <li class="tab-menu-item"><a href="#portfolio">Portfolio</a></li>
+                <li class="tab-menu-item"><a href="#reviews">Đánh giá</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 2. MAIN GRID CONTENT (CHIA 2 CỘT: TRÁI 2/3 - PHẢI 1/3) -->
+    <div class="profile-grid-container">
+
+        <!-- CỘT TRÁI (LEFT COLUMN - NỘI DUNG CHÍNH) -->
+        <div class="profile-left-col">
+
+            <!-- KHUNG 1: GIỚI THIỆU BẢN THÂN -->
+            <section class="profile-card-box">
+                <div class="card-box-header">
+                    <h3 class="card-box-title">
+                        <i class="fa-regular fa-user icon-title"></i> Giới thiệu bản thân
+                    </h3>
+                    <a href="#" class="btn-action-link">Chỉnh sửa</a>
+                </div>
+                <div class="card-box-body">
+                    <p class="bio-paragraph">
+                        Mình là sinh viên năm 3 chuyên ngành <strong>@Model.major</strong> tại <strong>@Model.university</strong>. Có kinh nghiệm phát triển web và thiết kế giao diện, yêu thích công nghệ và luôn mong muốn học hỏi thêm để nâng cao kỹ năng, phục vụ tốt hơn cho các dự án thực tế.
+                    </p>
+                </div>
+            </section>
+
+            <!-- KHUNG 2: HÀNG 3 THẺ SUB-CARDS (HỌC VẤN - MÔN THẾ MẠNH - CHỨNG CHỈ) -->
+            <div class="sub-cards-grid-row">
+                
+                <!-- Sub-Card 1: Thông tin học vấn -->
+                <div class="profile-card-box sub-card-item">
+                    <h4 class="sub-card-header-title">
+                        <i class="fa-solid fa-building-columns icon-title"></i> Thông tin học vấn
+                    </h4>
+                    <div class="sub-card-content">
+                        <strong class="school-title">@Model.university</strong>
+                        <p class="major-subtitle">@Model.major</p>
+                        <p class="years-text">@Model.AcademicYearStart - @Model.AcademicYearEnd</p>
+                        
+                        <div class="gpa-display-box">
+                            <span class="gpa-lbl">GPA</span>
+                            <span class="gpa-val">@(Model.GPA.HasValue ? Model.GPA.Value.ToString("0.00") : "3.45") / 4.0</span>
+                            <div class="gpa-toggle-group">
+                                <label class="switch">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="slider round"></span>
+                                </label>
+                                <span class="toggle-lbl">Công khai GPA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Card 2: Môn học thế mạnh -->
+                <div class="profile-card-box sub-card-item">
+                    <h4 class="sub-card-header-title">
+                        <i class="fa-solid fa-book-open icon-title"></i> Môn học thế mạnh
+                    </h4>
+                    <div class="sub-card-content">
+                        <div class="subject-tags-list">
+                            <span class="sub-tag">Cơ sở dữ liệu</span>
+                            <span class="sub-tag">Lập trình Web</span>
+                            <span class="sub-tag">Cấu trúc dữ liệu và giải thuật</span>
+                            <span class="sub-tag">Mạng máy tính</span>
+                            <span class="sub-tag">Hệ điều hành</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Card 3: Chứng chỉ -->
+                <div class="profile-card-box sub-card-item">
+                    <h4 class="sub-card-header-title">
+                        <i class="fa-solid fa-certificate icon-title"></i> Chứng chỉ
+                    </h4>
+                    <div class="sub-card-content">
+                        <div class="cert-mini-list">
+                            <div class="cert-mini-item">
+                                <i class="fa-solid fa-award cert-icon"></i>
+                                <div>
+                                    <strong class="cert-title">IELTS 6.5</strong>
+                                    <p class="cert-org">British Council • 2024</p>
+                                </div>
+                            </div>
+                            <div class="cert-mini-item">
+                                <i class="fa-solid fa-award cert-icon"></i>
+                                <div>
+                                    <strong class="cert-title">Frontend Development</strong>
+                                    <p class="cert-org">FPT Arena Multimedia • 2023</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- KHUNG 3: KINHN NGHIỆM -->
+            <section class="profile-card-box">
+                <div class="card-box-header">
+                    <h3 class="card-box-title">
+                        <i class="fa-solid fa-briefcase icon-title"></i> Kinh nghiệm
+                    </h3>
+                    <a href="#" class="btn-action-link">Chỉnh sửa</a>
+                </div>
+                <div class="card-box-body">
+                    <div class="experience-timeline-container">
+                        
+                        <!-- Timeline Item 1 -->
+                        <div class="exp-timeline-item">
+                            <div class="timeline-left-mark">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-line"></div>
+                            </div>
+                            <div class="timeline-right-info">
+                                <div class="exp-header-row">
+                                    <h4 class="exp-role-title">Thành viên CLB Cấu trúc máy tính</h4>
+                                    <span class="exp-time-badge">2023 - Hiện tại</span>
+                                </div>
+                                <p class="exp-company-name">@Model.university</p>
+                                <ul class="exp-bullet-list">
+                                    <li>Tham gia phát triển các dự án web nhỏ phục vụ sinh viên.</li>
+                                    <li>Hỗ trợ tổ chức các buổi workshop công nghệ chuyên đề.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Item 2 -->
+                        <div class="exp-timeline-item">
+                            <div class="timeline-left-mark">
+                                <div class="timeline-dot"></div>
+                            </div>
+                            <div class="timeline-right-info">
+                                <div class="exp-header-row">
+                                    <h4 class="exp-role-title">Thực tập sinh - Web Developer</h4>
+                                    <span class="exp-time-badge">06/2024 - 08/2024</span>
+                                </div>
+                                <p class="exp-company-name">Công ty ABC</p>
+                                <ul class="exp-bullet-list">
+                                    <li>Phát triển giao diện người dùng bằng Angular.</li>
+                                    <li>Làm việc với API và cơ sở dữ liệu SQL Server.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- CỘT PHẢI (RIGHT COLUMN - SIDEBAR WIDGETS) -->
+        <div class="profile-right-col">
+
+            <!-- WIDGET 1: KỸ NĂNG -->
+            <section class="profile-card-box">
+                <div class="card-box-header">
+                    <h3 class="card-box-title">Kỹ năng</h3>
+                    <a href="#" class="btn-action-link">Chỉnh sửa</a>
+                </div>
+                <div class="card-box-body">
+                    <div class="skill-cloud-tags">
+                        <span class="skill-chip">React</span>
+                        <span class="skill-chip">Angular</span>
+                        <span class="skill-chip">JavaScript</span>
+                        <span class="skill-chip">TypeScript</span>
+                        <span class="skill-chip">HTML</span>
+                        <span class="skill-chip">CSS</span>
+                        <span class="skill-chip">Node.js</span>
+                        <span class="skill-chip">MongoDB</span>
+                        <span class="skill-chip">SQL</span>
+                        <span class="skill-chip">Figma</span>
+                        <span class="skill-chip">Git</span>
+                        <span class="skill-chip">Postman</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- WIDGET 2: PORTFOLIO NỔI BẬT -->
+            <section class="profile-card-box">
+                <div class="card-box-header">
+                    <h3 class="card-box-title">Portfolio nổi bật</h3>
+                    <a href="#" class="btn-action-link view-all-link">Xem tất cả <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="card-box-body">
+                    <div class="portfolio-grid-2x2">
+                        
+                        <!-- Item 1 -->
+                        <div class="portfolio-card-item">
+                            <div class="portfolio-thumb-wrapper">
+                                <img src="~/images/portfolio-1.png" alt="Website E-commerce" class="portfolio-thumb-img" onerror="this.src='https://placehold.co/300x180/0E7490/FFF?text=Website+E-commerce'" />
+                            </div>
+                            <h4 class="portfolio-item-title">Website E-commerce</h4>
+                            <div class="portfolio-item-tags">
+                                <span class="ptag">React</span>
+                                <span class="ptag">Node.js</span>
+                            </div>
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="portfolio-card-item">
+                            <div class="portfolio-thumb-wrapper">
+                                <img src="~/images/portfolio-2.png" alt="Ứng dụng quản lý học tập" class="portfolio-thumb-img" onerror="this.src='https://placehold.co/300x180/0E7490/FFF?text=App+Hoc+Tap'" />
+                            </div>
+                            <h4 class="portfolio-item-title">Ứng dụng quản lý học tập</h4>
+                            <div class="portfolio-item-tags">
+                                <span class="ptag">Flutter</span>
+                                <span class="ptag">Firebase</span>
+                            </div>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="portfolio-card-item">
+                            <div class="portfolio-thumb-wrapper">
+                                <img src="~/images/portfolio-3.png" alt="Dashboard quản trị" class="portfolio-thumb-img" onerror="this.src='https://placehold.co/300x180/0E7490/FFF?text=Dashboard'" />
+                            </div>
+                            <h4 class="portfolio-item-title">Dashboard quản trị</h4>
+                            <div class="portfolio-item-tags">
+                                <span class="ptag">Angular</span>
+                                <span class="ptag">ASP.NET</span>
+                            </div>
+                        </div>
+
+                        <!-- Item 4 -->
+                        <div class="portfolio-card-item">
+                            <div class="portfolio-thumb-wrapper">
+                                <img src="~/images/portfolio-4.png" alt="Thiết kế Landing page" class="portfolio-thumb-img" onerror="this.src='https://placehold.co/300x180/0E7490/FFF?text=Landing+Page'" />
+                            </div>
+                            <h4 class="portfolio-item-title">Thiết kế Landing page</h4>
+                            <div class="portfolio-item-tags">
+                                <span class="ptag">Figma</span>
+                                <span class="ptag">UI/UX</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- WIDGET 3: ĐÁNH GIÁ TỪ KHÁCH HÀNG -->
+            <section class="profile-card-box">
+                <div class="card-box-header">
+                    <h3 class="card-box-title">Đánh giá từ khách hàng</h3>
+                    <a href="#" class="btn-action-link view-all-link">Xem tất cả <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="card-box-body">
+                    <div class="review-score-summary">
+                        <div class="score-number-big">4.8</div>
+                        <div class="stars-stars-row">
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star"></i>
+                            <i class="fa-solid fa-star-half-stroke"></i>
+                        </div>
+                        <span class="review-total-text">(32 đánh giá)</span>
+                    </div>
+
+                    <!-- Progress Bars List -->
+                    <div class="star-rating-bars">
+                        <div class="star-bar-row">
+                            <span class="star-lbl">5 sao</span>
+                            <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 78%;"></div></div>
+                            <span class="star-percent">78%</span>
+                        </div>
+                        <div class="star-bar-row">
+                            <span class="star-lbl">4 sao</span>
+                            <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 14%;"></div></div>
+                            <span class="star-percent">14%</span>
+                        </div>
+                        <div class="star-bar-row">
+                            <span class="star-lbl">3 sao</span>
+                            <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 4%;"></div></div>
+                            <span class="star-percent">4%</span>
+                        </div>
+                        <div class="star-bar-row">
+                            <span class="star-lbl">2 sao</span>
+                            <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 2%;"></div></div>
+                            <span class="star-percent">2%</span>
+                        </div>
+                        <div class="star-bar-row">
+                            <span class="star-lbl">1 sao</span>
+                            <div class="progress-bar-track"><div class="progress-bar-fill" style="width: 2%;"></div></div>
+                            <span class="star-percent">2%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+
+</div>
