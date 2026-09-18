@@ -1,7 +1,7 @@
-@model FreelancerStudent.Web.ViewModels.RegisterViewModel
+@model FreelancerStudent.Web.ViewModels.VerifyAccountViewModel
 @{
     Layout = null;
-    ViewData["Title"] = "Đăng ký tài khoản - Freelancer Students";
+    ViewData["Title"] = "Xác thực tài khoản - Freelancer Students";
 }
 
 <!DOCTYPE html>
@@ -265,9 +265,9 @@
             top: 20px;
             left: -15px;
             z-index: 3;
-            transform: rotate(-10deg);
+            transform: rotate(-12deg);
             font-family: 'Caveat', cursive;
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 700;
             line-height: 1.15;
             color: #385141;
@@ -289,21 +289,21 @@
 
         .crown-sketch {
             position: absolute;
-            top: -12px;
-            right: 15px;
+            top: -10px;
+            right: 65px;
             z-index: 3;
             color: #51775e;
             font-size: 1.8rem;
-            transform: rotate(20deg);
+            transform: rotate(15deg);
         }
 
-        /* Register Card */
-        .register-card-container {
-            max-width: 520px;
+        /* Card Styles */
+        .auth-card-container {
+            max-width: 480px;
             margin: 0 auto;
         }
 
-        .register-card {
+        .auth-card {
             background: #ffffff;
             border-radius: 24px;
             border: 1px solid #e7ede9;
@@ -312,228 +312,147 @@
             position: relative;
         }
 
+        .back-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #6a7c71;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-bottom: 1.25rem;
+            transition: color 0.2s;
+        }
+
+        .back-nav-link:hover {
+            color: var(--brand-green-primary);
+        }
+
+        .icon-circle-badge {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background-color: var(--brand-green-light);
+            border: 2px solid var(--brand-green-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem auto;
+            color: var(--brand-green-primary);
+            font-size: 2rem;
+        }
+
         .card-header-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 700;
             font-size: 1.65rem;
             color: #1a241e;
             text-align: center;
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.4rem;
         }
 
         .card-header-sub {
             text-align: center;
-            font-size: 0.875rem;
+            font-size: 0.88rem;
             color: #637268;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Role Selector Cards */
-        .role-selector-container {
             margin-bottom: 1.4rem;
-        }
-
-        .role-selector-label {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #28362d;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .role-cards-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .role-card {
-            border: 1.5px solid #e0e8e2;
-            border-radius: 14px;
-            padding: 12px 14px;
-            cursor: pointer;
-            position: relative;
-            background: #ffffff;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 100px;
-        }
-
-        .role-card:hover {
-            border-color: #b3cdc0;
-            background-color: #f9fcf9;
-        }
-
-        .role-card.active {
-            border-color: var(--brand-green-primary);
-            background-color: #f4f9f6;
-            box-shadow: 0 0 0 1px var(--brand-green-primary);
-        }
-
-        .role-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .role-icon-box {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background-color: #f0f5f2;
-            color: #4b6654;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
-
-        .role-card.active .role-icon-box {
-            background-color: var(--brand-green-primary);
-            color: #ffffff;
-        }
-
-        .role-radio-indicator {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: 2px solid #ccd8d1;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .role-card.active .role-radio-indicator {
-            border-color: var(--brand-green-primary);
-        }
-
-        .role-card.active .role-radio-indicator::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--brand-green-primary);
-            top: 3px;
-            left: 3px;
-        }
-
-        .role-card-title {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #1e2a22;
-            margin-bottom: 2px;
-            line-height: 1.25;
-        }
-
-        .role-card-desc {
-            font-size: 0.75rem;
-            color: #69786f;
-            margin-bottom: 0;
-            line-height: 1.3;
-        }
-
-        /* Form Controls */
-        .form-label-custom {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #28362d;
-            margin-bottom: 0.4rem;
-            display: block;
-        }
-
-        .input-group-custom {
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.1rem;
-        }
-
-        .input-group-custom .input-icon-left {
-            position: absolute;
-            left: 14px;
-            color: #798b80;
-            font-size: 1.05rem;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .input-group-custom .form-control {
-            border-radius: 12px;
-            border: 1px solid #dbe3de;
-            padding: 0.65rem 1rem 0.65rem 2.65rem;
-            font-size: 0.92rem;
-            color: #1f2923;
-            background-color: #ffffff;
-            transition: all 0.2s ease;
-            height: 46px;
-        }
-
-        .input-group-custom .form-control:focus {
-            border-color: var(--brand-green-primary);
-            box-shadow: 0 0 0 3.5px rgba(81, 119, 94, 0.15);
-            outline: none;
-        }
-
-        .input-group-custom .input-btn-right {
-            position: absolute;
-            right: 12px;
-            background: transparent;
-            border: none;
-            color: #798b80;
-            padding: 4px 6px;
-            cursor: pointer;
-            z-index: 5;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .input-group-custom .input-btn-right:hover {
-            color: #3b4e42;
-        }
-
-        .form-check-custom {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 0.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .form-check-custom input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            min-width: 18px;
-            margin-top: 2px;
-            accent-color: var(--brand-green-primary);
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .form-check-custom label {
-            font-size: 0.85rem;
-            color: #3f4e45;
-            cursor: pointer;
-            user-select: none;
-            margin-bottom: 0;
             line-height: 1.45;
         }
 
-        .form-check-custom a {
-            color: #486e55;
-            font-weight: 600;
+        /* Email Display Box */
+        .email-display-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #f3f7f4;
+            border-radius: 12px;
+            padding: 0.65rem 1.2rem;
+            margin-bottom: 1.75rem;
+            font-size: 0.9rem;
+            color: #37473d;
+            font-weight: 500;
+            border: 1px solid #e1ebe4;
+        }
+
+        .email-display-badge i {
+            color: #66796e;
+            font-size: 1.05rem;
+        }
+
+        /* 6-Digit OTP Inputs */
+        .otp-inputs-wrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 1.25rem;
+        }
+
+        .otp-digit-input {
+            width: 52px;
+            height: 56px;
+            border-radius: 12px;
+            border: 1.5px solid #d9e3dd;
+            background-color: #ffffff;
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1f2923;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .otp-digit-input:focus {
+            border-color: var(--brand-green-primary);
+            box-shadow: 0 0 0 3.5px rgba(81, 119, 94, 0.18);
+            background-color: #fbfdfc;
+        }
+
+        .otp-digit-input.filled {
+            border-color: var(--brand-green-primary);
+            background-color: #f6faf7;
+        }
+
+        /* Expiration & Resend Info */
+        .otp-timer-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #607066;
+            margin-bottom: 0.35rem;
+        }
+
+        .otp-timer-text strong {
+            color: #355640;
+            font-weight: 700;
+        }
+
+        .otp-resend-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6e7e74;
+            margin-bottom: 1.5rem;
+        }
+
+        .otp-resend-link {
+            color: #3d6349;
+            font-weight: 700;
             text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s;
         }
 
-        .form-check-custom a:hover {
-            color: #2b4534;
+        .otp-resend-link:hover {
+            color: #203a28;
         }
 
-        .btn-submit-register {
+        .otp-resend-link.disabled {
+            color: #8c9e93;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        .btn-submit-action {
             width: 100%;
             background-color: var(--brand-green-primary);
             color: #ffffff;
@@ -543,36 +462,19 @@
             border: none;
             border-radius: 50px;
             margin-top: 0.25rem;
-            margin-bottom: 1.25rem;
             cursor: pointer;
             box-shadow: 0 4px 14px rgba(81, 119, 94, 0.35);
             transition: all 0.2s ease;
         }
 
-        .btn-submit-register:hover {
+        .btn-submit-action:hover {
             background-color: var(--brand-green-hover);
             transform: translateY(-1px);
             box-shadow: 0 6px 18px rgba(81, 119, 94, 0.45);
         }
 
-        .btn-submit-register:active {
+        .btn-submit-action:active {
             transform: translateY(0);
-        }
-
-        .login-prompt {
-            text-align: center;
-            font-size: 0.875rem;
-            color: #55635a;
-        }
-
-        .login-prompt a {
-            color: #3d6349;
-            font-weight: 700;
-            text-decoration: underline;
-        }
-
-        .login-prompt a:hover {
-            color: #213c29;
         }
 
         /* Footer */
@@ -723,8 +625,16 @@
             .hero-visual-wrapper {
                 margin: 2rem auto;
             }
-            .register-card-container {
+            .auth-card-container {
                 margin-top: 2rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .otp-digit-input {
+                width: 42px;
+                height: 48px;
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -776,7 +686,7 @@
                     <!-- Login Button -->
                     <a href="/Account/Login" class="btn-nav-login">Đăng nhập</a>
 
-                    <!-- Register Button (Active) -->
+                    <!-- Register Button -->
                     <a href="/Account/Register" class="btn-nav-register">Đăng ký</a>
                 </div>
             </div>
@@ -788,7 +698,7 @@
         <div class="container">
             <div class="row align-items-center justify-content-between g-4 g-xl-5">
                 
-                <!-- Left Column: Branding & Value Proposition -->
+                <!-- Left Column: Branding & Features & Illustration -->
                 <div class="col-lg-6 col-xl-6 pe-lg-4">
                     
                     <!-- Big Heading -->
@@ -802,28 +712,28 @@
 
                     <!-- Slogan -->
                     <p class="hero-subtitle">
-                        Bắt đầu hành trình của bạn ngay hôm nay
+                        Kết nối sinh viên tài năng với cơ hội thực tế
                     </p>
 
                     <!-- Feature 1 -->
                     <div class="feature-item">
                         <div class="feature-icon-wrapper">
-                            <i class="bi bi-person-badge-fill"></i>
+                            <i class="bi bi-people-fill"></i>
                         </div>
                         <div>
-                            <div class="feature-title">Tạo hồ sơ chuyên nghiệp</div>
-                            <p class="feature-desc">Thể hiện kỹ năng và kinh nghiệm</p>
+                            <div class="feature-title">Cơ hội thực tế</div>
+                            <p class="feature-desc">Tìm công việc phù hợp, phát triển kỹ năng</p>
                         </div>
                     </div>
 
                     <!-- Feature 2 -->
                     <div class="feature-item">
                         <div class="feature-icon-wrapper">
-                            <i class="bi bi-chat-heart-fill"></i>
+                            <i class="bi bi-mortarboard-fill"></i>
                         </div>
                         <div>
-                            <div class="feature-title">Kết nối dễ dàng</div>
-                            <p class="feature-desc">Tìm công việc hoặc freelancer phù hợp</p>
+                            <div class="feature-title">Thu nhập linh hoạt</div>
+                            <p class="feature-desc">Làm chủ thời gian, tăng thu nhập</p>
                         </div>
                     </div>
 
@@ -833,8 +743,8 @@
                             <i class="bi bi-graph-up-arrow"></i>
                         </div>
                         <div>
-                            <div class="feature-title">Phát triển sự nghiệp</div>
-                            <p class="feature-desc">Tích lũy kinh nghiệm từ dự án thực tế</p>
+                            <div class="feature-title">Xây dựng tương lai</div>
+                            <p class="feature-desc">Tạo portfolio, tích lũy kinh nghiệm</p>
                         </div>
                     </div>
 
@@ -844,183 +754,85 @@
                         
                         <!-- Handwritten sticker badge -->
                         <div class="sticker-badge">
-                            <span class="line-1">Good</span>
-                            <span class="line-2">Students</span>
-                            <span class="line-3">Great Freelancers</span>
+                            <span class="line-1">Small</span>
+                            <span class="line-2">Skills</span>
+                            <span class="line-3">Big Opportunities</span>
                         </div>
 
                         <!-- Doodle Crown -->
                         <div class="crown-sketch">
-                            <i class="bi bi-stars"></i>
+                            <i class="bi bi-award"></i>
                         </div>
 
-                        <!-- Generated Hero Photography for Register -->
-                        <img src="~/images/student_female_hero.jpg" alt="Freelancer Students Registration" class="hero-img" />
+                        <!-- Real Generated Hero Photography -->
+                        <img src="~/images/students_hero.jpg" alt="Freelancer Students" class="hero-img" />
                     </div>
 
                 </div>
 
-                <!-- Right Column: Register Card -->
+                <!-- Right Column: Verification Card -->
                 <div class="col-lg-6 col-xl-5">
-                    <div class="register-card-container">
-                        <div class="register-card">
+                    <div class="auth-card-container">
+                        <div class="auth-card">
                             
+                            <!-- Back Link -->
+                            <a href="/Account/Login" class="back-nav-link">
+                                <i class="bi bi-chevron-left"></i> Quay lại
+                            </a>
+
+                            <!-- Shield Badge -->
+                            <div class="icon-circle-badge">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+
                             <!-- Card Header -->
-                            <h2 class="card-header-title">Tạo tài khoản</h2>
-                            <p class="card-header-sub">Tham gia cộng đồng Freelancer Students</p>
+                            <h2 class="card-header-title">Xác thực tài khoản</h2>
+                            <p class="card-header-sub">Chúng tôi đã gửi mã OTP gồm 6 chữ số đến email của bạn.</p>
+
+                            <!-- Email Read-only Display Badge -->
+                            <div class="email-display-badge">
+                                <i class="bi bi-envelope"></i>
+                                <span>@(string.IsNullOrEmpty(Model?.Email) ? "nguyen.vana123@student.edu.vn" : Model.Email)</span>
+                            </div>
 
                             <!-- Validation Summary -->
                             <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small rounded-3" role="alert"></div>
 
-                            <!-- Register Form -->
-                            <form asp-controller="Account" asp-action="Register" method="post" id="registerForm" novalidate>
+                            <!-- Verification Form -->
+                            <form asp-controller="Account" asp-action="VerifyAccount" method="post" id="verifyOtpForm" novalidate>
                                 @Html.AntiForgeryToken()
+                                <input type="hidden" asp-for="Email" value="@(Model?.Email ?? "nguyen.vana123@student.edu.vn")" />
+                                <input type="hidden" asp-for="VerifyType" />
+                                <input type="hidden" asp-for="OtpCode" id="hiddenOtpInput" />
 
-                                <!-- Role Selection Cards -->
-                                <div class="role-selector-container">
-                                    <label class="role-selector-label">Loại tài khoản</label>
-                                    
-                                    <!-- Hidden input for Model binding -->
-                                    <input type="hidden" asp-for="LoaiUser" id="selectedLoaiUser" value="@(Model?.LoaiUser ?? "FreelancerSV")" />
+                                <!-- 6-Digit OTP Boxes -->
+                                <div class="otp-inputs-wrapper" id="otpContainer">
+                                    <input type="text" maxlength="1" class="otp-digit-input" data-index="0" autofocus inputmode="numeric" pattern="[0-9]*" />
+                                    <input type="text" maxlength="1" class="otp-digit-input" data-index="1" inputmode="numeric" pattern="[0-9]*" />
+                                    <input type="text" maxlength="1" class="otp-digit-input" data-index="2" inputmode="numeric" pattern="[0-9]*" />
+                                    <input type="text" maxlength="1" class="otp-digit-input" data-index="3" inputmode="numeric" pattern="[0-9]*" />
+                                    <input type="text" maxlength="1" class="otp-digit-input" data-index="4" inputmode="numeric" pattern="[0-9]*" />
+                                    <input type="text" maxlength="1" class="otp-digit-input" data-index="5" inputmode="numeric" pattern="[0-9]*" />
+                                </div>
+                                <span asp-validation-for="OtpCode" class="text-danger small text-center d-block mb-2"></span>
 
-                                    <div class="role-cards-grid">
-                                        
-                                        <!-- Role 1: Freelancer Sinh viên -->
-                                        <div class="role-card @( (Model?.LoaiUser ?? "FreelancerSV") == "FreelancerSV" ? "active" : "" )" 
-                                             id="roleFreelancerCard" 
-                                             onclick="selectRole('FreelancerSV')">
-                                            <div class="role-card-header">
-                                                <div class="role-icon-box">
-                                                    <i class="bi bi-person-fill"></i>
-                                                </div>
-                                                <div class="role-radio-indicator"></div>
-                                            </div>
-                                            <div>
-                                                <div class="role-card-title">Freelancer sinh viên</div>
-                                                <p class="role-card-desc">Tìm công việc, phát triển kỹ năng</p>
-                                            </div>
-                                        </div>
-
-                                        <!-- Role 2: Khách hàng / Nhà tuyển dụng -->
-                                        <div class="role-card @( Model?.LoaiUser == "KhachHang" ? "active" : "" )" 
-                                             id="roleCustomerCard" 
-                                             onclick="selectRole('KhachHang')">
-                                            <div class="role-card-header">
-                                                <div class="role-icon-box">
-                                                    <i class="bi bi-briefcase-fill"></i>
-                                                </div>
-                                                <div class="role-radio-indicator"></div>
-                                            </div>
-                                            <div>
-                                                <div class="role-card-title">Khách hàng / Nhà tuyển dụng</div>
-                                                <p class="role-card-desc">Đăng dự án, tìm kiếm nhân lực</p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <span asp-validation-for="LoaiUser" class="text-danger small mt-1 d-block"></span>
+                                <!-- Expiry Timer -->
+                                <div class="otp-timer-text">
+                                    Mã OTP sẽ hết hạn sau <strong id="expiryTimer">05:00</strong>
                                 </div>
 
-                                <!-- Full Name (userName) -->
-                                <div class="mb-3">
-                                    <label asp-for="FullName" class="form-label-custom">Họ và tên</label>
-                                    <div class="input-group-custom">
-                                        <i class="bi bi-person input-icon-left"></i>
-                                        <input asp-for="FullName" 
-                                               class="form-control" 
-                                               placeholder="Nhập họ và tên" 
-                                               autocomplete="name" 
-                                               required />
-                                    </div>
-                                    <span asp-validation-for="FullName" class="text-danger small mt-n2 d-block"></span>
+                                <!-- Resend OTP with Cooldown -->
+                                <div class="otp-resend-text">
+                                    Không nhận được mã? 
+                                    <a href="javascript:void(0)" class="otp-resend-link disabled" id="resendBtn" onclick="handleResendOtp()">
+                                        Gửi lại mã (<span id="cooldownTimer">58</span>s)
+                                    </a>
                                 </div>
-
-                                <!-- Email (email) -->
-                                <div class="mb-3">
-                                    <label asp-for="Email" class="form-label-custom">Email</label>
-                                    <div class="input-group-custom">
-                                        <i class="bi bi-envelope input-icon-left"></i>
-                                        <input asp-for="Email" 
-                                               type="email"
-                                               class="form-control" 
-                                               placeholder="Nhập email của bạn" 
-                                               autocomplete="email" 
-                                               required />
-                                    </div>
-                                    <span asp-validation-for="Email" class="text-danger small mt-n2 d-block"></span>
-                                </div>
-
-                                <!-- Phone Number (phoneNumber) -->
-                                <div class="mb-3">
-                                    <label asp-for="PhoneNumber" class="form-label-custom">Số điện thoại</label>
-                                    <div class="input-group-custom">
-                                        <i class="bi bi-telephone input-icon-left"></i>
-                                        <input asp-for="PhoneNumber" 
-                                               type="tel"
-                                               class="form-control" 
-                                               placeholder="Nhập số điện thoại" 
-                                               autocomplete="tel" />
-                                    </div>
-                                    <span asp-validation-for="PhoneNumber" class="text-danger small mt-n2 d-block"></span>
-                                </div>
-
-                                <!-- Password (passwordHash) -->
-                                <div class="mb-3">
-                                    <label asp-for="Password" class="form-label-custom">Mật khẩu</label>
-                                    <div class="input-group-custom">
-                                        <i class="bi bi-lock input-icon-left"></i>
-                                        <input asp-for="Password" 
-                                               type="password" 
-                                               class="form-control pe-5" 
-                                               placeholder="Nhập mật khẩu" 
-                                               id="registerPasswordInput" 
-                                               autocomplete="new-password" 
-                                               required />
-                                        <button class="input-btn-right" type="button" id="toggleRegPasswordBtn" title="Hiện/ẩn mật khẩu">
-                                            <i class="bi bi-eye" id="toggleRegPasswordIcon"></i>
-                                        </button>
-                                    </div>
-                                    <span asp-validation-for="Password" class="text-danger small mt-n2 d-block"></span>
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="mb-3">
-                                    <label asp-for="ConfirmPassword" class="form-label-custom">Xác nhận mật khẩu</label>
-                                    <div class="input-group-custom">
-                                        <i class="bi bi-lock input-icon-left"></i>
-                                        <input asp-for="ConfirmPassword" 
-                                               type="password" 
-                                               class="form-control pe-5" 
-                                               placeholder="Nhập lại mật khẩu" 
-                                               id="confirmPasswordInput" 
-                                               autocomplete="new-password" 
-                                               required />
-                                        <button class="input-btn-right" type="button" id="toggleConfirmPasswordBtn" title="Hiện/ẩn mật khẩu">
-                                            <i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i>
-                                        </button>
-                                    </div>
-                                    <span asp-validation-for="ConfirmPassword" class="text-danger small mt-n2 d-block"></span>
-                                </div>
-
-                                <!-- Terms & Conditions Checkbox -->
-                                <div class="form-check-custom">
-                                    <input asp-for="AgreeTerms" class="form-check-input" type="checkbox" id="agreeTermsCheck" checked required>
-                                    <label for="agreeTermsCheck">
-                                        Tôi đồng ý với <a href="/Home/Terms" target="_blank">Điều khoản sử dụng</a> và <a href="/Home/Privacy" target="_blank">Chính sách bảo mật</a>
-                                    </label>
-                                </div>
-                                <span asp-validation-for="AgreeTerms" class="text-danger small d-block mb-3"></span>
 
                                 <!-- Submit Button -->
-                                <button type="submit" class="btn-submit-register">
-                                    Đăng ký
+                                <button type="submit" class="btn-submit-action">
+                                    Xác nhận
                                 </button>
-
-                                <!-- Login Link -->
-                                <div class="login-prompt">
-                                    <span>Đã có tài khoản? </span>
-                                    <a asp-controller="Account" asp-action="Login">Đăng nhập</a>
-                                </div>
 
                             </form>
 
@@ -1119,42 +931,107 @@
     <!-- Bootstrap & Scripts -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Role Card Selection
-        function selectRole(role) {
-            document.getElementById('selectedLoaiUser').value = role;
-            
-            const freelancerCard = document.getElementById('roleFreelancerCard');
-            const customerCard = document.getElementById('roleCustomerCard');
-
-            if (role === 'FreelancerSV') {
-                freelancerCard.classList.add('active');
-                customerCard.classList.remove('active');
-            } else {
-                customerCard.classList.add('active');
-                freelancerCard.classList.remove('active');
-            }
-        }
-
-        // Toggle show/hide password
-        function setupPasswordToggle(buttonId, inputId, iconId) {
-            const btn = document.getElementById(buttonId);
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-
-            if (btn && input && icon) {
-                btn.addEventListener("click", function () {
-                    const isPassword = input.type === "password";
-                    input.type = isPassword ? "text" : "password";
-                    icon.classList.toggle("bi-eye", !isPassword);
-                    icon.classList.toggle("bi-eye-slash", isPassword);
-                });
-            }
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
-            setupPasswordToggle("toggleRegPasswordBtn", "registerPasswordInput", "toggleRegPasswordIcon");
-            setupPasswordToggle("toggleConfirmPasswordBtn", "confirmPasswordInput", "toggleConfirmPasswordIcon");
+            const inputs = document.querySelectorAll(".otp-digit-input");
+            const hiddenOtpInput = document.getElementById("hiddenOtpInput");
+
+            // Update hidden OTP string
+            function updateHiddenInput() {
+                let code = "";
+                inputs.forEach(input => {
+                    code += input.value;
+                    if (input.value) {
+                        input.classList.add("filled");
+                    } else {
+                        input.classList.remove("filled");
+                    }
+                });
+                hiddenOtpInput.value = code;
+            }
+
+            // Handle typing & navigation
+            inputs.forEach((input, idx) => {
+                input.addEventListener("input", function (e) {
+                    const val = this.value;
+                    if (val.length > 1) {
+                        this.value = val.slice(-1);
+                    }
+                    if (this.value && idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                    updateHiddenInput();
+                });
+
+                input.addEventListener("keydown", function (e) {
+                    if (e.key === "Backspace") {
+                        if (!this.value && idx > 0) {
+                            inputs[idx - 1].focus();
+                            inputs[idx - 1].value = "";
+                        }
+                    } else if (e.key === "ArrowLeft" && idx > 0) {
+                        inputs[idx - 1].focus();
+                    } else if (e.key === "ArrowRight" && idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                    setTimeout(updateHiddenInput, 10);
+                });
+
+                // Paste support for full 6 digits
+                input.addEventListener("paste", function (e) {
+                    e.preventDefault();
+                    const pasteData = (e.clipboardData || window.clipboardData).getData("text").trim();
+                    if (/^\d+$/.test(pasteData)) {
+                        for (let i = 0; i < inputs.length && i < pasteData.length; i++) {
+                            inputs[i].value = pasteData[i];
+                        }
+                        const nextFocus = Math.min(pasteData.length, inputs.length - 1);
+                        inputs[nextFocus].focus();
+                        updateHiddenInput();
+                    }
+                });
+            });
+
+            // 1. Expiration Timer (5 minutes = 300 seconds)
+            let expirySeconds = 300;
+            const expiryTimerEl = document.getElementById("expiryTimer");
+
+            function updateExpiryTimer() {
+                const minutes = Math.floor(expirySeconds / 60);
+                const seconds = expirySeconds % 60;
+                expiryTimerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (expirySeconds > 0) {
+                    expirySeconds--;
+                } else {
+                    expiryTimerEl.textContent = "00:00 (Đã hết hạn)";
+                }
+            }
+            setInterval(updateExpiryTimer, 1000);
+
+            // 2. Cooldown Timer for Resend (58 seconds)
+            let cooldownSeconds = 58;
+            const cooldownEl = document.getElementById("cooldownTimer");
+            const resendBtn = document.getElementById("resendBtn");
+
+            const cooldownInterval = setInterval(function () {
+                if (cooldownSeconds > 0) {
+                    cooldownSeconds--;
+                    cooldownEl.textContent = cooldownSeconds;
+                } else {
+                    clearInterval(cooldownInterval);
+                    resendBtn.classList.remove("disabled");
+                    resendBtn.innerHTML = "Gửi lại mã ngay";
+                }
+            }, 1000);
         });
+
+        function handleResendOtp() {
+            const resendBtn = document.getElementById("resendBtn");
+            if (resendBtn.classList.contains("disabled")) return;
+
+            alert("Mã OTP mới đã được gửi đến email của bạn!");
+            window.location.reload();
+        }
 
         function handleSubscribe(e) {
             e.preventDefault();

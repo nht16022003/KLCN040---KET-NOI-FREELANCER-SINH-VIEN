@@ -1,0 +1,338 @@
+@model FreelancerStudent.Web.ViewModels.EmployerDashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan Nhà tuyển dụng";
+    Layout = "_EmployerLayout";
+}
+
+<div class="dashboard-2col-layout">
+    <!-- ==========================================
+         CỘT TRÁI (CHÍNH): BANNER, KPI, CARD VIỆC LÀM, CTA
+         ========================================== -->
+    <div class="dashboard-left-content">
+        <!-- 1. HERO SEARCH BANNER -->
+        <div class="hero-search-banner">
+            <div class="hero-banner-left">
+                <h2 class="hero-banner-title">
+                    Xin chào, @Model.EmployerInfo.UserName! <span style="font-size: 1.4rem;">👋</span>
+                </h2>
+                <p class="hero-banner-desc">
+                    Đăng dự án ngay hôm nay để tìm kiếm những freelancer tài năng<br />
+                    và hiện thực hóa ý tưởng của bạn!
+                </p>
+
+                <!-- Search Bar -->
+                <div class="banner-search-bar">
+                    <div class="banner-search-input-group">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Tìm freelancer theo kỹ năng, lĩnh vực, tên..." />
+                    </div>
+                    <button type="button" class="btn-banner-search">Tìm kiếm</button>
+                </div>
+
+                <!-- Quick Skill Filter Tags -->
+                <div class="banner-quick-skills">
+                    @foreach (var skill in Model.PopularSkills)
+                    {
+                        <a href="#" class="quick-skill-tag">@skill</a>
+                    }
+                    <a href="#" class="quick-skill-more">Xem thêm <i class="bi bi-chevron-down"></i></a>
+                </div>
+            </div>
+
+            <div class="hero-banner-right">
+                <div class="banner-benefits-list d-none d-md-flex">
+                    <div class="benefit-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Tiết kiệm thời gian</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Tiếp cận nhân tài</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Tối ưu chi phí</span>
+                    </div>
+                </div>
+
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Student" class="banner-character-img" />
+            </div>
+        </div>
+
+        <!-- 2. 4 THẺ KPI STATS -->
+        <div class="kpi-row-grid">
+            <!-- KPI 1 -->
+            <div class="kpi-stat-box">
+                <div class="kpi-stat-top">
+                    <div class="kpi-icon-square kpi-icon-blue">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <span class="kpi-growth-pill">
+                        <i class="bi bi-arrow-up-short"></i> @Model.Kpis.JobPostsGrowthPercentage%
+                    </span>
+                </div>
+                <div class="kpi-number-val">@Model.Kpis.TotalJobPosts</div>
+                <div class="kpi-title-label">Bài đăng tuyển dụng</div>
+                <div class="kpi-subtitle-desc">@Model.Kpis.ActiveJobPosts bài đang hoạt động</div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="kpi-stat-box">
+                <div class="kpi-stat-top">
+                    <div class="kpi-icon-square kpi-icon-green">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <span class="kpi-growth-pill">
+                        <i class="bi bi-arrow-up-short"></i> @Model.Kpis.ApplicantsGrowthPercentage%
+                    </span>
+                </div>
+                <div class="kpi-number-val">@Model.Kpis.TotalApplicants</div>
+                <div class="kpi-title-label">Freelancer ứng tuyển</div>
+                <div class="kpi-subtitle-desc">@Model.Kpis.ApplicantsSubtitle</div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="kpi-stat-box">
+                <div class="kpi-stat-top">
+                    <div class="kpi-icon-square kpi-icon-orange">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <span class="kpi-growth-pill">
+                        <i class="bi bi-arrow-up-short"></i> @Model.Kpis.ContractsGrowthPercentage%
+                    </span>
+                </div>
+                <div class="kpi-number-val">@Model.Kpis.ActiveContractsCount</div>
+                <div class="kpi-title-label">Công việc đang thực hiện</div>
+                <div class="kpi-subtitle-desc">@Model.Kpis.ContractsSubtitle</div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="kpi-stat-box">
+                <div class="kpi-stat-top">
+                    <div class="kpi-icon-square kpi-icon-emerald">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <span class="kpi-growth-pill">
+                        <i class="bi bi-arrow-up-short"></i> @Model.Kpis.CompletedGrowthPercentage%
+                    </span>
+                </div>
+                <div class="kpi-number-val">@Model.Kpis.CompletedProjectsCount</div>
+                <div class="kpi-title-label">Dự án đã hoàn thành</div>
+                <div class="kpi-subtitle-desc">@Model.Kpis.CompletedSubtitle</div>
+            </div>
+        </div>
+
+        <!-- 3. CÔNG VIỆC TUYỂN DỤNG GẦN ĐÂY (CARD GRID) -->
+        <div class="section-header-row">
+            <div>
+                <h3 class="section-title-with-icon">
+                    🔥 Công việc tuyển dụng gần đây
+                </h3>
+                <div class="section-subtitle-text">Các bài đăng đang thu hút freelancer ứng tuyển</div>
+            </div>
+            <a href="#" class="link-see-all">
+                <span>Xem tất cả</span>
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="jobs-cards-grid">
+            @foreach (var job in Model.RecentJobCards)
+            {
+                <div class="job-card-item">
+                    <div class="job-card-image-wrap">
+                        <img src="@job.ImageUrl" alt="@job.Title" class="job-card-img" />
+                        <span class="job-card-badge-status">@job.StatusText</span>
+                        <button type="button" class="job-card-btn-fav" title="Lưu">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </div>
+
+                    <div class="job-card-body">
+                        <div class="job-card-title" title="@job.Title">@job.Title</div>
+                        <div class="job-card-company">
+                            <i class="bi bi-building"></i>
+                            <span>@job.CompanyName</span>
+                        </div>
+
+                        <div class="job-card-details-list">
+                            <div class="job-card-detail-line">
+                                <i class="bi bi-cash-stack"></i>
+                                <span><strong>@job.FormattedBudget</strong></span>
+                            </div>
+                            <div class="job-card-detail-line">
+                                <i class="bi bi-clock"></i>
+                                <span>@job.Duration</span>
+                            </div>
+                            <div class="job-card-detail-line">
+                                <i class="bi bi-geo-alt"></i>
+                                <span>@job.WorkMode</span>
+                            </div>
+                        </div>
+
+                        <div class="job-card-skills">
+                            @foreach (var skill in job.Skills)
+                            {
+                                <span class="skill-tag-light">@skill</span>
+                            }
+                        </div>
+
+                        <div class="job-card-footer">
+                            <div class="job-card-applicants">
+                                <i class="bi bi-people-fill text-success"></i>
+                                <span>@job.ApplicantCount ứng tuyển</span>
+                            </div>
+                            <a href="#" class="btn-job-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- 4. BOTTOM CTA BANNER -->
+        <div class="bottom-cta-banner">
+            <div class="bottom-cta-left">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Student" class="bottom-cta-avatar" />
+                <div>
+                    <div class="bottom-cta-title">Biến ý tưởng thành hiện thực cùng freelancer tài năng</div>
+                    <p class="bottom-cta-desc">Đăng dự án ngay hôm nay và khám phá hàng ngàn sinh viên freelancer sẵn sàng đồng hành cùng bạn!</p>
+                </div>
+            </div>
+            <a href="#" class="btn-primary-emerald" style="padding: 10px 20px;">
+                + Đăng bài tuyển dụng
+            </a>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         CỘT PHẢI: VÍ, ỨNG VIÊN MỚI, HỢP ĐỒNG TIẾN ĐỘ
+         ========================================== -->
+    <div class="dashboard-right-sidebar">
+        <!-- 1. WALLET WIDGET -->
+        <div class="widget-card">
+            <div class="wallet-widget-header">
+                <span>Số dư ví</span>
+                <i class="bi bi-eye ms-1" id="btnToggleBalance" title="Ẩn/Hiện số dư" style="cursor: pointer;"></i>
+            </div>
+            <div class="wallet-balance-row-compact">
+                <div class="wallet-balance-num" id="walletBalanceDisplay">
+                    @Model.Wallet.FormattedBalance
+                </div>
+                <a href="#" class="btn-deposit-green">Nạp tiền</a>
+            </div>
+
+            <div class="wallet-three-buttons">
+                <a href="#" class="wallet-btn-icon-item">
+                    <div class="wallet-round-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <span>Lịch sử giao dịch</span>
+                </a>
+                <a href="#" class="wallet-btn-icon-item">
+                    <div class="wallet-round-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <span>Thanh toán</span>
+                </a>
+                <a href="#" class="wallet-btn-icon-item">
+                    <div class="wallet-round-icon">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <span>Yêu cầu hỗ trợ</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. ỨNG VIÊN MỚI WIDGET -->
+        <div class="widget-card">
+            <div class="section-header-row mb-2">
+                <h4 class="card-main-title" style="font-size: 0.95rem; font-weight: 800; margin: 0;">Ứng viên mới</h4>
+                <a href="#" class="link-see-all" style="font-size: 0.75rem;">
+                    <span>Xem tất cả</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="applicant-list-wrap">
+                @foreach (var app in Model.NewApplicants)
+                {
+                    <div class="applicant-item-row">
+                        <div class="applicant-left-info">
+                            <img src="@app.AvatarUrl" alt="@app.FullName" class="applicant-avatar" />
+                            <div>
+                                <div class="applicant-name-text">
+                                    <span class="applicant-status-dot"></span>
+                                    <span>@app.FullName</span>
+                                </div>
+                                <div class="applicant-sub-job">Ứng tuyển vào @app.AppliedJobID</div>
+                                <div class="applicant-time-ago">@app.TimeAgo</div>
+                            </div>
+                        </div>
+                        <a href="#" class="btn-view-profile-sm">Xem hồ sơ</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- 3. HỢP ĐỒNG ĐANG THỰC HIỆN WIDGET -->
+        <div class="widget-card">
+            <div class="section-header-row mb-2">
+                <h4 class="card-main-title" style="font-size: 0.95rem; font-weight: 800; margin: 0;">Hợp đồng đang thực hiện</h4>
+                <a href="#" class="link-see-all" style="font-size: 0.75rem;">
+                    <span>Xem tất cả</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="contracts-list-wrap">
+                @foreach (var c in Model.ActiveContracts)
+                {
+                    <div class="contract-progress-card">
+                        <div class="contract-card-header-flex">
+                            <img src="@c.ThumbnailUrl" alt="Project" class="contract-laptop-thumb" />
+                            <div class="flex-grow-1">
+                                <div class="contract-title-txt">@c.ProjectTitle</div>
+                                <div class="contract-freelancer-txt">Freelancer: @c.FreelancerName</div>
+                            </div>
+                            <span class="contract-badge-doing">@c.StatusText</span>
+                        </div>
+
+                        <div class="contract-progress-bar-wrap">
+                            <div class="progress-track">
+                                <div class="progress-fill-emerald" style="width: @c.ProgressPercentage%;"></div>
+                            </div>
+                            <div class="progress-percent-label">@c.ProgressPercentage%</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toggle Balance Visibility
+            const btnToggleBalance = document.getElementById('btnToggleBalance');
+            const walletBalanceDisplay = document.getElementById('walletBalanceDisplay');
+            const realBalance = "@Model.Wallet.FormattedBalance";
+            let isHidden = false;
+
+            if (btnToggleBalance && walletBalanceDisplay) {
+                btnToggleBalance.addEventListener('click', function () {
+                    isHidden = !isHidden;
+                    if (isHidden) {
+                        walletBalanceDisplay.innerText = "********đ";
+                        btnToggleBalance.classList.remove('bi-eye');
+                        btnToggleBalance.classList.add('bi-eye-slash');
+                    } else {
+                        walletBalanceDisplay.innerText = realBalance;
+                        btnToggleBalance.classList.remove('bi-eye-slash');
+                        btnToggleBalance.classList.add('bi-eye');
+                    }
+                });
+            }
+        });
+    </script>
+}
