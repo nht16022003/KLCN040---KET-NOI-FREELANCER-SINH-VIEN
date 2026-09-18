@@ -1,182 +1,1079 @@
 @model FreelancerStudent.Web.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Đăng nhập";
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập - Freelancer Students";
 }
 
-<div class="login-wrapper py-4 my-auto">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-5 col-xl-4">
-            
-            <!-- Card đăng nhập -->
-            <div class="card border-0 shadow-lg login-card">
-                <!-- Header Card -->
-                <div class="card-header bg-transparent text-center border-0 pt-4 pb-2">
-                    <div class="brand-badge mb-3 mx-auto">
-                        <i class="bi bi-mortarboard-fill fs-1 text-primary"></i>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Caveat:wght@600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap & Icons -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <style>
+        :root {
+            --brand-green-primary: #51775e;
+            --brand-green-hover: #43644f;
+            --brand-green-light: #eef5f1;
+            --brand-green-subtle: #dbebe0;
+            --brand-dark: #1f2923;
+            --brand-muted: #5f6c64;
+            --brand-border: #e2e8e4;
+            --brand-bg: #f9fbf9;
+            --card-shadow: 0 16px 40px -12px rgba(31, 58, 42, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--brand-dark);
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Notification */
+        .alert-floating {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+
+        /* Navbar Header */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid #eef2ef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: #385141;
+            line-height: 1.1;
+            text-decoration: none;
+            display: inline-block;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo span {
+            display: block;
+            font-size: 1.25rem;
+        }
+
+        .nav-link-custom {
+            color: #4b5850;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link-custom:hover {
+            color: var(--brand-green-primary);
+        }
+
+        .lang-selector {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #3d4a42;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .lang-selector:hover {
+            background-color: var(--brand-green-light);
+        }
+
+        .btn-nav-login {
+            border: 1px solid #d4ddd7;
+            background: #ffffff;
+            color: #334038;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.45rem 1.4rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-login:hover {
+            background: #f4f7f5;
+            border-color: #b7c5bc;
+            color: #1f2923;
+        }
+
+        .btn-nav-register {
+            background: var(--brand-green-primary);
+            border: 1px solid var(--brand-green-primary);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.45rem 1.4rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav-register:hover {
+            background: var(--brand-green-hover);
+            border-color: var(--brand-green-hover);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(81, 119, 94, 0.3);
+        }
+
+        /* Main Container */
+        .main-content {
+            flex: 1 0 auto;
+            padding: 2.5rem 0 3.5rem 0;
+            background: radial-gradient(circle at 15% 40%, rgba(222, 237, 227, 0.45) 0%, rgba(255, 255, 255, 0) 50%),
+                        radial-gradient(circle at 85% 80%, rgba(238, 245, 241, 0.6) 0%, rgba(255, 255, 255, 0) 50%);
+        }
+
+        /* Left Column Styles */
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 2.75rem;
+            line-height: 1.05;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+            color: #3f614b;
+        }
+
+        .hero-title .title-top {
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-title .title-bottom {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hero-title .text-outline {
+            color: transparent;
+            -webkit-text-stroke: 1.8px #3f614b;
+            font-weight: 900;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #2e3a32;
+            margin-bottom: 1.8rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon-wrapper {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 50%;
+            background-color: var(--brand-green-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand-green-primary);
+            font-size: 1.2rem;
+            box-shadow: 0 2px 6px rgba(81, 119, 94, 0.08);
+        }
+
+        .feature-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #212c24;
+            margin-bottom: 2px;
+        }
+
+        .feature-desc {
+            font-size: 0.875rem;
+            color: #647369;
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+
+        /* Visual Graphic Container */
+        .hero-visual-wrapper {
+            position: relative;
+            margin-top: 1.5rem;
+            max-width: 440px;
+        }
+
+        .hero-bg-blob {
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            background: linear-gradient(135deg, #cde3d4 0%, #e2efe6 100%);
+            border-radius: 50% 50% 40% 60% / 60% 40% 60% 40%;
+            top: 10px;
+            left: 20px;
+            z-index: 1;
+            opacity: 0.85;
+        }
+
+        .hero-img {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            border-radius: 20px;
+            object-fit: cover;
+            filter: drop-shadow(0 12px 24px rgba(30, 50, 36, 0.12));
+        }
+
+        .sticker-badge {
+            position: absolute;
+            top: 20px;
+            left: -15px;
+            z-index: 3;
+            transform: rotate(-12deg);
+            font-family: 'Caveat', cursive;
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.15;
+            color: #385141;
+            text-shadow: 1px 1px 0 #fff;
+            pointer-events: none;
+        }
+
+        .sticker-badge .line-1 {
+            display: block;
+        }
+        .sticker-badge .line-2 {
+            display: block;
+            margin-left: 8px;
+        }
+        .sticker-badge .line-3 {
+            display: block;
+            margin-left: 16px;
+        }
+
+        .crown-sketch {
+            position: absolute;
+            top: -10px;
+            right: 65px;
+            z-index: 3;
+            color: #51775e;
+            font-size: 1.8rem;
+            transform: rotate(15deg);
+        }
+
+        /* Login Card */
+        .login-card-container {
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid #e7ede9;
+            box-shadow: var(--card-shadow);
+            padding: 2.25rem 2.25rem 1.85rem 2.25rem;
+            position: relative;
+        }
+
+        .card-header-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.65rem;
+            color: #1a241e;
+            text-align: center;
+            margin-bottom: 0.35rem;
+        }
+
+        .card-header-sub {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #637268;
+            margin-bottom: 1.6rem;
+        }
+
+        .btn-social {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 0.65rem 1rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #2c3831;
+            background: #ffffff;
+            border: 1px solid #dbe2dd;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-social:hover {
+            background-color: #f7f9f8;
+            border-color: #bcc8bf;
+            transform: translateY(-1px);
+        }
+
+        .btn-social img, .btn-social svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider-container {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.2rem 0;
+            color: #92a097;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .divider-container::before,
+        .divider-container::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e5ece7;
+        }
+
+        .divider-container span {
+            padding: 0 14px;
+        }
+
+        .form-label-custom {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #28362d;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.1rem;
+        }
+
+        .input-group-custom .input-icon-left {
+            position: absolute;
+            left: 14px;
+            color: #798b80;
+            font-size: 1.05rem;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .input-group-custom .form-control {
+            border-radius: 12px;
+            border: 1px solid #dbe3de;
+            padding: 0.65rem 1rem 0.65rem 2.65rem;
+            font-size: 0.92rem;
+            color: #1f2923;
+            background-color: #ffffff;
+            transition: all 0.2s ease;
+            height: 46px;
+        }
+
+        .input-group-custom .form-control:focus {
+            border-color: var(--brand-green-primary);
+            box-shadow: 0 0 0 3.5px rgba(81, 119, 94, 0.15);
+            outline: none;
+        }
+
+        .input-group-custom .input-btn-right {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: #798b80;
+            padding: 4px 6px;
+            cursor: pointer;
+            z-index: 5;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-group-custom .input-btn-right:hover {
+            color: #3b4e42;
+        }
+
+        .form-check-custom {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-check-custom input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--brand-green-primary);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-check-custom label {
+            font-size: 0.85rem;
+            color: #3f4e45;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+        }
+
+        .forgot-link {
+            font-size: 0.85rem;
+            color: #486e55;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #2b4534;
+            text-decoration: underline;
+        }
+
+        .btn-submit-login {
+            width: 100%;
+            background-color: var(--brand-green-primary);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 50px;
+            margin-top: 0.5rem;
+            margin-bottom: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(81, 119, 94, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit-login:hover {
+            background-color: var(--brand-green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(81, 119, 94, 0.45);
+        }
+
+        .btn-submit-login:active {
+            transform: translateY(0);
+        }
+
+        .register-prompt {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #55635a;
+        }
+
+        .register-prompt a {
+            color: #3d6349;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .register-prompt a:hover {
+            color: #213c29;
+        }
+
+        .admin-access-box {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px dashed #e1eae3;
+        }
+
+        .admin-access-box .admin-label {
+            font-size: 0.825rem;
+            color: #6d7d73;
+            margin-bottom: 2px;
+        }
+
+        .admin-access-box .admin-link {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #3f644b;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .admin-access-box .admin-link:hover {
+            color: #233e2b;
+            text-decoration: underline;
+        }
+
+        /* Demo Quick Credentials Picker */
+        .demo-credentials-card {
+            margin-top: 1rem;
+            background: #f4f8f5;
+            border-radius: 14px;
+            border: 1px solid #dbe6de;
+            padding: 10px 14px;
+        }
+
+        .demo-badge-btn {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #ffffff;
+            border: 1px solid #c8d8ce;
+            color: #385141;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .demo-badge-btn:hover {
+            background: #e4efe7;
+            border-color: #9ebba8;
+        }
+
+        /* Footer */
+        .site-footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e7ede9;
+            padding: 3.5rem 0 1.5rem 0;
+            font-size: 0.9rem;
+            color: #56645b;
+        }
+
+        .footer-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: #385141;
+            line-height: 1.1;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-slogan {
+            font-size: 0.875rem;
+            color: #647369;
+            margin-bottom: 1.25rem;
+            line-height: 1.45;
+        }
+
+        .social-icons-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-icon-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background-color: #f0f4f1;
+            color: #405548;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .social-icon-btn:hover {
+            background-color: var(--brand-green-primary);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .footer-heading {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1e2821;
+            margin-bottom: 1.1rem;
+        }
+
+        .footer-links-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .footer-links-list li {
+            margin-bottom: 0.65rem;
+        }
+
+        .footer-links-list a {
+            color: #5b6960;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links-list a:hover {
+            color: var(--brand-green-primary);
+        }
+
+        .newsletter-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+
+        .newsletter-input-group input {
+            width: 100%;
+            border-radius: 50px;
+            border: 1px solid #d4ded8;
+            padding: 0.55rem 3rem 0.55rem 1.1rem;
+            font-size: 0.85rem;
+            background-color: #fafcfb;
+        }
+
+        .newsletter-input-group input:focus {
+            outline: none;
+            border-color: var(--brand-green-primary);
+            background-color: #fff;
+        }
+
+        .newsletter-btn {
+            position: absolute;
+            right: 4px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background-color: var(--brand-green-primary);
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .newsletter-btn:hover {
+            background-color: var(--brand-green-hover);
+        }
+
+        .footer-bottom-bar {
+            border-top: 1px solid #edf2ee;
+            margin-top: 2.5rem;
+            padding-top: 1.25rem;
+            font-size: 0.825rem;
+            color: #79877e;
+        }
+
+        .footer-bottom-links a {
+            color: #79877e;
+            text-decoration: none;
+            margin: 0 4px;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--brand-green-primary);
+        }
+
+        /* Responsive tweaks */
+        @@media (max-width: 991.98px) {
+            .hero-title {
+                font-size: 2.3rem;
+            }
+            .hero-visual-wrapper {
+                margin: 2rem auto;
+            }
+            .login-card-container {
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Notification Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-floating alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-floating alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Header / Navbar -->
+    <header class="site-header py-3">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <!-- Logo -->
+                <a href="/" class="brand-logo">
+                    Freelancer<br><span>Students</span>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="d-none d-lg-flex align-items-center gap-2">
+                    <a href="/Home/Index" class="nav-link-custom">Tìm công việc</a>
+                    <a href="/FreelancerStudent" class="nav-link-custom">Tìm Freelancer</a>
+                    <a href="/Home/About" class="nav-link-custom">Về chúng tôi</a>
+                    <a href="/Home/Support" class="nav-link-custom">Hỗ trợ</a>
+                </nav>
+
+                <!-- Actions / Auth buttons -->
+                <div class="d-flex align-items-center gap-2 gap-sm-3">
+                    <!-- Language selector -->
+                    <div class="lang-selector">
+                        <i class="bi bi-globe2"></i>
+                        <span>VI</span>
+                        <i class="bi bi-chevron-down" style="font-size: 0.75rem;"></i>
                     </div>
-                    <h3 class="fw-bold text-dark mb-1">Đăng Nhập</h3>
-                    <p class="text-muted small">Cổng kết nối Freelancer Sinh viên & Nhà tuyển dụng</p>
+
+                    <!-- Login Button (Active / Outlined) -->
+                    <a href="/Account/Login" class="btn-nav-login">Đăng nhập</a>
+
+                    <!-- Register Button -->
+                    <a href="/Account/Register" class="btn-nav-register">Đăng ký</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content d-flex align-items-center">
+        <div class="container">
+            <div class="row align-items-center justify-content-between g-4 g-xl-5">
+                
+                <!-- Left Column: Branding & Features & Illustration -->
+                <div class="col-lg-6 col-xl-6 pe-lg-4">
+                    
+                    <!-- Big Heading -->
+                    <h1 class="hero-title">
+                        <span class="title-top">FREELANCER</span>
+                        <span class="title-bottom">
+                            <span class="text-outline">FOR</span>
+                            <span>STUDENTS</span>
+                        </span>
+                    </h1>
+
+                    <!-- Slogan -->
+                    <p class="hero-subtitle">
+                        Kết nối sinh viên tài năng với cơ hội thực tế
+                    </p>
+
+                    <!-- Feature 1 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-wrapper">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Cơ hội thực tế</div>
+                            <p class="feature-desc">Tìm công việc phù hợp, phát triển kỹ năng</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-wrapper">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Thu nhập linh hoạt</div>
+                            <p class="feature-desc">Làm chủ thời gian, tăng thu nhập</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-wrapper">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Xây dựng tương lai</div>
+                            <p class="feature-desc">Tạo portfolio, tích lũy kinh nghiệm</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Illustration Composition -->
+                    <div class="hero-visual-wrapper d-none d-md-block">
+                        <div class="hero-bg-blob"></div>
+                        
+                        <!-- Handwritten sticker badge -->
+                        <div class="sticker-badge">
+                            <span class="line-1">Small</span>
+                            <span class="line-2">Skills</span>
+                            <span class="line-3">Big Opportunities</span>
+                        </div>
+
+                        <!-- Doodle Crown -->
+                        <div class="crown-sketch">
+                            <i class="bi bi-award"></i>
+                        </div>
+
+                        <!-- Real Generated Hero Photography -->
+                        <img src="~/images/students_hero.jpg" alt="Freelancer Students" class="hero-img" />
+                    </div>
+
                 </div>
 
-                <div class="card-body p-4 pt-2">
-                    <!-- Thông báo lỗi tổng quát nếu có -->
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                <!-- Right Column: Login Card -->
+                <div class="col-lg-6 col-xl-5">
+                    <div class="login-card-container">
+                        <div class="login-card">
+                            
+                            <!-- Card Header -->
+                            <h2 class="card-header-title">Chào mừng trở lại!</h2>
+                            <p class="card-header-sub">Đăng nhập để tiếp tục hành trình của bạn</p>
 
-                    <!-- Form Đăng nhập -->
-                    <form asp-controller="Account" asp-action="Login" method="post" id="loginForm" novalidate>
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" asp-for="ReturnUrl" />
+                            <!-- Social Login Buttons -->
+                            <a href="javascript:void(0)" class="btn-social" title="Đăng nhập bằng Google" onclick="handleSocialLogin('Google')">
+                                <!-- Google SVG Icon -->
+                                <svg viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                <span>Tiếp tục với Google</span>
+                            </a>
 
-                        <!-- Tên đăng nhập / Email -->
-                        <div class="mb-3">
-                            <label asp-for="UsernameOrEmail" class="form-label fw-semibold text-secondary small"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
-                                    <i class="bi bi-person text-muted"></i>
-                                </span>
-                                <input asp-for="UsernameOrEmail" 
-                                       class="form-control bg-light border-start-0 ps-0" 
-                                       placeholder="Nhập tên đăng nhập hoặc email..." 
-                                       autocomplete="username" />
+                            <a href="javascript:void(0)" class="btn-social" title="Đăng nhập bằng Facebook" onclick="handleSocialLogin('Facebook')">
+                                <!-- Facebook SVG Icon -->
+                                <svg viewBox="0 0 24 24">
+                                    <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                <span>Tiếp tục với Facebook</span>
+                            </a>
+
+                            <!-- Divider -->
+                            <div class="divider-container">
+                                <span>Hoặc</span>
                             </div>
-                            <span asp-validation-for="UsernameOrEmail" class="text-danger small mt-1 d-block"></span>
-                        </div>
 
-                        <!-- Mật khẩu -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label asp-for="Password" class="form-label fw-semibold text-secondary small mb-0"></label>
-                                <a href="#" class="small text-decoration-none text-primary fw-medium" tabindex="-1">Quên mật khẩu?</a>
-                            </div>
-                            <div class="input-group mt-1">
-                                <span class="input-group-text bg-light border-end-0">
-                                    <i class="bi bi-lock text-muted"></i>
-                                </span>
-                                <input asp-for="Password" 
-                                       type="password" 
-                                       class="form-control bg-light border-start-0 border-end-0 ps-0" 
-                                       placeholder="••••••••" 
-                                       id="passwordInput"
-                                       autocomplete="current-password" />
-                                <button class="btn btn-light border border-start-0" type="button" id="togglePasswordBtn" title="Hiện/ẩn mật khẩu">
-                                    <i class="bi bi-eye text-muted" id="togglePasswordIcon"></i>
+                            <!-- Validation Summary -->
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small rounded-3" role="alert"></div>
+
+                            <!-- Login Form -->
+                            <form asp-controller="Account" asp-action="Login" method="post" id="loginForm" novalidate>
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" asp-for="ReturnUrl" />
+
+                                <!-- Email or Username -->
+                                <div class="mb-3">
+                                    <label asp-for="UsernameOrEmail" class="form-label-custom">Email hoặc tên đăng nhập</label>
+                                    <div class="input-group-custom">
+                                        <i class="bi bi-envelope input-icon-left"></i>
+                                        <input asp-for="UsernameOrEmail" 
+                                               class="form-control" 
+                                               placeholder="Nhập email hoặc tên đăng nhập" 
+                                               autocomplete="username" 
+                                               required />
+                                    </div>
+                                    <span asp-validation-for="UsernameOrEmail" class="text-danger small mt-n2 d-block"></span>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="mb-3">
+                                    <label asp-for="Password" class="form-label-custom">Mật khẩu</label>
+                                    <div class="input-group-custom">
+                                        <i class="bi bi-lock input-icon-left"></i>
+                                        <input asp-for="Password" 
+                                               type="password" 
+                                               class="form-control pe-5" 
+                                               placeholder="Nhập mật khẩu" 
+                                               id="passwordInput" 
+                                               autocomplete="current-password" 
+                                               required />
+                                        <button class="input-btn-right" type="button" id="togglePasswordBtn" title="Hiện/ẩn mật khẩu">
+                                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger small mt-n2 d-block"></span>
+                                </div>
+
+                                <!-- Remember Me & Forgot Password -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="form-check-custom">
+                                        <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck" checked>
+                                        <label for="rememberMeCheck">Ghi nhớ đăng nhập</label>
+                                    </div>
+                                    <a href="/Account/ForgotPassword" class="forgot-link">Quên mật khẩu?</a>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn-submit-login">
+                                    Đăng nhập
                                 </button>
+
+                                <!-- Register Link -->
+                                <div class="register-prompt">
+                                    <span>Chưa có tài khoản? </span>
+                                    <a asp-controller="Account" asp-action="Register">Đăng ký ngay</a>
+                                </div>
+
+                                <!-- Admin Link -->
+                                <div class="admin-access-box">
+                                    <div class="admin-label">Dành cho quản trị viên?</div>
+                                    <a href="javascript:void(0)" class="admin-link" onclick="quickFillAdmin()">Đăng nhập hệ thống quản trị</a>
+                                </div>
+
+                            </form>
+
+                            <!-- Demo Quick Accounts Toolbar (For ease of testing) -->
+                            <div class="demo-credentials-card mt-3">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="text-muted" style="font-size: 0.76rem; font-weight: 600;">
+                                        <i class="bi bi-lightning-charge-fill text-warning"></i> Thử nhanh tài khoản mẫu:
+                                    </span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button type="button" class="demo-badge-btn" onclick="fillCreds('freelancer_sv1', 'hash_pass_789')">
+                                        👨‍🎓 Sinh viên
+                                    </button>
+                                    <button type="button" class="demo-badge-btn" onclick="fillCreds('khachhang_a', 'hash_pass_456')">
+                                        🏢 Khách hàng
+                                    </button>
+                                    <button type="button" class="demo-badge-btn" onclick="fillCreds('admin_sys', 'hash_pass_123')">
+                                        🛡️ Quản trị viên
+                                    </button>
+                                </div>
                             </div>
-                            <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
-                        </div>
 
-                        <!-- Ghi nhớ đăng nhập -->
-                        <div class="mb-4 d-flex align-items-center">
-                            <div class="form-check">
-                                <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck">
-                                <label class="form-check-label text-muted small user-select-none" for="rememberMeCheck">
-                                    Ghi nhớ phiên đăng nhập
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Nút Submit -->
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg shadow-sm fw-semibold py-2">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Phân cách -->
-                    <div class="position-relative text-center my-4">
-                        <hr class="text-muted opacity-25" />
-                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
-                            Tài khoản mẫu thử nghiệm
-                        </span>
-                    </div>
-
-                    <!-- Gợi ý tài khoản demo (Dành cho việc test nhanh bản nháp) -->
-                    <div class="bg-light p-3 rounded-3 mb-3 border">
-                        <div class="text-muted small fw-semibold mb-2">
-                            <i class="bi bi-info-circle me-1"></i> Nhấn để tự động điền nhanh tài khoản nháp:
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary quick-fill-btn" 
-                                    data-user="freelancer_sv1" data-pass="hash_pass_789">
-                                <i class="bi bi-person-badge"></i> Sinh viên
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-success quick-fill-btn" 
-                                    data-user="khachhang_a" data-pass="hash_pass_456">
-                                <i class="bi bi-briefcase"></i> Khách hàng
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-dark quick-fill-btn" 
-                                    data-user="admin_sys" data-pass="hash_pass_123">
-                                <i class="bi bi-shield-lock"></i> Quản trị viên
-                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Footer link -->
-                    <div class="text-center mt-3 pt-2 border-top">
-                        <span class="text-muted small">Chưa có tài khoản? </span>
-                        <a asp-controller="Account" asp-action="Register" class="text-primary fw-semibold small text-decoration-none">
-                            Đăng ký ngay
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-4 justify-content-between">
+                
+                <!-- Col 1: Logo, Slogan, Socials -->
+                <div class="col-lg-3 col-md-6">
+                    <a href="/" class="footer-logo">
+                        Freelancer Students
+                    </a>
+                    <p class="footer-slogan">
+                        Kết nối sinh viên tài năng với cơ hội thực tế
+                    </p>
+                    <div class="social-icons-wrapper">
+                        <a href="https://facebook.com" target="_blank" class="social-icon-btn" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" class="social-icon-btn" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="https://youtube.com" target="_blank" class="social-icon-btn" title="YouTube">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                        <a href="https://linkedin.com" target="_blank" class="social-icon-btn" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
                         </a>
                     </div>
                 </div>
+
+                <!-- Col 2: Về chúng tôi -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <div class="footer-heading">Về chúng tôi</div>
+                    <ul class="footer-links-list">
+                        <li><a href="/Home/About">Giới thiệu</a></li>
+                        <li><a href="/Home/Terms">Điều khoản sử dụng</a></li>
+                        <li><a href="/Home/Privacy">Chính sách bảo mật</a></li>
+                        <li><a href="/Home/Contact">Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Hỗ trợ -->
+                <div class="col-lg-2 col-md-6 col-6">
+                    <div class="footer-heading">Hỗ trợ</div>
+                    <ul class="footer-links-list">
+                        <li><a href="/Home/HelpCenter">Trung tâm trợ giúp</a></li>
+                        <li><a href="/Home/Guide">Hướng dẫn sử dụng</a></li>
+                        <li><a href="/Home/FAQ">Câu hỏi thường gặp</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Kết nối với chúng tôi -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-heading">Kết nối với chúng tôi</div>
+                    <p style="font-size: 0.88rem; color: #647369; margin-bottom: 0.75rem;">
+                        Cập nhật những cơ hội việc làm mới nhất dành cho sinh viên.
+                    </p>
+                    <form onsubmit="handleSubscribe(event)">
+                        <div class="newsletter-input-group">
+                            <input type="email" placeholder="Nhập email của bạn" required />
+                            <button type="submit" class="newsletter-btn" title="Gửi email">
+                                <i class="bi bi-send-fill" style="font-size: 0.85rem;"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
 
-            <!-- Footer ghi chú -->
-            <p class="text-center text-muted small mt-3">
-                &copy; @DateTime.Now.Year FreelancerStudent - Nền tảng tuyển dụng sinh viên
-            </p>
+            <!-- Bottom Copyright & Legal Links -->
+            <div class="footer-bottom-bar d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+                <div>
+                    &copy; 2026 Freelancer Students. All rights reserved.
+                </div>
+                <div class="footer-bottom-links">
+                    <a href="/Home/Terms">Điều khoản</a>
+                    <span>|</span>
+                    <a href="/Home/Privacy">Bảo mật</a>
+                    <span>|</span>
+                    <a href="/Home/Contact">Liên hệ</a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    </footer>
 
-<style>
-    .login-card {
-        border-radius: 1rem;
-        background: #ffffff;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .brand-badge {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        background: rgba(13, 110, 253, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .input-group .form-control:focus {
-        border-color: #86b7fe;
-        box-shadow: none;
-    }
-    .input-group-text {
-        border-color: #dee2e6;
-    }
-    .form-control {
-        border-color: #dee2e6;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-        border: none;
-        transition: all 0.2s ease;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
-    }
-    .quick-fill-btn {
-        font-size: 0.8rem;
-        border-radius: 20px;
-    }
-</style>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <!-- Bootstrap & Scripts -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Hiện / ẩn mật khẩu
+            // Toggle show/hide password
             const togglePasswordBtn = document.getElementById("togglePasswordBtn");
             const passwordInput = document.getElementById("passwordInput");
             const togglePasswordIcon = document.getElementById("togglePasswordIcon");
@@ -189,19 +1086,30 @@
                     togglePasswordIcon.classList.toggle("bi-eye-slash", isPassword);
                 });
             }
-
-            // Nút bấm điền nhanh tài khoản nháp
-            const quickFillBtns = document.querySelectorAll(".quick-fill-btn");
-            const usernameInput = document.querySelector('input[name="UsernameOrEmail"]');
-
-            quickFillBtns.forEach(btn => {
-                btn.addEventListener("click", function () {
-                    const user = this.getAttribute("data-user");
-                    const pass = this.getAttribute("data-pass");
-                    if (usernameInput) usernameInput.value = user;
-                    if (passwordInput) passwordInput.value = pass;
-                });
-            });
         });
+
+        // Quick demo filler
+        function fillCreds(user, pass) {
+            const userInput = document.querySelector('input[name="UsernameOrEmail"]');
+            const passInput = document.getElementById("passwordInput");
+            if (userInput) userInput.value = user;
+            if (passInput) passInput.value = pass;
+        }
+
+        function quickFillAdmin() {
+            fillCreds('admin_sys', 'hash_pass_123');
+            const userInput = document.querySelector('input[name="UsernameOrEmail"]');
+            if (userInput) userInput.focus();
+        }
+
+        function handleSocialLogin(provider) {
+            alert('Tính năng đăng nhập với ' + provider + ' đang được kết nối!');
+        }
+
+        function handleSubscribe(e) {
+            e.preventDefault();
+            alert('Cảm ơn bạn đã đăng ký nhận bản tin từ Freelancer Students!');
+        }
     </script>
-}
+</body>
+</html>
