@@ -4,44 +4,39 @@ using System.Collections.Generic;
 namespace FreelancerStudent.Web.ViewModels
 {
     /// <summary>
-    /// ViewModel cho Trang Tổng quan của Nhà tuyển dụng (Employer Dashboard)
-    /// /// </summary>
+    /// ViewModel chính cho Trang Tổng quan Nhà tuyển dụng (KhachHang / Employer Dashboard)
+    /// </summary>
     public class EmployerDashboardViewModel
     {
-        // 1. Thông tin tài khoản & hồ sơ nhà tuyển dụng (Users, KhachHang, NhaTuyenDung)
+        // 1. Thông tin Nhà tuyển dụng (Users + KhachHang + NhaTuyenDung)
         public EmployerProfileSummaryViewModel EmployerInfo { get; set; } = new();
 
-        // 2. Thông tin ví & số dư (Bảng Wallet)
+        // 2. Số dư ví (Wallet)
         public EmployerWalletSummaryViewModel Wallet { get; set; } = new();
 
-        // 3. Danh sách từ khóa kỹ năng gợi ý tìm kiếm nhanh trên Banner
+        // 3. Danh sách từ khóa kỹ năng gợi ý tìm kiếm
         public List<string> PopularSkills { get; set; } = new()
         {
             "UI/UX", "Web Development", "Content Writing", "Design", "Marketing", "Data Entry", "Lập trình"
         };
 
-        // 4. 4 Thẻ chỉ số KPI thống kê tổng quan (JobPost, HopDong, UngTuyen)
+        // 4. 4 Thẻ chỉ số KPI thống kê tổng quan
         public EmployerKpiSummaryViewModel Kpis { get; set; } = new();
 
-        // 5. Danh sách các bài đăng công việc gần đây dạng Card (JobPost, Skill)
+        // 5. Danh sách 3 card công việc tuyển dụng gần đây (JobPost)
         public List<EmployerJobCardViewModel> RecentJobCards { get; set; } = new();
 
-        // 6. Danh sách ứng viên sinh viên mới nộp hồ sơ (UngTuyen, FreelancerSV, Users)
+        // 6. Danh sách ứng viên mới nộp hồ sơ
         public List<EmployerNewApplicantViewModel> NewApplicants { get; set; } = new();
 
-        // 7. Danh sách hợp đồng đang thực hiện & tiến độ % (HopDong, FreelancerSV, Users)
+        // 7. Danh sách hợp đồng đang thực hiện (HopDong)
         public List<EmployerActiveContractViewModel> ActiveContracts { get; set; } = new();
     }
 
-    /// <summary>
-    /// Thông tin cá nhân & công ty của Nhà tuyển dụng
-    /// Bảng: Users, KhachHang, NhaTuyenDung
-    /// </summary>
     public class EmployerProfileSummaryViewModel
     {
         public string UserID { get; set; } = "USR002";
         public string CusID { get; set; } = "CUS001";
-        public string EmployerID { get; set; } = "EMP001";
         public string UserName { get; set; } = "khachhang_a";
         public string FullName { get; set; } = "khachhang_a";
         public string RoleTitle { get; set; } = "Nhà tuyển dụng";
@@ -51,21 +46,14 @@ namespace FreelancerStudent.Web.ViewModels
         public int UnreadMessageCount { get; set; } = 2;
     }
 
-    /// <summary>
-    /// Số dư ví nhà tuyển dụng
-    /// Bảng: Wallet (userID = 'USR002')
-    /// </summary>
     public class EmployerWalletSummaryViewModel
     {
-        public string WalletID { get; set; } = "WAL002";
+        public string WalletID { get; set; } = "WAL001";
         public decimal SoDuKhadung { get; set; } = 12000000;
         public decimal SoDuDongBang { get; set; } = 0;
         public string FormattedBalance => SoDuKhadung.ToString("N0") + "đ";
     }
 
-    /// <summary>
-    /// 4 Thẻ chỉ số KPI thống kê trên Dashboard
-    /// </summary>
     public class EmployerKpiSummaryViewModel
     {
         // 1. Bài đăng tuyển dụng (JobPost WHERE cusID = @cusID)
@@ -73,7 +61,7 @@ namespace FreelancerStudent.Web.ViewModels
         public int ActiveJobPosts { get; set; } = 5;
         public int JobPostsGrowthPercentage { get; set; } = 25; // ↑ 25%
 
-        // 2. Freelancer ứng tuyển (UngTuyen)
+        // 2. Freelancer ứng tuyển
         public int TotalApplicants { get; set; } = 28;
         public int ApplicantsGrowthPercentage { get; set; } = 40; // ↑ 40%
         public string ApplicantsSubtitle { get; set; } = "28 hồ sơ đã ứng tuyển";
@@ -89,52 +77,36 @@ namespace FreelancerStudent.Web.ViewModels
         public string CompletedSubtitle { get; set; } = "1 dự án đã bàn giao";
     }
 
-    /// <summary>
-    /// Thẻ bài đăng công việc tuyển dụng gần đây
-    /// Bảng: JobPost, NhaTuyenDung, Skill
-    /// </summary>
     public class EmployerJobCardViewModel
     {
         public string JobID { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
-        public string ImageUrl { get; set; } = string.Empty;
         public string CompanyName { get; set; } = "Công ty ABC";
-        public decimal Budget { get; set; }
-        public string FormattedBudget => Budget.ToString("N0") + "đ";
-        public string Duration { get; set; } = "2 - 4 tuần";
-        public string WorkMode { get; set; } = "Remote"; // Remote, Onsite, Hybrid
-        public List<string> Skills { get; set; } = new();
-        public int ApplicantCount { get; set; }
+        public string FormattedBudget { get; set; } = string.Empty;
+        public string Duration { get; set; } = string.Empty;
+        public string WorkMode { get; set; } = "Remote";
+        public string ImageUrl { get; set; } = string.Empty;
         public string StatusText { get; set; } = "Đang tuyển";
-        public bool IsFavorite { get; set; } = false;
+        public List<string> Skills { get; set; } = new();
+        public int ApplicantCount { get; set; } = 0;
     }
 
-    /// <summary>
-    /// Thông tin ứng viên sinh viên mới ứng tuyển vào bài đăng
-    /// Bảng: UngTuyen JOIN FreelancerSV JOIN Users
-    /// </summary>
     public class EmployerNewApplicantViewModel
     {
-        public string FreeID { get; set; } = string.Empty;
+        public string ApplicantID { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public string AvatarUrl { get; set; } = string.Empty;
         public string AppliedJobID { get; set; } = string.Empty;
-        public string AppliedJobTitle { get; set; } = string.Empty;
         public string TimeAgo { get; set; } = string.Empty;
+        public string AvatarUrl { get; set; } = string.Empty;
     }
 
-    /// <summary>
-    /// Thông tin hợp đồng đang thực hiện kèm tiến độ %
-    /// Bảng: HopDong JOIN FreelancerSV JOIN Users (cột tienDo INT 0-100)
-    /// </summary>
     public class EmployerActiveContractViewModel
     {
-        public string MaHD { get; set; } = string.Empty;
+        public string ContractID { get; set; } = string.Empty;
         public string ProjectTitle { get; set; } = string.Empty;
-        public string ThumbnailUrl { get; set; } = string.Empty;
         public string FreelancerName { get; set; } = string.Empty;
-        public string FreelancerID { get; set; } = string.Empty;
-        public int ProgressPercentage { get; set; } = 0; // tienDo: 75%, 40%...
+        public int ProgressPercentage { get; set; } = 0;
         public string StatusText { get; set; } = "Đang làm";
+        public string ThumbnailUrl { get; set; } = string.Empty;
     }
 }
