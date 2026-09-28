@@ -1,0 +1,152 @@
+@model MOCK.Models.ViewModels.AdminSupportTicketViewModel
+@{
+    ViewData["Title"] = "Xử lý Yêu cầu Hỗ trợ (AD-UC-08.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-08.01: Xử lý Yêu cầu Hỗ trợ</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-headset text-secondary me-2"></i>Trung tâm Tiếp nhận & Phản hồi Hỗ trợ Kỹ thuật
+            </h3>
+            <p class="text-muted small mb-0">Xử lý các phiếu yêu cầu trợ giúp từ Sinh viên và Nhà tuyển dụng (bảng YeuCauHoTro).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/XuLyTranhChap" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                <i class="bi bi-shield-slash me-1"></i> Tranh chấp
+            </a>
+            <a href="/Admin/GiamSatHeThong" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                <i class="bi bi-cpu me-1"></i> Giám sát hệ thống
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filter Buttons -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex gap-2">
+                <a href="/Admin/XuLyHoTro" class="btn btn-sm @(string.IsNullOrEmpty(Model.FilterTrangThai) ? "btn-dark" : "btn-light border") rounded-pill px-3">Tất cả ticket</a>
+                <a href="/Admin/XuLyHoTro?status=ChoXuLy" class="btn btn-sm @(Model.FilterTrangThai == "ChoXuLy" ? "btn-danger" : "btn-light border") rounded-pill px-3">
+                    Chờ xử lý (@Model.SoTicketDangXuLy)
+                </a>
+                <a href="/Admin/XuLyHoTro?status=DangXuLy" class="btn btn-sm @(Model.FilterTrangThai == "DangXuLy" ? "btn-warning" : "btn-light border") rounded-pill px-3">Đang xử lý</a>
+                <a href="/Admin/XuLyHoTro?status=DaXuLy" class="btn btn-sm @(Model.FilterTrangThai == "DaXuLy" ? "btn-success" : "btn-light border") rounded-pill px-3">Đã giải quyết</a>
+            </div>
+            <div class="small text-muted">
+                Tổng số ticket: <strong>@Model.YeuCaus.Count</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket List Cards -->
+    <div class="row g-4">
+        @if (!Model.YeuCaus.Any())
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-5 text-center text-muted">
+                    <i class="bi bi-inbox fs-1 mb-2"></i>
+                    <h5>Không có ticket hỗ trợ nào</h5>
+                    <p class="small mb-0">Tất cả các yêu cầu hỗ trợ đều đã được hoàn tất.</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var tk in Model.YeuCaus)
+            {
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3 pb-2 border-bottom">
+                            <div>
+                                <span class="badge @(tk.TrangThai == "ChoXuLy" ? "bg-danger" : (tk.TrangThai == "DangXuLy" ? "bg-warning text-dark" : "bg-success")) me-2">
+                                    @tk.TrangThai
+                                </span>
+                                <span class="badge bg-light text-dark border me-2">@tk.LoaiYeuCau</span>
+                                <span class="fw-bold text-dark fs-6">Ticket #@tk.MaYeuCau: @tk.TieuDe</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-clock me-1"></i>Gửi lúc: @tk.NgayGui.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-6">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <div class="small text-muted fw-semibold mb-1">NGƯỜI GỬI: User ID #@tk.MaUser</div>
+                                    <div class="small text-muted fw-semibold mb-1">NỘI DUNG YÊU CẦU:</div>
+                                    <p class="small text-dark mb-3">@tk.NoiDung</p>
+
+                                    @if (!string.IsNullOrEmpty(tk.FileDinhKem))
+                                    {
+                                        <div class="small">
+                                            <strong>File đính kèm:</strong>
+                                            <a href="@tk.FileDinhKem" target="_blank" class="text-decoration-none ms-1">
+                                                <i class="bi bi-paperclip"></i> Xem tài liệu đính kèm
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6">
+                                <div class="p-3 border rounded-3 h-100 bg-white">
+                                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-reply-fill text-primary me-1"></i>Phản hồi từ Admin</h6>
+                                    
+                                    <form method="post" asp-action="PhanHoiHoTro">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="maYeuCau" value="@tk.MaYeuCau" />
+
+                                        <div class="mb-2">
+                                            <textarea name="phanHoi" class="form-control form-control-sm" rows="3" required placeholder="Nhập câu trả lời hướng dẫn hoặc giải pháp xử lý...">@(tk.PhanHoiAdmin ?? "")</textarea>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center gap-2">
+                                            <select name="trangThai" class="form-select form-select-sm w-auto">
+                                                <option value="DangXuLy" selected="@(tk.TrangThai == "DangXuLy")">Đang xử lý</option>
+                                                <option value="DaXuLy" selected="@(tk.TrangThai == "DaXuLy")">Đã giải quyết (Đóng ticket)</option>
+                                                <option value="ChoXuLy" selected="@(tk.TrangThai == "ChoXuLy")">Chờ xử lý</option>
+                                            </select>
+
+                                            <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">
+                                                <i class="bi bi-send me-1"></i> Gửi phản hồi
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    @if (tk.NgayXuLy.HasValue)
+                                    {
+                                        <div class="small text-muted mt-2">
+                                            <i class="bi bi-check2-circle text-success me-1"></i>Xử lý lần cuối: @tk.NgayXuLy.Value.ToString("dd/MM/yyyy HH:mm") (Admin #@(tk.MaAdmin ?? 1))
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

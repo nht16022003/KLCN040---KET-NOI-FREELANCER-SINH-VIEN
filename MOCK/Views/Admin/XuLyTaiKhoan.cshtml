@@ -1,0 +1,158 @@
+@model MOCK.Models.ViewModels.AdminAccountStatusViewModel
+@{
+    ViewData["Title"] = "Xử lý Trạng thái Tài khoản (AD-UC-02.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-02.01: Xử lý Trạng thái Tài khoản</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-person-slash text-danger me-2"></i>Khóa & Mở Khóa Tài Khoản Người Dùng
+            </h3>
+            <p class="text-muted small mb-0">Thực thi chế tài kỷ luật, khóa tài khoản vi phạm hoặc mở khóa tài khoản sau khi xem xét khiếu nại (bảng LichSu_XuLyTaiKhoan).</p>
+        </div>
+        <div>
+            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách người dùng
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Form Action -->
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-lock-fill text-danger me-2"></i>Thiết lập Trạng thái Tài khoản</h5>
+                
+                <form method="post" asp-action="XuLyTaiKhoan">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Chọn Người dùng cần xử lý <span class="text-danger">*</span></label>
+                        <select asp-for="XuLyModel.MaUser" class="form-select bg-light">
+                            @foreach (var u in Model.DanhSachTaiKhoan)
+                            {
+                                <option value="@u.MaUser">
+                                    [#@u.MaUser] @u.HotenUser (@(u.MaRole == 2 ? "Sinh viên" : "NTD")) - Hiện tại: @u.Status
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="XuLyModel.MaUser" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Hành động áp dụng <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="XuLyModel.HanhDong" id="actLock" value="KHOA_TAI_KHOAN" checked />
+                                <label class="form-check-label text-danger fw-semibold" for="actLock">
+                                    <i class="bi bi-lock-fill me-1"></i> Khóa tài khoản
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="XuLyModel.HanhDong" id="actUnlock" value="MO_KHOA_TAI_KHOAN" />
+                                <label class="form-check-label text-success fw-semibold" for="actUnlock">
+                                    <i class="bi bi-unlock-fill me-1"></i> Mở khóa tài khoản
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Lý do xử lý (Lưu vào hồ sơ kiểm toán) <span class="text-danger">*</span></label>
+                        <textarea asp-for="XuLyModel.LyDo" class="form-control bg-light" rows="4" placeholder="Nhập căn cứ, điều khoản vi phạm hoặc lý do khôi phục tài khoản..."></textarea>
+                        <span asp-validation-for="XuLyModel.LyDo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3 small text-muted">
+                        <i class="bi bi-info-circle text-primary me-1"></i>
+                        Khi khóa tài khoản, người dùng sẽ không thể đăng tin tuyển dụng, nộp hồ sơ xin việc hoặc tạo hợp đồng mới.
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100 rounded-3 py-2 fw-semibold">
+                        <i class="bi bi-check2-circle me-1"></i> Xác nhận Thực thi Xử lý
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Audit Log History -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-journal-text text-primary me-2"></i>Lịch sử Xử lý Tài khoản (LichSu_XuLyTaiKhoan)</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small">
+                            <tr>
+                                <th>Mã LS</th>
+                                <th>User</th>
+                                <th>Hành động</th>
+                                <th>Lý do</th>
+                                <th>Admin</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.LichSuXuLys.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">Chưa có lịch sử xử lý tài khoản nào.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var ls in Model.LichSuXuLys)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-dark small">#@ls.MaLichSu</td>
+                                        <td class="small">
+                                            User ID: <span class="fw-bold">#@ls.MaUser</span>
+                                        </td>
+                                        <td>
+                                            @if (ls.HanhDong == "KHOA_TAI_KHOAN")
+                                            {
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger small">Khóa TK</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success small">Mở khóa</span>
+                                            }
+                                        </td>
+                                        <td class="small text-dark" style="max-width: 200px;">
+                                            @ls.LyDo
+                                        </td>
+                                        <td class="small text-muted">Admin #@ls.MaAdmin</td>
+                                        <td class="small text-muted">@ls.NgayXuLy.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

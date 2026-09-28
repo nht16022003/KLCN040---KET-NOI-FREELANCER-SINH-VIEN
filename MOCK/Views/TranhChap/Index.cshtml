@@ -1,0 +1,193 @@
+@model MOCK.Models.ViewModels.TranhChapListViewModel
+@{
+    ViewData["Title"] = "Quản lý & Theo dõi Tranh chấp hợp đồng";
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Index" class="text-decoration-none text-muted">Hợp đồng</a></li>
+            <li class="breadcrumb-item active text-danger fw-semibold" aria-current="page">Tranh chấp & Khiếu nại</li>
+        </ol>
+    </nav>
+
+    <!-- ALERTS -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- HEADER TITLE & CREATE ACTION -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-shield-shaded text-danger me-2"></i>Quản Lý & Theo Dõi Tranh Chấp Hợp Đồng
+            </h3>
+            <p class="text-muted small mb-0">
+                Theo dõi quá trình hòa giải, thu thập chứng cứ và phán quyết trọng tài cho các hợp đồng có khiếu nại.
+            </p>
+        </div>
+        <div>
+            <a asp-controller="TranhChap" asp-action="Create" class="btn btn-danger fw-bold px-4 py-2 shadow-sm" style="border-radius: 10px;">
+                <i class="bi bi-plus-circle me-1"></i> Mở hồ sơ tranh chấp mới
+            </a>
+        </div>
+    </div>
+
+    <!-- STATS COUNTER BAR -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <span class="text-muted small fw-semibold">Tổng số vụ việc</span>
+                <h4 class="fw-bold text-dark mb-0 mt-1">@Model.TotalCount</h4>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <span class="text-muted small fw-semibold">Đang mở hồ sơ</span>
+                <h4 class="fw-bold text-warning mb-0 mt-1">@Model.OpenCount</h4>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <span class="text-muted small fw-semibold">Trọng tài đang xử lý</span>
+                <h4 class="fw-bold text-primary mb-0 mt-1">@Model.InProgressCount</h4>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <span class="text-muted small fw-semibold">Đã có kết luận giải quyết</span>
+                <h4 class="fw-bold text-success mb-0 mt-1">@Model.ResolvedCount</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER FORM -->
+    <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 14px; background: #FFFFFF;">
+        <form method="get" asp-controller="TranhChap" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="keyword" value="@Model.Keyword" class="form-control border-start-0 bg-light"
+                           placeholder="Tìm theo mã HĐ, lý do, từ khóa..." style="font-size: 0.9rem;" />
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <select name="status" class="form-select bg-light" style="font-size: 0.9rem;">
+                    <option value="All">-- Tất cả trạng thái --</option>
+                    <!option value="DangMo" @(Model.SelectedStatus == "DangMo" ? "selected" : "")>Đang mở hồ sơ</!option>
+                    <!option value="DangXuLy" @(Model.SelectedStatus == "DangXuLy" ? "selected" : "")>Đang xử lý</!option>
+                    <!option value="DaGiaiQuyet" @(Model.SelectedStatus == "DaGiaiQuyet" ? "selected" : "")>Đã giải quyết</!option>
+                    <!option value="DaHuy" @(Model.SelectedStatus == "DaHuy" ? "selected" : "")>Đã hủy</!option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary flex-grow-1 fw-semibold" style="border-radius: 8px;">
+                    <i class="bi bi-funnel-fill me-1"></i> Lọc
+                </button>
+                <a asp-controller="TranhChap" asp-action="Index" class="btn btn-outline-secondary" title="Đặt lại" style="border-radius: 8px;">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- DISPUTES LIST -->
+    @if (Model.TranhChaps.Any())
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var item in Model.TranhChaps)
+            {
+                <div class="card border-0 shadow-sm p-4 transition-hover" style="border-radius: 16px; background: #FFFFFF;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                <span class="fw-bold text-dark fs-5">#TC_@item.TranhChap.MaTranhChap.ToString("D4")</span>
+                                <span class="badge bg-light text-secondary border">HĐ: #@item.HopDong.MaHD</span>
+
+                                @if (item.TranhChap.TrangThai == "DangMo")
+                                {
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-top me-1"></i>Đang mở hồ sơ</span>
+                                }
+                                else if (item.TranhChap.TrangThai == "DangXuLy")
+                                {
+                                    <span class="badge bg-primary"><i class="bi bi-gear-wide-connected me-1"></i>Trọng tài đang xử lý</span>
+                                }
+                                else if (item.TranhChap.TrangThai == "DaGiaiQuyet")
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Đã giải quyết</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@item.TranhChap.TrangThai</span>
+                                }
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-1">@item.Job.Tieude</h5>
+                            <div class="text-danger fw-semibold small mb-2">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Lý do: @item.TranhChap.LyDo
+                            </div>
+
+                            <p class="text-muted small mb-2 text-truncate-2" style="font-size: 0.88rem;">
+                                @item.TranhChap.MoTaChiTiet
+                            </p>
+
+                            <div class="d-flex flex-wrap gap-3 small text-secondary">
+                                <div><i class="bi bi-person-fill text-muted me-1"></i>Người tạo: <strong>@item.CreatorUser.HotenUser</strong></div>
+                                <div><i class="bi bi-cash-stack text-success me-1"></i>Số tiền: <strong class="text-dark">@item.TranhChap.SoTienTranhChap.ToString("#,##0") đ</strong></div>
+                                <div><i class="bi bi-paperclip me-1"></i>Bằng chứng: <strong>@item.SoLuongBangChung tệp</strong></div>
+                                <div><i class="bi bi-calendar3 me-1"></i>Ngày tạo: @item.TranhChap.NgayTao.ToString("dd/MM/yyyy")</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                            <a asp-controller="TranhChap" asp-action="Details" asp-route-id="@item.TranhChap.MaTranhChap"
+                               class="btn btn-outline-danger fw-bold px-4 py-2" style="border-radius: 10px;">
+                                <i class="bi bi-eye-fill me-1"></i> Xem chi tiết & Đối chất
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm py-5 text-center" style="border-radius: 18px; background: #FFFFFF;">
+            <i class="bi bi-shield-check display-3 text-success d-block mb-3"></i>
+            <h4 class="fw-bold text-dark mb-2">Không có vụ tranh chấp nào đang diễn ra</h4>
+            <p class="text-muted small mb-4 mx-auto" style="max-width: 450px;">
+                Tất cả các hợp đồng đều đang hoạt động tốt hoặc đã nghiệm thu thuận lợi.
+            </p>
+            <div>
+                <a asp-controller="HopDong" asp-action="Index" class="btn btn-success fw-bold px-4 py-2" style="border-radius: 20px; background-color: var(--primary-green, #3B6E53);">
+                    Quản lý danh sách hợp đồng
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .transition-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important;
+    }
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>

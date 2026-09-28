@@ -1,0 +1,250 @@
+@model MOCK.Models.ViewModels.DeXuatHopDongViewModel
+@{
+    ViewData["Title"] = "Tạo đề xuất hợp đồng làm việc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .contract-proposal-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .contract-proposal-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .employer-badge-card {
+        background: linear-gradient(135deg, #EBF4F0 0%, #D8EADB 100%);
+        border: 1px solid #C4DEC8;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .milestone-box {
+        background: #F8FAF9;
+        border: 1px solid #EAEFEA;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 14px;
+        transition: all 0.2s;
+    }
+
+    .milestone-box:hover {
+        border-color: #3B6E53;
+        background: #FFFFFF;
+    }
+
+    .btn-submit-proposal {
+        background: #1C4D35;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 13px 32px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(28, 77, 53, 0.25);
+    }
+
+    .btn-submit-proposal:hover {
+        background: #143726;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="contract-proposal-wrapper">
+    <div class="container">
+        
+        <!-- BREADCRUMB -->
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 text-muted small">
+                    <li class="breadcrumb-item"><a asp-controller="Freelancer" asp-action="LoiMoiNhanViec" class="text-decoration-none text-muted">Lời mời nhận việc</a></li>
+                    <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Tạo đề xuất hợp đồng (FRL-UC-06)</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-1">Khởi tạo đề xuất Hợp đồng & Điều khoản</h2>
+            <p class="text-muted small mb-0">Thống nhất các mốc công việc, giá trị hợp đồng và thời hạn hoàn thành trước khi bắt đầu dự án.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4">
+                @Html.ValidationSummary(true)
+            </div>
+        }
+
+        <form asp-action="DeXuatHopDong" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MaJob" />
+            <input type="hidden" asp-for="MaYeuCauUngThue" />
+            <input type="hidden" asp-for="MaFreelancerStudent" />
+            <input type="hidden" asp-for="MaNhaTuyenDung" />
+            <input type="hidden" asp-for="TenNhaTuyenDung" />
+
+            <div class="row g-4">
+                
+                <!-- MAIN FORM (LEFT) -->
+                <div class="col-12 col-lg-8">
+                    
+                    <!-- EMPLOYER INFO BANNER -->
+                    <div class="employer-badge-card d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="@(string.IsNullOrEmpty(Model.AvatarNhaTuyenDung) ? "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&auto=format&fit=crop&q=80" : Model.AvatarNhaTuyenDung)" 
+                                 alt="@Model.TenNhaTuyenDung" 
+                                 class="rounded-circle border border-2 border-white shadow-sm" style="width: 56px; height: 56px; object-fit: cover;" />
+                            <div>
+                                <div class="small text-success fw-bold text-uppercase" style="letter-spacing: 0.5px;">Đối tác ký hợp đồng</div>
+                                <h5 class="fw-bold text-dark mb-0">@Model.TenNhaTuyenDung</h5>
+                                <div class="text-muted small">Dự án: <strong class="text-dark">@Model.TieuDeCongViec</strong></div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge bg-white text-success border border-success-subtle px-3 py-2 rounded-pill fw-bold">
+                                Ký quỹ bảo đảm qua hệ thống
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="contract-proposal-card mb-4">
+                        
+                        <!-- SECTION 1: CÁC ĐIỀU KHOẢN CHÍNH -->
+                        <div class="form-section-title">
+                            <i class="bi bi-file-earmark-text text-success fs-5"></i>
+                            Điều khoản cơ bản của hợp đồng
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="TieuDeCongViec" class="form-label fw-semibold text-dark small mb-1">
+                                Tên hợp đồng / Công việc thực hiện <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="TieuDeCongViec" class="form-control form-control-lg rounded-3 fs-6" />
+                            <span asp-validation-for="TieuDeCongViec" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="TongGiaTriHopDong" class="form-label fw-semibold text-dark small mb-1">
+                                    Tổng giá trị hợp đồng (VNĐ) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="TongGiaTriHopDong" type="number" step="50000" class="form-control form-control-lg rounded-start-3 fs-6" />
+                                    <span class="input-group-text bg-light fw-bold text-muted rounded-end-3">VNĐ</span>
+                                </div>
+                                <span asp-validation-for="TongGiaTriHopDong" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Hinhthuclamviec" class="form-label fw-semibold text-dark small mb-1">
+                                    Hình thức làm việc <span class="text-danger">*</span>
+                                </label>
+                                <select asp-for="Hinhthuclamviec" class="form-select form-select-lg rounded-3 fs-6">
+                                    <option value="Remote">Làm việc từ xa (Remote 100%)</option>
+                                    <option value="Hybrid">Kết hợp linh hoạt (Hybrid)</option>
+                                    <option value="Onsite">Tại văn phòng (Onsite)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="NgayBatDau" class="form-label fw-semibold text-dark small mb-1">
+                                    Ngày bắt đầu <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="NgayBatDau" type="date" class="form-control rounded-3" value="@Model.NgayBatDau.ToString("yyyy-MM-dd")" />
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="NgayKetThuc" class="form-label fw-semibold text-dark small mb-1">
+                                    Hạn chót bàn giao <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="NgayKetThuc" type="date" class="form-control rounded-3" value="@Model.NgayKetThuc.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="DieuKhoanHopDong" class="form-label fw-semibold text-dark small mb-1">
+                                Chi tiết phạm vi công việc & Cam kết chất lượng
+                            </label>
+                            <textarea asp-for="DieuKhoanHopDong" class="form-control rounded-3" rows="4" placeholder="Mô tả các thỏa thuận riêng như số lần chỉnh sửa tối đa, định dạng tài liệu, hỗ trợ bảo hành sản phẩm..."></textarea>
+                        </div>
+
+                        <!-- SECTION 2: CÁC MỐC GIAI ĐOẠN -->
+                        <div class="form-section-title">
+                            <i class="bi bi-list-check text-success fs-5"></i>
+                            Các mốc nghiệm thu & Giải ngân giai đoạn (Milestones)
+                        </div>
+
+                        @for (int i = 0; i < Model.GiaiDoans.Count; i++)
+                        {
+                            <div class="milestone-box">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-success-subtle text-success fw-bold">Mốc @(i + 1)</span>
+                                    <span class="small text-muted">Tỷ lệ thanh toán: <strong>@Model.GiaiDoans[i].TyLePhanTram%</strong></span>
+                                </div>
+                                <div class="mb-2">
+                                    <input name="GiaiDoans[@i].TenGiaiDoan" value="@Model.GiaiDoans[i].TenGiaiDoan" class="form-control rounded-3 form-control-sm fw-semibold" placeholder="Tên giai đoạn" />
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-12 col-md-6">
+                                        <input name="GiaiDoans[@i].MoTa" value="@Model.GiaiDoans[i].MoTa" class="form-control rounded-3 form-control-sm" placeholder="Mô tả tiêu chí hoàn thành mốc này..." />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <input name="GiaiDoans[@i].HanChot" type="date" value="@Model.GiaiDoans[i].HanChot.ToString("yyyy-MM-dd")" class="form-control rounded-3 form-control-sm" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+                <!-- SIDEBAR GUIDELINES (RIGHT) -->
+                <div class="col-12 col-lg-4">
+                    
+                    <div class="contract-proposal-card mb-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-lock-fill text-success me-2"></i>Quyền lợi Freelancer Sinh Viên</h6>
+                        <ul class="list-unstyled small text-muted d-flex flex-column gap-2 mb-0">
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Ký quỹ 100%:</strong> Nhà tuyển dụng phải nạp tiền ký quỹ trước khi bạn bắt đầu làm.</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Nghiệm thu an toàn:</strong> Tiền được tự động giải ngân khi hoàn thành các mốc.</li>
+                            <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Bảo vệ quyền lợi:</strong> Có hệ thống trọng tài xử lý tranh chấp nếu có sự cố.</li>
+                        </ul>
+                    </div>
+
+                    <div class="contract-proposal-card">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-submit-proposal">
+                                <i class="bi bi-send-check-fill me-2"></i>Gửi đề xuất hợp đồng
+                            </button>
+                            <a asp-controller="Freelancer" asp-action="LoiMoiNhanViec" class="btn btn-outline-secondary rounded-pill fw-semibold py-2 text-decoration-none text-center">
+                                Quay lại danh sách
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>

@@ -1,0 +1,161 @@
+@model FreelancerStudent.Web.ViewModels.DangNhapViewModel
+@{
+   
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .containerdecor {}
+
+    input {
+        width: 100% !important;
+        text-align: left;
+        align-items: center;
+        border: solid rgba(230, 230, 230, 0.817) 1px;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .card {
+        margin-top: 40px;
+        width: 100% !important;
+        border-radius: 10px;
+    }
+
+    .card-title {
+        font-size: 35px;
+        text-align: center;
+        background-color: #3b6e53;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    button {
+        background-color: #57ae80;
+        padding: 10px;
+        border-radius: 10px;
+        border: solid gainsboro;
+        color: white;
+        text-align: center;
+    }
+
+    button:hover {
+        background-color: #4f9b72;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <!-- LEFT COLUMN: BRAND & VALUE PROPOSITIONS -->
+            <div class="col-12 col-lg-12 pe-lg-4">
+                <!-- Big Hero Title -->
+                <h1 class="hero-title-main">
+                    FREELANCER<br />
+                    <span class="hero-title-outlined">FOR</span> STUDENTS
+                </h1>
+                <p class="hero-subtitle">Kết nối sinh viên tài năng với cơ hội thực tế</p>
+
+                <!-- 3 Feature Points -->
+                <div class="features-list mt-4">
+                    <!-- Feature 1 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-box">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Cơ hội thực tế</div>
+                            <div class="feature-desc">Tìm công việc phù hợp, phát triển kỹ năng</div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-box">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Thu nhập linh hoạt</div>
+                            <div class="feature-desc">Làm chủ thời gian, tăng thu nhập</div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-box">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Xây dựng tương lai</div>
+                            <div class="feature-desc">Tạo portfolio, tích lũy kinh nghiệm</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Illustration & Hand-drawn text -->
+                <div class="hero-illustration-box d-none d-md-block">
+                    <div class="doodle-badge">
+                        Small Skills<br />Big Opportunities 👑
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=700&q=80"
+                         alt="Freelancer Students" class="hero-student-img" />
+                </div>
+            </div>
+        </div>
+        <div class="col-5">
+            <div class="containerdecor">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Đăng Nhập <span style="color:white">Tài Khoản</span></h5>
+                       
+                        <form asp-action="DangNhap" method="post">
+                            @* Sửa thành asp-validation-summary="All" để hiện TẤT CẢ mọi lỗi lên màn hình *@
+                            <div asp-validation-summary="All" class="alert alert-danger mb-3" style="display:none;">
+                            </div>
+
+                           
+                            <div class="mb-3">
+                      
+                                <label type="tentaikhoan_email" class="form-label fw-semibold">Họ và tên</label>
+                                
+                                <input type="text" class=form-control" id="tentaikhoan_email" name="tentaikhoan_email"
+                                       value="@Model?.tentaikhoan_email" placeholder="Nhập tên tài khoản hoặc email" />
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="tentaikhoan_email" class="text-danger"></span>
+                       
+                            </div>
+
+                            <div class="mb-3">
+                      
+                                <label type="password" class="form-label fw-semibold">Tên tài khoản</label>
+                                
+                                <input type="password" class=form-control" id="password" name="password"
+                                       value="@Model?.password" placeholder="Nhập mật khẩu" />
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="password" class="text-danger"></span>
+                       
+                            </div>
+                            <div>
+                                <div class="row">
+                                    <div class="col">
+                                        <a href="#">Quên mật khẩu?</a>
+                                    </div>
+                                    <div class="col">
+                                        <a href="\Account\DangKy">Bạn
+                                            chưa có tài khoản?</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            
+                                <div class="text-center mt-3">
+                                    <button type="submit">Đăng nhập</button>
+                                </div>
+
+                            </form>
+                        </div>
+                    
+                    </div>
+                </div>
+  
+            </div>
+        </div>

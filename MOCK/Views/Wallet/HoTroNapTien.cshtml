@@ -1,0 +1,190 @@
+@model MOCK.Models.ViewModels.HoTroNapTienViewModel
+@{
+    ViewData["Title"] = "Gửi yêu cầu hỗ trợ nạp tiền";
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Wallet" asp-action="Index" class="text-decoration-none text-muted">Ví tài khoản</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Hỗ trợ nạp tiền</li>
+        </ol>
+    </nav>
+
+    <!-- ALERTS -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-headset text-success me-2"></i>Phiếu Yêu Cầu Hỗ Trợ Nạp Tiền & Đối Soát
+        </h3>
+        <p class="text-muted small mb-0">
+            Nếu bạn đã chuyển khoản thành công từ tài khoản ngân hàng nhưng ví chưa cộng tiền sau 10 phút (do sai nội dung, mạng ngân hàng chậm,...), vui lòng gửi yêu cầu để Admin tra soát và cộng tiền thủ công.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- ==================== CỘT TRÁI: FORM GỬI YÊU CẦU ==================== -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 18px; background: #FFFFFF;">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-send-plus text-success me-1"></i> Tạo phiếu tra soát nạp tiền
+                </h5>
+
+                <form method="post" asp-controller="Wallet" asp-action="GuiYeuCauHoTroNapTien">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Số tiền bạn đã chuyển (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="soTien" class="form-control" placeholder="Ví dụ: 500000" min="10000" step="1000" required style="border-radius: 10px;" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Phương thức thanh toán</label>
+                        <select name="phuongThuc" class="form-select" style="border-radius: 10px;">
+                            <option value="ChuyenKhoanVietQR">Chuyển khoản VietQR MBBank</option>
+                            <option value="ChuyenKhoanNganHangKhac">Chuyển khoản liên ngân hàng 247</option>
+                            <option value="VNPAY">Cổng VNPAY</option>
+                            <option value="MoMo">Ví MoMo</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Mã giao dịch tại Ngân hàng (Mã FT / Ref ID / Trace No)</label>
+                        <input type="text" name="maGDNganHang" class="form-control" placeholder="Ví dụ: FT26090123992 hoặc MBB12389" style="border-radius: 10px;" />
+                        <div class="form-text small">Tìm thấy trên biên lai chuyển tiền thành công tại App ngân hàng của bạn.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Link hoặc Ảnh chụp màn hình biên lai</label>
+                        <input type="text" name="anhBienLai" class="form-control" placeholder="Dán URL ảnh hoặc để trống (mặc định demo)" style="border-radius: 10px;" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary">Mô tả sự cố / Ghi chú cho Admin</label>
+                        <textarea name="ghiChu" rows="3" class="form-control" placeholder="Ví dụ: Em lỡ quên ghi nội dung chuyển khoản mã ví NAPVI W1 U1..." style="border-radius: 10px;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success fw-bold w-100 py-3 shadow-sm" style="border-radius: 12px; background-color: var(--primary-green, #3B6E53);">
+                        <i class="bi bi-send-fill me-1"></i> Gửi Phiếu Hỗ Trợ
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== CỘT PHẢI: DANH SÁCH PHIẾU ĐÃ GỬI ==================== -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 18px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-card-checklist text-primary me-2"></i>Lịch sử yêu cầu hỗ trợ đã gửi
+                    </h5>
+                    <span class="badge bg-light text-dark border">@Model.DanhSachYeuCau.Count phiếu</span>
+                </div>
+
+                @if (Model.DanhSachYeuCau.Any())
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var ticket in Model.DanhSachYeuCau)
+                        {
+                            <div class="p-3 border rounded-3 bg-white shadow-sm position-relative">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="fw-bold text-dark fs-6">#TICKET_@ticket.MaYeuCau.ToString("D4")</span>
+                                        <div class="text-muted small" style="font-size: 0.78rem;">
+                                            <i class="bi bi-clock me-1"></i>Gửi lúc: @ticket.NgayTao.ToString("HH:mm dd/MM/yyyy")
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        @if (ticket.TrangThai == "DaDuyet")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+                                                <i class="bi bi-check2-circle me-1"></i>Đã xử lý & cộng tiền
+                                            </span>
+                                        }
+                                        else if (ticket.TrangThai == "ChoDuyet")
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1">
+                                                <i class="bi bi-hourglass-split me-1"></i>Đang chờ kiểm tra
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1">
+                                                <i class="bi bi-x-circle me-1"></i>Đã từ chối
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 small text-secondary mb-2">
+                                    <div class="col-sm-6">
+                                        Số tiền yêu cầu: <strong class="text-success fs-6">@ticket.SoTien.ToString("#,##0") đ</strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        Phương thức: <strong>@ticket.PhuongThuc</strong>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(ticket.MaGiaoDichNganHang))
+                                    {
+                                        <div class="col-12">
+                                            Mã GD Ngân hàng: <code class="text-dark bg-light px-2 py-1 rounded">@ticket.MaGiaoDichNganHang</code>
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(ticket.GhiChu))
+                                {
+                                    <div class="p-2 bg-light rounded text-muted small mb-2" style="font-size: 0.82rem;">
+                                        <strong>Lời nhắn:</strong> @ticket.GhiChu
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(ticket.AnhBienLai))
+                                {
+                                    <div class="mt-2">
+                                        <a href="@ticket.AnhBienLai" target="_blank" class="btn btn-sm btn-outline-secondary" style="font-size: 0.75rem;">
+                                            <i class="bi bi-image me-1"></i> Xem ảnh biên lai đính kèm
+                                        </a>
+                                    </div>
+                                }
+
+                                @if (ticket.NgayDuyet.HasValue)
+                                {
+                                    <div class="mt-2 text-muted small" style="font-size: 0.75rem;">
+                                        <i class="bi bi-check-all text-success me-1"></i>Thời gian hoàn tất: @ticket.NgayDuyet.Value.ToString("HH:mm dd/MM/yyyy")
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        Bạn chưa gửi yêu cầu hỗ trợ nạp tiền nào.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

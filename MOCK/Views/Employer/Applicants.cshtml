@@ -1,0 +1,291 @@
+@model MOCK.Models.ViewModels.JobApplicantsViewModel
+@{
+    ViewData["Title"] = "Danh sách ứng viên nộp đơn - " + Model.Job.Tieude;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .applicants-page-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    /* TOP JOB HEADER CARD */
+    .job-summary-header-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    /* APPLICANT CARD */
+    .applicant-item-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .applicant-item-card:hover {
+        border-color: #BBD9C7;
+        box-shadow: 0 8px 24px rgba(27, 94, 54, 0.06);
+    }
+
+    .applicant-avatar-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #D2E7DC;
+    }
+
+    .skill-tag-sm {
+        background: #EEF6F1;
+        color: #1C5F37;
+        font-weight: 700;
+        font-size: 0.76rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #D2E7DC;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .cover-letter-box {
+        background: #F8FAFC;
+        border: 1px dashed #CBD5E1;
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 0.9rem;
+        color: #334155;
+        line-height: 1.6;
+        margin: 14px 0;
+    }
+
+    .btn-accept-candidate {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 10px 22px;
+        border-radius: 30px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(27, 94, 54, 0.2);
+        transition: all 0.2s;
+    }
+
+    .btn-accept-candidate:hover {
+        background-color: #14492A;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(27, 94, 54, 0.3);
+    }
+</style>
+
+<div class="applicants-page-wrapper">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- Breadcrumb -->
+        <div class="mb-3">
+            <a href="/Employer/ManageJobs" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách bài đăng
+            </a>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Top Job Summary Card -->
+        <div class="job-summary-header-card">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-light text-muted border">#@Model.Job.MaJob</span>
+                        <span class="badge @(Model.Job.Status == "DangTuyen" ? "bg-success" : "bg-primary")">
+                            @(Model.Job.Status == "DangTuyen" ? "Đang mở tuyển" : "Đang thực hiện")
+                        </span>
+                        <span class="badge bg-light text-primary border">
+                            <i class="bi bi-people-fill me-1"></i> @Model.Applicants.Count hồ sơ ứng tuyển
+                        </span>
+                    </div>
+
+                    <h2 class="fw-bold text-dark mb-2">@Model.Job.Tieude</h2>
+
+                    <div class="d-flex flex-wrap gap-3 text-secondary small">
+                        <span><i class="bi bi-cash text-danger me-1"></i>Ngân sách: <strong>@(Model.Job.Thulao.HasValue ? Model.Job.Thulao.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")</strong></span>
+                        <span><i class="bi bi-calendar-event text-primary me-1"></i>Hạn: <strong>@Model.Job.Thoigiandukienhoanthanh</strong></span>
+                        <span><i class="bi bi-person text-success me-1"></i>Cần tuyển: <strong>@(Model.Job.Soluongtuyen ?? 1) bạn</strong></span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="/JobPost/Details/@Model.Job.MaJob" class="btn btn-outline-secondary rounded-pill px-3">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Xem trang bài đăng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Title -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-dark mb-0">
+                <i class="bi bi-person-lines-fill text-success me-2"></i>Danh sách sinh viên nộp hồ sơ (bảng `UngTuyen`)
+            </h4>
+            <span class="text-muted small">Khớp với mã bài đăng #@Model.Job.MaJob</span>
+        </div>
+
+        <!-- List of Applicants -->
+        @if (!Model.Applicants.Any())
+        {
+            <div class="card border-0 rounded-4 shadow-sm p-5 text-center text-muted">
+                <i class="bi bi-person-x display-3 text-muted"></i>
+                <h5 class="fw-bold mt-3 text-secondary">Hiện tại chưa có sinh viên nào nộp đơn</h5>
+                <p class="small">Hồ sơ ứng tuyển mới của sinh viên sẽ tự động xuất hiện tại đây khi có người nộp đơn.</p>
+                <div class="mt-2">
+                    <a href="/JobPost/Details/@Model.Job.MaJob" class="btn btn-sm btn-outline-success rounded-pill px-4">
+                        Xem trang bài đăng
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.Applicants)
+                {
+                    <div class="col-12">
+                        <div class="applicant-item-card">
+                            
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-4">
+                                
+                                <!-- Cột Trái: Thông tin sinh viên & Đề xuất -->
+                                <div class="d-flex flex-column flex-sm-row gap-3 flex-grow-1">
+                                    <!-- Avatar -->
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+                                         alt="@item.StudentUser.HotenUser" class="applicant-avatar-circle" />
+
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <h5 class="fw-bold text-dark mb-0">@item.StudentUser.HotenUser</h5>
+                                            <span class="badge bg-success-subtle text-success border" style="font-size: 0.72rem;">
+                                                <i class="bi bi-patch-check-fill me-1"></i> Sinh viên xác minh
+                                            </span>
+                                            <span class="badge bg-warning-subtle text-dark border" style="font-size: 0.72rem;">
+                                                GPA: @item.Student.GPA / 4.0
+                                            </span>
+                                        </div>
+
+                                        <p class="text-secondary small mb-2">
+                                            <i class="bi bi-mortarboard me-1"></i>@(item.Student.TenTruong ?? "Đại học Công nghệ Thông tin") • Sinh viên năm @item.Student.NamThu
+                                        </p>
+
+                                        <!-- Kỹ năng -->
+                                        <div class="mb-2">
+                                            @foreach (var skill in item.Skills)
+                                            {
+                                                <span class="skill-tag-sm">@skill.TenKyNang</span>
+                                            }
+                                        </div>
+
+                                        <!-- Thư giới thiệu / Cover letter -->
+                                        <div class="cover-letter-box">
+                                            <div class="fw-bold text-dark small mb-1">
+                                                <i class="bi bi-chat-quote-fill text-success me-1"></i> Thư giới thiệu & Đề xuất giải pháp:
+                                            </div>
+                                            @item.Application.ThuGioiThieu
+                                        </div>
+
+                                        <!-- Đề xuất thù lao & thời gian & CV -->
+                                        <div class="d-flex flex-wrap gap-4 text-secondary small pt-1">
+                                            <div>
+                                                Thù lao đề xuất: 
+                                                <strong class="text-danger fs-6">
+                                                    @(item.Application.ThulaoDeXuat.HasValue ? item.Application.ThulaoDeXuat.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                                                </strong>
+                                            </div>
+                                            <div>
+                                                Thời gian cam kết: 
+                                                <strong class="text-dark">@item.Application.ThoiGianHoanThanhDeXuat</strong>
+                                            </div>
+                                            <div>
+                                                Ngày nộp: 
+                                                <strong class="text-dark">@item.Application.NgayUngTuyen.ToString("dd/MM/yyyy HH:mm")</strong>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(item.Application.FileCV))
+                                            {
+                                                <div>
+                                                    <a href="#" class="text-primary text-decoration-none fw-bold" onclick="alert('Đang mở xem file CV / Portfolio đính kèm của sinh viên!')">
+                                                        <i class="bi bi-file-earmark-pdf me-1"></i> Xem CV đính kèm
+                                                    </a>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cột Phải: Trạng thái & Nút hành động -->
+                                <div class="d-flex flex-column align-items-md-end gap-2 text-md-end min-w-180">
+                                    @if (item.Application.TrangThaiUngTuyen == "ChoDuyet")
+                                    {
+                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fs-7 mb-2">
+                                            <i class="bi bi-clock-history me-1"></i> Chờ doanh nghiệp duyệt
+                                        </span>
+
+                                        <form asp-controller="Employer" asp-action="AcceptApplicant" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="maUngTuyen" value="@item.Application.MaUngTuyen" />
+                                            <button type="submit" class="btn-accept-candidate w-100 mb-2">
+                                                <i class="bi bi-check2-circle me-1"></i> Duyệt & Ký hợp đồng
+                                            </button>
+                                        </form>
+
+                                        <form asp-controller="Employer" asp-action="RejectApplicant" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="maUngTuyen" value="@item.Application.MaUngTuyen" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 w-100" onclick="return confirm('Bạn có chắc chắn muốn từ chối ứng viên này?')">
+                                                Từ chối
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (item.Application.TrangThaiUngTuyen == "ChapNhan" || item.Application.TrangThaiUngTuyen == "DaLapHopDong")
+                                    {
+                                        <span class="badge bg-success px-3 py-2 rounded-pill fs-7 mb-2">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Đã chấp nhận ứng viên
+                                        </span>
+                                        <a href="/HopDong" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                            <i class="bi bi-file-earmark-ruled me-1"></i> Xem hợp đồng
+                                        </a>
+                                    }
+                                    else if (item.Application.TrangThaiUngTuyen == "TuChoi")
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2 rounded-pill fs-7 mb-2">
+                                            <i class="bi bi-x-circle me-1"></i> Đã từ chối
+                                        </span>
+                                    }
+
+                                    <a href="/Freelancer/Profile/@item.Student.MaFreelancerStudents" class="btn btn-link btn-sm text-secondary text-decoration-none">
+                                        Xem toàn bộ hồ sơ <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

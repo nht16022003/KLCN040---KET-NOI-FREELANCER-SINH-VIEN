@@ -1,0 +1,213 @@
+@model MOCK.Models.ViewModels.AdminDepositManagementViewModel
+@{
+    ViewData["Title"] = "Xử lý Yêu cầu Nạp tiền (AD-UC-03.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-03.01: Xử lý Yêu cầu Nạp tiền</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-wallet2 text-success me-2"></i>Duyệt & Xử lý Yêu cầu Nạp tiền vào Ví
+            </h3>
+            <p class="text-muted small mb-0">Kiểm tra biên lai chuyển khoản ngân hàng, phê duyệt cộng số dư ví người dùng hoặc từ chối yêu cầu không hợp lệ.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/DieuChinhSoDu" class="btn btn-outline-warning btn-sm rounded-pill px-3 text-dark">
+                <i class="bi bi-sliders2-vertical me-1"></i> Điều chỉnh số dư
+            </a>
+            <a href="/Admin/QuanLyGiaoDich" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-safe me-1"></i> Sổ giao dịch
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Yêu cầu Đang chờ duyệt</span>
+                        <h4 class="fw-bold text-warning mt-1 mb-0">@Model.SoChoDuyet</h4>
+                    </div>
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 fs-4">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Tổng tiền Chờ phê duyệt</span>
+                        <h4 class="fw-bold text-success mt-1 mb-0">@Model.TongTienChoDuyet.ToString("N0") <small class="fs-6">đ</small></h4>
+                    </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-3 fs-4">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex justify-content-center">
+                <div class="d-flex gap-2">
+                    <a href="/Admin/YeuCauNapTien" class="btn btn-sm @(string.IsNullOrEmpty(Model.FilterTrangThai) ? "btn-dark" : "btn-light border") rounded-pill px-3">Tất cả</a>
+                    <a href="/Admin/YeuCauNapTien?status=ChoDuyet" class="btn btn-sm @(Model.FilterTrangThai == "ChoDuyet" ? "btn-warning" : "btn-light border") rounded-pill px-3">Chờ duyệt</a>
+                    <a href="/Admin/YeuCauNapTien?status=DaDuyet" class="btn btn-sm @(Model.FilterTrangThai == "DaDuyet" ? "btn-success" : "btn-light border") rounded-pill px-3">Đã duyệt</a>
+                    <a href="/Admin/YeuCauNapTien?status=TuChoi" class="btn btn-sm @(Model.FilterTrangThai == "TuChoi" ? "btn-danger" : "btn-light border") rounded-pill px-3">Từ chối</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Requests Table -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th>Mã YC</th>
+                        <th>Người nạp</th>
+                        <th>Số tiền</th>
+                        <th>Phương thức / GD</th>
+                        <th>Biên lai</th>
+                        <th>Thời gian gửi</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.YeuCauNaps.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-wallet-fill fs-1 d-block mb-2"></i>
+                                Không có yêu cầu nạp tiền nào phù hợp với bộ lọc hiện tại.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var yc in Model.YeuCauNaps)
+                        {
+                            <tr>
+                                <td class="fw-bold text-dark small">#@yc.MaYeuCauNap</td>
+                                <td>
+                                    <div class="fw-bold text-dark small">@yc.TenNguoiNap</div>
+                                    <div class="text-muted small">User ID #@yc.MaUser &bull; @yc.EmailNguoiNap</div>
+                                </td>
+                                <td class="fw-bold text-success fs-6">
+                                    @yc.SoTienNap.ToString("N0") đ
+                                </td>
+                                <td>
+                                    <div class="small fw-semibold text-dark">@yc.PhuongThuc</div>
+                                    <div class="small text-muted font-monospace">Ref: @(yc.MaGDNganHang ?? "N/A")</div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(yc.AnhBienLai))
+                                    {
+                                        <a href="@yc.AnhBienLai" target="_blank" class="btn btn-sm btn-outline-info rounded-pill px-2 py-1 small">
+                                            <i class="bi bi-image me-1"></i> Xem ảnh
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Chưa đính kèm</span>
+                                    }
+                                </td>
+                                <td class="small text-muted">
+                                    @yc.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td>
+                                    @if (yc.TrangThai == "ChoDuyet")
+                                    {
+                                        <span class="badge bg-warning text-dark small">Chờ duyệt</span>
+                                    }
+                                    else if (yc.TrangThai == "DaDuyet")
+                                    {
+                                        <span class="badge bg-success small">Đã duyệt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger small" title="@yc.LyDoTuChoi">Đã từ chối</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (yc.TrangThai == "ChoDuyet")
+                                    {
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <form method="post" asp-action="DuyetNapTien" onsubmit="return confirm('Bạn có chắc chắn muốn duyệt nạp tiền @yc.SoTienNap.ToString("N0") đ cho người dùng này?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@yc.MaYeuCauNap" />
+                                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
+                                                    <i class="bi bi-check-lg me-1"></i> Duyệt
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#rejectModal-@yc.MaYeuCauNap">
+                                                Từ chối
+                                            </button>
+                                        </div>
+
+                                        <!-- Reject Modal -->
+                                        <div class="modal fade" id="rejectModal-@yc.MaYeuCauNap" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content rounded-4 border-0">
+                                                    <div class="modal-header border-0 pb-0">
+                                                        <h5 class="modal-title fw-bold text-danger">Từ chối Yêu cầu Nạp tiền #@yc.MaYeuCauNap</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form method="post" asp-action="TuChoiNapTien">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@yc.MaYeuCauNap" />
+                                                        <div class="modal-body">
+                                                            <p class="small text-muted mb-2">Số tiền: <strong>@yc.SoTienNap.ToString("N0") đ</strong> - Người nạp: <strong>@yc.TenNguoiNap</strong></p>
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-semibold text-dark">Lý do từ chối <span class="text-danger">*</span></label>
+                                                                <textarea name="lyDo" class="form-control" rows="3" required placeholder="Ví dụ: Chưa nhận được giao dịch qua ngân hàng, mã giao dịch không khớp..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-0 pt-0">
+                                                            <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-danger rounded-pill px-3">Xác nhận Từ chối</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small"><i class="bi bi-check2-all"></i> Đã hoàn tất</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

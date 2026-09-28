@@ -1,0 +1,132 @@
+@model MOCK.Models.ViewModels.AdminJobPostingFeeViewModel
+@{
+    ViewData["Title"] = "Quản lý Phí Đăng bài Tuyển dụng (AD-UC-11)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-11: Quản lý Phí Đăng bài</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-tags-fill text-success me-2"></i>Quản lý Biểu Phí Đăng Tin Tuyển Dụng
+            </h3>
+            <p class="text-muted small mb-0">Thiết lập mức phí cố định áp dụng khi Nhà tuyển dụng đăng tin tìm kiếm Freelancer sinh viên (bảng CauHinhPhiHoaHong_PhiDangBai).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/CauHinhPhi" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                <i class="bi bi-percent me-1"></i> Cấu hình phí & Hoa hồng
+            </a>
+            <a href="/Admin" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                <span class="small text-muted fw-semibold text-uppercase">Mức Phí Đăng Bài Hiện Tại</span>
+                <h2 class="fw-bold text-success mt-2 mb-0">@Model.PhiHienTai.ToString("N0") <small class="fs-5">VNĐ / bài</small></h2>
+                <div class="small text-muted mt-2">Trừ trực tiếp từ số dư ví NTD khi đăng tin</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pencil-square text-success me-2"></i>Cập nhật Mức Phí Đăng Bài Mới</h5>
+
+                <form method="post" asp-action="CapNhatPhiDangBai" class="row g-3 align-items-end">
+                    @Html.AntiForgeryToken()
+
+                    <div class="col-12 col-md-5">
+                        <label class="form-label small fw-semibold text-dark">Mức phí đăng bài mới (VNĐ) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" asp-for="PhiDangBaiMoi" class="form-control bg-light" step="500" min="0" max="1000000" required />
+                            <span class="input-group-text bg-light">VNĐ</span>
+                        </div>
+                        <span asp-validation-for="PhiDangBaiMoi" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold text-dark">Ghi chú / Quyết định ban hành</label>
+                        <input type="text" name="ghiChu" class="form-control bg-light" placeholder="Ví dụ: Giảm phí khuyến khích mùa tuyển dụng" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <button type="submit" class="btn btn-success w-100 rounded-3 py-2 fw-semibold" onclick="return confirm('Bạn có chắc chắn muốn thay đổi phí đăng bài tuyển dụng?');">
+                            <i class="bi bi-check2 me-1"></i> Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Log Table -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-secondary me-2"></i>Lịch sử Điều chỉnh Phí Đăng Bài (CauHinhPhiHoaHong_PhiDangBai)</h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th>Mã CH</th>
+                        <th>Tên chính sách</th>
+                        <th>Mức phí</th>
+                        <th>Mô tả / Ghi chú</th>
+                        <th>Admin thực hiện</th>
+                        <th>Ngày áp dụng</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.LichSuPhiDangBais.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Chưa có lịch sử thay đổi phí đăng bài nào.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var c in Model.LichSuPhiDangBais)
+                        {
+                            <tr>
+                                <td class="fw-bold text-dark small">#@c.MaCauHinh</td>
+                                <td class="small fw-semibold text-dark">@c.TenCauHinh</td>
+                                <td class="fw-bold text-success fs-6">@c.GiaTri.ToString("N0") VNĐ</td>
+                                <td class="small text-dark" style="max-width: 250px;">@c.MoTa</td>
+                                <td class="small text-muted">Admin #@c.MaAdmin</td>
+                                <td class="small text-muted">@c.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (c.HieuLuc)
+                                    {
+                                        <span class="badge bg-success small"><i class="bi bi-check-circle me-1"></i>Đang hiệu lực</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary small">Lịch sử cũ</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

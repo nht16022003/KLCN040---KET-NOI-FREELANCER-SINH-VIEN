@@ -1,0 +1,225 @@
+@model MOCK.Models.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển Quản trị Hệ thống";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header Page -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-speedometer2 text-success me-2"></i>Tổng quan Quản trị Freelancer Students
+            </h3>
+            <p class="text-muted small mb-0">Theo dõi toàn bộ hoạt động người dùng, tài chính escrow, tranh chấp và hệ thống theo thời gian thực.</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a href="/Admin/GiamSatHeThong" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                <i class="bi bi-activity me-1"></i> Live Logs
+            </a>
+            <a href="/Admin/CauHinhPhi" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
+                <i class="bi bi-sliders me-1"></i> Cấu hình phí
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert / Toast if any -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Tổng Người dùng</span>
+                        <h3 class="fw-bold text-dark mt-1 mb-0">@Model.TongSoUser</h3>
+                        <div class="small text-muted mt-1">
+                            <span class="text-success"><i class="bi bi-mortarboard-fill"></i> @Model.TongSoSinhVien SV</span> |
+                            <span class="text-primary"><i class="bi bi-building"></i> @Model.TongSoNhaTuyenDung NTD</span>
+                        </div>
+                    </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-3 fs-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Doanh Thu Hệ Thống</span>
+                        <h3 class="fw-bold text-success mt-1 mb-0">@Model.TongDoanhThuHeThong.ToString("N0") <small class="fs-6">đ</small></h3>
+                        <div class="small text-muted mt-1">Phí đăng bài + Hoa hồng 5%</div>
+                    </div>
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 fs-3">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Tin Tuyển Dụng & Hợp Đồng</span>
+                        <h3 class="fw-bold text-dark mt-1 mb-0">@Model.TongSoJob <span class="fs-6 fw-normal text-muted">/ @Model.TongSoHopDong HĐ</span></h3>
+                        <div class="small text-muted mt-1">Tỷ lệ chuyển đổi việc làm cao</div>
+                    </div>
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 fs-3">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Cần Xử Lý Ngay</span>
+                        <h3 class="fw-bold text-danger mt-1 mb-0">@(Model.SoYeuCauNapChoDuyet + Model.SoTranhChapCanXuLy + Model.SoTicketHoTro)</h3>
+                        <div class="small text-muted mt-1">
+                            <span>@Model.SoYeuCauNapChoDuyet nạp</span> &bull; 
+                            <span>@Model.SoTranhChapCanXuLy khiếu nại</span> &bull;
+                            <span>@Model.SoTicketHoTro hỗ trợ</span>
+                        </div>
+                    </div>
+                    <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 fs-3">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Section: Quick Actions + Recent Transaction Audit -->
+    <div class="row g-4">
+        <!-- Quick Action Hub (11 Use Cases Navigation) -->
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid-fill text-success me-2"></i>Tính năng Quản trị Chức năng (AD-UC)</h5>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="/Admin/DanhSachNguoiDung" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-primary"><i class="bi bi-people me-1"></i> AD-UC-01</div>
+                            <div class="small text-muted mt-1">QL Người dùng & Profile</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/XuLyTaiKhoan" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-danger"><i class="bi bi-person-slash me-1"></i> AD-UC-02</div>
+                            <div class="small text-muted mt-1">Khóa / Mở tài khoản</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/YeuCauNapTien" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-success"><i class="bi bi-wallet2 me-1"></i> AD-UC-03</div>
+                            <div class="small text-muted mt-1">Duyệt nạp tiền ví (@Model.SoYeuCauNapChoDuyet)</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/DieuChinhSoDu" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-warning"><i class="bi bi-sliders2-vertical me-1"></i> AD-UC-04</div>
+                            <div class="small text-muted mt-1">Điều chỉnh số dư thủ công</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/QuanLyGiaoDich" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-info"><i class="bi bi-safe me-1"></i> AD-UC-05</div>
+                            <div class="small text-muted mt-1">Giao dịch & Escrow ký quỹ</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/CauHinhPhi" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-success"><i class="bi bi-percent me-1"></i> AD-UC-06</div>
+                            <div class="small text-muted mt-1">Cấu hình phí & Báo cáo thu</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/XuLyTranhChap" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-danger"><i class="bi bi-shield-shaded me-1"></i> AD-UC-07</div>
+                            <div class="small text-muted mt-1">Phân xử Tranh chấp (@Model.SoTranhChapCanXuLy)</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/XuLyHoTro" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-secondary"><i class="bi bi-headset me-1"></i> AD-UC-08</div>
+                            <div class="small text-muted mt-1">Xử lý Hỗ trợ ticket (@Model.SoTicketHoTro)</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/GiamSatHeThong" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-dark"><i class="bi bi-cpu me-1"></i> AD-UC-09</div>
+                            <div class="small text-muted mt-1">Giám sát hoạt động live</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="/Admin/QuanLyHopDong" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all h-100">
+                            <div class="fw-bold text-primary"><i class="bi bi-file-earmark-ruled me-1"></i> AD-UC-10</div>
+                            <div class="small text-muted mt-1">Mẫu điều khoản hợp đồng</div>
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <a href="/Admin/QuanLyPhiDangBai" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light hover-shadow transition-all">
+                            <div class="fw-bold text-success"><i class="bi bi-tags-fill me-1"></i> AD-UC-11: Quản lý biểu phí đăng bài dự án</div>
+                            <div class="small text-muted mt-1">Thiết lập mức phí cố định khi Nhà tuyển dụng đăng tin tìm Freelancer</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Audit Log -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Nhật ký Giao dịch gần nhất</h5>
+                    <a href="/Admin/QuanLyGiaoDich" class="text-success text-decoration-none small fw-semibold">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small">
+                            <tr>
+                                <th>Mã GD</th>
+                                <th>Ví</th>
+                                <th>Loại</th>
+                                <th>Số tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var gd in Model.GiaoDichMoiNhat)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-dark small">#@gd.MaGiaoDich</td>
+                                    <td class="small">Ví #@gd.MaWallet</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border small">@gd.LoaiGiaoDich</span>
+                                    </td>
+                                    <td class="fw-bold small @(gd.SoTien >= 0 ? "text-success" : "text-danger")">
+                                        @gd.SoTien.ToString("+#,##0;-#,##0;0") đ
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">@gd.TrangThai</span>
+                                    </td>
+                                    <td class="text-muted small">@gd.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

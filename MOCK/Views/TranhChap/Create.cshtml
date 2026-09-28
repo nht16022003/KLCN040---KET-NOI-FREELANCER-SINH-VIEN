@@ -1,0 +1,146 @@
+@model MOCK.Models.ViewModels.TranhChapCreateViewModel
+@{
+    ViewData["Title"] = "Mở hồ sơ yêu cầu hỗ trợ tranh chấp";
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="TranhChap" asp-action="Index" class="text-decoration-none text-muted">Tranh chấp & Khiếu nại</a></li>
+            <li class="breadcrumb-item active text-danger fw-semibold" aria-current="page">Tạo yêu cầu tranh chấp</li>
+        </ol>
+    </nav>
+
+    <!-- ALERTS -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-shield-exclamation text-danger me-2"></i>Mở Hồ Sơ Khiếu Nại & Hỗ Trợ Tranh Chấp
+        </h3>
+        <p class="text-muted small mb-0">
+            Khi phát sinh bất đồng không thể tự hòa giải giữa Doanh nghiệp và Freelancer, hệ thống Trọng tài FreelancerStudent sẽ đứng ra đối soát và đưa ra quyết định công bằng.
+        </p>
+    </div>
+
+    <form method="post" asp-controller="TranhChap" asp-action="Create">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- CỘT TRÁI: THÔNG TIN TRANH CHẤP -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 18px; background: #FFFFFF;">
+                    <h5 class="fw-bold text-dark mb-3">1. Thông tin hợp đồng & Khiếu nại</h5>
+
+                    <!-- Chọn Hợp đồng -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Hợp đồng phát sinh tranh chấp <span class="text-danger">*</span></label>
+                        <select name="maHD" class="form-select bg-light" required style="border-radius: 10px;" id="selectHopDong">
+                            <option value="">-- Chọn hợp đồng --</option>
+                            @foreach (var hd in Model.EligibleContracts)
+                            {
+                                bool isSelected = Model.MaHD == hd.MaHD;
+                                <!option value="@hd.MaHD" data-amount="@(hd.Sotienkyquy ?? 0)" @(isSelected ? "selected" : "")>
+                                    #@hd.MaHD - @(hd.JobPost?.Tieude ?? "Hợp đồng việc làm") (Ký quỹ: @((hd.Sotienkyquy ?? 0).ToString("#,##0")) đ)
+                                </!option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Lý do tranh chấp -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Lý do chính <span class="text-danger">*</span></label>
+                        <select name="lyDo" class="form-select bg-light" required style="border-radius: 10px;">
+                            <option value="">-- Chọn lý do tranh chấp --</option>
+                            <option value="Chậm tiến độ nhiều ngày và không phản hồi">Chậm tiến độ nhiều ngày và không phản hồi</option>
+                            <option value="Sản phẩm bàn giao không đạt yêu cầu cam kết">Sản phẩm bàn giao không đạt yêu cầu cam kết</option>
+                            <option value="Yêu cầu công việc phát sinh quá nhiều ngoài phạm vi HĐ">Yêu cầu công việc phát sinh quá nhiều ngoài phạm vi HĐ</option>
+                            <option value="Doanh nghiệp từ chối nghiệm thu không có lý do chính đáng">Doanh nghiệp từ chối nghiệm thu không có lý do chính đáng</option>
+                            <option value="Bất đồng về chất lượng và số tiền thanh toán">Bất đồng về chất lượng và số tiền thanh toán</option>
+                            <option value="Khác">Lý do khác...</option>
+                        </select>
+                    </div>
+
+                    <!-- Số tiền tranh chấp -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Số tiền Escrow yêu cầu xem xét hoàn lại / giải ngân (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="soTienTranhChap" id="inputSoTienTranhChap" value="@Model.SoTienTranhChap" min="0" step="10000" class="form-control bg-light" required style="border-radius: 10px;" />
+                    </div>
+
+                    <!-- Mô tả chi tiết -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Mô tả tường trình chi tiết sự việc <span class="text-danger">*</span></label>
+                        <textarea name="moTaChiTiet" rows="5" class="form-control bg-light" required
+                                  placeholder="Trình bày mốc thời gian, diễn biến sự việc, các thỏa thuận 2 bên và thiệt hại phát sinh..."
+                                  style="border-radius: 10px; font-size: 0.9rem;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: BẰNG CHỨNG & QUY ĐỊNH -->
+            <div class="col-lg-5">
+                <!-- Khung cung cấp bằng chứng ban đầu -->
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 18px; background: #FFFFFF;">
+                    <h5 class="fw-bold text-dark mb-3">2. Bằng chứng ban đầu đính kèm</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Loại tài liệu bằng chứng</label>
+                        <select name="loaiBangChung" class="form-select" style="border-radius: 10px;">
+                            <option value="AnhChup">Ảnh chụp màn hình (Screenshot)</option>
+                            <option value="DoanChat">Ảnh lịch sử chat / email thỏa thuận</option>
+                            <option value="TaiLieu">Tài liệu đặc tả / Bản cam kết</option>
+                            <option value="FileLoi">File mã nguồn / Báo cáo lỗi</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Đường dẫn tệp / Link ảnh bằng chứng (Cloud/Drive/Imgur)</label>
+                        <input type="text" name="duongDanFile" class="form-control" placeholder="https://drive.google.com/... hoặc để trống link demo" style="border-radius: 10px;" />
+                        <div class="form-text small">Bạn có thể tải lên thêm nhiều bằng chứng khác sau khi mở hồ sơ.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Ghi chú cho bằng chứng này</label>
+                        <input type="text" name="moTaBangChung" class="form-control" placeholder="Ví dụ: Đoạn chat hứa hẹn giao bản fix vào ngày 20/09..." style="border-radius: 10px;" />
+                    </div>
+                </div>
+
+                <!-- Quy định trọng tài -->
+                <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 18px; background: #F8FAF9; border-left: 5px solid var(--primary-green, #3B6E53) !important;">
+                    <h6 class="fw-bold text-success mb-2"><i class="bi bi-info-circle-fill me-1"></i> Quy trình phân xử Trọng tài</h6>
+                    <ul class="text-secondary small mb-0 ps-3" style="line-height: 1.6;">
+                        <li>Sau khi mở đơn, tiền Escrow của hợp đồng sẽ bị <strong>tạm khóa bảo đảm</strong>.</li>
+                        <li>Đối phương sẽ nhận được thông báo và có <strong>48 giờ</strong> để gửi bằng chứng phản biện.</li>
+                        <li>Ban quản trị sẽ xem xét toàn diện hợp đồng, nhật ký chat, các bản bàn giao để ra phán quyết hoàn tiền hoặc giải ngân.</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-danger btn-lg fw-bold w-100 py-3 shadow-sm" style="border-radius: 12px;">
+                    <i class="bi bi-shield-fill-check me-1"></i> Gửi hồ sơ Tranh chấp
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('selectHopDong')?.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const amount = selectedOption.getAttribute('data-amount');
+            if (amount) {
+                document.getElementById('inputSoTienTranhChap').value = amount;
+            }
+        });
+    </script>
+}

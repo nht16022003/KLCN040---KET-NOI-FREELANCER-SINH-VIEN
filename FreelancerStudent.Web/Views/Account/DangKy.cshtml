@@ -1,0 +1,205 @@
+@model FreelancerStudent.Web.ViewModels.DangKyViewModel
+@{
+   
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .containerdecor {}
+
+    input {
+        width: 100% !important;
+        text-align: left;
+        align-items: center;
+        border: solid rgba(230, 230, 230, 0.817) 1px;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .card {
+        margin-top: 40px;
+        width: 100% !important;
+        border-radius: 10px;
+    }
+
+    .card-title {
+        font-size: 35px;
+        text-align: center;
+        background-color: #3b6e53;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    button {
+        background-color: #57ae80;
+        padding: 10px;
+        border-radius: 10px;
+        border: solid gainsboro;
+        color: white;
+        text-align: center;
+    }
+
+    button:hover {
+        background-color: #4f9b72;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="col-12 col-lg-12 pe-lg-4">
+                <!-- Big Hero Title -->
+                <h1 class="hero-title-main">
+                    FREELANCER<br />
+                    <span class="hero-title-outlined">FOR</span> STUDENTS
+                </h1>
+                <p class="hero-subtitle">Kết nối sinh viên tài năng với cơ hội thực tế</p>
+
+                <!-- 3 Feature Points -->
+                <div class="features-list mt-4">
+                    <!-- Feature 1 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-box">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Cơ hội thực tế</div>
+                            <div class="feature-desc">Tìm công việc phù hợp, phát triển kỹ năng</div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-box">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Thu nhập linh hoạt</div>
+                            <div class="feature-desc">Làm chủ thời gian, tăng thu nhập</div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-item">
+                        <div class="feature-icon-box">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div>
+                            <div class="feature-title">Xây dựng tương lai</div>
+                            <div class="feature-desc">Tạo portfolio, tích lũy kinh nghiệm</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Illustration & Hand-drawn text -->
+                <div class="hero-illustration-box d-none d-md-block">
+                    <div class="doodle-badge">
+                        Small Skills<br />Big Opportunities 👑
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=700&q=80"
+                         alt="Freelancer Students" class="hero-student-img" />
+                </div>
+            </div>
+        </div>
+        <div class="col-5">
+            <div class="containerdecor">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Đăng Ký <span style="color:white">Tài Khoản</span></h5>
+                       
+                        <form asp-action="DangKy" method="post">
+                            @* Sửa thành asp-validation-summary="All" để hiện TẤT CẢ mọi lỗi lên màn hình *@
+                            <div asp-validation-summary="All" class="alert alert-danger mb-3" style="display:none;">
+                            </div>
+
+                            @* 1. Thêm ô chọn loại tài khoản *@
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Loại tài khoản</label>
+                                <select name="marole" class="form-select">
+                                    <option value="1">Sinh viên Freelancer (Tìm việc)</option>
+                                    <option value="2">Nhà tuyển dụng (Đăng việc)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                      
+                                <label type="hovaten" class="form-label fw-semibold">Họ và tên</label>
+                                
+                                <input type="text" class="form-control" id="hovaten" name="hovaten"
+                                       value="@Model?.hovaten" placeholder="Nhập họ và tên" />
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="hovaten" class="text-danger"></span>
+                       
+                            </div>
+
+                            <div class="mb-3">
+                      
+                                <label type="tentaikhoan" class="form-label fw-semibold">Tên tài khoản</label>
+                                
+                                <input type="text" class="form-control" id="tentaikhoan" name="tentaikhoan"
+                                       value="@Model?.tentaikhoan" placeholder="Nhập tên tài khoản" />
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="tentaikhoan" class="text-danger"></span>
+                       
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    <div class="mb-3">
+                      
+                                        <label type="email" class="form-label fw-semibold">Email</label>
+                                
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               value="@Model?.email" placeholder="Nhập Email" />
+                                        @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                        <span asp-validation-for="email" class="text-danger"></span>
+                       
+                                    </div>
+                            
+                                </div>
+                                <div class="col">
+                                    <div class="mb-3">
+                      
+                                        <label type="sodienthoai" class="form-label fw-semibold">Số điện thoại</label>
+                                
+                                        <input type="text" class="form-control" id="sodienthoai" name="sodienthoai"
+                                               value="@Model?.sodienthoai" placeholder="Nhập số điện thoại" />
+                                        @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                        <span asp-validation-for="sodienthoai" class="text-danger"></span>
+                       
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                      
+                                <label type="password" class="form-label fw-semibold">Mật khẩu</label>
+                                
+                                <input type="password" class="form-control" id="password" name="password"
+                                       value="@Model?.password" placeholder="Nhập mật khẩu" />
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="password" class="text-danger"></span>
+                       
+                            </div>
+
+                            <div class="mb-3">
+                      
+                                <label type="xacnhanmatkhau" class="form-label fw-semibold">Xác nhận mật khẩu</label>
+                                
+                                <input type="password" class="form-control" id="xacnhanmatkhau" name="xacnhanmatkhau"
+                                       value="@Model?.xacnhanmatkhau" placeholder="Nhập lại mật khẩu" />
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="xacnhanmatkhau" class="text-danger"></span>
+                       
+                            </div>
+                            <div class="text-center mt-3">
+                                <button type="submit">Đăng ký</button>
+                            </div>
+
+                        </form>
+                    </div>
+                    
+                </div>
+            </div>
+  
+        </div>
+    </div>
+</div>

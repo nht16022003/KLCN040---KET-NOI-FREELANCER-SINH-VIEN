@@ -1,0 +1,205 @@
+@model MOCK.Models.ViewModels.AdminFeeCommissionViewModel
+@{
+    ViewData["Title"] = "Cấu hình Phí, Hoa hồng & Doanh thu (AD-UC-06.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-06.01: Cấu hình Phí, Hoa hồng & Doanh thu</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-percent text-success me-2"></i>Cấu hình Phí Dịch vụ, Hoa hồng Sàn & Báo cáo Doanh thu
+            </h3>
+            <p class="text-muted small mb-0">Quản lý các thông số tài chính nền tảng (bảng CauHinhPhiHoaHong_PhiDangBai) và theo dõi báo cáo doanh thu hệ thống.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/QuanLyPhiDangBai" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                <i class="bi bi-tags me-1"></i> Quản lý Phí đăng bài
+            </a>
+            <a href="/Admin/QuanLyGiaoDich" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-safe me-1"></i> Sổ giao dịch
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Revenue KPIs -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Tổng Doanh Thu Sàn</span>
+                        <h3 class="fw-bold text-success mt-1 mb-0">@Model.TongDoanhThuHeThong.ToString("N0") <small class="fs-6">đ</small></h3>
+                        <div class="small text-muted mt-1">Toàn bộ nguồn thu nền tảng</div>
+                    </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-3 fs-3">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Thu Phí Đăng Tin Tuyển Dụng</span>
+                        <h3 class="fw-bold text-primary mt-1 mb-0">@Model.TongDoanhThuPhiDangBai.ToString("N0") <small class="fs-6">đ</small></h3>
+                        <div class="small text-muted mt-1">Mức hiện tại: <strong>@Model.PhiDangBaiHienTai.ToString("N0") đ</strong> / tin</div>
+                    </div>
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 fs-3">
+                        <i class="bi bi-tag-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Thu Hoa Hồng Hợp Đồng</span>
+                        <h3 class="fw-bold text-warning mt-1 mb-0">@Model.TongDoanhThuHoaHong.ToString("N0") <small class="fs-6">đ</small></h3>
+                        <div class="small text-muted mt-1">Tỷ lệ hiện tại: <strong>@Model.PhanTramHoaHongHienTai%</strong> / hợp đồng</div>
+                    </div>
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 fs-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Configuration Form -->
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-sliders text-success me-2"></i>Thiết lập Biểu Phí & Hoa Hồng</h5>
+                
+                <form method="post" asp-action="CapNhatPhiVaHoaHong">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Phí đăng bài tuyển dụng (VNĐ/bài) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="phiDangBai" value="@Model.PhiDangBaiHienTai" class="form-control bg-light" step="500" min="0" required />
+                            <span class="input-group-text bg-light">VNĐ</span>
+                        </div>
+                        <div class="form-text small">Thu trực tiếp khi NTD hoàn tất đăng tin tuyển dụng mới.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Tỷ lệ hoa hồng chiết khấu nền tảng (%) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="phanTramHoaHong" value="@Model.PhanTramHoaHongHienTai" class="form-control bg-light" step="0.5" min="0" max="50" required />
+                            <span class="input-group-text bg-light">%</span>
+                        </div>
+                        <div class="form-text small">Trích khấu hao từ giá trị hợp đồng khi giải ngân cho Freelancer.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Ghi chú lý do điều chỉnh</label>
+                        <textarea name="moTa" class="form-control bg-light" rows="3" placeholder="Nhập lý do hoặc chính sách áp dụng biểu phí mới..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 rounded-3 py-2 fw-semibold" onclick="return confirm('Bạn có chắc chắn muốn lưu chính sách biểu phí mới?');">
+                        <i class="bi bi-check2-circle me-1"></i> Lưu & Áp dụng Biểu phí mới
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue Analytics -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Báo cáo Doanh thu theo Tháng</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small">
+                            <tr>
+                                <th>Tháng / Năm</th>
+                                <th>Phí đăng bài</th>
+                                <th>Hoa hồng hợp đồng</th>
+                                <th class="text-end">Tổng doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in Model.DoanhThuTheoThang)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-dark small">@m.ThangNam</td>
+                                    <td class="small text-muted">@m.PhiDangBai.ToString("N0") đ</td>
+                                    <td class="small text-muted">@m.HoaHong.ToString("N0") đ</td>
+                                    <td class="fw-bold text-success text-end small">@m.TongDoanhThu.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Audit of Fee Config -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-secondary me-2"></i>Lịch sử Cập nhật Cấu hình Phí (CauHinhPhiHoaHong_PhiDangBai)</h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th>Mã CH</th>
+                        <th>Tên cấu hình</th>
+                        <th>Loại</th>
+                        <th>Giá trị</th>
+                        <th>Mô tả</th>
+                        <th>Admin cập nhật</th>
+                        <th>Ngày cập nhật</th>
+                        <th>Hiệu lực</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.LichSuCauHinhs)
+                    {
+                        <tr>
+                            <td class="fw-bold text-dark small">#@c.MaCauHinh</td>
+                            <td class="small fw-semibold text-dark">@c.TenCauHinh</td>
+                            <td><span class="badge bg-light text-dark border small">@c.LoaiCauHinh</span></td>
+                            <td class="fw-bold text-success small">
+                                @(c.LoaiCauHinh == "HoaHong" ? $"{c.GiaTri}%" : $"{c.GiaTri:N0} đ")
+                            </td>
+                            <td class="small text-dark" style="max-width: 250px;">@c.MoTa</td>
+                            <td class="small text-muted">Admin #@c.MaAdmin</td>
+                            <td class="small text-muted">@c.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (c.HieuLuc)
+                                {
+                                    <span class="badge bg-success small">Đang áp dụng</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary small">Cũ</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

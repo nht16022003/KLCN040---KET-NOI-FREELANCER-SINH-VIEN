@@ -1,0 +1,280 @@
+@model MOCK.Models.ViewModels.ThongBaoListViewModel
+@{
+    ViewData["Title"] = "Trung tâm thông báo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .notifications-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 35px 0 70px;
+    }
+
+    .notifications-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid #E5ECE7;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        padding: 28px;
+    }
+
+    .filter-pill {
+        background: #F1F5F9;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 18px;
+        border-radius: 30px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .filter-pill:hover {
+        background: #E2E8F0;
+        color: #1E293B;
+    }
+
+    .filter-pill.active {
+        background: #2D6A4F;
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+    }
+
+    .notification-item {
+        background: #FFFFFF;
+        border: 1px solid #EEF2F6;
+        border-radius: 16px;
+        padding: 18px 22px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .notification-item:hover {
+        border-color: #3B6E53;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    }
+
+    .notification-item.unread {
+        background: #F4FBF7;
+        border-color: #C8E6D3;
+    }
+
+    .notification-item.unread::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 14px;
+        bottom: 14px;
+        width: 4px;
+        background: #2D6A4F;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .notification-icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .notification-time {
+        font-size: 0.78rem;
+        color: #94A3B8;
+        font-weight: 500;
+    }
+
+    .btn-mark-all-read {
+        background: #FFFFFF;
+        border: 1px solid #D0D7DE;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 8px 18px;
+        border-radius: 30px;
+        transition: all 0.2s;
+    }
+
+    .btn-mark-all-read:hover {
+        background: #F8FAFC;
+        color: #0F172A;
+    }
+</style>
+
+<div class="notifications-wrapper">
+    <div class="container">
+        
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="fw-bold text-dark mb-0">Thông báo của bạn</h2>
+                    @if (Model.SoChuaDoc > 0)
+                    {
+                        <span class="badge bg-danger rounded-pill px-2 py-1 fs-6">@Model.SoChuaDoc mới</span>
+                    }
+                </div>
+                <p class="text-muted small mb-0">Cập nhật tin tức tuyển dụng, ứng tuyển, tiến độ hợp đồng & giao dịch ví</p>
+            </div>
+
+            <div class="d-flex gap-2">
+                @if (Model.SoChuaDoc > 0)
+                {
+                    <form asp-action="MarkAllAsRead" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-mark-all-read">
+                            <i class="bi bi-check2-all text-success me-1"></i>Đánh dấu tất cả đã đọc
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+        }
+
+        <!-- FILTER TABS & SEARCH -->
+        <div class="notifications-card mb-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                
+                <!-- Category filters -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-action="Index" asp-route-loai="" asp-route-status="@Model.FilterTrangThai" class="filter-pill @(string.IsNullOrEmpty(Model.FilterLoai) ? "active" : "")">
+                        Tất cả (@Model.TongSoThongBao)
+                    </a>
+                    <a asp-action="Index" asp-route-loai="UngTuyen" asp-route-status="@Model.FilterTrangThai" class="filter-pill @(Model.FilterLoai == "UngTuyen" ? "active" : "")">
+                        <i class="bi bi-person-check-fill text-success"></i>Ứng tuyển
+                    </a>
+                    <a asp-action="Index" asp-route-loai="UngThue" asp-route-status="@Model.FilterTrangThai" class="filter-pill @(Model.FilterLoai == "UngThue" ? "active" : "")">
+                        <i class="bi bi-send-check-fill text-info"></i>Lời mời thuê
+                    </a>
+                    <a asp-action="Index" asp-route-loai="HopDong" asp-route-status="@Model.FilterTrangThai" class="filter-pill @(Model.FilterLoai == "HopDong" ? "active" : "")">
+                        <i class="bi bi-file-earmark-check-fill text-warning"></i>Hợp đồng
+                    </a>
+                    <a asp-action="Index" asp-route-loai="ThanhToan" asp-route-status="@Model.FilterTrangThai" class="filter-pill @(Model.FilterLoai == "ThanhToan" ? "active" : "")">
+                        <i class="bi bi-wallet2 text-emerald"></i>Thanh toán & Ví
+                    </a>
+                    <a asp-action="Index" asp-route-loai="HeThong" asp-route-status="@Model.FilterTrangThai" class="filter-pill @(Model.FilterLoai == "HeThong" ? "active" : "")">
+                        <i class="bi bi-bell-fill text-secondary"></i>Hệ thống
+                    </a>
+                </div>
+
+                <!-- Read/Unread toggle -->
+                <div class="btn-group btn-group-sm bg-light rounded-pill p-1 border">
+                    <a asp-action="Index" asp-route-loai="@Model.FilterLoai" asp-route-status="" class="btn btn-sm rounded-pill fw-semibold @(string.IsNullOrEmpty(Model.FilterTrangThai) ? "btn-white shadow-sm text-dark bg-white" : "text-muted")">
+                        Tất cả
+                    </a>
+                    <a asp-action="Index" asp-route-loai="@Model.FilterLoai" asp-route-status="Unread" class="btn btn-sm rounded-pill fw-semibold @(Model.FilterTrangThai == "Unread" ? "btn-white shadow-sm text-dark bg-white" : "text-muted")">
+                        Chưa đọc (@Model.SoChuaDoc)
+                    </a>
+                    <a asp-action="Index" asp-route-loai="@Model.FilterLoai" asp-route-status="Read" class="btn btn-sm rounded-pill fw-semibold @(Model.FilterTrangThai == "Read" ? "btn-white shadow-sm text-dark bg-white" : "text-muted")">
+                        Đã đọc
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- NOTIFICATION LIST -->
+        <div class="row">
+            <div class="col-12">
+                @if (Model.Items != null && Model.Items.Count > 0)
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <div class="notification-item @(!item.DaDoc ? "unread" : "")" id="notification-@item.MaThongBao">
+                            
+                            <!-- Icon Box -->
+                            <div class="notification-icon-box @item.BadgeClass">
+                                <i class="bi @item.IconClass"></i>
+                            </div>
+
+                            <!-- Content Details -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="badge @item.BadgeClass small fw-bold">@item.LoaiDisplayName</span>
+                                        <h6 class="fw-bold text-dark mb-0">@item.TieuDe</h6>
+                                        @if (!item.DaDoc)
+                                        {
+                                            <span class="badge bg-danger rounded-circle p-1" style="width: 8px; height: 8px;" title="Chưa đọc"></span>
+                                        }
+                                    </div>
+                                    <span class="notification-time">@item.ThoiGianTuongDoi</span>
+                                </div>
+
+                                <p class="text-secondary small mb-2">@item.NoiDung</p>
+
+                                <!-- Navigation & Actions -->
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(item.LinkDieuHuong))
+                                    {
+                                        <a href="@item.LinkDieuHuong" onclick="markAsRead(@item.MaThongBao)" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold small text-decoration-none">
+                                            Xem chi tiết <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    }
+
+                                    @if (!item.DaDoc)
+                                    {
+                                        <button type="button" onclick="markAsRead(@item.MaThongBao)" class="btn btn-link btn-sm text-muted text-decoration-none p-0 small">
+                                            <i class="bi bi-check2 me-1"></i>Đánh dấu đã đọc
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="notifications-card text-center py-5">
+                        <i class="bi bi-bell-slash display-3 text-secondary mb-3"></i>
+                        <h5 class="fw-bold text-dark">Không có thông báo nào</h5>
+                        <p class="text-muted small">Bạn đã cập nhật mọi thông tin mới nhất trên hệ thống.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function markAsRead(notificationId) {
+        fetch('/ThongBao/MarkAsRead', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `id=${notificationId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const item = document.getElementById(`notification-${notificationId}`);
+                if (item) {
+                    item.classList.remove('unread');
+                }
+            }
+        });
+    }
+</script>

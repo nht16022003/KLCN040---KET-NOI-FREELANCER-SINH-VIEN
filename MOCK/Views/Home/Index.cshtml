@@ -1,0 +1,79 @@
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Trang Chủ - Kiểm Thử Giao Diện";
+    var currentRole = Context.Session.GetString("UserRole") ?? "Chưa đăng nhập (Guest)";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1 text-success">
+                            <i class="bi bi-shield-lock-fill me-2"></i>Bộ chuyển đổi Role kiểm thử
+                        </h4>
+                        <p class="text-muted mb-0 small">
+                            Role hiện tại trên Navbar: 
+                            <span class="badge bg-success-subtle text-success fs-6 border border-success-subtle px-3 py-1">@currentRole</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                    <a asp-controller="Home" asp-action="SwitchRole" asp-route-role="Guest" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-person me-1"></i> Chưa đăng nhập (Hiển thị Đăng nhập / Đăng ký)
+                    </a>
+                    <a asp-controller="Home" asp-action="SwitchRole" asp-route-role="FreelancerStudent" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-mortarboard me-1"></i> Freelancer Student (Son_ko_thogminh)
+                    </a>
+                    <a asp-controller="Home" asp-action="SwitchRole" asp-route-role="NhaTuyenDung" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-building me-1"></i> Nhà tuyển dụng (tuan_depzai)
+                    </a>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-grid-fill text-success me-2"></i>Các trang giao diện chức năng chính</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="/Account/Register" class="card h-100 p-3 text-decoration-none border rounded-3 hover-shadow">
+                            <h6 class="fw-bold text-success mb-1"><i class="bi bi-person-plus-fill me-1"></i>Đăng ký tài khoản</h6>
+                            <p class="text-muted small mb-0">Tạo tài khoản sinh viên và tự động chuyển đến trang Minh chứng.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/Account/MinhChung" class="card h-100 p-3 text-decoration-none border rounded-3 hover-shadow">
+                            <h6 class="fw-bold text-success mb-1"><i class="bi bi-shield-check me-1"></i>Minh chứng sinh viên</h6>
+                            <p class="text-muted small mb-0">Tải thẻ sinh viên, chọn trường, chuyên ngành và theo dõi duyệt.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/JobPost/Details/JOB_01" class="card h-100 p-3 text-decoration-none border rounded-3 hover-shadow">
+                            <h6 class="fw-bold text-success mb-1"><i class="bi bi-briefcase-fill me-1"></i>Chi tiết công việc</h6>
+                            <p class="text-muted small mb-0">Xem bài đăng tuyển dụng, thù lao ký quỹ và form ứng tuyển.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/Employer/Search" class="card h-100 p-3 text-decoration-none border rounded-3 hover-shadow">
+                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-building me-1"></i>Khám phá Nhà tuyển dụng</h6>
+                            <p class="text-muted small mb-0">Lọc doanh nghiệp theo lĩnh vực, đánh giá sao, địa điểm.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/Freelancer/Search" class="card h-100 p-3 text-decoration-none border rounded-3 hover-shadow">
+                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-mortarboard me-1"></i>Khám phá Freelancer</h6>
+                            <p class="text-muted small mb-0">Tìm kiếm sinh viên theo chuyên ngành, trường học, kỹ năng.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/HopDong" class="card h-100 p-3 text-decoration-none border rounded-3 hover-shadow">
+                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-ruled me-1"></i>Quản lý hợp đồng</h6>
+                            <p class="text-muted small mb-0">Danh sách hợp đồng điện tử & chi tiết điều khoản ký quỹ.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

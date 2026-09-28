@@ -1,0 +1,243 @@
+@model MOCK.Models.ViewModels.TaiKhoanNganHangListViewModel
+@{
+    ViewData["Title"] = "Quản lý tài khoản ngân hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .bank-manage-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .bank-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .bank-item-box {
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        background: #FFFFFF;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .bank-item-box:hover {
+        border-color: #3B6E53;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    }
+
+    .bank-item-box.default-acc {
+        border-color: #A3D9B1;
+        background: #F4FBF7;
+    }
+
+    .btn-add-bank {
+        background: #1C4D35;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 12px 28px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .btn-add-bank:hover {
+        background: #143726;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="bank-manage-wrapper">
+    <div class="container">
+        
+        <!-- BREADCRUMB -->
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 text-muted small">
+                    <li class="breadcrumb-item"><a asp-controller="Wallet" asp-action="Index" class="text-decoration-none text-muted">Ví tài chính</a></li>
+                    <li class="breadcrumb-item"><a asp-action="RutTien" class="text-decoration-none text-muted">Rút tiền</a></li>
+                    <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Tài khoản ngân hàng (FRL-UC-11)</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Tài khoản ngân hàng nhận tiền</h2>
+                    <p class="text-muted small mb-0">Quản lý các tài khoản ngân hàng liên kết để nhận tiền thanh toán hợp đồng và rút tiền nhanh chóng.</p>
+                </div>
+                <div>
+                    <a asp-action="RutTien" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi bi-wallet2 me-1"></i>Đến trang Rút tiền
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- LIST OF LINKED BANK ACCOUNTS (LEFT) -->
+            <div class="col-12 col-lg-7">
+                <div class="bank-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-credit-card-2-front text-success me-2"></i>Tài khoản đã liên kết</h5>
+                        <span class="badge bg-light text-muted border">@Model.TaiKhoans.Count tài khoản</span>
+                    </div>
+
+                    @if (Model.TaiKhoans != null && Model.TaiKhoans.Count > 0)
+                    {
+                        @foreach (var item in Model.TaiKhoans)
+                        {
+                            <div class="bank-item-box @(item.LaMacDinh ? "default-acc" : "")">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-white border p-2 shadow-sm text-success">
+                                            <i class="bi bi-bank fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-0">@item.TenNganHang</h6>
+                                            <div class="text-muted small">@(!string.IsNullOrEmpty(item.ChiNhanh) ? item.ChiNhanh : "Hội sở / Toàn quốc")</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        @if (item.LaMacDinh)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill fw-bold small">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Mặc định
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="SetDefaultTaiKhoanNganHang" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.MaTKNH" />
+                                                <button type="submit" class="btn btn-sm btn-link text-decoration-none text-muted p-0 small">
+                                                    Đặt làm mặc định
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-3 p-3 border mt-3 mb-3">
+                                    <div class="row g-2 small">
+                                        <div class="col-6 text-muted">Số tài khoản:</div>
+                                        <div class="col-6 text-end fw-bold text-dark fs-6" style="letter-spacing: 1px;">@item.SoTaiKhoan</div>
+                                        <div class="col-6 text-muted">Chủ tài khoản:</div>
+                                        <div class="col-6 text-end fw-semibold text-dark text-uppercase">@item.TenChuTaiKhoan</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted">
+                                    <span>Ngày thêm: @item.NgayThem.ToString("dd/MM/yyyy")</span>
+                                    
+                                    <form asp-action="DeleteTaiKhoanNganHang" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản ngân hàng @item.TenNganHang này?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.MaTKNH" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 text-danger small">
+                                            <i class="bi bi-trash3 me-1"></i>Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-credit-card display-4 text-secondary mb-3"></i>
+                            <h6>Chưa có tài khoản ngân hàng nào</h6>
+                            <p class="small">Thêm tài khoản ngân hàng ở form bên phải để nhận tiền rút từ ví.</p>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <!-- ADD NEW BANK ACCOUNT FORM (RIGHT) -->
+            <div class="col-12 col-lg-5">
+                <div class="bank-card">
+                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                        <i class="bi bi-plus-circle text-success me-2"></i>Thêm tài khoản mới
+                    </h5>
+
+                    <form asp-action="AddTaiKhoanNganHang" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="NewAccount.MaUser" />
+
+                        <div class="mb-3">
+                            <label asp-for="NewAccount.TenNganHang" class="form-label fw-semibold text-dark small mb-1">
+                                Ngân hàng <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="NewAccount.TenNganHang" class="form-select rounded-3">
+                                <option value="">-- Chọn ngân hàng --</option>
+                                <option value="Vietcombank">Vietcombank - Ngân hàng TMCP Ngoại thương Việt Nam</option>
+                                <option value="MB Bank">MB Bank - Ngân hàng Quân Đội</option>
+                                <option value="Techcombank">Techcombank - Ngân hàng Kỹ Thương</option>
+                                <option value="VietinBank">VietinBank - Ngân hàng Công Thương</option>
+                                <option value="BIDV">BIDV - Ngân hàng Đầu tư và Phát triển</option>
+                                <option value="ACB">ACB - Ngân hàng Á Châu</option>
+                                <option value="VPBank">VPBank - Ngân hàng Việt Nam Thịnh Vượng</option>
+                                <option value="TPBank">TPBank - Ngân hàng Tiên Phong</option>
+                            </select>
+                            <span asp-validation-for="NewAccount.TenNganHang" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NewAccount.SoTaiKhoan" class="form-label fw-semibold text-dark small mb-1">
+                                Số tài khoản ngân hàng <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="NewAccount.SoTaiKhoan" class="form-control rounded-3" placeholder="Nhập số tài khoản" />
+                            <span asp-validation-for="NewAccount.SoTaiKhoan" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NewAccount.TenChuTaiKhoan" class="form-label fw-semibold text-dark small mb-1">
+                                Tên chủ tài khoản <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="NewAccount.TenChuTaiKhoan" class="form-control rounded-3 text-uppercase" placeholder="VD: NGUYEN VAN AN" />
+                            <span asp-validation-for="NewAccount.TenChuTaiKhoan" class="text-danger small mt-1 d-block"></span>
+                            <div class="form-text text-muted" style="font-size: 0.75rem;">Phải trùng khớp với tên trên thẻ / tài khoản ngân hàng.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="NewAccount.ChiNhanh" class="form-label fw-semibold text-dark small mb-1">
+                                Chi nhánh ngân hàng (Tùy chọn)
+                            </label>
+                            <input asp-for="NewAccount.ChiNhanh" class="form-control rounded-3" placeholder="VD: Chi nhánh TP. Hồ Chí Minh" />
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="NewAccount.LaMacDinh" class="form-check-input" type="checkbox" id="checkDefault" />
+                            <label class="form-check-label text-dark small" for="checkDefault">
+                                Đặt làm tài khoản nhận tiền mặc định
+                            </label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-add-bank">
+                                <i class="bi bi-plus-circle-fill me-2"></i>Lưu tài khoản ngân hàng
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

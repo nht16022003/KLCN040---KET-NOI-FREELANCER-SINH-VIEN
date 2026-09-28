@@ -1,0 +1,194 @@
+@model MOCK.Models.ViewModels.DangTinTimViecViewModel
+@{
+    ViewData["Title"] = Model.IsEditMode ? "Chỉnh sửa bài đăng tìm việc" : "Đăng bài tìm việc mới";
+    var student = Model.StudentInfo;
+    var user = Model.UserInfo;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/Freelancer/QuanLyTimViec" class="text-decoration-none text-muted">Quản lý tìm việc</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">@(Model.IsEditMode ? "Chỉnh sửa bài đăng" : "Đăng bài tìm việc")</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-briefcase-fill text-success me-2"></i>@(Model.IsEditMode ? "Chỉnh sửa Bài đăng Tìm việc" : "Đăng Tin Tìm Việc Sinh Viên")
+            </h3>
+            <p class="text-muted small mb-0">Quảng bá năng lực, dịch vụ chuyên môn và mức thù lao mong muốn tới hàng nghìn Nhà tuyển dụng (bảng BaiDangTimViec_FreelancerStudent).</p>
+        </div>
+        <div>
+            <a href="/Freelancer/QuanLyTimViec" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Danh sách bài đăng
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Main Form Input -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-pencil-square text-success me-2"></i>Thông tin Bài đăng Tìm việc
+                </h5>
+
+                <form method="post" asp-action="DangTinTimViec">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MaBaiDang" />
+
+                    <!-- Tiêu đề -->
+                    <div class="mb-3">
+                        <label asp-for="Tieude" class="form-label small fw-semibold text-dark">Tiêu đề bài đăng tìm việc <span class="text-danger">*</span></label>
+                        <input type="text" asp-for="Tieude" id="txtTieuDe" class="form-control bg-light" placeholder="Ví dụ: Nhận thiết kế Website Fullstack ASP.NET / ReactJS..." required />
+                        <span asp-validation-for="Tieude" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mức giá & Trạng thái -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="MucGiaTu" class="form-label small fw-semibold text-dark">Mức thù lao mong muốn từ (VNĐ) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" asp-for="MucGiaTu" id="txtMucGia" class="form-control bg-light" step="50000" min="50000" required />
+                                <span class="input-group-text bg-light">VNĐ</span>
+                            </div>
+                            <span asp-validation-for="MucGiaTu" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="Trangthai" class="form-label small fw-semibold text-dark">Trạng thái bài đăng</label>
+                            <select asp-for="Trangthai" class="form-select bg-light">
+                                <option value="DangHienThi">Đang hiển thị (Công khai)</option>
+                                <option value="DaAn">Ẩn bài đăng (Tạm dừng)</option>
+                                <option value="DaNhanViec">Đã nhận việc</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Kỹ năng -->
+                    <div class="mb-3">
+                        <label asp-for="Kynang" class="form-label small fw-semibold text-dark">Kỹ năng chuyên môn nổi bật <span class="text-danger">*</span></label>
+                        <input type="text" asp-for="Kynang" id="txtKyNang" class="form-control bg-light" placeholder="Ví dụ: C#, ASP.NET Core, ReactJS, SQL Server, Figma" required />
+                        <div class="form-text small">Các kỹ năng phân cách nhau bằng dấu phẩy (,).</div>
+                        <span asp-validation-for="Kynang" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mô tả chi tiết -->
+                    <div class="mb-4">
+                        <label asp-for="Mota" class="form-label small fw-semibold text-dark">Mô tả chi tiết năng lực & cam kết dịch vụ <span class="text-danger">*</span></label>
+                        <textarea asp-for="Mota" id="txtMoTa" class="form-control bg-light" rows="6" placeholder="Mô tả kinh nghiệm, các dự án tiêu biểu từng làm, quy trình làm việc, cam kết bảo hành và thời gian có thể đáp ứng..." required></textarea>
+                        <span asp-validation-for="Mota" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
+                            <i class="bi bi-send-fill me-1"></i> @(Model.IsEditMode ? "Lưu cập nhật" : "Đăng bài lên sàn")
+                        </button>
+                        <a href="/Freelancer/QuanLyTimViec" class="btn btn-light border rounded-pill px-4 py-2">
+                            Hủy bỏ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar / Live Preview Card -->
+        <div class="col-12 col-lg-5">
+            <!-- Student Verified Card -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="@(student?.Avatar ?? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80")" class="rounded-circle border" style="width: 55px; height: 55px; object-fit: cover;" alt="@user?.HotenUser" />
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">@(user?.HotenUser ?? "Freelancer Sinh viên")</h6>
+                        <div class="small text-muted">@(student?.TenTruong ?? "Trường Đại học") &bull; GPA: <span class="text-success fw-bold">@(student?.GPA ?? 3.5)</span></div>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small mt-1">
+                            <i class="bi bi-patch-check-fill me-1"></i> Sinh viên đã xác minh
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Card Preview -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-light text-dark border small"><i class="bi bi-eye me-1"></i> Xem trước hiển thị</span>
+                    <span class="text-success fw-bold fs-6" id="previewPrice">@Model.MucGiaTu.ToString("N0") đ</span>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-2" id="previewTitle">
+                    @(string.IsNullOrEmpty(Model.Tieude) ? "Tiêu đề bài đăng tìm việc của bạn..." : Model.Tieude)
+                </h6>
+
+                <p class="small text-muted mb-3" id="previewDesc" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    @(string.IsNullOrEmpty(Model.Mota) ? "Nội dung mô tả chi tiết năng lực và dịch vụ..." : Model.Mota)
+                </p>
+
+                <div class="d-flex flex-wrap gap-1 mb-3" id="previewSkills">
+                    @if (!string.IsNullOrEmpty(Model.Kynang))
+                    {
+                        @foreach (var s in Model.Kynang.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <span class="badge bg-light text-dark border small">@s</span>
+                        }
+                    }
+                </div>
+
+                <div class="p-3 bg-light rounded-3 small text-muted">
+                    <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                    <strong>Mẹo:</strong> Bài đăng có tiêu đề rõ ràng, liệt kê kỹ năng chi tiết và mức giá cạnh tranh sẽ tăng <strong>85%</strong> cơ hội được Nhà tuyển dụng gửi lời mời thuê trực tiếp (`UngThue`).
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Live preview sync
+        const txtTieuDe = document.getElementById('txtTieuDe');
+        const txtMucGia = document.getElementById('txtMucGia');
+        const txtMoTa = document.getElementById('txtMoTa');
+        const txtKyNang = document.getElementById('txtKyNang');
+
+        const previewTitle = document.getElementById('previewTitle');
+        const previewPrice = document.getElementById('previewPrice');
+        const previewDesc = document.getElementById('previewDesc');
+        const previewSkills = document.getElementById('previewSkills');
+
+        txtTieuDe?.addEventListener('input', () => {
+            previewTitle.textContent = txtTieuDe.value || 'Tiêu đề bài đăng tìm việc của bạn...';
+        });
+
+        txtMucGia?.addEventListener('input', () => {
+            const val = parseFloat(txtMucGia.value) || 0;
+            previewPrice.textContent = val.toLocaleString('vi-VN') + ' đ';
+        });
+
+        txtMoTa?.addEventListener('input', () => {
+            previewDesc.textContent = txtMoTa.value || 'Nội dung mô tả chi tiết năng lực và dịch vụ...';
+        });
+
+        txtKyNang?.addEventListener('input', () => {
+            previewSkills.innerHTML = '';
+            const skills = txtKyNang.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            skills.forEach(s => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-light text-dark border small me-1';
+                badge.textContent = s;
+                previewSkills.appendChild(badge);
+            });
+        });
+    </script>
+}

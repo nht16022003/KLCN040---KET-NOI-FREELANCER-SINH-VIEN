@@ -1,0 +1,239 @@
+@model MOCK.Models.ViewModels.StudentAppliedJobsViewModel
+@{
+    ViewData["Title"] = "Danh sách công việc đã nộp tuyển";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .applied-jobs-page {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    /* TOP STATS CARDS */
+    .stat-card-box {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 20px 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .stat-icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    .stat-icon-amber {
+        background: #FFFBEB;
+        color: #D97706;
+    }
+
+    .stat-icon-green {
+        background: #E8F5EC;
+        color: #1B5E36;
+    }
+
+    .stat-icon-purple {
+        background: #F3E8FF;
+        color: #7E22CE;
+    }
+
+    .stat-val-text {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+
+    .stat-label-text {
+        font-size: 0.8rem;
+        color: #64748B;
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+
+    /* CARD LIST */
+    .applied-item-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .applied-item-card:hover {
+        border-color: #BBD9C7;
+        box-shadow: 0 8px 24px rgba(27, 94, 54, 0.06);
+    }
+</style>
+
+<div class="applied-jobs-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Danh sách công việc đã ứng tuyển</h2>
+                <p class="text-muted small mb-0">Theo dõi tiến độ xét duyệt hồ sơ, thù lao đề xuất và hợp đồng nhận việc từ các doanh nghiệp.</p>
+            </div>
+
+            <a href="/Employer/Search" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+                <i class="bi bi-search me-1"></i> Khám phá việc làm mới
+            </a>
+        </div>
+
+        <!-- 3 Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-icon-circle stat-icon-amber">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val-text">@Model.PendingCount</div>
+                        <div class="stat-label-text">Hồ sơ đang chờ duyệt</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-icon-circle stat-icon-green">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val-text">@Model.AcceptedCount</div>
+                        <div class="stat-label-text">Doanh nghiệp đã chấp nhận</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-icon-circle stat-icon-purple">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val-text">@Model.TotalAppliedCount</div>
+                        <div class="stat-label-text">Tổng công việc đã nộp</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <a href="/Freelancer/DanhSachNopTuyen" class="btn btn-sm @(string.IsNullOrEmpty(Model.CurrentStatusFilter) || Model.CurrentStatusFilter == "All" ? "btn-success" : "btn-light border") rounded-pill px-3">
+                Tất cả (@Model.TotalAppliedCount)
+            </a>
+            <a href="/Freelancer/DanhSachNopTuyen?status=ChoDuyet" class="btn btn-sm @(Model.CurrentStatusFilter == "ChoDuyet" ? "btn-success" : "btn-light border") rounded-pill px-3">
+                Đang chờ duyệt (@Model.PendingCount)
+            </a>
+            <a href="/Freelancer/DanhSachNopTuyen?status=ChapNhan" class="btn btn-sm @(Model.CurrentStatusFilter == "ChapNhan" ? "btn-success" : "btn-light border") rounded-pill px-3">
+                Đã được nhận (@Model.AcceptedCount)
+            </a>
+        </div>
+
+        <!-- List of Applied Jobs -->
+        @if (!Model.AppliedJobs.Any())
+        {
+            <div class="card border-0 rounded-4 shadow-sm p-5 text-center text-muted">
+                <i class="bi bi-inbox display-3 text-muted"></i>
+                <h5 class="fw-bold mt-3 text-secondary">Bạn chưa nộp hồ sơ vào công việc nào trong mục này</h5>
+                <p class="small">Hãy tìm các bài đăng tuyển dụng phù hợp với kỹ năng và nộp đơn ngay.</p>
+                <div>
+                    <a href="/Employer/Search" class="btn btn-sm btn-success rounded-pill px-4">Tìm việc làm ngay</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var item in Model.AppliedJobs)
+                {
+                    <div class="col-12">
+                        <div class="applied-item-card">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
+                                
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-light text-muted border">#@item.Job.MaJob</span>
+                                        
+                                        @if (item.Application.TrangThaiUngTuyen == "ChoDuyet")
+                                        {
+                                            <span class="badge bg-warning-subtle text-dark border">
+                                                <i class="bi bi-clock-history me-1"></i> Chờ doanh nghiệp duyệt
+                                            </span>
+                                        }
+                                        else if (item.Application.TrangThaiUngTuyen == "ChapNhan" || item.Application.TrangThaiUngTuyen == "DaLapHopDong")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Doanh nghiệp đã chấp nhận
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary border">
+                                                <i class="bi bi-x-circle me-1"></i> Chưa phù hợp
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <h4 class="fw-bold mb-1">
+                                        <a href="/JobPost/Details/@item.Job.MaJob" class="text-dark text-decoration-none hover-green">
+                                            @item.Job.Tieude
+                                        </a>
+                                    </h4>
+
+                                    <p class="text-success fw-semibold small mb-2">
+                                        <i class="bi bi-building me-1"></i>@(item.Employer.Tencongty ?? item.EmployerUser.HotenUser) • 
+                                        <i class="bi bi-geo-alt me-1"></i>@(item.Employer.Diachi ?? "TP.HCM")
+                                    </p>
+
+                                    <!-- Thư giới thiệu đã nộp -->
+                                    <div class="p-3 bg-light rounded-3 small text-secondary mb-3 border">
+                                        <div class="fw-bold text-dark mb-1"><i class="bi bi-chat-quote me-1"></i> Thư đề xuất đã gửi:</div>
+                                        @item.Application.ThuGioiThieu
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-4 text-secondary small">
+                                        <div>Thù lao đề xuất: <strong class="text-danger fs-6">@(item.Application.ThulaoDeXuat.HasValue ? item.Application.ThulaoDeXuat.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")</strong></div>
+                                        <div>Thời gian cam kết: <strong class="text-dark">@item.Application.ThoiGianHoanThanhDeXuat</strong></div>
+                                        <div>Ngày nộp đơn: <strong class="text-dark">@item.Application.NgayUngTuyen.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                                    </div>
+                                </div>
+
+                                <!-- Cột Phải: Hành động -->
+                                <div class="d-flex flex-column align-items-md-end gap-2 text-md-end min-w-160">
+                                    @if (item.Application.TrangThaiUngTuyen == "ChapNhan" || item.Application.TrangThaiUngTuyen == "DaLapHopDong")
+                                    {
+                                        <a href="/HopDong" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm">
+                                            <i class="bi bi-file-earmark-ruled me-1"></i> Xem hợp đồng
+                                        </a>
+                                    }
+                                    <a href="/JobPost/Details/@item.Job.MaJob" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                        Xem bài tuyển dụng
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

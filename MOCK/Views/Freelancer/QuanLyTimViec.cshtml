@@ -1,0 +1,227 @@
+@model MOCK.Models.ViewModels.QuanLyTimViecViewModel
+@{
+    ViewData["Title"] = "Quản lý Tìm việc (Bài đăng Năng lực)";
+    var student = Model.StudentInfo;
+    var user = Model.UserInfo;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/Freelancer/Profile/1" class="text-decoration-none text-muted">Freelancer</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Quản lý tìm việc</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-person-workspace text-success me-2"></i>Quản lý Bài đăng Tìm việc
+            </h3>
+            <p class="text-muted small mb-0">Quản lý toàn bộ danh sách dịch vụ & bài đăng tìm việc của bạn trên hệ thống (bảng BaiDangTimViec_FreelancerStudent).</p>
+        </div>
+        <div class="mt-2 mt-md-0">
+            <a href="/Freelancer/DangTinTimViec" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Đăng bài tìm việc mới
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+                <span class="text-muted small fw-semibold">TỔNG BÀI ĐĂNG</span>
+                <h3 class="fw-bold text-dark mt-1 mb-0">@Model.TongSoBaiDang</h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+                <span class="text-muted small fw-semibold">ĐANG HIỂN THỊ</span>
+                <h3 class="fw-bold text-success mt-1 mb-0">@Model.SoDangHienThi</h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+                <span class="text-muted small fw-semibold">ĐÃ ẨN</span>
+                <h3 class="fw-bold text-secondary mt-1 mb-0">@Model.SoDaAn</h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+                <span class="text-muted small fw-semibold">ĐÃ NHẬN VIỆC</span>
+                <h3 class="fw-bold text-primary mt-1 mb-0">@Model.SoDaNhanViec</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-3 mb-4">
+        <form method="get" asp-action="QuanLyTimViec" class="row g-2 align-items-center">
+            <div class="col-12 col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="keyword" value="@Model.Keyword" class="form-control bg-light border-start-0" placeholder="Tìm theo tiêu đề, kỹ năng hoặc mô tả..." />
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select bg-light">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="DangHienThi" selected="@(Model.FilterStatus == "DangHienThi")">Đang hiển thị</option>
+                    <option value="DaAn" selected="@(Model.FilterStatus == "DaAn")">Đã ẩn</option>
+                    <option value="DaNhanViec" selected="@(Model.FilterStatus == "DaNhanViec")">Đã nhận việc</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-success w-100 rounded-pill">
+                    <i class="bi bi-funnel me-1"></i> Lọc
+                </button>
+                <a href="/Freelancer/QuanLyTimViec" class="btn btn-light border rounded-pill px-3" title="Đặt lại">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Job Postings List -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        @if (!Model.DanhSachBaiDang.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-file-earmark-plus fs-1 d-block mb-2"></i>
+                <h5>Bạn chưa có bài đăng tìm việc nào</h5>
+                <p class="small mb-3">Hãy tạo bài đăng tìm việc đầu tiên để tiếp cận hàng nghìn Nhà tuyển dụng tiềm năng!</p>
+                <a href="/Freelancer/DangTinTimViec" class="btn btn-success rounded-pill px-4">
+                    <i class="bi bi-plus-circle me-1"></i> Đăng bài tìm việc ngay
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small">
+                        <tr>
+                            <th>Mã bài</th>
+                            <th>Tiêu đề bài đăng</th>
+                            <th>Kỹ năng</th>
+                            <th>Mức giá từ</th>
+                            <th>Ngày đăng</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var post in Model.DanhSachBaiDang)
+                        {
+                            <tr>
+                                <td class="fw-bold text-dark small">@post.MaBaiDang</td>
+                                <td>
+                                    <div class="fw-bold text-dark small mb-1">@post.Tieude</div>
+                                    <div class="text-muted small" style="max-width: 320px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @post.Mota
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1" style="max-width: 200px;">
+                                        @if (!string.IsNullOrEmpty(post.Kynang))
+                                        {
+                                            @foreach (var s in post.Kynang.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                                            {
+                                                <span class="badge bg-light text-dark border small">@s</span>
+                                            }
+                                        }
+                                    </div>
+                                </td>
+                                <td class="fw-bold text-success small">
+                                    @((post.MucGiaTu ?? 0).ToString("N0")) đ
+                                </td>
+                                <td class="text-muted small">
+                                    @post.Thoigiandang.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @if (post.Trangthai == "DangHienThi")
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">
+                                            <i class="bi bi-broadcast me-1"></i> Đang hiển thị
+                                        </span>
+                                    }
+                                    else if (post.Trangthai == "DaAn")
+                                    {
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 small">
+                                            <i class="bi bi-eye-slash me-1"></i> Đã ẩn
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 small">
+                                            <i class="bi bi-check-circle me-1"></i> Đã nhận việc
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/Freelancer/DangTinTimViec?id=@post.MaBaiDang" class="btn btn-outline-secondary" title="Chỉnh sửa bài đăng">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+
+                                        @if (post.Trangthai == "DangHienThi")
+                                        {
+                                            <form method="post" asp-action="ToggleTrangThaiBaiDang" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="maBaiDang" value="@post.MaBaiDang" />
+                                                <input type="hidden" name="trangThai" value="DaAn" />
+                                                <button type="submit" class="btn btn-outline-secondary" title="Ẩn bài đăng">
+                                                    <i class="bi bi-eye-slash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-action="ToggleTrangThaiBaiDang" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="maBaiDang" value="@post.MaBaiDang" />
+                                                <input type="hidden" name="trangThai" value="DangHienThi" />
+                                                <button type="submit" class="btn btn-outline-success" title="Hiển thị lại bài đăng">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <form method="post" asp-action="XoaBaiDang" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài đăng tìm việc này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="maBaiDang" value="@post.MaBaiDang" />
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa bài đăng">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

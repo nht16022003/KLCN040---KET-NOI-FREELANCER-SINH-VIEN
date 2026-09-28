@@ -1,0 +1,174 @@
+@model MOCK.Models.ViewModels.AdminBalanceAdjustmentViewModel
+@{
+    ViewData["Title"] = "Điều chỉnh Số dư Ví (AD-UC-04.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-04.01: Điều chỉnh Số dư Ví</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-sliders2-vertical text-warning me-2"></i>Điều chỉnh Số dư Ví Thủ công
+            </h3>
+            <p class="text-muted small mb-0">Cộng hoặc trừ số dư ví người dùng trong các trường hợp bồi hoàn, phạt vi phạm hoặc xử lý sự cố thanh toán (bảng DieuChinhSoDu).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/YeuCauNapTien" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                <i class="bi bi-wallet2 me-1"></i> Yêu cầu nạp tiền
+            </a>
+            <a href="/Admin/QuanLyGiaoDich" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-safe me-1"></i> Sổ giao dịch
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Adjustment Form -->
+        <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pencil-square text-warning me-2"></i>Thực hiện Điều chỉnh Số dư</h5>
+
+                <form method="post" asp-action="DieuChinhSoDu">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Chọn Ví Người dùng <span class="text-danger">*</span></label>
+                        <select asp-for="FormModel.MaWallet" class="form-select bg-light">
+                            @foreach (var w in Model.Wallets)
+                            {
+                                <option value="@w.MaWallet">
+                                    [Ví #@w.MaWallet] @w.TenChuVi (@w.RoleName) - Số dư: @w.SoDuKhaDung.ToString("N0") đ
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="FormModel.MaWallet" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Loại điều chỉnh <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="FormModel.LoaiDieuChinh" id="typeAdd" value="CongTien" checked />
+                                <label class="form-check-label text-success fw-semibold" for="typeAdd">
+                                    <i class="bi bi-plus-circle me-1"></i> Cộng tiền (Tăng số dư)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="FormModel.LoaiDieuChinh" id="typeSub" value="TruTien" />
+                                <label class="form-check-label text-danger fw-semibold" for="typeSub">
+                                    <i class="bi bi-dash-circle me-1"></i> Trừ tiền (Giảm số dư)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Số tiền điều chỉnh (VNĐ) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" asp-for="FormModel.SoTien" class="form-control bg-light" step="1000" min="1000" />
+                            <span class="input-group-text bg-light">VNĐ</span>
+                        </div>
+                        <span asp-validation-for="FormModel.SoTien" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Lý do điều chỉnh (Kiểm toán) <span class="text-danger">*</span></label>
+                        <textarea asp-for="FormModel.LyDo" class="form-control bg-light" rows="3" placeholder="Nhập lý do điều chỉnh ví (ví dụ: Bồi hoàn tranh chấp, thưởng sự kiện, truy thu phí...)..."></textarea>
+                        <span asp-validation-for="FormModel.LyDo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3 small text-muted">
+                        <i class="bi bi-exclamation-triangle text-warning me-1"></i>
+                        Mọi thao tác điều chỉnh sẽ lập tức làm thay đổi số dư ví người dùng và tự động ghi nhận vào sổ kiểm toán `DieuChinhSoDu` cùng `LichSuGiaoDich`.
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 rounded-3 py-2 fw-semibold text-dark" onclick="return confirm('Bạn có chắc chắn muốn thực hiện điều chỉnh số dư này?');">
+                        <i class="bi bi-check2-circle me-1"></i> Xác nhận Điều chỉnh
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Adjustment History -->
+        <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-journal-bookmark text-primary me-2"></i>Lịch sử Điều chỉnh Số dư (DieuChinhSoDu)</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small">
+                            <tr>
+                                <th>Mã ĐC</th>
+                                <th>Ví</th>
+                                <th>Loại</th>
+                                <th>Số tiền</th>
+                                <th>Trước &rarr; Sau</th>
+                                <th>Lý do</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.LichSuDieuChinhs.Any())
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">Chưa có lịch sử điều chỉnh số dư nào.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var dc in Model.LichSuDieuChinhs)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-dark small">#@dc.MaDieuChinh</td>
+                                        <td class="small">Ví #@dc.MaWallet</td>
+                                        <td>
+                                            @if (dc.LoaiDieuChinh == "CongTien")
+                                            {
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success small">+ Cộng</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger small">- Trừ</span>
+                                            }
+                                        </td>
+                                        <td class="fw-bold small @(dc.LoaiDieuChinh == "CongTien" ? "text-success" : "text-danger")">
+                                            @dc.SoTienDieuChinh.ToString("N0") đ
+                                        </td>
+                                        <td class="small text-muted font-monospace">
+                                            @dc.SoDuTruoc.ToString("N0") &rarr; @dc.SoDuSau.ToString("N0")
+                                        </td>
+                                        <td class="small text-dark" style="max-width: 180px;">
+                                            @dc.LyDo
+                                        </td>
+                                        <td class="small text-muted">@dc.NgayDieuChinh.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

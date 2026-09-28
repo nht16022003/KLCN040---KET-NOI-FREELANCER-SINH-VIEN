@@ -1,0 +1,224 @@
+@model MOCK.Models.ViewModels.NapTienViewModel
+@{
+    ViewData["Title"] = "Nạp tiền vào ví";
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Wallet" asp-action="Index" class="text-decoration-none text-muted">Ví tài khoản</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Nạp tiền</li>
+        </ol>
+    </nav>
+
+    <!-- ALERT -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-wallet-fill text-success me-2"></i>Nạp Tiền Vào Số Dư Ví
+        </h3>
+        <p class="text-muted small mb-0">
+            Nạp tiền trực tuyến tự động 24/7 qua cổng thanh toán chuẩn VietQR (Chuyển khoản 247) hoặc thẻ ATM/VNPAY.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- ==================== CỘT TRÁI: FORM CHỌN SỐ TIỀN & PHƯƠNG THỨC ==================== -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 18px; background: #FFFFFF;">
+                <h5 class="fw-bold text-dark mb-3">1. Chọn số tiền cần nạp</h5>
+
+                <!-- Gợi ý số tiền nhanh -->
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 quick-amount-btn @(Model.SoTien == 100000 ? "active" : "")" data-amount="100000">
+                            100.000 đ
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 quick-amount-btn @(Model.SoTien == 200000 ? "active" : "")" data-amount="200000">
+                            200.000 đ
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 quick-amount-btn @(Model.SoTien == 500000 ? "active" : "")" data-amount="500000">
+                            500.000 đ
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 quick-amount-btn @(Model.SoTien == 1000000 ? "active" : "")" data-amount="1000000">
+                            1.000.000 đ
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 quick-amount-btn @(Model.SoTien == 2000000 ? "active" : "")" data-amount="2000000">
+                            2.000.000 đ
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 quick-amount-btn @(Model.SoTien == 5000000 ? "active" : "")" data-amount="5000000">
+                            5.000.000 đ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input nhập số tiền tùy ý -->
+                <form id="amountForm" method="get" asp-controller="Wallet" asp-action="NapTien" class="mb-4">
+                    <label class="form-label small fw-semibold text-secondary">Hoặc nhập số tiền khác (VNĐ):</label>
+                    <div class="input-group">
+                        <input type="number" id="inputSoTien" name="soTien" value="@Model.SoTien" min="10000" step="10000"
+                               class="form-control form-control-lg fw-bold text-success border-end-0 bg-light" />
+                        <span class="input-group-text bg-light border-start-0 fw-bold">VNĐ</span>
+                        <button type="submit" class="btn btn-success fw-bold px-3" style="background-color: var(--primary-green, #3B6E53);">
+                            Cập nhật QR
+                        </button>
+                    </div>
+                    <div class="form-text small">Số tiền nạp tối thiểu: 10.000 VNĐ. Miễn phí phí nạp tiền.</div>
+                </form>
+
+                <h5 class="fw-bold text-dark mb-3">2. Chọn phương thức thanh toán</h5>
+                <div class="d-flex flex-column gap-2 mb-4">
+                    <label class="p-3 border rounded-3 d-flex align-items-center justify-content-between cursor-pointer @(Model.PhuongThuc == "VietQR" ? "border-success bg-success-subtle text-dark" : "bg-light")">
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="radio" name="paymentOption" value="VietQR" checked class="form-check-input" />
+                            <div>
+                                <strong class="d-block"><i class="bi bi-qr-code-scan text-success me-1"></i> Quét mã VietQR (Khuyên dùng)</strong>
+                                <span class="small text-muted">Chuyển khoản 24/7 từ bất kỳ App ngân hàng nào (MB, VCB, BIDV, Techcombank,...)</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-success">Tự động 24/7</span>
+                    </label>
+
+                    <label class="p-3 border rounded-3 d-flex align-items-center justify-content-between cursor-pointer @(Model.PhuongThuc == "VNPAY" ? "border-primary bg-primary-subtle" : "bg-light")">
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="radio" name="paymentOption" value="VNPAY" class="form-check-input" />
+                            <div>
+                                <strong class="d-block"><i class="bi bi-credit-card-2-front text-primary me-1"></i> Cổng VNPAY / Thẻ ATM Nội địa</strong>
+                                <span class="small text-muted">Thanh toán qua thẻ ATM, Visa, MasterCard</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary">Online</span>
+                    </label>
+                </div>
+
+                <!-- Thẻ số dư ví hiện tại -->
+                <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between mt-auto">
+                    <div>
+                        <span class="text-muted small">Số dư ví khả dụng hiện tại:</span>
+                        <div class="fw-bold text-dark fs-5">@Model.Wallet.SoDuKhaDung.ToString("#,##0") VNĐ</div>
+                    </div>
+                    <a asp-controller="Wallet" asp-action="LichSuGiaoDich" class="btn btn-sm btn-outline-secondary">
+                        Lịch sử ví
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CỘT PHẢI: MÃ VIETQR & THÔNG TIN CHUYỂN KHOẢN ==================== -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4 text-center" style="border-radius: 18px; background: #FFFFFF;">
+                <div class="d-inline-block px-3 py-1 bg-success-subtle text-success fw-bold rounded-pill mb-2 small">
+                    <i class="bi bi-shield-check me-1"></i> Giao dịch được bảo lãnh an toàn
+                </div>
+
+                <h5 class="fw-bold text-dark mb-1">Quét mã QR để hoàn tất thanh toán</h5>
+                <p class="text-muted small mb-3">Mở App Ngân hàng của bạn và quét mã QR bên dưới</p>
+
+                <!-- KHUNG ẢNH QR CODE -->
+                <div class="d-inline-block p-3 border rounded-4 bg-white shadow-sm mb-3">
+                    <img src="@Model.QrCodeImageUrl" alt="VietQR Nap Tien" class="img-fluid rounded-3" style="max-width: 250px; max-height: 250px;" />
+                </div>
+
+                <!-- BẢNG CHI TIẾT THÔNG TIN CHUYỂN KHOẢN -->
+                <div class="text-start bg-light p-3 rounded-3 mb-3" style="font-size: 0.88rem;">
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-secondary">Ngân hàng thụ hưởng:</span>
+                        <strong class="text-dark">@Model.TenNganHang</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                        <span class="text-secondary">Số tài khoản:</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <strong class="text-dark fs-6" id="stkText">@Model.SoTaiKhoan</strong>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 copy-btn" data-clipboard-text="@Model.SoTaiKhoan" title="Sao chép STK">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span class="text-secondary">Chủ tài khoản:</span>
+                        <strong class="text-dark">@Model.ChuTaiKhoan</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                        <span class="text-secondary">Số tiền nạp:</span>
+                        <strong class="text-success fs-5">@Model.SoTien.ToString("#,##0") VNĐ</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-1">
+                        <span class="text-secondary">Nội dung chuyển khoản:</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <strong class="text-danger fw-bold fs-6" id="memoText">@Model.NoiDungChuyenKhoan</strong>
+                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 copy-btn" data-clipboard-text="@Model.NoiDungChuyenKhoan" title="Sao chép nội dung">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NÚT XÁC NHẬN GIẢ LẬP ĐÃ CHUYỂN TIỀN -->
+                <form method="post" asp-controller="Wallet" asp-action="XacNhanNapTien">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="soTien" value="@Model.SoTien" />
+                    <input type="hidden" name="phuongThuc" value="@Model.PhuongThuc" />
+                    <input type="hidden" name="noiDung" value="Nạp @Model.SoTien.ToString("#,##0")đ qua VietQR (@Model.NoiDungChuyenKhoan)" />
+                    <input type="hidden" name="maThamChieu" value="@Model.MaGiaoDichThamChieu" />
+
+                    <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm py-3 mb-2" style="border-radius: 12px; background-color: var(--primary-green, #3B6E53);">
+                        <i class="bi bi-check-circle-fill me-2"></i> Tôi đã hoàn tất chuyển tiền (Xác nhận nạp)
+                    </button>
+                </form>
+
+                <div class="small text-muted">
+                    Hệ thống sẽ tự động đối soát và cộng tiền trong 30 giây - 2 phút.
+                    <br />Nếu quá 10 phút chưa nhận được, <a asp-controller="Wallet" asp-action="HoTroNapTien" class="text-success fw-bold text-decoration-none">Bấm vào đây để gửi yêu cầu hỗ trợ</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Quick amount button click
+        document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const amount = this.getAttribute('data-amount');
+                document.getElementById('inputSoTien').value = amount;
+                document.getElementById('amountForm').submit();
+            });
+        });
+
+        // Copy button toast/feedback
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const text = this.getAttribute('data-clipboard-text');
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+}
