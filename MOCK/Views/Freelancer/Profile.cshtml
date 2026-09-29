@@ -1,0 +1,852 @@
+@model MOCK.Models.ViewModels.FreelancerProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ của " + Model.User.HotenUser;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var chuyenNganhName = Model.FreelancerStudent.ChuyenNganh?.TenChuyenNganh ??
+                          (Model.FreelancerStudent.MaChuyenNganh == "KTPM" ? "Kỹ thuật phần mềm" :
+                          Model.FreelancerStudent.MaChuyenNganh == "TKDH" ? "Thiết kế đồ họa" :
+                          "Công nghệ thông tin");
+}
+
+<style>
+    .profile-page-wrapper {
+        background-color: #F8FAF9;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    /* ============================================================ */
+    /* COVER & PROFILE BANNER                                       */
+    /* ============================================================ */
+    .profile-banner-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid #E5ECE7;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .cover-image-container {
+        height: 180px;
+        background: linear-gradient(135deg, #CFE0D6 0%, #E8F1EC 50%, #BBD6C7 100%);
+        position: relative;
+        background-image: url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center 35%;
+    }
+
+    .cover-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.2) 60%, rgba(255, 255, 255, 0.7) 100%);
+    }
+
+    .cover-quote-art {
+        position: absolute;
+        right: 36px;
+        top: 24px;
+        font-family: 'Caveat', cursive;
+        font-size: 2.2rem;
+        color: #2D6346;
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: right;
+        transform: rotate(-3deg);
+    }
+
+    .profile-header-content {
+        padding: 0 32px 24px;
+        position: relative;
+    }
+
+    .avatar-wrapper-circle {
+        position: relative;
+        margin-top: -65px;
+        width: 124px;
+        height: 124px;
+        flex-shrink: 0;
+    }
+
+    .avatar-main-img {
+        width: 124px;
+        height: 124px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #FFFFFF;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        background-color: #FFFFFF;
+    }
+
+    .avatar-status-pill {
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #D4E8DC;
+        color: #1E5C38;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        border: 1px solid #B8D6C4;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-dot-active {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #22C55E;
+    }
+
+    .profile-name-title {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0F172A;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+    }
+
+    .verified-badge-icon {
+        color: #1D9BF0;
+        font-size: 1.3rem;
+    }
+
+    .profile-role-subline {
+        color: #1E6E38;
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+
+    .profile-school-subline {
+        color: #64748B;
+        font-size: 0.88rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .profile-quote-desc {
+        color: #475569;
+        font-size: 0.9rem;
+        font-style: italic;
+        line-height: 1.45;
+        max-width: 800px;
+        margin-bottom: 12px;
+    }
+
+    .profile-meta-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 0.82rem;
+        color: #64748B;
+    }
+
+    .profile-meta-chips span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-contact-green {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 8px 24px;
+        border-radius: 24px;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s;
+    }
+
+    .btn-contact-green:hover {
+        background-color: #15492A;
+        transform: translateY(-1px);
+    }
+
+    .btn-save-outlined {
+        background-color: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 8px 18px;
+        border-radius: 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-save-outlined:hover {
+        border-color: #94A3B8;
+        background-color: #F8FAFC;
+    }
+
+    /* ============================================================ */
+    /* STATS METRICS STRIP                                          */
+    /* ============================================================ */
+    .metrics-strip-container {
+        background: #FFFFFF;
+        border-radius: 18px;
+        border: 1px solid #E5ECE7;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .metric-col {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 4px 12px;
+        border-right: 1px solid #EEF2F6;
+    }
+
+    .metric-col:last-child {
+        border-right: none;
+    }
+
+    .metric-icon-box {
+        font-size: 1.5rem;
+    }
+
+    .metric-main-value {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.1;
+    }
+
+    .metric-sub-label {
+        font-size: 0.74rem;
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    /* ============================================================ */
+    /* PROFILE NAVIGATION TABS                                      */
+    /* ============================================================ */
+    .profile-nav-tabs {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        border-bottom: 2px solid #E2E8F0;
+        margin-bottom: 24px;
+        padding-bottom: 2px;
+        overflow-x: auto;
+    }
+
+    .profile-tab-item {
+        color: #64748B;
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        padding: 8px 4px 12px;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: color 0.2s;
+    }
+
+    .profile-tab-item:hover {
+        color: #1E6E38;
+    }
+
+    .profile-tab-item.active {
+        color: #1E6E38;
+        font-weight: 700;
+    }
+
+    .profile-tab-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #1E6E38;
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* ============================================================ */
+    /* CONTENT CARDS                                                */
+    /* ============================================================ */
+    .section-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 18px;
+    }
+
+    /* Thông tin cơ bản Table */
+    .basic-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        font-size: 0.88rem;
+    }
+
+    .basic-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px dashed #F1F5F9;
+        padding-bottom: 8px;
+    }
+
+    .basic-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .basic-info-label {
+        color: #64748B;
+        font-weight: 500;
+        width: 45%;
+    }
+
+    .basic-info-val {
+        color: #0F172A;
+        font-weight: 600;
+        width: 55%;
+        text-align: right;
+    }
+
+    /* Badges & Projects */
+    .skill-tag-badge {
+        background: #EEF6F1;
+        color: #1C5F37;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid #D2E7DC;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 8px;
+    }
+
+    .project-grid-box {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 16px;
+    }
+
+    .project-preview-card {
+        background: #FAFDFB;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .project-preview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        border-color: #BBD9C7;
+    }
+
+    .project-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 4px;
+    }
+
+    .project-role-tag {
+        font-size: 0.72rem;
+        color: #1E6E38;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .project-desc {
+        font-size: 0.78rem;
+        color: #64748B;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    /* Education card right */
+    .edu-card-content {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .edu-logo-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: #EBF4F0;
+        color: #1E6E38;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        border: 1px solid #CBE2D4;
+    }
+
+    .edu-school-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+    }
+
+    .edu-meta-sub {
+        font-size: 0.78rem;
+        color: #64748B;
+        line-height: 1.35;
+    }
+
+    .review-item-box {
+        border-bottom: 1px solid #F1F5F9;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .review-item-box:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="profile-page-wrapper">
+    <div class="container-fluid px-lg-5 pt-4">
+        
+        <!-- ==================== 1. TOP COVER & PROFILE BANNER ==================== -->
+        <div class="profile-banner-card">
+            <!-- Cover image -->
+            <div class="cover-image-container">
+                <div class="cover-overlay"></div>
+                <div class="cover-quote-art d-none d-md-block">
+                    Build<br />a better<br />Future
+                </div>
+            </div>
+
+            <!-- Profile Info Header Content -->
+            <div class="profile-header-content">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    
+                    <!-- Left: Avatar + Names & Intro -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-3 gap-sm-4">
+                        <!-- Avatar with status -->
+                        <div class="avatar-wrapper-circle">
+                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=@(Model.User.TenTaiKhoanUser)"
+                                 alt="@Model.User.HotenUser" class="avatar-main-img" />
+                            <div class="avatar-status-pill">
+                                <span class="status-dot-active"></span>
+                                @(Model.FreelancerStudent.TrangthaiNhanViec ? "Đang hoạt động" : "Tạm ngưng")
+                            </div>
+                        </div>
+
+                        <!-- Name & Subtext -->
+                        <div class="pt-2">
+                            <h2 class="profile-name-title">
+                                @Model.User.HotenUser
+                                <i class="bi bi-patch-check-fill verified-badge-icon" title="Đã xác minh sinh viên"></i>
+                            </h2>
+                            <div class="profile-role-subline">
+                                Sinh viên @chuyenNganhName
+                            </div>
+                            <div class="profile-school-subline">
+                                @Model.FreelancerStudent.TenTruong • Năm @Model.FreelancerStudent.NamThu
+                            </div>
+                            <p class="profile-quote-desc">
+                                “@(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent.Gioithieu ?? "Tôi là sinh viên đam mê phát triển web và ứng dụng. Luôn nỗ lực mang đến sản phẩm chất lượng, đúng yêu cầu và đúng deadline.")”
+                            </p>
+                            <div class="profile-meta-chips">
+                                <span><i class="bi bi-geo-alt-fill text-secondary"></i>
+                                    @Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
+                                    <span><i class="bi bi-globe text-secondary"></i> @(Model.FreelancerStudent.NgonNgu ??
+                                                 "Tiếng Việt, Tiếng Anh")</span>
+                                        <span><i class="bi bi-calendar-event text-secondary"></i> Tham gia từ
+                                            @Model.User.NgayTao.ToString("MM/yyyy")</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right: Action Buttons -->
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <button type="button" class="btn-contact-green"
+                                            onclick="alert('Đã gửi thông tin liên hệ tới @Model.User.HotenUser!')">
+                                        Liên hệ
+                                    </button>
+                                    <button type="button" class="btn-save-outlined"
+                                            onclick="alert('Đã lưu hồ sơ vào danh sách yêu thích!')">
+                                        <i class="bi bi-heart"></i> Lưu
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==================== 2. STATS / METRICS STRIP ==================== -->
+                    <div class="metrics-strip-container">
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 text-center text-sm-start">
+                
+                            <!-- Stat 1: Rating -->
+                            <div class="col metric-col">
+                                <div class="metric-icon-box text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-main-value">4.8</div>
+                                    <div class="metric-sub-label">(24 đánh giá)</div>
+                                </div>
+                            </div>
+
+                            <!-- Stat 2: Projects completed -->
+                            <div class="col metric-col">
+                                <div class="metric-icon-box text-primary">
+                                    <i class="bi bi-briefcase"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-main-value">@(Model.DuAns.Count > 0 ? Model.DuAns.Count * 4 : 12)</div>
+                                    <div class="metric-sub-label">Dự án hoàn thành</div>
+                                </div>
+                            </div>
+
+                            <!-- Stat 3: Completion rate -->
+                            <div class="col metric-col">
+                                <div class="metric-icon-box text-success">
+                                    <i class="bi bi-patch-check"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-main-value">98%</div>
+                                    <div class="metric-sub-label">Tỷ lệ hoàn thành</div>
+                                </div>
+                            </div>
+
+                            <!-- Stat 4: Experience -->
+                            <div class="col metric-col">
+                                <div class="metric-icon-box text-info">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-main-value">@Model.FreelancerStudent.NamThu năm</div>
+                                    <div class="metric-sub-label">Kinh nghiệm</div>
+                                </div>
+                            </div>
+
+                            <!-- Stat 5: Clients -->
+                            <div class="col metric-col">
+                                <div class="metric-icon-box text-secondary">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-main-value">15</div>
+                                    <div class="metric-sub-label">Khách hàng</div>
+                                </div>
+                            </div>
+
+                            <!-- Stat 6: Satisfaction -->
+                            <div class="col metric-col">
+                                <div class="metric-icon-box text-success">
+                                    <i class="bi bi-hand-thumbs-up"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-main-value">100%</div>
+                                    <div class="metric-sub-label">Khách hàng hài lòng</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ==================== 3. NAVIGATION TABS ==================== -->
+                    <div class="profile-nav-tabs">
+                        <a href="#tongquan" class="profile-tab-item active">
+                            <i class="bi bi-grid-1x2"></i> Tổng quan
+                        </a>
+                        <a href="#duan" class="profile-tab-item">
+                            <i class="bi bi-folder"></i> Dự án (@Model.DuAns.Count)
+                        </a>
+                        <a href="#danhgia" class="profile-tab-item">
+                            <i class="bi bi-star"></i> Đánh giá
+                        </a>
+                        <a href="#kynang" class="profile-tab-item">
+                            <i class="bi bi-gem"></i> Kỹ năng
+                        </a>
+                        <a href="#hocvan" class="profile-tab-item">
+                            <i class="bi bi-mortarboard"></i> Học vấn
+                        </a>
+                        <a href="#chungchi" class="profile-tab-item">
+                            <i class="bi bi-award"></i> Chứng chỉ
+                        </a>
+                        <a href="#dichvu" class="profile-tab-item">
+                            <i class="bi bi-layers"></i> Dịch vụ
+                        </a>
+                        <a href="#hoatdong" class="profile-tab-item">
+                            <i class="bi bi-activity"></i> Hoạt động
+                        </a>
+                    </div>
+
+                    <!-- ==================== 4. MAIN 3-COLUMN CONTENT GRID ==================== -->
+                    <div class="row g-4">
+            
+                        <!-- CỘT 1: THÔNG TIN CƠ BẢN (LEFT) -->
+                        <div class="col-12 col-lg-3">
+                            <div class="section-card">
+                                <h5 class="section-card-title">Thông tin cơ bản</h5>
+                    
+                                <div class="basic-info-list">
+                                    <div class="basic-info-row">
+                                        <span class="basic-info-label">Họ và tên</span>
+                                        <span class="basic-info-val">@Model.User.HotenUser</span>
+                                    </div>
+                                    <div class="basic-info-row">
+                                        <span class="basic-info-label">Ngày sinh</span>
+                                        <span class="basic-info-val">@(Model.User.Ngaysinh.HasValue?
+                                                                        Model.User.Ngaysinh.Value.ToString("dd/MM/yyyy") : "15/05/2003")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Giới tính</span>
+                                            <span class="basic-info-val">Nam</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Địa điểm</span>
+                                            <span class="basic-info-val">@Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Ngôn ngữ</span>
+                                            <span class="basic-info-val">@(Model.FreelancerStudent.NgonNgu ?? "Tiếng Việt, Tiếng Anh")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Kỹ năng cơ bản</span>
+                                            <span class="basic-info-val">@(Model.FreelancerStudent.KyNangCoBan ?? "Word, Excel, PowerPoint")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Trạng thái</span>
+                                            <span class="basic-info-val text-success">@(Model.FreelancerStudent.TrangthaiNhanViec ?
+                                                                      "Đang nhận việc" : "Tạm ngưng")</span>
+                                            </div>
+                                            <div class="basic-info-row">
+                                                <span class="basic-info-label">Mức giá tham khảo</span>
+                                                <span class="basic-info-val text-danger">@(Model.FreelancerStudent.ChiPhiTu.HasValue?
+                                                                                Model.FreelancerStudent.ChiPhiTu.Value.ToString("#,##0") + " VNĐ/Dự án" : "Thỏa thuận")</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Thời gian có thể làm</span>
+                                                    <span class="basic-info-val">Part-time / Linh hoạt</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Trường</span>
+                                                    <span class="basic-info-val">@Model.FreelancerStudent.TenTruong</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Mã trường</span>
+                                                    <span class="basic-info-val">@Model.FreelancerStudent.MaTruong</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Năm thứ</span>
+                                                    <span class="basic-info-val">Năm @Model.FreelancerStudent.NamThu</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Chuyên ngành</span>
+                                                    <span class="basic-info-val">@chuyenNganhName
+                                                        (@Model.FreelancerStudent.MaChuyenNganh)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- CỘT 2: GIỚI THIỆU, KỸ NĂNG & DỰ ÁN (CENTER) -->
+                                        <div class="col-12 col-lg-6">
+                
+                                            <!-- 1. Giới thiệu bản thân -->
+                                            <div class="section-card">
+                                                <h5 class="section-card-title">Giới thiệu bản thân</h5>
+                                                <p class="text-secondary leading-relaxed mb-0" style="line-height: 1.6;">
+                                                    @(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent.Gioithieu ?? "Tôi là sinh viên đam mê công nghệ và sáng tạo, có kinh nghiệm thực chiến qua nhiều dự án học tập và thực tế. Luôn đặt chất lượng sản phẩm và deadline của khách hàng lên hàng đầu.")
+                                                </p>
+                                                @if (!string.IsNullOrEmpty(Model.Portfolio?.Url_video))
+                                                {
+                                                    <div class="mt-3">
+                                                        <a href="@Model.Portfolio.Url_video" target="_blank"
+                                                           class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                            <i class="bi bi-play-circle-fill me-1"></i> Xem Video Portfolio
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- 2. Kỹ năng chuyên ngành -->
+                                            <div class="section-card">
+                                                <h5 class="section-card-title">Kỹ năng chuyên ngành</h5>
+                                                <div class="d-flex flex-wrap">
+                                                    @foreach (var k in Model.KyNangs)
+                                                    {
+                                                        <span class="skill-tag-badge">@k.TenKyNang</span>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <!-- 3. Dự án nổi bật -->
+                                            <div class="section-card">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h5 class="section-card-title mb-0">Dự án nổi bật</h5>
+                                                    <span class="badge bg-light text-muted border">@Model.DuAns.Count dự án</span>
+                                                </div>
+
+                                                @if (!Model.DuAns.Any())
+                                                {
+                                                    <div class="text-center py-4 text-muted small">
+                                                        <i class="bi bi-folder-x display-6"></i>
+                                                        <p class="mt-2 mb-0">Chưa có dự án nào được công khai trong portfolio.</p>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="project-grid-box">
+                                                        @foreach (var da in Model.DuAns)
+                                                        {
+                                                            <div class="project-preview-card">
+                                                                <div>
+                                                                    <div class="project-title text-truncate" title="@da.TenDuAn">@da.TenDuAn</div>
+                                                                    <div class="project-role-tag"><i class="bi bi-person-workspace me-1"></i>@da.VaiTro</div>
+                                                                    <div class="project-desc">@da.MoTa</div>
+                                                                    <div class="small text-muted mb-2">
+                                                                        <strong>Công nghệ:</strong> @da.Congnghe
+                                                                    </div>
+                                                                </div>
+                                                                <div class="d-flex gap-2 pt-2 border-top">
+                                                                    @if (!string.IsNullOrEmpty(da.LinkGithub))
+                                                                    {
+                                                                        <a href="@da.LinkGithub" target="_blank"
+                                                                           class="btn btn-xs btn-outline-dark rounded-pill px-2 py-1 small"
+                                                                           style="font-size: 0.72rem;">
+                                                                            <i class="bi bi-github"></i> Github
+                                                                        </a>
+                                                                    }
+                                                                    @if (!string.IsNullOrEmpty(da.LinkDemo))
+                                                                    {
+                                                                        <a href="@da.LinkDemo" target="_blank"
+                                                                           class="btn btn-xs btn-outline-primary rounded-pill px-2 py-1 small"
+                                                                           style="font-size: 0.72rem;">
+                                                                            <i class="bi bi-link-45deg"></i> Demo
+                                                                        </a>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+
+                                        </div>
+
+                                        <!-- CỘT 3: HỌC VẤN, CHỨNG CHỈ & ĐÁNH GIÁ (RIGHT) -->
+                                        <div class="col-12 col-lg-3">
+                
+                                            <!-- 1. Học vấn -->
+                                            <div class="section-card">
+                                                <h5 class="section-card-title">Học vấn</h5>
+                                                <div class="edu-card-content">
+                                                    <div class="edu-logo-box">
+                                                        <i class="bi bi-mortarboard-fill"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="edu-school-title">@Model.FreelancerStudent.TenTruong</div>
+                                                        <div class="edu-meta-sub">
+                                                            <div>@chuyenNganhName</div>
+                                                            <div>@Model.FreelancerStudent.NienKhoa (Năm @Model.FreelancerStudent.NamThu)</div>
+                                                            <div class="text-success fw-bold">GPA: @Model.FreelancerStudent.GPA.ToString("0.0#") /
+                                                                4.0</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- 2. Chứng chỉ / Xác minh sinh viên -->
+                                                <div class="section-card">
+                                                    <h5 class="section-card-title">Chứng chỉ & Xác minh</h5>
+                                                    @if (Model.MinhChung != null)
+                                                    {
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <div class="text-success fs-3">
+                                                                <i class="bi bi-shield-fill-check"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="fw-bold text-dark small">@Model.MinhChung.LoaiMinhChung</div>
+                                                                <div class="text-success small fw-semibold">
+                                                                    <i class="bi bi-check-circle me-1"></i>@Model.MinhChung.TrangThaiGuiMinhChung
+                                                                </div>
+                                                                <div class="text-muted" style="font-size: 0.72rem;">Xác minh bởi Ban quản trị</div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-muted small">
+                                                            <i class="bi bi-file-earmark-check me-1"></i> Hồ sơ đang chờ gửi minh chứng sinh viên.
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                                <!-- 3. Đánh giá gần đây -->
+                                                <div class="section-card">
+                                                    <h5 class="section-card-title">Đánh giá gần đây</h5>
+                    
+                                                    <!-- Review item 1 -->
+                                                    <div class="review-item-box">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold text-dark small">Công ty Công Nghệ ABC</span>
+                                                            <span class="text-warning small"><i class="bi bi-star-fill"></i> 5.0</span>
+                                                        </div>
+                                                        <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
+                                                            "Bạn sinh viên làm việc rất có trách nhiệm, bàn giao đúng hẹn và code chuẩn cấu trúc."
+                                                        </p>
+                                                        <span class="text-secondary" style="font-size: 0.7rem;">2 tuần trước</span>
+                                                    </div>
+
+                                                    <!-- Review item 2 -->
+                                                    <div class="review-item-box">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold text-dark small">Startup EduTech</span>
+                                                            <span class="text-warning small"><i class="bi bi-star-fill"></i> 4.8</span>
+                                                        </div>
+                                                        <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
+                                                            "Giao tiếp nhanh nhẹn, tiếp thu yêu cầu tốt và hỗ trợ nhiệt tình."
+                                                        </p>
+                                                        <span class="text-secondary" style="font-size: 0.7rem;">1 tháng trước</span>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>

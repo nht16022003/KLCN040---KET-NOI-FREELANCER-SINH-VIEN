@@ -1,0 +1,165 @@
+@model MOCK.Models.ViewModels.AdminTransactionManagementViewModel
+@{
+    ViewData["Title"] = "Quản lý Giao dịch & Escrow (AD-UC-05.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-05.01: Quản lý Giao dịch & Ký quỹ (Escrow)</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-safe text-info me-2"></i>Quản lý Tài chính, Ký quỹ Escrow & Sổ cái Giao dịch
+            </h3>
+            <p class="text-muted small mb-0">Giám sát dòng tiền ký quỹ trung gian an toàn giữa Nhà tuyển dụng và Freelancer, lịch sử luân chuyển tiền tệ toàn hệ thống.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/YeuCauNapTien" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                <i class="bi bi-wallet2 me-1"></i> Nạp tiền
+            </a>
+            <a href="/Admin/CauHinhPhi" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-percent me-1"></i> Biểu phí & Doanh thu
+            </a>
+        </div>
+    </div>
+
+    <!-- Escrow Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Tổng Tiền Đang Ký Quỹ (Escrow)</span>
+                        <h3 class="fw-bold text-primary mt-1 mb-0">@Model.TongTienDangKyQuy.ToString("N0") <small class="fs-6">đ</small></h3>
+                    </div>
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 fs-3">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Hợp Đồng Đang Đóng Băng Ký Quỹ</span>
+                        <h3 class="fw-bold text-success mt-1 mb-0">@Model.TongHopDongDangKyQuy <small class="fs-6">hợp đồng</small></h3>
+                    </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-3 fs-3">
+                        <i class="bi bi-file-earmark-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="small text-muted fw-semibold">Cơ chế Bảo vệ Thanh toán</span>
+                        <div class="small text-success fw-bold mt-1"><i class="bi bi-check-circle-fill me-1"></i> Tự động giải ngân sau nghiệm thu</div>
+                        <div class="small text-muted">Bảo vệ 100% quyền lợi sinh viên & NTD</div>
+                    </div>
+                    <div class="rounded-circle bg-info bg-opacity-10 text-info p-3 fs-3">
+                        <i class="bi bi-patch-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Escrow Contracts Section -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-shaded text-primary me-2"></i>Danh sách Hợp đồng đang Ký quỹ (Escrow Active)</h5>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th>Mã HĐ</th>
+                        <th>Công việc</th>
+                        <th>Nhà tuyển dụng</th>
+                        <th>Freelancer</th>
+                        <th>Số tiền Ký quỹ</th>
+                        <th>Trạng thái</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.EscrowContracts.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Hiện không có hợp đồng nào đang giữ tiền ký quỹ.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var hd in Model.EscrowContracts)
+                        {
+                            <tr>
+                                <td class="fw-bold text-dark small">@hd.MaHD</td>
+                                <td class="small fw-semibold text-dark">@hd.TenCongViec</td>
+                                <td class="small"><i class="bi bi-building me-1 text-muted"></i>@hd.TenNhaTuyenDung</td>
+                                <td class="small"><i class="bi bi-mortarboard me-1 text-success"></i>@hd.TenFreelancer</td>
+                                <td class="fw-bold text-primary small">@hd.SoTienKyQuy.ToString("N0") đ</td>
+                                <td>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 small">
+                                        @hd.TrangThai
+                                    </span>
+                                </td>
+                                <td class="small text-muted">@hd.NgayBatDau.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- All Transactions Ledger -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-journal-text text-secondary me-2"></i>Sổ cái Lịch sử Giao dịch Toàn hệ thống (LichSuGiaoDich)</h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th>Mã GD</th>
+                        <th>Ví</th>
+                        <th>Loại giao dịch</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Mô tả chi tiết</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tx in Model.RecentTransactions)
+                    {
+                        <tr>
+                            <td class="fw-bold text-dark small">#@tx.MaGiaoDich</td>
+                            <td class="small">Ví #@tx.MaWallet</td>
+                            <td>
+                                <span class="badge bg-light text-dark border small">@tx.LoaiGiaoDich</span>
+                            </td>
+                            <td class="fw-bold small @(tx.SoTien >= 0 ? "text-success" : "text-danger")">
+                                @tx.SoTien.ToString("+#,##0;-#,##0;0") đ
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">@tx.TrangThai</span>
+                            </td>
+                            <td class="small text-dark" style="max-width: 250px;">@tx.NoiDung</td>
+                            <td class="small text-muted">@tx.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

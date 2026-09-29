@@ -1,0 +1,181 @@
+@model MOCK.Models.ViewModels.StudentInvitationsViewModel
+@{
+    ViewData["Title"] = "Lời mời nhận việc trực tiếp";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .invitations-page {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .invite-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .invite-card:hover {
+        border-color: #BBD9C7;
+        box-shadow: 0 8px 24px rgba(27, 94, 54, 0.06);
+    }
+
+    .btn-accept-invite {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.92rem;
+        padding: 10px 24px;
+        border-radius: 30px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(27, 94, 54, 0.2);
+        transition: all 0.2s;
+    }
+
+    .btn-accept-invite:hover {
+        background-color: #14492A;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(27, 94, 54, 0.3);
+    }
+</style>
+
+<div class="invitations-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Lời mời nhận việc trực tiếp</h2>
+                <p class="text-muted small mb-0">Các cơ hội việc làm do Doanh nghiệp chủ động gửi trực tiếp sau khi xem hồ sơ Portfolio của bạn (bảng `YeuCauThueFreelancer`).</p>
+            </div>
+
+            <span class="badge bg-success-subtle text-success border px-3 py-2 fs-7">
+                <i class="bi bi-envelope-open-fill me-1"></i> @Model.PendingCount lời mời đang chờ phản hồi
+            </span>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- List of Invitations -->
+        @if (!Model.Invitations.Any())
+        {
+            <div class="card border-0 rounded-4 shadow-sm p-5 text-center text-muted">
+                <i class="bi bi-envelope-paper display-3 text-muted"></i>
+                <h5 class="fw-bold mt-3 text-secondary">Hiện chưa có lời mời nhận việc nào</h5>
+                <p class="small">Hãy hoàn thiện thêm các dự án trong Portfolio để thu hút nhiều doanh nghiệp tìm đến bạn hơn.</p>
+                <div>
+                    <a href="/Freelancer/Portfolio" class="btn btn-sm btn-outline-success rounded-pill px-4">Cập nhật Portfolio ngay</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.Invitations)
+                {
+                    <div class="col-12">
+                        <div class="invite-card">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-4">
+                                
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-light text-muted border">Mã mời: #REQ_@item.Invitation.MaYeuCau</span>
+                                        @if (item.Invitation.TrangThai == "ChoPhanHoi")
+                                        {
+                                            <span class="badge bg-warning-subtle text-dark border">
+                                                <i class="bi bi-clock-history me-1"></i> Đang chờ phản hồi
+                                            </span>
+                                        }
+                                        else if (item.Invitation.TrangThai == "DongY" || item.Invitation.TrangThai == "DaLapHopDong")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Bạn đã đồng ý nhận việc
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary border">
+                                                <i class="bi bi-x-circle me-1"></i> Đã từ chối
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <h4 class="fw-bold text-dark mb-1">@item.Invitation.TieuDeCongViec</h4>
+
+                                    <div>
+                                        <a href="/Employer/Profile/@item.Employer.MaNhaTuyenDung" class="text-success fw-bold text-decoration-none small">
+                                            <i class="bi bi-building me-1"></i>@(item.Employer.Tencongty ?? item.EmployerUser.HotenUser)
+                                            <i class="bi bi-patch-check-fill text-primary" title="Doanh nghiệp xác thực"></i>
+                                        </a>
+                                    </div>
+
+                                    <!-- Nội dung mô tả -->
+                                    <div class="p-3 bg-light rounded-3 small text-secondary my-3 border">
+                                        <div class="fw-bold text-dark mb-1"><i class="bi bi-chat-left-text me-1"></i> Yêu cầu chi tiết từ doanh nghiệp:</div>
+                                        @item.Invitation.MoTaCongViec
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-4 text-secondary small">
+                                        <div>Ngân sách đề nghị: <strong class="text-danger fs-6">@(item.Invitation.NganSachDeNghi.HasValue ? item.Invitation.NganSachDeNghi.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")</strong></div>
+                                        <div>Thời hạn dự kiến: <strong class="text-dark">@item.Invitation.ThoiHanDuKien</strong></div>
+                                        <div>Ngày gửi: <strong class="text-dark">@item.Invitation.NgayGui.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                                    </div>
+                                </div>
+
+                                <!-- Cột Phải: Hành động -->
+                                <div class="d-flex flex-column align-items-md-end gap-2 text-md-end min-w-180">
+                                    @if (item.Invitation.TrangThai == "ChoPhanHoi")
+                                    {
+                                        <a asp-action="DeXuatHopDong" asp-route-maUngThue="@item.Invitation.MaYeuCau" class="btn btn-outline-success btn-sm rounded-pill px-3 w-100 fw-semibold mb-1">
+                                            <i class="bi bi-file-earmark-plus me-1"></i> Tạo đề xuất hợp đồng
+                                        </a>
+
+                                        <form asp-controller="Freelancer" asp-action="AcceptInvitation" method="post" class="d-inline w-100">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="maYeuCau" value="@item.Invitation.MaYeuCau" />
+                                            <button type="submit" class="btn-accept-invite w-100 mb-2">
+                                                <i class="bi bi-check2-circle me-1"></i> Đồng ý trực tiếp
+                                            </button>
+                                        </form>
+
+                                        <form asp-controller="Freelancer" asp-action="RejectInvitation" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="maYeuCau" value="@item.Invitation.MaYeuCau" />
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill px-3 w-100" onclick="return confirm('Bạn có chắc muốn từ chối lời mời này?')">
+                                                Từ chối
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (item.Invitation.TrangThai == "DongY" || item.Invitation.TrangThai == "DaLapHopDong")
+                                    {
+                                        <a href="/HopDong" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm">
+                                            <i class="bi bi-file-earmark-ruled me-1"></i> Xem hợp đồng
+                                        </a>
+                                    }
+
+                                    <a href="/Employer/Profile/@item.Employer.MaNhaTuyenDung" class="btn btn-link btn-sm text-secondary text-decoration-none">
+                                        Xem hồ sơ công ty <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

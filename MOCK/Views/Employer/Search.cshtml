@@ -1,0 +1,422 @@
+@model MOCK.Models.ViewModels.EmployerSearchViewModel
+@{
+    ViewData["Title"] = "Khám phá Nhà tuyển dụng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .employer-explore-page {
+        background-color: #F8FAF9;
+        min-height: 80vh;
+        padding: 30px 0 60px;
+    }
+
+    /* FILTER SECTION */
+    .filter-section-container {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .filter-section-title {
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #1B4731;
+        letter-spacing: 0.5px;
+        margin-bottom: 0;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .search-main-input-box {
+        display: flex;
+        align-items: center;
+        background: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        border-radius: 30px;
+        padding: 4px 6px 4px 18px;
+        transition: border-color 0.2s;
+    }
+
+    .search-main-input-box:focus-within {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(59, 110, 83, 0.12);
+    }
+
+    .search-main-input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 0.9rem;
+        color: #1E293B;
+    }
+
+    .search-main-btn {
+        background: #D8EADE;
+        color: #245838;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .search-main-btn:hover {
+        background: #C4DEC9;
+    }
+
+    .filter-field-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .filter-select {
+        width: 100%;
+        height: 38px;
+        border-radius: 8px;
+        border: 1px solid #CBD5E1;
+        font-size: 0.84rem;
+        color: #334155;
+        padding: 4px 10px;
+        background-color: #FFFFFF;
+        outline: none;
+    }
+
+    .filter-select:focus {
+        border-color: var(--primary-green);
+    }
+
+    /* EMPLOYER CARD */
+    .employer-explore-card {
+        background: #FFFFFF;
+        border: 1px solid #E2EDE6;
+        border-radius: 20px;
+        padding: 18px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .employer-explore-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(42, 82, 62, 0.08);
+        border-color: #BBD9C7;
+    }
+
+    /* TOP HEADER BANNER IN CARD */
+    .employer-card-top-header {
+        background: #DDEBE2;
+        border-radius: 14px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .company-logo-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
+        background: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+        border: 1px solid #CBD5E1;
+        font-size: 1.5rem;
+        color: var(--primary-green);
+    }
+
+    .company-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .company-header-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .company-name-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #1E293B;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .meta-data-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 8px;
+        font-size: 0.72rem;
+        color: #334155;
+        line-height: 1.35;
+    }
+
+    .meta-data-item strong {
+        color: #0F172A;
+        font-weight: 600;
+    }
+
+    /* CARD BODY DETAILS */
+    .company-desc-line {
+        font-size: 0.84rem;
+        color: #475569;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    .featured-jobs-section {
+        background-color: #F8FAFC;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+        border: 1px dashed #E2E8F0;
+    }
+
+    .featured-job-item {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .featured-job-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .job-reward-tag {
+        color: #E11D48;
+        font-weight: 700;
+        font-size: 0.75rem;
+    }
+
+    /* CARD ACTIONS */
+    .card-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .btn-card-profile {
+        background-color: #9AA898;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 9px 0;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        display: block;
+    }
+
+    .btn-card-profile:hover {
+        background-color: #849381;
+    }
+
+    .btn-card-viewjobs {
+        background-color: #D6E8D8;
+        color: #2D5838 !important;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 9px 0;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        display: block;
+    }
+
+    .btn-card-viewjobs:hover {
+        background-color: #C3DFC6;
+    }
+</style>
+
+<div class="employer-explore-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- ==================== BỘ LỌC TÌM KIẾM ==================== -->
+        <div class="filter-section-container">
+            <form method="get" asp-controller="Employer" asp-action="Search" id="filterForm">
+                <div class="row align-items-center g-3">
+                    
+                    <!-- Cột 1: Tiêu đề + Thanh tìm kiếm chính -->
+                    <div class="col-12 col-xl-5">
+                        <div class="d-flex align-items-center gap-3">
+                            <h5 class="filter-section-title">BỘ LỌC TÌM KIẾM</h5>
+                            <div class="search-main-input-box flex-grow-1">
+                                <input type="text" name="keyword" value="@Model.Keyword" class="search-main-input"
+                                       placeholder="Tìm theo tên công ty, lĩnh vực, địa điểm..." />
+                                <button type="submit" class="search-main-btn" title="Tìm kiếm">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Các bộ lọc nhỏ theo dropdowns -->
+                    <div class="col-12 col-xl-7">
+                        <div class="row g-2">
+                            <!-- Lĩnh vực -->
+                            <div class="col-6 col-md-4">
+                                <label class="filter-field-label">Lĩnh vực hoạt động</label>
+                                <select name="linhVuc" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả lĩnh vực</option>
+                                    @foreach (var lv in Model.AllLinhVucs)
+                                    {
+                                        if (Model.SelectedLinhVuc == lv)
+                                        {
+                                            <option value="@lv" selected>@lv</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@lv">@lv</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Địa điểm -->
+                            <div class="col-6 col-md-4">
+                                <label class="filter-field-label">Địa điểm</label>
+                                <select name="diaDiem" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả địa điểm</option>
+                                    @foreach (var dd in Model.AllDiaDiems)
+                                    {
+                                        if (Model.SelectedDiaDiem == dd)
+                                        {
+                                            <option value="@dd" selected>@dd</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@dd">@dd</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Đánh giá sao -->
+                            <div class="col-12 col-md-4">
+                                <label class="filter-field-label">Đánh giá tối thiểu</label>
+                                <select name="danhGia" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả đánh giá</option>
+                                    <option value="4.5" selected="@(Model.SelectedRating == 4.5)">>= 4.5 ⭐ (Rất tốt)</option>
+                                    <option value="4.0" selected="@(Model.SelectedRating == 4.0)">>= 4.0 ⭐ (Tốt)</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <!-- ==================== DANH SÁCH THẺ NHÀ TUYỂN DỤNG ==================== -->
+        @if (!Model.Employers.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-building-slash display-3 text-muted"></i>
+                <h5 class="fw-bold mt-3 text-secondary">Không tìm thấy nhà tuyển dụng phù hợp</h5>
+                <p class="text-muted small">Hãy thử điều chỉnh lại bộ lọc hoặc từ khóa tìm kiếm.</p>
+                <a href="/Employer/Search" class="btn btn-sm btn-outline-success rounded-pill px-4">Xem tất cả</a>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                @foreach (var item in Model.Employers)
+                {
+                    <div class="col">
+                        <div class="employer-explore-card">
+                            
+                            <div>
+                                <!-- Header Banner -->
+                                <div class="employer-card-top-header">
+                                    <div class="company-logo-box">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <div class="company-header-info">
+                                        <div class="company-name-title" title="@(item.Employer.Tencongty ?? item.User.HotenUser)">
+                                            @(item.Employer.Tencongty ?? item.User.HotenUser)
+                                        </div>
+                                        <div class="meta-data-grid">
+                                            <div class="meta-data-item">Lĩnh vực: <strong>@(item.Employer.Linhvuc ?? "CNTT")</strong></div>
+                                            <div class="meta-data-item">Đang tuyển: <strong>@item.ActiveJobsCount việc</strong></div>
+                                            <div class="meta-data-item">Địa điểm: <strong>@(item.Employer.Diachi ?? "TP.HCM")</strong></div>
+                                            <div class="meta-data-item">Đánh giá: <strong>@(item.Employer.Sosaodanhgia ?? 4.8) ⭐</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Body -->
+                                <p class="company-desc-line text-truncate-2">
+                                    @(item.Employer.Gioithieu ?? "Công ty uy tín với nhiều dự án công nghệ phù hợp cho sinh viên thực chiến.")
+                                </p>
+
+                                <!-- Công việc đang tuyển -->
+                                <div class="featured-jobs-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted fw-bold" style="font-size: 0.74rem;">CÔNG VIỆC MỚI ĐĂNG:</span>
+                                        <span class="badge bg-success-subtle text-success" style="font-size: 0.68rem;">@item.ActiveJobsCount vị trí</span>
+                                    </div>
+                                    @if (!item.FeaturedJobs.Any())
+                                    {
+                                        <div class="text-muted small italic">Chưa có bài đăng tuyển mới.</div>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var job in item.FeaturedJobs)
+                                        {
+                                            <a href="/JobPost/Details/@job.MaJob" class="featured-job-item text-decoration-none hover-green">
+                                                <span class="text-truncate text-dark" style="max-width: 65%;" title="@job.Tieude">• @job.Tieude</span>
+                                                <span class="job-reward-tag">@(job.Thulao.HasValue ? job.Thulao.Value.ToString("#,##0") + "đ" : "Thỏa thuận")</span>
+                                            </a>
+                                        }
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="card-actions-grid pt-2">
+                                <a href="/Employer/Profile/@item.Employer.MaNhaTuyenDung" class="btn-card-profile">
+                                    XEM HỒ SƠ
+                                </a>
+                                <a href="/Employer/Profile/@item.Employer.MaNhaTuyenDung#jobs" class="btn-card-viewjobs">
+                                    XEM VIỆC LÀM
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

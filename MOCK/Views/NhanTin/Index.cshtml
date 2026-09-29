@@ -1,0 +1,612 @@
+@model MOCK.Models.ViewModels.ChatViewModel
+@{
+    ViewData["Title"] = "Tin nhắn trao đổi trực tuyến";
+}
+
+<style>
+    .chat-app-wrapper {
+        height: calc(100vh - 170px);
+        min-height: 600px;
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid #E5ECE7;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+
+    /* SIDEBAR CONVERSATIONS */
+    .chat-sidebar {
+        border-right: 1px solid #EAEFF0;
+        background: #FDFEFE;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .conversation-item {
+        padding: 14px 16px;
+        border-bottom: 1px solid #F1F5F4;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        text-decoration: none !important;
+        display: block;
+    }
+
+    .conversation-item:hover {
+        background-color: #F4F8F5;
+    }
+
+    .conversation-item.active {
+        background-color: #EBF4EF;
+        border-left: 4px solid var(--primary-green, #3B6E53);
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #FFF;
+        border: 2px solid #FFF;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        width: 12px;
+        height: 12px;
+        background-color: #2ECC71;
+        border: 2px solid #FFF;
+        border-radius: 50%;
+    }
+
+    /* MAIN CHAT AREA */
+    .chat-main {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #FFFFFF;
+    }
+
+    .chat-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #EAEFF0;
+        background: #FFFFFF;
+        z-index: 10;
+    }
+
+    .chat-messages-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        background-color: #F8FAF9;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* MESSAGE BUBBLES */
+    .message-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        max-width: 80%;
+    }
+
+    .message-row.mine {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message-row.partner {
+        align-self: flex-start;
+    }
+
+    .message-bubble {
+        padding: 12px 18px;
+        border-radius: 18px;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        position: relative;
+        word-break: break-word;
+    }
+
+    .message-row.mine .message-bubble {
+        background: linear-gradient(135deg, #2A523E 0%, #3B6E53 100%);
+        color: #FFFFFF;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 12px rgba(59, 110, 83, 0.15);
+    }
+
+    .message-row.partner .message-bubble {
+        background-color: #FFFFFF;
+        color: #2D3748;
+        border: 1px solid #E5ECE7;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .message-time {
+        font-size: 0.72rem;
+        margin-top: 4px;
+    }
+
+    .message-row.mine .message-time {
+        color: rgba(255, 255, 255, 0.75);
+        text-align: right;
+    }
+
+    .message-row.partner .message-time {
+        color: #A0AEC0;
+    }
+
+    /* EMBEDDED PORTFOLIO CARD IN CHAT */
+    .chat-portfolio-card {
+        background: #FFFFFF;
+        border: 1px solid #CDE1D6;
+        border-radius: 14px;
+        padding: 12px;
+        margin-top: 8px;
+        color: #2D3748;
+        max-width: 320px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .chat-portfolio-card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+
+    /* CHAT FOOTER & INPUT */
+    .chat-footer {
+        padding: 14px 20px;
+        background: #FFFFFF;
+        border-top: 1px solid #EAEFF0;
+    }
+
+    .chat-input-pill {
+        border-radius: 25px;
+        padding: 10px 18px;
+        font-size: 0.92rem;
+        background-color: #F4F7F5;
+        border: 1px solid #E2E8F0;
+    }
+
+    .chat-input-pill:focus {
+        background-color: #FFFFFF;
+        border-color: var(--primary-green, #3B6E53);
+        box-shadow: 0 0 0 3px rgba(59, 110, 83, 0.15);
+    }
+
+    .btn-chat-action {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: #F4F7F5;
+        color: #4A5568;
+        transition: all 0.2s ease;
+    }
+
+    .btn-chat-action:hover {
+        background: #E8F2EC;
+        color: var(--primary-green, #3B6E53);
+    }
+
+    .btn-chat-send {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: var(--primary-green, #3B6E53);
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(59, 110, 83, 0.25);
+        transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-chat-send:hover {
+        background: #2E5842;
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="container-fluid px-lg-4 py-3">
+    
+    <div class="chat-app-wrapper row g-0">
+        
+        <!-- ==================== CỘT TRÁI: DANH SÁCH CUỘC HỘI THOẠI ==================== -->
+        <div class="col-12 col-md-4 col-lg-4 col-xl-3 chat-sidebar">
+            <!-- Header Sidebar -->
+            <div class="p-3 border-bottom bg-white">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-chat-dots-fill text-success me-1"></i> Tin nhắn
+                    </h5>
+                    <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
+                        @Model.Conversations.Count hội thoại
+                    </span>
+                </div>
+
+                <!-- Ô tìm kiếm cuộc trò chuyện -->
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light border-end-0" style="border-radius: 20px 0 0 20px;">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="searchChatInput" class="form-control bg-light border-start-0" placeholder="Tìm theo tên đối tác, tin nhắn..." style="border-radius: 0 20px 20px 0; font-size: 0.84rem;" />
+                </div>
+            </div>
+
+            <!-- Danh sách các phòng chat -->
+            <div class="overflow-y-auto flex-grow-1" id="conversationListContainer">
+                @if (Model.Conversations.Any())
+                {
+                    @foreach (var conv in Model.Conversations)
+                    {
+                        bool isActive = Model.ActiveConversation?.PhongChat.MaPhongChat == conv.PhongChat.MaPhongChat;
+                        <a href="/NhanTin?chatId=@conv.PhongChat.MaPhongChat" class="conversation-item @(isActive ? "active" : "")">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-wrapper">
+                                    <img src="~/@conv.PartnerAvatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'" class="avatar-img" alt="@conv.PartnerUser.HotenUser" />
+                                    @if (conv.IsOnline)
+                                    {
+                                        <span class="online-indicator" title="Đang trực tuyến"></span>
+                                    }
+                                </div>
+
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-truncate text-dark" style="max-width: 140px; font-size: 0.92rem;">
+                                            @conv.PartnerUser.HotenUser
+                                        </strong>
+                                        <span class="text-muted" style="font-size: 0.72rem;">
+                                            @(conv.PhongChat.ThoiGianTinNhanCuoi?.ToString("HH:mm") ?? "")
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="text-muted small text-truncate pe-2" style="font-size: 0.8rem;">
+                                            @conv.PhongChat.TinNhanCuoi
+                                        </div>
+                                        @if (conv.PhongChat.SoTinNhanChuaDoc > 0)
+                                        {
+                                            <span class="badge bg-danger rounded-pill" style="font-size: 0.68rem;">
+                                                @conv.PhongChat.SoTinNhanChuaDoc
+                                            </span>
+                                        }
+                                    </div>
+
+                                    @if (conv.RelatedJob != null)
+                                    {
+                                        <div class="mt-1">
+                                            <span class="badge bg-light text-secondary border text-truncate d-inline-block" style="max-width: 180px; font-size: 0.68rem;">
+                                                <i class="bi bi-briefcase me-1"></i>@conv.RelatedJob.Tieude
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted small">
+                        <i class="bi bi-chat-square-text fs-2 d-block mb-1"></i>
+                        Chưa có cuộc trò chuyện nào.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ==================== CỘT PHẢI: KHUNG TRÒ CHUYỆN CHÍNH ==================== -->
+        <div class="col-12 col-md-8 col-lg-8 col-xl-9 chat-main">
+            @if (Model.ActiveConversation != null)
+            {
+                <!-- CHAT HEADER -->
+                <div class="chat-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-wrapper" style="width: 44px; height: 44px;">
+                            <img src="~/@Model.ActiveConversation.PartnerAvatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'" class="avatar-img" alt="@Model.ActiveConversation.PartnerUser.HotenUser" />
+                            <span class="online-indicator"></span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                @Model.ActiveConversation.PartnerUser.HotenUser
+                                <span class="badge bg-success-subtle text-success fw-normal" style="font-size: 0.72rem;">
+                                    @Model.ActiveConversation.PartnerRole
+                                </span>
+                            </h6>
+                            <div class="text-muted small" style="font-size: 0.78rem;">
+                                <span>@Model.ActiveConversation.PartnerTitle</span>
+                                @if (Model.ActiveConversation.RelatedJob != null)
+                                {
+                                    <span class="ms-2 text-success fw-medium">• Công việc: #@Model.ActiveConversation.RelatedJob.MaJob - @Model.ActiveConversation.RelatedJob.Tieude</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Header Quick Actions -->
+                    <div class="d-flex align-items-center gap-2">
+                        @if (Model.ActiveConversation.RelatedContract != null)
+                        {
+                            <a href="/HopDong/Details/@Model.ActiveConversation.RelatedContract.MaHD" class="btn btn-sm btn-outline-success fw-semibold" style="border-radius: 20px; font-size: 0.8rem;">
+                                <i class="bi bi-file-earmark-text me-1"></i> Xem Hợp đồng
+                            </a>
+                        }
+
+                        <a href="/TranhChap/Create" class="btn btn-sm btn-outline-danger" title="Mở khiếu nại tranh chấp" style="border-radius: 20px; font-size: 0.8rem;">
+                            <i class="bi bi-shield-exclamation me-1"></i> Khiếu nại
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CHAT MESSAGES BODY -->
+                <div class="chat-messages-body" id="chatMessagesBody">
+                    <div class="text-center my-2">
+                        <span class="badge bg-light text-muted border px-3 py-1 fw-normal" style="font-size: 0.75rem;">
+                            Bắt đầu cuộc trò chuyện với @Model.ActiveConversation.PartnerUser.HotenUser
+                        </span>
+                    </div>
+
+                    @foreach (var msg in Model.ActiveMessages)
+                    {
+                        <div class="message-row @(msg.IsMine ? "mine" : "partner")">
+                            <div class="message-bubble">
+                                <!-- Nội dung chữ -->
+                                @if (!string.IsNullOrEmpty(msg.TinNhan.NoiDung))
+                                {
+                                    <div>@msg.TinNhan.NoiDung</div>
+                                }
+
+                                <!-- Thẻ Portfolio đính kèm (FRL-UC-07) -->
+                                @if (msg.TinNhan.LoaiTinNhan == "ThePortfolio" && msg.PortfolioProject != null)
+                                {
+                                    <div class="chat-portfolio-card">
+                                        <div class="d-flex align-items-center gap-1 text-success fw-bold small mb-1">
+                                            <i class="bi bi-stars"></i> Dự án Portfolio tiêu biểu:
+                                        </div>
+                                        <img src="~/@(string.IsNullOrEmpty(msg.PortfolioProject.Link_file) ? "uploads/portfolio/default.jpg" : msg.PortfolioProject.Link_file)" onerror="this.src='https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=80'" alt="@msg.PortfolioProject.TenDuAn" />
+                                        <strong class="d-block text-dark small">@msg.PortfolioProject.TenDuAn</strong>
+                                        <p class="text-muted small mb-2" style="font-size: 0.78rem; line-height: 1.4;">
+                                            @msg.PortfolioProject.MoTa
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center pt-1 border-top">
+                                            <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">@msg.PortfolioProject.VaiTro</span>
+                                            <a href="/Freelancer/Portfolio" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2 fw-semibold" style="font-size: 0.72rem;">
+                                                Xem chi tiết <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- File tài liệu đính kèm -->
+                                @if (msg.TinNhan.LoaiTinNhan == "TepDinhKem" && !string.IsNullOrEmpty(msg.TinNhan.FileDinhKemUrl))
+                                {
+                                    <div class="p-2 mt-2 bg-white bg-opacity-75 border rounded-3 text-dark d-flex align-items-center gap-2">
+                                        <i class="bi bi-file-earmark-arrow-down-fill fs-3 text-primary"></i>
+                                        <div class="min-w-0 flex-grow-1">
+                                            <strong class="d-block text-truncate small">@(msg.TinNhan.TenFile ?? "Tài liệu đính kèm")</strong>
+                                            <a href="@msg.TinNhan.FileDinhKemUrl" target="_blank" class="text-primary small text-decoration-none fw-semibold" style="font-size: 0.75rem;">
+                                                <i class="bi bi-download me-1"></i>Tải xuống tệp
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="message-time">
+                                    @msg.TinNhan.NgayGui.ToString("HH:mm")
+                                    @if (msg.IsMine)
+                                    {
+                                        <i class="bi bi-check2-all ms-1"></i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- CHAT FOOTER & INPUT TOOLBAR -->
+                <div class="chat-footer">
+                    <form id="chatForm" asp-controller="NhanTin" asp-action="GuiTinNhan" method="post" class="d-flex align-items-center gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="chatId" value="@Model.ActiveConversation.PhongChat.MaPhongChat" />
+                        <input type="hidden" name="loaiTinNhan" id="hiddenLoaiTinNhan" value="VanBan" />
+                        <input type="hidden" name="maDuAnPortfolio" id="hiddenMaDuAnPortfolio" value="" />
+                        <input type="hidden" name="fileUrl" id="hiddenFileUrl" value="" />
+                        <input type="hidden" name="tenFile" id="hiddenTenFile" value="" />
+
+                        <!-- Nút trích xuất thẻ Portfolio (FRL-UC-07) -->
+                        <button type="button" class="btn-chat-action" data-bs-toggle="modal" data-bs-target="#portfolioPickerModal" title="Gửi thẻ dự án Portfolio">
+                            <i class="bi bi-collection-play-fill text-success fs-5"></i>
+                        </button>
+
+                        <!-- Nút đính kèm file -->
+                        <button type="button" class="btn-chat-action" data-bs-toggle="modal" data-bs-target="#attachFileModal" title="Đính kèm tệp tài liệu / ảnh">
+                            <i class="bi bi-paperclip fs-5"></i>
+                        </button>
+
+                        <!-- Input nội dung tin nhắn -->
+                        <input type="text" name="noiDung" id="chatMessageInput" class="form-control chat-input-pill flex-grow-1" placeholder="Nhập tin nhắn trao đổi với @Model.ActiveConversation.PartnerUser.HotenUser..." autocomplete="off" />
+
+                        <!-- Nút gửi -->
+                        <button type="submit" class="btn-chat-send" title="Gửi tin nhắn">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                    <i class="bi bi-chat-square-dots display-1 text-muted opacity-50 mb-3"></i>
+                    <h5 class="fw-bold">Chọn một cuộc hội thoại để bắt đầu trao đổi</h5>
+                    <p class="small text-muted">Kết nối trực tiếp giữa Doanh nghiệp và Freelancer Sinh viên.</p>
+                </div>
+            }
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL: CHỌN DỰ ÁN TỪ PORTFOLIO ĐỂ GỬI (FRL-UC-07) -->
+<!-- ======================================================== -->
+<div class="modal fade" id="portfolioPickerModal" tabindex="-1" aria-labelledby="portfolioPickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 18px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="portfolioPickerModalLabel">
+                    <i class="bi bi-collection-play-fill text-success me-2"></i>Chọn dự án từ Portfolio của bạn để gửi vào Chat
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-muted small mb-3">
+                    Thẻ dự án được trích xuất sẽ hiển thị hình ảnh, vai trò và mô tả chuyên môn để khách hàng dễ dàng đánh giá năng lực của bạn.
+                </p>
+
+                <div class="row g-3">
+                    @if (Model.StudentPortfolioProjects.Any())
+                    {
+                        @foreach (var prj in Model.StudentPortfolioProjects)
+                        {
+                            <div class="col-md-6">
+                                <div class="card h-100 border p-3 rounded-4 shadow-sm hover-shadow cursor-pointer select-portfolio-card" data-project-id="@prj.MaDA" data-project-name="@prj.TenDuAn">
+                                    <img src="~/@(string.IsNullOrEmpty(prj.Link_file) ? "uploads/portfolio/default.jpg" : prj.Link_file)" onerror="this.src='https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=80'" class="rounded-3 mb-2" style="height: 120px; object-fit: cover; width: 100%;" alt="@prj.TenDuAn" />
+                                    <h6 class="fw-bold text-dark mb-1">@prj.TenDuAn</h6>
+                                    <p class="text-muted small mb-2 text-truncate" style="font-size: 0.8rem;">@prj.MoTa</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                        <span class="badge bg-light text-secondary border">@prj.VaiTro</span>
+                                        <button type="button" class="btn btn-sm btn-success fw-bold px-3 py-1" style="border-radius: 20px; background-color: var(--primary-green, #3B6E53);">
+                                            <i class="bi bi-send-plus me-1"></i> Gửi thẻ này
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12 text-center py-4 text-muted">
+                            Bạn chưa có dự án nào trong Portfolio. <a href="/Freelancer/Portfolio" class="text-success fw-bold">Thêm dự án ngay</a>.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL: ĐÍNH KÈM TỆP / LINK TÀI LIỆU -->
+<!-- ======================================================== -->
+<div class="modal fade" id="attachFileModal" tabindex="-1" aria-labelledby="attachFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 18px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="attachFileModalLabel">
+                    <i class="bi bi-paperclip text-primary me-1"></i> Đính kèm tệp tài liệu vào Chat
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Tên tệp / Mô tả tài liệu:</label>
+                    <input type="text" id="modalTenFileInput" class="form-control" placeholder="Ví dụ: Spec_ChucNang_v1.pdf" style="border-radius: 10px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Đường dẫn tệp (Cloud Drive / Download Link):</label>
+                    <input type="text" id="modalFileUrlInput" class="form-control" placeholder="https://example.com/docs/file.pdf" style="border-radius: 10px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary">Lời nhắn gửi kèm:</label>
+                    <input type="text" id="modalFileNoteInput" class="form-control" placeholder="Em gửi anh file đặc tả yêu cầu chi tiết ạ..." style="border-radius: 10px;" />
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                <button type="button" id="btnConfirmSendFile" class="btn btn-primary fw-bold px-4" style="border-radius: 8px;">
+                    <i class="bi bi-send-fill me-1"></i> Gửi tệp ngay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tự động scroll xuống tin nhắn mới nhất
+        const chatBody = document.getElementById('chatMessagesBody');
+        if (chatBody) {
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Lọc tìm kiếm cuộc hội thoại ở Sidebar
+        document.getElementById('searchChatInput')?.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? 'block' : 'none';
+            });
+        });
+
+        // Xử lý gửi thẻ dự án Portfolio vào phòng chat
+        document.querySelectorAll('.select-portfolio-card').forEach(card => {
+            card.addEventListener('click', function () {
+                const prjId = this.getAttribute('data-project-id');
+                const prjName = this.getAttribute('data-project-name');
+
+                document.getElementById('hiddenLoaiTinNhan').value = 'ThePortfolio';
+                document.getElementById('hiddenMaDuAnPortfolio').value = prjId;
+                document.getElementById('chatMessageInput').value = `Em xin gửi anh/chị tham khảo thẻ dự án [${prjName}] từ Portfolio của em ạ!`;
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('portfolioPickerModal'));
+                if (modal) modal.hide();
+
+                document.getElementById('chatForm').submit();
+            });
+        });
+
+        // Xử lý gửi file đính kèm
+        document.getElementById('btnConfirmSendFile')?.addEventListener('click', function () {
+            const tenFile = document.getElementById('modalTenFileInput').value.trim();
+            const fileUrl = document.getElementById('modalFileUrlInput').value.trim();
+            const note = document.getElementById('modalFileNoteInput').value.trim();
+
+            if (!fileUrl) {
+                alert('Vui lòng nhập đường dẫn tệp tài liệu!');
+                return;
+            }
+
+            document.getElementById('hiddenLoaiTinNhan').value = 'TepDinhKem';
+            document.getElementById('hiddenFileUrl').value = fileUrl;
+            document.getElementById('hiddenTenFile').value = tenFile || 'Tài liệu đính kèm.pdf';
+            document.getElementById('chatMessageInput').value = note || `Gửi kèm tệp: ${tenFile || fileUrl}`;
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('attachFileModal'));
+            if (modal) modal.hide();
+
+            document.getElementById('chatForm').submit();
+        });
+    </script>
+}

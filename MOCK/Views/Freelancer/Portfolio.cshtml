@@ -1,0 +1,193 @@
+@model MOCK.Models.ViewModels.StudentPortfolioManageViewModel
+@{
+    ViewData["Title"] = "Quản lý Portfolio & Dự án cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .portfolio-manage-page {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .section-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 26px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .project-item-box {
+        border: 1.5px solid #E2EDE6;
+        border-radius: 16px;
+        padding: 20px;
+        background: #FFFFFF;
+        margin-bottom: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .project-item-box:hover {
+        border-color: #A3D4B6;
+        box-shadow: 0 6px 18px rgba(42, 82, 62, 0.06);
+    }
+
+    .btn-add-project {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 30px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(27, 94, 54, 0.2);
+        transition: all 0.2s;
+    }
+
+    .btn-add-project:hover {
+        background-color: #14492A;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="portfolio-manage-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Quản lý Portfolio & Dự án thực tế</h2>
+                <p class="text-muted small mb-0">Thể hiện năng lực thực chiến thông qua các sản phẩm đã hoàn thiện (khớp bảng `Portfolio` & `DuAn_Trong_Portfolio`).</p>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="/Freelancer/Profile/@Model.Student.MaFreelancerStudents" class="btn btn-outline-success rounded-pill px-4">
+                    <i class="bi bi-eye me-1"></i> Xem giao diện Portfolio công khai
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- CỘT TRÁI (7 COLS): DANH SÁCH DỰ ÁN TRONG PORTFOLIO -->
+            <div class="col-12 col-lg-7">
+                <div class="section-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-collection-play-fill text-success me-2"></i>Dự án đã đưa vào Portfolio (@Model.Projects.Count)
+                        </h4>
+                        <span class="badge bg-success-subtle text-success">Mã Portfolio: #@Model.Portfolio.MaPortfolio</span>
+                    </div>
+
+                    @if (!Model.Projects.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-plus display-3 text-muted"></i>
+                            <h6 class="fw-bold mt-2">Chưa có dự án nào trong Portfolio</h6>
+                            <p class="small">Hãy thêm dự án đầu tiên của bạn ở form bên cạnh.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var proj in Model.Projects)
+                        {
+                            <div class="project-item-box">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="badge bg-light text-muted border me-2">#@proj.MaDA</span>
+                                        <span class="badge bg-success-subtle text-success border">@proj.VaiTro</span>
+                                    </div>
+                                    <span class="text-muted small"><i class="bi bi-code-slash text-primary me-1"></i>@proj.Congnghe</span>
+                                </div>
+
+                                <h5 class="fw-bold text-dark mb-2">@proj.TenDuAn</h5>
+                                <p class="text-secondary small mb-3">@proj.MoTa</p>
+
+                                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                    @if (!string.IsNullOrEmpty(proj.LinkGithub))
+                                    {
+                                        <a href="@proj.LinkGithub" target="_blank" class="btn btn-sm btn-light border rounded-pill px-3">
+                                            <i class="bi bi-github me-1"></i> Github Code
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(proj.LinkDemo))
+                                    {
+                                        <a href="@proj.LinkDemo" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> Xem Demo Trực Tuyến
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(proj.Link_file))
+                                    {
+                                        <a href="@proj.Link_file" target="_blank" class="btn btn-sm btn-light border rounded-pill px-3">
+                                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Tải tài liệu / APK
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI (5 COLS): FORM THÊM DỰ ÁN MỚI -->
+            <div class="col-12 col-lg-5">
+                <div class="section-card">
+                    <h4 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-plus-circle-fill text-success me-2"></i>Thêm dự án mới
+                    </h4>
+
+                    <form asp-controller="Freelancer" asp-action="AddProject" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Portfolio.MaPortfolio" value="@Model.Portfolio.MaPortfolio" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">Tên dự án <span class="text-danger">*</span></label>
+                            <input asp-for="NewTenDuAn" class="form-control rounded-3" placeholder="Ví dụ: App Quản lý Chi tiêu Cá nhân" required />
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-bold text-dark small">Vai trò của bạn</label>
+                                <input asp-for="NewVaiTro" class="form-control rounded-3" placeholder="Full-stack Dev / UI Designer" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold text-dark small">Công nghệ sử dụng</label>
+                                <input asp-for="NewCongNghe" class="form-control rounded-3" placeholder="ASP.NET, Flutter, Figma..." />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">Mô tả dự án & Kết quả đạt được</label>
+                            <textarea asp-for="NewMoTa" class="form-control rounded-3" rows="3" placeholder="Tóm tắt chức năng chính, giải pháp công nghệ và đóng góp của bạn..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">Link Github repository</label>
+                            <input asp-for="NewLinkGithub" class="form-control rounded-3" placeholder="https://github.com/..." />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">Link Demo (Website / Behance)</label>
+                            <input asp-for="NewLinkDemo" class="form-control rounded-3" placeholder="https://demo-app.io" />
+                        </div>
+
+                        <button type="submit" class="btn-add-project w-100">
+                            <i class="bi bi-plus-lg me-1"></i> Lưu dự án vào Portfolio
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

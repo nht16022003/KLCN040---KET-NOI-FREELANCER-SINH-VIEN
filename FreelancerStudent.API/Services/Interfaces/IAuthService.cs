@@ -1,0 +1,20 @@
+using FreelancerStudent.API.DTOs.ReponsesDTO;
+using FreelancerStudent.API.DTOs.RequestDTOs;
+namespace FreelancerStudent.API.Services.Interfaces
+{
+    public interface IAuthService
+    {
+        //Nhận rì quét và trả về ReponsesDTO sau khi xử lý đăng ký
+        Task<DangKy_ReponseDTO> DangKyTaiKhoanAsync(DangKy_RequestDTO request);
+
+        Task<DangNhap_ReponseDTO> DangNhapTaiKhoanAsync(DangNhap_RequestDTO request);
+
+        Task<ThongTinTaiKhoan_ReponseDTO> layThongTinTaiKhoanAsync(int maUser);
+
+        Task<ThongTinTaiKhoan_ReponseDTO> capNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoan_RequestDTO request);
+    
+        Task<bool> capNhatAvatarAsync(CapNhatAvatar_RequestDTO request);
+    
+        Task doiMatKhauAsync(DoiMatKhau_RequestDTO request);
+    }
+}

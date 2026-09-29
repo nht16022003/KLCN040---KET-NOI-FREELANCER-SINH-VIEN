@@ -1,0 +1,231 @@
+@model MOCK.Models.ViewModels.JobCreateViewModel
+@{
+    ViewData["Title"] = "Đăng tin tuyển dụng mới";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .job-create-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .job-create-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .suggest-skill-pill {
+        background: #EEF6F1;
+        color: #1C5F37;
+        border: 1px solid #D2E7DC;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 6px;
+        transition: all 0.2s;
+    }
+
+    .suggest-skill-pill:hover {
+        background: #1C5F37;
+        color: #FFFFFF;
+    }
+
+    .btn-submit-post {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 12px 36px;
+        border-radius: 30px;
+        border: none;
+        box-shadow: 0 4px 14px rgba(27, 94, 54, 0.25);
+        transition: all 0.2s;
+    }
+
+    .btn-submit-post:hover {
+        background-color: #14492A;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(27, 94, 54, 0.35);
+    }
+</style>
+
+<div class="job-create-wrapper">
+    <div class="container">
+        
+        <!-- Breadcrumb -->
+        <div class="mb-3">
+            <a href="/Employer/ManageJobs" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại quản lý tin tuyển dụng
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9">
+                
+                <div class="job-create-card">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            <span class="badge bg-success-subtle text-success border px-3 py-1 mb-2">
+                                <i class="bi bi-briefcase-fill me-1"></i> Dành cho Nhà tuyển dụng
+                            </span>
+                            <h2 class="fw-bold text-dark mb-1">Đăng tin tuyển dụng sinh viên</h2>
+                            <p class="text-muted small mb-0">Tìm kiếm các bạn sinh viên tài năng, chủ động và phù hợp nhất với dự án của bạn (khớp bảng <code>JobPost</code>).</p>
+                        </div>
+                        <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-success fs-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+                    </div>
+
+                    <form asp-controller="JobPost" asp-action="Create" method="post" id="jobPostForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="MaNhaTuyenDung" value="1" />
+
+                        <!-- PHẦN 1: THÔNG TIN CÔNG VIỆC -->
+                        <div class="mb-4">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-file-earmark-text text-success"></i> 1. Nội dung công việc
+                            </h5>
+
+                            <!-- Tiêu đề -->
+                            <div class="mb-3">
+                                <label asp-for="Tieude" class="form-label fw-bold text-dark small">
+                                    Tiêu đề bài đăng <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Tieude" class="form-control rounded-3 py-2" 
+                                       placeholder="Ví dụ: Thiết kế bộ nhận diện thương hiệu cho quán cà phê / Viết API ASP.NET Core" />
+                                <span asp-validation-for="Tieude" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Mô tả chi tiết -->
+                            <div class="mb-3">
+                                <label asp-for="Mota" class="form-label fw-bold text-dark small">
+                                    Mô tả chi tiết yêu cầu công việc <span class="text-danger">*</span>
+                                </label>
+                                <textarea asp-for="Mota" class="form-control rounded-3" rows="5"
+                                          placeholder="Mô tả cụ thể phạm vi công việc, mục tiêu dự án, tiêu chuẩn bàn giao và các yêu cầu kỹ thuật..."></textarea>
+                                <span asp-validation-for="Mota" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Kỹ năng yêu cầu -->
+                            <div class="mb-3">
+                                <label asp-for="Kynangyeucau" class="form-label fw-bold text-dark small">
+                                    Kỹ năng yêu cầu (phân cách bằng dấu phẩy) <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Kynangyeucau" class="form-control rounded-3 py-2" id="skillsInput"
+                                       placeholder="Ví dụ: Photoshop, Illustrator, Banner Design" />
+                                <span asp-validation-for="Kynangyeucau" class="text-danger small"></span>
+
+                                <!-- Gợi ý nhanh -->
+                                <div class="mt-2">
+                                    <span class="text-muted small me-2">Gợi ý kỹ năng:</span>
+                                    <span class="suggest-skill-pill" onclick="addSkill('Photoshop')">+ Photoshop</span>
+                                    <span class="suggest-skill-pill" onclick="addSkill('Figma')">+ Figma</span>
+                                    <span class="suggest-skill-pill" onclick="addSkill('C# / ASP.NET')">+ ASP.NET</span>
+                                    <span class="suggest-skill-pill" onclick="addSkill('Flutter')">+ Flutter</span>
+                                    <span class="suggest-skill-pill" onclick="addSkill('HTML/CSS/JS')">+ HTML/CSS</span>
+                                    <span class="suggest-skill-pill" onclick="addSkill('SQL Server')">+ SQL Server</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PHẦN 2: THÙ LAO & THỜI HẠN -->
+                        <div class="mb-4">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-cash-coin text-success"></i> 2. Ngân sách thù lao & Kế hoạch hoàn thành
+                            </h5>
+
+                            <div class="row g-3">
+                                <!-- Thù lao -->
+                                <div class="col-12 col-md-6">
+                                    <label asp-for="Thulao" class="form-label fw-bold text-dark small">
+                                        Mức thù lao ngân sách (VNĐ) <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input asp-for="Thulao" type="number" step="50000" min="100000" class="form-control rounded-start-3 py-2" placeholder="Ví dụ: 1500000" />
+                                        <span class="input-group-text bg-light text-muted">VNĐ</span>
+                                    </div>
+                                    <span asp-validation-for="Thulao" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Số lượng tuyển -->
+                                <div class="col-12 col-md-6">
+                                    <label asp-for="Soluongtuyen" class="form-label fw-bold text-dark small">
+                                        Số lượng sinh viên cần tuyển <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Soluongtuyen" type="number" min="1" max="20" class="form-control rounded-3 py-2" />
+                                    <span asp-validation-for="Soluongtuyen" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Thời gian dự kiến hoàn thành -->
+                                <div class="col-12 col-md-6">
+                                    <label asp-for="Thoigiandukienhoanthanh" class="form-label fw-bold text-dark small">
+                                        Hạn hoàn thành dự kiến <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Thoigiandukienhoanthanh" type="date" class="form-control rounded-3 py-2" />
+                                    <span asp-validation-for="Thoigiandukienhoanthanh" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Cam kết Ký quỹ -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-bold text-dark small">Chính sách thanh toán</label>
+                                    <div class="p-2 bg-light border rounded-3 small text-secondary">
+                                        <i class="bi bi-shield-check text-success me-1"></i>
+                                        Ký quỹ Escrow tự động bảo đảm quyền lợi khi ký hợp đồng chính thức.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="/Employer/ManageJobs" class="btn btn-outline-secondary rounded-pill px-4">
+                                Hủy bỏ
+                            </a>
+                            <button type="submit" class="btn-submit-post">
+                                <i class="bi bi-send-fill me-1"></i> Đăng tin tuyển dụng ngay
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function addSkill(skill) {
+            const input = document.getElementById('skillsInput');
+            if (!input.value) {
+                input.value = skill;
+            } else if (!input.value.includes(skill)) {
+                input.value += ', ' + skill;
+            }
+        }
+    </script>
+}

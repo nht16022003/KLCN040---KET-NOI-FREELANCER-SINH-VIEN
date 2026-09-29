@@ -1,0 +1,235 @@
+@model MOCK.Models.ViewModels.EmployerProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ Nhà tuyển dụng - " + (Model.Employer.Tencongty ?? Model.User.HotenUser);
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .employer-profile-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding-bottom: 60px;
+    }
+
+    .employer-cover-banner {
+        height: 160px;
+        background: linear-gradient(135deg, #2E6845 0%, #193E28 100%);
+        border-radius: 20px 20px 0 0;
+        position: relative;
+    }
+
+    .employer-header-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .employer-logo-circle {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background-color: #FFFFFF;
+        border: 4px solid #FFFFFF;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: var(--primary-green);
+        margin-top: -55px;
+        flex-shrink: 0;
+    }
+
+    .job-item-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 14px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .job-item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        border-color: #BBD9C7;
+    }
+</style>
+
+<div class="employer-profile-wrapper">
+    <div class="container-fluid px-lg-5 pt-4">
+        
+        <!-- ==================== HEADER CARD ==================== -->
+        <div class="employer-header-card">
+            <div class="employer-cover-banner"></div>
+            <div class="p-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-4">
+                        <div class="employer-logo-circle">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="pt-2">
+                            <h3 class="fw-bold text-dark mb-1">
+                                @(Model.Employer.Tencongty ?? Model.User.HotenUser)
+                                <i class="bi bi-patch-check-fill text-primary fs-5" title="Doanh nghiệp xác thực"></i>
+                            </h3>
+                            <p class="text-success fw-semibold mb-2">
+                                <i class="bi bi-briefcase me-1"></i>@(Model.Employer.Linhvuc ?? "Công nghệ thông tin") • 
+                                <i class="bi bi-geo-alt me-1"></i>@(Model.Employer.Diachi ?? "Quận 1, TP.HCM")
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-warning-subtle text-dark border px-3 py-1">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>@(Model.Employer.Sosaodanhgia ?? 4.8) Đánh giá
+                                </span>
+                                <span class="badge bg-success-subtle text-success border px-3 py-1">
+                                    <i class="bi bi-check2-circle me-1"></i>@Model.ActiveJobs.Count việc làm đang tuyển
+                                </span>
+                                @if (!string.IsNullOrEmpty(Model.Employer.Link))
+                                {
+                                    <a href="@Model.Employer.Link" target="_blank" class="badge bg-light text-primary border text-decoration-none px-3 py-1">
+                                        <i class="bi bi-globe me-1"></i>Trang web công ty
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn @(Model.IsBookmarked ? "btn-danger" : "btn-outline-danger") rounded-pill px-3 py-2 fw-semibold" id="btnToggleBookmark" data-employer-id="@Model.Employer.MaNhaTuyenDung">
+                            <i class="bi @(Model.IsBookmarked ? "bi-heart-fill" : "bi-heart") me-1" id="bookmarkIcon"></i>
+                            <span id="bookmarkText">@(Model.IsBookmarked ? "Đã quan tâm" : "Lưu NTD")</span>
+                        </button>
+                        <a href="mailto:@Model.User.EmailUser" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
+                            <i class="bi bi-envelope me-1"></i> Liên hệ tuyển dụng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <div class="row g-4">
+            <!-- Cột Trái: Giới thiệu & Thông tin -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-success me-2"></i>Giới thiệu công ty</h5>
+                    <p class="text-secondary leading-relaxed mb-0">
+                        @(Model.Employer.Gioithieu ?? "Công ty hoạt động chuyên nghiệp trong lĩnh vực công nghệ, luôn tạo điều kiện thuận lợi và môi trường phát triển kỹ năng thực tế cho các bạn sinh viên Freelancer.")
+                    </p>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i>Thông tin liên hệ</h5>
+                    <div class="small text-secondary">
+                        <p class="mb-2"><strong>Đại diện:</strong> @Model.User.HotenUser</p>
+                        <p class="mb-2"><strong>Email:</strong> @Model.User.EmailUser</p>
+                        <p class="mb-2"><strong>SĐT:</strong> @(Model.User.SdtUser ?? "0283838383")</p>
+                        <p class="mb-2"><strong>Địa chỉ:</strong> @(Model.Employer.Diachi ?? "TP. Hồ Chí Minh")</p>
+                        <p class="mb-0"><strong>Ngày tham gia:</strong> @Model.Employer.NgayDangKy.ToString("dd/MM/yyyy")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột Phải: Danh sách việc làm đang tuyển -->
+            <div class="col-12 col-lg-8" id="jobs">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-briefcase-fill text-success me-2"></i>Danh sách bài đăng tuyển dụng
+                        </h5>
+                        <span class="badge bg-success">@Model.AllJobs.Count bài đăng</span>
+                    </div>
+
+                    @if (!Model.AllJobs.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-briefcase display-4"></i>
+                            <p class="mt-2 mb-0">Hiện tại nhà tuyển dụng chưa có bài đăng nào.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var job in Model.AllJobs)
+                        {
+                            <div class="job-item-card">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="badge bg-light text-muted border me-2">#@job.MaJob</span>
+                                        <span class="badge @(job.Status == "DangTuyen" ? "bg-success" : "bg-secondary")">
+                                            @(job.Status == "DangTuyen" ? "Đang tuyển" : "Đang thực hiện")
+                                        </span>
+                                    </div>
+                                    <div class="fw-bold text-danger fs-6">
+                                        @(job.Thulao.HasValue ? job.Thulao.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                                    </div>
+                                </div>
+                                <h5 class="fw-bold mb-2">
+                                    <a href="/JobPost/Details/@job.MaJob" class="text-dark text-decoration-none hover-green">
+                                        @job.Tieude
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3">@job.Mota</p>
+                                
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top">
+                                    <div class="small text-secondary">
+                                        <span class="me-3"><i class="bi bi-tools text-success me-1"></i>@job.Kynangyeucau</span>
+                                        <span><i class="bi bi-clock text-info me-1"></i>Hạn: @job.Thoigiandukienhoanthanh</span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="/JobPost/Details/@job.MaJob" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            Xem chi tiết
+                                        </a>
+                                        <a href="/JobPost/Details/@job.MaJob#applyBox" class="btn btn-sm btn-success rounded-pill px-3">
+                                            Ứng tuyển ngay
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnToggleBookmark')?.addEventListener('click', function () {
+            const btn = this;
+            const employerId = btn.getAttribute('data-employer-id');
+            const icon = document.getElementById('bookmarkIcon');
+            const text = document.getElementById('bookmarkText');
+
+            fetch('/Freelancer/ToggleNhaTuyenDungYeuThich?maNhaTuyenDung=' + employerId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.isFavorite) {
+                        btn.classList.remove('btn-outline-danger');
+                        btn.classList.add('btn-danger');
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        text.textContent = 'Đã quan tâm';
+                    } else {
+                        btn.classList.remove('btn-danger');
+                        btn.classList.add('btn-outline-danger');
+                        icon.classList.remove('bi-heart-fill');
+                        icon.classList.add('bi-heart');
+                        text.textContent = 'Lưu NTD';
+                    }
+                }
+            })
+            .catch(err => console.error('Error toggling favorite:', err));
+        });
+    </script>
+}

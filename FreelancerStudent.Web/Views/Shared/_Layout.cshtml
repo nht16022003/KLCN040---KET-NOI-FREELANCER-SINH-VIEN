@@ -1,76 +1,1263 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var role = Context.Session.GetString("tenRole");
+    var userName = Context.Session.GetString("hovaten") ?? (role == "NhaTuyenDung" ? "tuan_depzai" : "Son_ko_thogminh");
+    var userRoleTitle = Context.Session.GetString("tenRole") ?? (role == "NhaTuyenDung" ? "Nhà tuyển dụng" :
+"Freelancer Student");
+    var userAvatar = Context.Session.GetString("UserAvatar") ??
+"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80";
+}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FreelancerStudent.Web</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Freelancer Students</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Caveat:wght@600;700&display=swap"
+    rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FreelancerStudent.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <style>
+            :root {
+                --primary-green: #3B6E53;
+                --primary-green-dark: #2A523E;
+                --primary-green-light: #EBF4F0;
+                --primary-green-hover: #325E47;
+                --text-dark: #1E293B;
+                --text-muted: #64748B;
+                --border-color: #E2E8F0;
+                --card-bg: #FFFFFF;
+                --body-bg: #FAFCFB;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                background-color: var(--body-bg);
+                color: var(--text-dark);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* ============================================================ */
+            /* AUTH & DEFAULT GUEST NAVBAR                                  */
+            /* ============================================================ */
+            .auth-header {
+                background: #FFFFFF;
+                border-bottom: 1px solid #EEF2F6;
+                padding: 14px 0;
+            }
+
+            .brand-logo {
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: #0F172A;
+                text-decoration: none;
+                letter-spacing: -0.5px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .brand-logo span {
+                color: var(--primary-green);
+            }
+
+            .nav-link-custom {
+                color: #475569;
+                font-size: 0.95rem;
+                font-weight: 500;
+                text-decoration: none;
+                padding: 6px 14px;
+                transition: color 0.2s;
+            }
+
+            .nav-link-custom:hover {
+                color: var(--primary-green);
+            }
+
+            .btn-header-login {
+                background: #FFFFFF;
+                border: 1px solid #D0D7DE;
+                color: #334155;
+                font-weight: 600;
+                font-size: 0.9rem;
+                padding: 7px 20px;
+                border-radius: 30px;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .btn-header-login:hover {
+                border-color: var(--primary-green);
+                color: var(--primary-green);
+                background: var(--primary-green-light);
+            }
+
+            .btn-header-register {
+                background: var(--primary-green);
+                border: 1px solid var(--primary-green);
+                color: #FFFFFF;
+                font-weight: 600;
+                font-size: 0.9rem;
+                padding: 7px 22px;
+                border-radius: 30px;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .btn-header-register:hover {
+                background: var(--primary-green-dark);
+                color: #FFFFFF;
+            }
+
+            /* ============================================================ */
+            /* LOGGED IN TOP NAVBAR (EMPLOYER & FREELANCER)                 */
+            /* ============================================================ */
+            .portal-header {
+                background: #FFFFFF;
+                border-bottom: 1px solid #E5ECE7;
+                padding: 12px 0;
+            }
+
+            .search-pill-btn {
+                background-color: #DDEAE1;
+                border: 1px solid #C4D9CD;
+                border-radius: 8px;
+                padding: 6px 14px;
+                font-size: 0.86rem;
+                font-weight: 600;
+                color: #26593D;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+
+            .search-pill-btn:hover {
+                background-color: #CFE2D4;
+                color: #1A442D;
+            }
+
+            .portal-nav-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.92rem;
+                font-weight: 600;
+                color: #2D3748;
+                text-decoration: none;
+                padding: 6px 12px;
+                border-radius: 8px;
+                transition: all 0.2s ease;
+            }
+
+            .portal-nav-link i {
+                font-size: 1.15rem;
+                color: #334155;
+            }
+
+            .portal-nav-link:hover {
+                color: var(--primary-green);
+                background-color: #F8FAF9;
+            }
+
+            .portal-icon-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                background: #F1F5F9;
+                color: #334155;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+
+            .portal-icon-btn:hover {
+                background: #E2E8F0;
+                color: #0F172A;
+            }
+
+            .btn-portal-action-green {
+                background-color: #297746;
+                color: #FFFFFF !important;
+                font-weight: 700;
+                font-size: 0.88rem;
+                padding: 8px 22px;
+                border-radius: 30px;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 12px rgba(41, 119, 70, 0.2);
+                white-space: nowrap;
+            }
+
+            .btn-portal-action-green:hover {
+                background-color: #1F5F36;
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(41, 119, 70, 0.3);
+            }
+
+            .portal-user-profile {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                padding: 2px 6px;
+                border-radius: 30px;
+                transition: background 0.2s;
+            }
+
+            .portal-user-profile:hover {
+                background: #F8FAFC;
+            }
+
+            .portal-user-avatar {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #E2E8F0;
+            }
+
+            .portal-user-info {
+                display: flex;
+                flex-direction: column;
+                text-align: left;
+            }
+
+            .portal-user-name {
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: #0F172A;
+                line-height: 1.2;
+            }
+
+            .portal-user-tag {
+                font-size: 0.72rem;
+                color: #64748B;
+                font-weight: 500;
+            }
+
+            /* ============================================================ */
+            /* SUBNAVBAR DÀNH CHO ROLE PORTALS                              */
+            /* ============================================================ */
+            .portal-subnav {
+                background-color: #EEF6F1;
+                border-bottom: 1px solid #DFECE3;
+                padding: 8px 0;
+            }
+
+            .subnav-link-active {
+                background-color: #1E6E38;
+                color: #FFFFFF !important;
+                font-weight: 700;
+                font-size: 0.85rem;
+                padding: 6px 18px;
+                border-radius: 20px;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .subnav-link {
+                color: #556B5D;
+                font-weight: 600;
+                font-size: 0.86rem;
+                padding: 6px 14px;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.2s ease;
+                border-radius: 20px;
+            }
+
+            .subnav-link:hover {
+                color: #1E6E38;
+                background-color: rgba(30, 110, 56, 0.08);
+            }
+
+            /* ============================================================ */
+            /* AUTH HERO & FORMS (LOGIN & REGISTER)                         */
+            /* ============================================================ */
+            .auth-main-container {
+                flex: 1;
+                padding: 40px 0 60px;
+            }
+
+            /* LEFT COLUMN: HERO */
+            .hero-title-main {
+                font-size: 2.75rem;
+                font-weight: 800;
+                line-height: 1.15;
+                color: var(--primary-green);
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+
+            .hero-title-outlined {
+                color: transparent;
+                -webkit-text-stroke: 2px var(--primary-green);
+                font-weight: 800;
+            }
+
+            .hero-subtitle {
+                color: #475569;
+                font-size: 1.1rem;
+                font-weight: 500;
+                margin-top: 12px;
+                margin-bottom: 30px;
+            }
+
+            .feature-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .feature-icon-box {
+                width: 46px;
+                height: 46px;
+                border-radius: 50%;
+                background: #E2ECE6;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--primary-green-dark);
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .feature-title {
+                font-weight: 700;
+                font-size: 1.02rem;
+                color: #1E293B;
+                margin-bottom: 2px;
+            }
+
+            .feature-desc {
+                color: #64748B;
+                font-size: 0.9rem;
+                line-height: 1.4;
+            }
+
+            .hero-illustration-box {
+                position: relative;
+                margin-top: 30px;
+                max-width: 480px;
+            }
+
+            .hero-student-img {
+                width: 100%;
+                height: auto;
+                border-radius: 20px;
+                object-fit: cover;
+                box-shadow: 0 12px 36px rgba(59, 110, 83, 0.12);
+            }
+
+            .doodle-badge,
+            .doodle-text-badge {
+                font-family: 'Caveat', cursive;
+                color: var(--primary-green-dark);
+                font-size: 1.65rem;
+                font-weight: 700;
+                line-height: 1.15;
+                position: absolute;
+                top: 20px;
+                left: -20px;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 8px 16px;
+                border-radius: 12px;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+                transform: rotate(-6deg);
+                z-index: 2;
+            }
+
+            /* RIGHT COLUMN: AUTH CARD */
+            .login-card-container {
+                background: #FFFFFF;
+                border: 1px solid #E8EFF2;
+                border-radius: 24px;
+                padding: 40px 36px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.04);
+            }
+
+            .login-card-title {
+                font-size: 1.75rem;
+                font-weight: 800;
+                color: #1E293B;
+                text-align: center;
+                margin-bottom: 6px;
+            }
+
+            .login-card-subtitle {
+                color: #64748B;
+                font-size: 0.92rem;
+                text-align: center;
+                margin-bottom: 26px;
+            }
+
+            .btn-social {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                padding: 11px 16px;
+                border-radius: 12px;
+                border: 1px solid #E2E8F0;
+                background: #FFFFFF;
+                color: #334155;
+                font-weight: 600;
+                font-size: 0.92rem;
+                margin-bottom: 12px;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .btn-social:hover {
+                background: #F8FAFC;
+                border-color: #CBD5E1;
+                color: #0F172A;
+                transform: translateY(-1px);
+            }
+
+            .auth-divider {
+                display: flex;
+                align-items: center;
+                text-align: center;
+                margin: 20px 0;
+                color: #94A3B8;
+                font-size: 0.85rem;
+            }
+
+            .auth-divider::before,
+            .auth-divider::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px solid #E2E8F0;
+            }
+
+            .auth-divider span {
+                padding: 0 14px;
+            }
+
+            .form-label-auth {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #1E293B;
+                margin-bottom: 6px;
+                display: block;
+            }
+
+            .input-group-auth {
+                position: relative;
+                display: flex;
+                align-items: center;
+                margin-bottom: 18px;
+            }
+
+            .input-icon-left {
+                position: absolute;
+                left: 14px;
+                color: #94A3B8;
+                font-size: 1.1rem;
+                z-index: 5;
+            }
+
+            .form-control-auth {
+                width: 100%;
+                height: 48px;
+                padding: 10px 14px 10px 42px;
+                border-radius: 12px;
+                border: 1px solid #CBD5E1;
+                font-size: 0.92rem;
+                color: #1E293B;
+                background-color: #FFFFFF;
+                transition: all 0.2s ease;
+            }
+
+            .form-control-auth:focus {
+                outline: none;
+                border-color: var(--primary-green);
+                box-shadow: 0 0 0 3px rgba(59, 110, 83, 0.12);
+            }
+
+            .input-icon-right {
+                position: absolute;
+                right: 14px;
+                color: #94A3B8;
+                cursor: pointer;
+                font-size: 1.1rem;
+                z-index: 5;
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            .input-icon-right:hover {
+                color: #475569;
+            }
+
+            .auth-options-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 22px;
+                font-size: 0.88rem;
+            }
+
+            .form-check-input-green:checked {
+                background-color: var(--primary-green);
+                border-color: var(--primary-green);
+            }
+
+            .link-forgot {
+                color: var(--primary-green);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .link-forgot:hover {
+                text-decoration: underline;
+            }
+
+            .btn-submit-auth {
+                width: 100%;
+                height: 50px;
+                border-radius: 30px;
+                background: var(--primary-green);
+                color: #FFFFFF;
+                border: none;
+                font-weight: 700;
+                font-size: 1.02rem;
+                transition: all 0.2s ease;
+                box-shadow: 0 6px 18px rgba(59, 110, 83, 0.25);
+                cursor: pointer;
+            }
+
+            .btn-submit-auth:hover {
+                background: var(--primary-green-dark);
+                transform: translateY(-1px);
+                box-shadow: 0 8px 22px rgba(59, 110, 83, 0.32);
+            }
+
+            .auth-footer-text {
+                text-align: center;
+                margin-top: 18px;
+                font-size: 0.9rem;
+                color: #64748B;
+            }
+
+            .auth-footer-text a {
+                color: var(--primary-green);
+                font-weight: 700;
+                text-decoration: none;
+            }
+
+            .auth-footer-text a:hover {
+                text-decoration: underline;
+            }
+
+            .admin-login-box {
+                text-align: center;
+                margin-top: 24px;
+                padding-top: 18px;
+                border-top: 1px dashed #E2E8F0;
+                font-size: 0.85rem;
+                color: #64748B;
+            }
+
+            .admin-login-box a {
+                color: var(--primary-green);
+                font-weight: 700;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 4px;
+            }
+
+            .quick-fill-section {
+                background: #F8FAFC;
+                border: 1px dashed #CBD5E1;
+                border-radius: 12px;
+                padding: 10px 14px;
+                margin-top: 18px;
+            }
+
+            /* ============================================================ */
+            /* FOOTER                                                       */
+            /* ============================================================ */
+            .main-footer {
+                background: #FFFFFF;
+                border-top: 1px solid #EEF2F6;
+                padding: 50px 0 24px;
+                margin-top: auto;
+            }
+
+            .footer-brand {
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--primary-green-dark);
+                margin-bottom: 10px;
+            }
+
+            .footer-desc {
+                color: #64748B;
+                font-size: 0.88rem;
+                line-height: 1.5;
+                margin-bottom: 16px;
+            }
+
+            .footer-social-links a {
+                color: #64748B;
+                font-size: 1.15rem;
+                margin-right: 14px;
+                transition: color 0.2s;
+            }
+
+            .footer-social-links a:hover {
+                color: var(--primary-green);
+            }
+
+            .footer-heading {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #1E293B;
+                margin-bottom: 16px;
+            }
+
+            .footer-links {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .footer-links li {
+                margin-bottom: 10px;
+            }
+
+            .footer-links a {
+                color: #64748B;
+                text-decoration: none;
+                font-size: 0.88rem;
+                transition: color 0.2s;
+            }
+
+            .footer-links a:hover {
+                color: var(--primary-green);
+            }
+
+            .subscribe-form {
+                display: flex;
+                gap: 6px;
+            }
+
+            .subscribe-input {
+                flex: 1;
+                height: 42px;
+                border-radius: 8px;
+                border: 1px solid #CBD5E1;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .subscribe-btn {
+                width: 42px;
+                height: 42px;
+                border-radius: 8px;
+                background: var(--primary-green);
+                color: #FFFFFF;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .subscribe-btn:hover {
+                background: var(--primary-green-dark);
+            }
+
+            .footer-bottom {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #F1F5F9;
+                font-size: 0.82rem;
+                color: #94A3B8;
+            }
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom shadow-sm mb-3">
-            <div class="container">
-                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-mortarboard-fill me-1"></i> FreelancerStudent
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Giới thiệu</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="btn btn-outline-primary btn-sm px-3 me-2" asp-controller="Account" asp-action="Login">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+
+    @if (role == "NhaTuyenDung")
+    {
+        <!-- ==================== HEADER NHÀ TUYỂN DỤNG ==================== -->
+        <header class="portal-header">
+            <div class="container-fluid px-lg-5">
+                <div class="d-flex align-items-center justify-content-between">
+                    
+                    <!-- Cột Trái: Logo + Khám phá + Navigation chính -->
+                    <div class="d-flex align-items-center gap-3 gap-lg-4">
+                        <!-- Logo -->
+                        <a href="/" class="brand-logo me-2">
+                            Freelancer <span>Students</span>
+                        </a>
+
+                        <!-- Nút Khám phá Freelancer -->
+                        <a href="/Freelancer/Search" class="search-pill-btn">
+                            <i class="bi bi-search"></i>
+                            <span>Khám phá Freelancer</span>
+                        </a>
+
+                        <!-- Navigation chính -->
+                        <nav class="d-none d-md-flex align-items-center gap-2">
+                            <a href="/Employer/ManageJobs" class="portal-nav-link">
+                                <i class="bi bi-briefcase"></i>
+                                <span>Quản lý tuyển dụng</span>
                             </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <!-- Thông báo từ TempData -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
+                            <a href="/HopDong" class="portal-nav-link">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span>Hợp đồng</span>
+                            </a>
+                            <a href="/Wallet" class="portal-nav-link">
+                                <i class="bi bi-wallet2"></i>
+                                <span>Ví & Thanh toán</span>
+                            </a>
+                        </nav>
+                    </div>
 
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+                    <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài + Profile User -->
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
+                        <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo">
+                            <i class="bi bi-bell"></i>
+                            <span
+                            class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                            style="width: 8px; height: 8px;"></span>
+                        </a>
 
-    <footer class="border-top footer text-muted bg-light py-3 mt-auto">
-        <div class="container text-center">
-            &copy; 2026 - FreelancerStudent.Web - Nền tảng kết nối Freelancer Sinh viên
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
+                        <!-- Nút Tin Nhắn (FRL-UC-07) -->
+                        <a href="/NhanTin" class="portal-icon-btn position-relative" title="Tin nhắn trao đổi">
+                            <i class="bi bi-chat-dots"></i>
+                            <span
+                            class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                            style="width: 9px; height: 9px;"></span>
+                        </a>
+
+                        <!-- Nút Đăng bài tuyển dụng -->
+                        <a href="/JobPost/Create" class="btn-portal-action-green">
+                            Đăng bài tuyển dụng
+                        </a>
+
+                        <!-- User Profile Dropdown -->
+                        <div class="dropdown">
+                            <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
+                                <div class="portal-user-info d-none d-lg-block">
+                                    <span class="portal-user-name">@userName</span>
+                                    <span class="portal-user-tag">@userRoleTitle</span>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                <li>
+                                    <a class="dropdown-item"
+                                    asp-controller="Account"
+                                    asp-action="ThietLapTaiKhoan"
+                                    asp-route-tab="thongtin">
+                                        <i class="bi bi-person-gear me-2"></i>
+                                        Thiết lập tài khoản
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item"
+                                    asp-controller="Account"
+                                    asp-action="ThietLapTaiKhoan"
+                                    asp-route-tab="baomat">
+                                        <i class="bi bi-shield-lock me-2"></i>
+                                        Thiết lập bảo mật
+                                    </a>
+                                </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="/Wallet"><i class="bi bi-wallet2 text-success me-2"></i>
+                                            Ví tài chính & Nạp tiền</a></li>
+                                            <li><a class="dropdown-item" href="/Employer/Profile/1"><i class="bi bi-building me-2"></i>
+                                                Hồ sơ công ty</a></li>
+                                                <li><a class="dropdown-item" href="/Employer/ManageJobs"><i
+                                                    class="bi bi-briefcase me-2"></i> Quản lý tin tuyển dụng</a></li>
+                                                    <li><a class="dropdown-item" href="/Employer/FreelancerYeuThich"><i
+                                                        class="bi bi-bookmark-heart text-danger me-2"></i> Freelancer quan tâm</a></li>
+                                                        <li><a class="dropdown-item" href="/HopDong"><i class="bi bi-file-earmark-text me-2"></i>
+                                                            Quản lý hợp đồng</a></li>
+                                                            <li><a class="dropdown-item" href="/TranhChap"><i
+                                                                class="bi bi-shield-shaded text-danger me-2"></i> Tranh chấp & Khiếu nại</a>
+                                                            </li>
+                                                            <li>
+                                                                <hr class="dropdown-divider">
+                                                            </li>
+                                                            <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
+                                                                class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </header>
+
+                                        <!-- SUBNAVBAR CHO NHÀ TUYỂN DỤNG -->
+                                        <nav class="portal-subnav">
+                                            <div class="container-fluid px-lg-5">
+                                                <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                    <a href="/Employer/ManageJobs" class="subnav-link">Quản lý tin tuyển dụng</a>
+                                                    <a href="/Employer/Applicants" class="subnav-link">Danh sách ứng viên</a>
+                                                    <a href="/Employer/FreelancerYeuThich" class="subnav-link"><i
+                                                        class="bi bi-bookmark-heart me-1"></i>Freelancer quan tâm</a>
+                                                        <a href="/Wallet" class="subnav-link"><i class="bi bi-wallet2 me-1"></i>Ví điện tử</a>
+                                                        <a href="/JobPost/Create" class="subnav-link text-success fw-bold"><i
+                                                            class="bi bi-plus-circle me-1"></i>Đăng tin mới</a>
+                                                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                                            <a href="/Employer/Profile/1" class="subnav-link">Hồ sơ công ty</a>
+                                                        </div>
+                                                    </div>
+                                                </nav>
+                                            }
+    else if (role == "FreelancerStudent")
+                                            {
+                                                <!-- ==================== HEADER FREELANCER STUDENT ==================== -->
+                                                <header class="portal-header">
+                                                    <div class="container-fluid px-lg-5">
+                                                        <div class="d-flex align-items-center justify-content-between">
+                    
+                                                            <!-- Cột Trái: Logo + Khám phá nhà tuyển dụng + Navigation chính -->
+                                                            <div class="d-flex align-items-center gap-3 gap-lg-4">
+                                                                <!-- Logo -->
+                                                                <a href="/" class="brand-logo me-2">
+                                                                    Freelancer <span>Students</span>
+                                                                </a>
+
+                                                                <!-- Nút Khám phá nhà tuyển dụng -->
+                                                                <a href="/NhaTuyenDung/Search" class="search-pill-btn">
+                                                                    <i class="bi bi-search"></i>
+                                                                    <span>Khám phá nhà tuyển dụng</span>
+                                                                </a>
+
+                                                                <!-- Navigation chính -->
+                                                                <nav class="d-none d-md-flex align-items-center gap-2">
+                                                                    <a href="/Freelancer/QuanLyTimViec" class="portal-nav-link">
+                                                                        <i class="bi bi-briefcase"></i>
+                                                                        <span>Quản lý tìm việc</span>
+                                                                    </a>
+                                                                    <a href="/HopDong" class="portal-nav-link">
+                                                                        <i class="bi bi-file-earmark-text"></i>
+                                                                        <span>Hợp đồng</span>
+                                                                    </a>
+                                                                    <a href="/Wallet" class="portal-nav-link">
+                                                                        <i class="bi bi-wallet2"></i>
+                                                                        <span>Ví & Thu nhập</span>
+                                                                    </a>
+                                                                </nav>
+                                                            </div>
+
+                                                            <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài tìm việc + Profile User -->
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
+                                                                <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo">
+                                                                    <i class="bi bi-bell"></i>
+                                                                    <span
+                                                                    class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                                                                    style="width: 8px; height: 8px;"></span>
+                                                                </a>
+
+                                                                <!-- Nút Tin Nhắn (FRL-UC-07) -->
+                                                                <a href="/NhanTin" class="portal-icon-btn position-relative" title="Tin nhắn trao đổi">
+                                                                    <i class="bi bi-chat-dots"></i>
+                                                                    <span
+                                                                    class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                                                                    style="width: 9px; height: 9px;"></span>
+                                                                </a>
+
+                                                                <!-- Nút Đăng bài tìm việc -->
+                                                                <a href="/Freelancer/DangTinTimViec" class="btn-portal-action-green">
+                                                                    Đăng bài tìm việc
+                                                                </a>
+
+                                                                <!-- User Profile Dropdown -->
+                                                                <div class="dropdown">
+                                                                    <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                                                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
+                                                                        <div class="portal-user-info d-none d-lg-block">
+                                                                            <span class="portal-user-name">@userName</span>
+                                                                            <span class="portal-user-tag">@userRoleTitle</span>
+                                                                        </div>
+                                                                    </a>
+                                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                                                        <li>
+                                                                            <a class="dropdown-item"
+                                                                            asp-controller="Account"
+                                                                            asp-action="ThietLapTaiKhoan"
+                                                                            asp-route-tab="thongtin">
+                                                                                <i class="bi bi-person-gear me-2"></i>
+                                                                                Thiết lập tài khoản
+                                                                            </a>
+                                                                        </li>
+
+                                                                        <li>
+                                                                            <a class="dropdown-item"
+                                                                            asp-controller="Account"
+                                                                            asp-action="ThietLapTaiKhoan"
+                                                                            asp-route-tab="baomat">
+                                                                                <i class="bi bi-shield-lock me-2"></i>
+                                                                                Thiết lập bảo mật
+                                                                            </a>
+                                                                        </li>
+                                                                                <li>
+                                                                                    <hr class="dropdown-divider">
+                                                                                </li>
+                                                                                <li><a class="dropdown-item" href="/Wallet"><i class="bi bi-wallet2 text-success me-2"></i>
+                                                                                    Ví tài chính & Nạp tiền</a></li>
+                                                                                    <li><a class="dropdown-item" href="/Account/MinhChung"><i
+                                                                                        class="bi bi-patch-check-fill text-success me-2"></i> Minh chứng sinh viên</a>
+                                                                                    </li>
+                                                                                    <li><a class="dropdown-item" href="/Freelancer/HoSo"><i class="bi bi-person-vcard me-2"></i>
+                                                                                        Hồ sơ năng lực sinh viên</a></li>
+                                                                                        <li><a class="dropdown-item" href="/Freelancer/Portfolio"><i
+                                                                                            class="bi bi-collection-play me-2"></i> Portfolio cá nhân</a></li>
+                                                                                            <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich"><i
+                                                                                                class="bi bi-building-check text-primary me-2"></i> NTD quan tâm (Đã lưu)</a>
+                                                                                            </li>
+                                                                                            <li><a class="dropdown-item" href="/TranhChap"><i
+                                                                                                class="bi bi-shield-shaded text-danger me-2"></i> Tranh chấp & Khiếu nại</a>
+                                                                                            </li>
+                                                                                            <li>
+                                                                                                <hr class="dropdown-divider">
+                                                                                            </li>
+                                                                                            <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
+                                                                                                class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                                                                                            </ul>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </header>
+
+                                                                        <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
+                                                                        <nav class="portal-subnav">
+                                                                            <div class="container-fluid px-lg-5">
+                                                                                <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                                                    <a href="/Freelancer/QuanLyTimViec" class="subnav-link"><i class="bi bi-briefcase me-1"></i>Quản lý tìm
+                                                                                        việc</a>
+                                                                                        <a href="/Freelancer/DangTinTimViec" class="subnav-link"><i class="bi bi-pencil-square me-1"></i>Đăng
+                                                                                            tin tìm việc</a>
+                                                                                            <a href="/Freelancer/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
+                                                                                            <a href="/Freelancer/LoiMoiNhanViec" class="subnav-link">Lời mời nhận việc</a>
+                                                                                            <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link"><i
+                                                                                                class="bi bi-building-check me-1"></i>NTD quan tâm</a>
+                                                                                                <a href="/Wallet" class="subnav-link"><i class="bi bi-wallet2 me-1"></i>Ví & Thu nhập</a>
+                                                                                                <a href="/Freelancer/Portfolio" class="subnav-link">Portfolio cá nhân</a>
+                                                                                                <a href="/Account/MinhChung" class="subnav-link text-success fw-bold"><i
+                                                                                                    class="bi bi-shield-check me-1"></i>Minh chứng sinh viên</a>
+                                                                                                    <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                                                                                    <a href="/Freelancer/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </nav>
+                                                                                    }
+    else if (role == "Admin" || (Context.Request.Path.Value != null && Context.Request.Path.Value.StartsWith("/Admin",
+    StringComparison.OrdinalIgnoreCase)))
+                                                                                    {
+                                                                                        <!-- ==================== HEADER QUẢN TRỊ VIÊN (ADMIN) ==================== -->
+                                                                                        <header class="portal-header">
+                                                                                            <div class="container-fluid px-lg-5">
+                                                                                                <div class="d-flex align-items-center justify-content-between">
+                                                                                                    <!-- Cột Trái: Brand Admin + Tra cứu nhanh + Navigation chính -->
+                                                                                                    <div class="d-flex align-items-center gap-3 gap-lg-4">
+                                                                                                        <a href="/Admin" class="brand-logo me-2">
+                                                                                                            Freelancer <span
+                                                                                                            class="badge bg-success-subtle text-success fs-6 fw-bold px-2 py-1 ms-1 border border-success-subtle">Admin</span>
+                                                                                                        </a>
+
+                                                                                                        <!-- Nút Tra cứu nhanh người dùng -->
+                                                                                                        <a href="/Admin/DanhSachNguoiDung" class="search-pill-btn">
+                                                                                                            <i class="bi bi-search"></i>
+                                                                                                            <span>Tra cứu người dùng & hệ thống</span>
+                                                                                                        </a>
+
+                                                                                                        <!-- Navigation chính -->
+                                                                                                        <nav class="d-none d-md-flex align-items-center gap-2">
+                                                                                                            <a href="/Admin" class="portal-nav-link">
+                                                                                                                <i class="bi bi-speedometer2"></i>
+                                                                                                                <span>Tổng quan</span>
+                                                                                                            </a>
+                                                                                                            <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link">
+                                                                                                                <i class="bi bi-people"></i>
+                                                                                                                <span>Người dùng</span>
+                                                                                                            </a>
+                                                                                                            <a href="/Admin/QuanLyGiaoDich" class="portal-nav-link">
+                                                                                                                <i class="bi bi-shield-check"></i>
+                                                                                                                <span>Giao dịch & Ký quỹ</span>
+                                                                                                            </a>
+                                                                                                            <a href="/Admin/XuLyTranhChap" class="portal-nav-link">
+                                                                                                                <i class="bi bi-exclamation-triangle"></i>
+                                                                                                                <span>Tranh chấp</span>
+                                                                                                            </a>
+                                                                                                        </nav>
+                                                                                                    </div>
+
+                                                                                                    <!-- Cột Phải: Thông báo + Nút Giám sát Live + Profile Admin -->
+                                                                                                    <div class="d-flex align-items-center gap-3">
+                                                                                                        <!-- Nút Chuông Thông Báo -->
+                                                                                                        <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo hệ thống">
+                                                                                                            <i class="bi bi-bell"></i>
+                                                                                                            <span
+                                                                                                            class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                                                                                                            style="width: 8px; height: 8px;"></span>
+                                                                                                        </a>
+
+                                                                                                        <!-- Nút Giám sát Live -->
+                                                                                                        <a href="/Admin/GiamSatHeThong" class="btn-portal-action-green">
+                                                                                                            <i class="bi bi-activity"></i> Giám sát Live
+                                                                                                        </a>
+
+                                                                                                        <!-- User Profile Dropdown -->
+                                                                                                        <div class="dropdown">
+                                                                                                            <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                                                                                                               data-bs-toggle="dropdown" aria-expanded="false">
+                                                                                                                <img src="@userAvatar" alt="@userName"
+                                                                                                                     class="portal-user-avatar border border-2 border-success" />
+                                                                                                                <div class="portal-user-info d-none d-lg-block">
+                                                                                                                    <span class="portal-user-name">@userName</span>
+                                                                                                                    <span class="portal-user-tag text-success fw-bold">Quản trị viên</span>
+                                                                                                                </div>
+                                                                                                            </a>
+                                                                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                                                                                                <li><a class="dropdown-item" href="/Admin"><i
+                                                                                                                    class="bi bi-speedometer2 text-success me-2"></i> Bảng điều khiển Quản trị</a>
+                                                                                                                </li>
+                                                                                                                <li><a class="dropdown-item" href="/Admin/CauHinhPhi"><i
+                                                                                                                    class="bi bi-sliders text-primary me-2"></i> Cấu hình phí & Doanh thu</a></li>
+                                                                                                                    <li><a class="dropdown-item" href="/Admin/QuanLyHopDong"><i
+                                                                                                                        class="bi bi-file-earmark-code text-warning me-2"></i> Cấu hình Mẫu hợp đồng</a>
+                                                                                                                    </li>
+                                                                                                                    <li><a class="dropdown-item" href="/Admin/QuanLyPhiDangBai"><i
+                                                                                                                        class="bi bi-tags text-info me-2"></i> Cấu hình Phí đăng bài</a></li>
+                                                                                                                        <li><a class="dropdown-item" href="/Admin/GiamSatHeThong"><i
+                                                                                                                            class="bi bi-activity text-danger me-2"></i> Giám sát thời gian thực</a></li>
+                                                                                                                            <li>
+                                                                                                                                <hr class="dropdown-divider">
+                                                                                                                            </li>
+                                                                                                                            <li><a class="dropdown-item text-primary" href="/Employer/ManageJobs"><i
+                                                                                                                                class="bi bi-arrow-repeat me-2"></i> Chuyển sang giao diện Tuyển dụng</a></li>
+                                                                                                                                <li><a class="dropdown-item text-success" href="/Freelancer/QuanLyTimViec"><i
+                                                                                                                                    class="bi bi-arrow-repeat me-2"></i> Chuyển sang giao diện Freelancer</a></li>
+                                                                                                                                    <li>
+                                                                                                                                        <hr class="dropdown-divider">
+                                                                                                                                    </li>
+                                                                                                                                    <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
+                                                                                                                                        class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                                                                                                                                    </ul>
+                                                                                                                                </div>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </header>
+
+                                                                                                                <!-- SUBNAVBAR CHO ADMIN (Đồng bộ styling với toàn bộ hệ thống) -->
+                                                                                                                <nav class="portal-subnav">
+                                                                                                                    <div class="container-fluid px-lg-5">
+                                                                                                                        <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                                                                                            <a href="/Admin" class="subnav-link"><i class="bi bi-speedometer2 me-1"></i>Tổng quan</a>
+                                                                                                                            <a href="/Admin/DanhSachNguoiDung" class="subnav-link"><i class="bi bi-people me-1"></i>QL Người
+                                                                                                                                dùng</a>
+                                                                                                                                <a href="/Admin/XuLyTaiKhoan" class="subnav-link"><i class="bi bi-person-lock me-1"></i>Khóa/Mở TK</a>
+                                                                                                                                <a href="/Admin/YeuCauNapTien" class="subnav-link"><i class="bi bi-cash-stack me-1"></i>Duyệt nạp
+                                                                                                                                    tiền</a>
+                                                                                                                                    <a href="/Admin/DieuChinhSoDu" class="subnav-link"><i class="bi bi-sliders2-vertical me-1"></i>Điều
+                                                                                                                                        chỉnh số dư</a>
+                                                                                                                                        <a href="/Admin/QuanLyGiaoDich" class="subnav-link"><i class="bi bi-safe me-1"></i>Ký quỹ & Giao
+                                                                                                                                            dịch</a>
+                                                                                                                                            <a href="/Admin/CauHinhPhi" class="subnav-link"><i class="bi bi-percent me-1"></i>Cấu hình phí</a>
+                                                                                                                                            <a href="/Admin/XuLyTranhChap" class="subnav-link"><i class="bi bi-shield-slash me-1"></i>Xử lý tranh
+                                                                                                                                                chấp</a>
+                                                                                                                                                <a href="/Admin/XuLyHoTro" class="subnav-link"><i class="bi bi-headset me-1"></i>Xử lý hỗ trợ</a>
+                                                                                                                                                <a href="/Admin/GiamSatHeThong" class="subnav-link"><i class="bi bi-cpu me-1"></i>Giám sát hệ thống</a>
+                                                                                                                                                <a href="/Admin/QuanLyHopDong" class="subnav-link"><i class="bi bi-file-earmark-ruled me-1"></i>Mẫu hợp
+                                                                                                                                                    đồng</a>
+                                                                                                                                                    <a href="/Admin/QuanLyPhiDangBai" class="subnav-link"><i class="bi bi-tags-fill me-1"></i>Phí đăng
+                                                                                                                                                        bài</a>
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+                                                                                                                                            </nav>
+                                                                                                                                        }
+    else
+                                                                                                                                        {
+                                                                                                                                            <!-- ==================== HEADER DEFAULT / GUEST ==================== -->
+                                                                                                                                            <header class="auth-header">
+                                                                                                                                                <div class="container">
+                                                                                                                                                    <div class="d-flex align-items-center justify-content-between">
+
+                                                                                                                                                        <!-- Logo -->
+                                                                                                                                                        <a href="/" class="brand-logo">
+                                                                                                                                                            <i class="bi bi-mortarboard-fill text-success"></i>
+                                                                                                                                                            Freelancer <span>Students</span>
+                                                                                                                                                        </a>
+
+                                                                                                                                                        <!-- Nav Links -->
+                                                                                                                                                        <nav class="d-none d-lg-flex align-items-center gap-2">
+                                                                                                                                                            <a href="#" class="nav-link-custom">Tìm công việc</a>
+                                                                                                                                                            <a href="#" class="nav-link-custom">Tìm Freelancer</a>
+                                                                                                                                                            <a href="#" class="nav-link-custom">Về chúng tôi</a>
+                                                                                                                                                            <a href="#" class="nav-link-custom">Hỗ trợ</a>
+                                                                                                                                                        </nav>
+
+                                                                                                                                                        <!-- Right -->
+                                                                                                                                                        <div class="d-flex align-items-center gap-3">
+
+                                                                                                                                                            <div class="dropdown d-none d-sm-block">
+                                                                                                                                                                <button class="btn btn-sm btn-link text-decoration-none text-secondary dropdown-toggle p-0"
+                                                                                                                                                                        type="button" data-bs-toggle="dropdown">
+                                                                                                                                                                    <i class="bi bi-globe me-1"></i> VI
+                                                                                                                                                                </button>
+
+                                                                                                                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                                                                                                                                    <li>
+                                                                                                                                                                        <a class="dropdown-item active" href="#">
+                                                                                                                                                                            Tiếng Việt (VI)
+                                                                                                                                                                        </a>
+                                                                                                                                                                    </li>
+                                                                                                                                                                    <li>
+                                                                                                                                                                        <a class="dropdown-item" href="#">
+                                                                                                                                                                            English (EN)
+                                                                                                                                                                        </a>
+                                                                                                                                                                    </li>
+                                                                                                                                                                </ul>
+                                                                                                                                                            </div>
+
+                                                                                                                                                            <a asp-controller="Account" asp-action="DangNhap" class="btn-header-login">
+                                                                                                                                                                Đăng nhập
+                                                                                                                                                            </a>
+
+                                                                                                                                                            <a asp-controller="Account" asp-action="DangKy" class="btn-header-register">
+                                                                                                                                                                Đăng ký
+                                                                                                                                                            </a>
+
+                                                                                                                                                        </div>
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+                                                                                                                                            </header>
+                                                                                                                                        }
+
+                                                                                                                                        <!-- NỘI DUNG CỦA TỪNG VIEW -->
+                                                                                                                                        <main>
+                                                                                                                                            @RenderBody()
+                                                                                                                                        </main>
+
+                                                                                                                                        <!-- FOOTER CHUNG -->
+                                                                                                                                        <footer class="main-footer">
+                                                                                                                                            <div class="container">
+                                                                                                                                                <div class="row g-4">
+                                                                                                                                                    <!-- Col 1: Brand & Slogan -->
+                                                                                                                                                    <div class="col-12 col-md-4">
+                                                                                                                                                        <div class="footer-brand">
+                                                                                                                                                            <i class="bi bi-mortarboard-fill text-success"></i> Freelancer <span>Students</span>
+                                                                                                                                                        </div>
+                                                                                                                                                        <p class="footer-desc">
+                                                                                                                                                            Kết nối sinh viên tài năng với cơ hội thực tế
+                                                                                                                                                        </p>
+                                                                                                                                                        <div class="footer-social-links">
+                                                                                                                                                            <a href="#"><i class="bi bi-facebook"></i></a>
+                                                                                                                                                            <a href="#"><i class="bi bi-instagram"></i></a>
+                                                                                                                                                            <a href="#"><i class="bi bi-youtube"></i></a>
+                                                                                                                                                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                                                                                                                                                        </div>
+                                                                                                                                                    </div>
+
+                                                                                                                                                    <!-- Col 2: About Us -->
+                                                                                                                                                    <div class="col-6 col-md-2">
+                                                                                                                                                        <h5 class="footer-heading">Về chúng tôi</h5>
+                                                                                                                                                        <ul class="footer-links">
+                                                                                                                                                            <li><a href="#">Giới thiệu</a></li>
+                                                                                                                                                            <li><a href="#">Điều khoản sử dụng</a></li>
+                                                                                                                                                            <li><a href="#">Chính sách bảo mật</a></li>
+                                                                                                                                                            <li><a href="#">Liên hệ</a></li>
+                                                                                                                                                        </ul>
+                                                                                                                                                    </div>
+
+                                                                                                                                                    <!-- Col 3: Support -->
+                                                                                                                                                    <div class="col-6 col-md-2">
+                                                                                                                                                        <h5 class="footer-heading">Hỗ trợ</h5>
+                                                                                                                                                        <ul class="footer-links">
+                                                                                                                                                            <li><a href="#">Trung tâm trợ giúp</a></li>
+                                                                                                                                                            <li><a href="#">Hướng dẫn sử dụng</a></li>
+                                                                                                                                                            <li><a href="#">Câu hỏi thường gặp</a></li>
+                                                                                                                                                        </ul>
+                                                                                                                                                    </div>
+
+                                                                                                                                                    <!-- Col 4: Newsletter -->
+                                                                                                                                                    <div class="col-12 col-md-4">
+                                                                                                                                                        <h5 class="footer-heading">Kết nối với chúng tôi</h5>
+                                                                                                                                                        <p class="footer-desc">
+                                                                                                                                                            Cập nhật những cơ hội việc làm mới nhất dành cho sinh viên.
+                                                                                                                                                        </p>
+                                                                                                                                                        <form class="subscribe-form" onsubmit="event.preventDefault();">
+                                                                                                                                                            <input type="email" class="subscribe-input" placeholder="Nhập email của bạn" />
+                                                                                                                                                            <button type="submit" class="subscribe-btn">
+                                                                                                                                                                <i class="bi bi-send-fill"></i>
+                                                                                                                                                            </button>
+                                                                                                                                                        </form>
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+
+                                                                                                                                                <!-- Bottom sublinks -->
+                                                                                                                                                <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                                                                                                                                                    <div>
+                                                                                                                                                        &copy; 2026 Freelancer Students. All rights reserved.
+                                                                                                                                                    </div>
+                                                                                                                                                    <div class="d-flex gap-3">
+                                                                                                                                                        <a href="#" class="text-decoration-none text-muted">Điều khoản</a>
+                                                                                                                                                        <span>|</span>
+                                                                                                                                                        <a href="#" class="text-decoration-none text-muted">Bảo mật</a>
+                                                                                                                                                        <span>|</span>
+                                                                                                                                                        <a href="#" class="text-decoration-none text-muted">Liên hệ</a>
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+                                                                                                                                            </div>
+                                                                                                                                        </footer>
+
+                                                                                                                                        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+                                                                                                                                        @await RenderSectionAsync("Scripts", required: false)
+
+                                                                                                                                    </body>
+
+                                                                                                                                </html>

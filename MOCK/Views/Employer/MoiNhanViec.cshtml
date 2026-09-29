@@ -1,0 +1,204 @@
+@model MOCK.Models.ViewModels.SendDirectOfferViewModel
+@{
+    ViewData["Title"] = $"Gửi lời mời thuê trực tiếp tới {Model.TenFreelancer}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .direct-offer-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .direct-offer-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .freelancer-mini-banner {
+        background: linear-gradient(135deg, #EBF4F0 0%, #D8EADB 100%);
+        border: 1px solid #C4DEC8;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .avatar-student-mini {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #FFFFFF;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-submit-offer {
+        background: #1C4D35;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 13px 32px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(28, 77, 53, 0.25);
+    }
+
+    .btn-submit-offer:hover {
+        background: #143726;
+        transform: translateY(-1px);
+    }
+
+    .info-bubble {
+        background: #F1F5F9;
+        border-left: 4px solid #3B6E53;
+        padding: 14px 18px;
+        border-radius: 0 12px 12px 0;
+        font-size: 0.88rem;
+        color: #334155;
+    }
+</style>
+
+<div class="direct-offer-wrapper">
+    <div class="container">
+        
+        <!-- BREADCRUMB -->
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 text-muted small">
+                    <li class="breadcrumb-item"><a asp-controller="Employer" asp-action="Search" class="text-decoration-none text-muted">Tìm Freelancer</a></li>
+                    <li class="breadcrumb-item"><a asp-action="FreelancerDetail" asp-route-id="@Model.MaFreelancerStudent" class="text-decoration-none text-muted">@Model.TenFreelancer</a></li>
+                    <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Gửi lời mời thuê trực tiếp</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-1">Khởi tạo lời mời hợp tác trực tiếp (Direct Hire)</h2>
+            <p class="text-muted small mb-0">Đề xuất công việc và ngân sách trực tiếp tới Freelancer sinh viên mà không cần chờ ứng tuyển công khai.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4">
+                @Html.ValidationSummary(true)
+            </div>
+        }
+
+        <form asp-action="MoiNhanViec" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MaFreelancerStudent" />
+            <input type="hidden" asp-for="MaNhaTuyenDung" />
+            <input type="hidden" asp-for="TenFreelancer" />
+            <input type="hidden" asp-for="TenTruong" />
+            <input type="hidden" asp-for="TenChuyenNganh" />
+
+            <div class="row g-4">
+                
+                <!-- MAIN OFFER FORM (LEFT) -->
+                <div class="col-12 col-lg-8">
+                    <div class="direct-offer-card">
+                        
+                        <!-- TARGET FREELANCER MINI BANNER -->
+                        <div class="freelancer-mini-banner d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@(string.IsNullOrEmpty(Model.AvatarFreelancer) ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" : Model.AvatarFreelancer)" alt="@Model.TenFreelancer" class="avatar-student-mini" />
+                                <div>
+                                    <div class="small text-success fw-bold text-uppercase" style="letter-spacing: 0.5px;">Ứng viên nhận lời mời</div>
+                                    <h5 class="fw-bold text-dark mb-0">@Model.TenFreelancer</h5>
+                                    <div class="text-muted small">@Model.TenChuyenNganh &bull; @Model.TenTruong</div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-white text-success border border-success-subtle px-3 py-2 rounded-pill fw-bold">
+                                    Chi phí tham khảo: @(Model.ChiPhiThamKhao.HasValue ? $"{Model.ChiPhiThamKhao.Value:N0} đ/job" : "Thỏa thuận")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- FIELDS -->
+                        <div class="mb-4">
+                            <label asp-for="TieuDeCongViec" class="form-label fw-semibold text-dark small mb-1">
+                                Tiêu đề công việc / dự án <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="TieuDeCongViec" class="form-control form-control-lg rounded-3 fs-6" placeholder="VD: Thiết kế bộ logo thương hiệu cho cửa hàng mỹ phẩm" />
+                            <span asp-validation-for="TieuDeCongViec" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="MoTaCongViec" class="form-label fw-semibold text-dark small mb-1">
+                                Mô tả chi tiết yêu cầu, sản phẩm & tiêu chí nghiệm thu <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="MoTaCongViec" class="form-control rounded-3" rows="6" placeholder="Nêu rõ mục tiêu công việc, phong cách thiết kế / nghiệp vụ lập trình, số lượng bản phác thảo và định dạng file cần bàn giao..."></textarea>
+                            <span asp-validation-for="MoTaCongViec" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="NganSachDeNghi" class="form-label fw-semibold text-dark small mb-1">
+                                    Ngân sách đề nghị (VNĐ) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="NganSachDeNghi" type="number" step="50000" class="form-control form-control-lg rounded-start-3 fs-6" placeholder="1,000,000" />
+                                    <span class="input-group-text bg-light fw-bold text-muted rounded-end-3">VNĐ</span>
+                                </div>
+                                <span asp-validation-for="NganSachDeNghi" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label asp-for="ThoiHanDuKien" class="form-label fw-semibold text-dark small mb-1">
+                                    Thời hạn hoàn thành dự kiến <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="ThoiHanDuKien" class="form-control form-control-lg rounded-3 fs-6" placeholder="VD: 5 ngày kể từ ngày chốt" />
+                                <span asp-validation-for="ThoiHanDuKien" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="GhiChuThem" class="form-label fw-semibold text-dark small mb-1">
+                                Ghi chú thêm cho ứng viên
+                            </label>
+                            <input asp-for="GhiChuThem" class="form-control rounded-3" placeholder="VD: Có thể trao đổi thêm qua phòng chat để điều chỉnh mốc giao hàng..." />
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SIDEBAR GUIDELINES (RIGHT) -->
+                <div class="col-12 col-lg-4">
+                    
+                    <div class="direct-offer-card mb-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-success me-2"></i>Quy trình Thuê trực tiếp</h6>
+                        
+                        <div class="info-bubble mb-3">
+                            <strong>1. Gửi lời mời:</strong> Lời mời sẽ được chuyển tức thì tới thông báo của Freelancer.
+                        </div>
+
+                        <div class="info-bubble mb-3">
+                            <strong>2. Phản hồi:</strong> Freelancer có quyền Đồng ý hoặc Từ chối kèm lý do.
+                        </div>
+
+                        <div class="info-bubble mb-3">
+                            <strong>3. Ký hợp đồng:</strong> Khi Freelancer đồng ý, hệ thống sẽ tự động khởi tạo dự thảo Hợp đồng & Ký quỹ an toàn.
+                        </div>
+                    </div>
+
+                    <div class="direct-offer-card">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-submit-offer">
+                                <i class="bi bi-send-fill me-2"></i>Gửi lời mời ngay
+                            </button>
+                            <a asp-action="FreelancerDetail" asp-route-id="@Model.MaFreelancerStudent" class="btn btn-outline-secondary rounded-pill fw-semibold py-2 text-decoration-none text-center">
+                                Quay lại xem hồ sơ
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>

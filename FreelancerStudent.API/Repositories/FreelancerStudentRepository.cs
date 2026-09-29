@@ -1,0 +1,26 @@
+using FreelancerStudent.API.Data;
+using FreelancerStudent.API.Models;
+using FreelancerStudent.API.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace FreelancerStudent.API.Repositories
+{
+    public class FreelancerStudentRepository : IFreelancerStudentRepository
+    {
+        private readonly ApplicationDBContext _context;
+
+        public FreelancerStudentRepository(ApplicationDBContext context)
+        {
+            _context = context;
+
+        }
+
+
+        public async Task<List<FreelamcerStudents>> layTatCaFreelancerStudentsAsync()
+        {
+            var ketqua = await _context.FreelamcerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).ToListAsync();
+            return ketqua;
+        }
+
+    }
+}

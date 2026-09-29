@@ -1,0 +1,230 @@
+@model MOCK.Models.ViewModels.ContractListViewModel
+@{
+    ViewData["Title"] = "Quản lý hợp đồng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .contracts-page-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .contract-summary-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .contract-row-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .contract-row-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(42, 82, 62, 0.06);
+        border-color: #BBD9C7;
+    }
+
+    .status-pill {
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-pill-progress {
+        background-color: #EBF7EE;
+        color: #1E6E38;
+        border: 1px solid #CBE5D3;
+    }
+
+    .status-pill-done {
+        background-color: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #BFDBFE;
+    }
+
+    .tab-filter-btn {
+        color: #64748B;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 8px 18px;
+        border-radius: 30px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .tab-filter-btn:hover {
+        color: #1E6E38;
+        background-color: #F1F7F3;
+    }
+
+    .tab-filter-btn.active {
+        color: #FFFFFF;
+        background-color: var(--primary-green);
+    }
+</style>
+
+<div class="contracts-page-wrapper">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- ==================== HEADER & SUMMARY ==================== -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Quản lý Hợp đồng & Ký quỹ</h3>
+                <p class="text-muted small mb-0">Theo dõi tiến độ, kiểm soát giải ngân và quản lý các thỏa thuận công việc.</p>
+            </div>
+            <div>
+                <a href="/Freelancer/Search" class="btn btn-success rounded-pill px-4 py-2 fw-semibold small">
+                    <i class="bi bi-plus-lg me-1"></i> Tạo hợp đồng mới
+                </a>
+            </div>
+        </div>
+
+        <!-- 3 Thẻ thống kê nhanh -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="contract-summary-card d-flex align-items-center gap-3">
+                    <div class="rounded-circle p-3 bg-success-subtle text-success fs-3">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">@Model.ActiveContracts</div>
+                        <div class="text-muted small">Hợp đồng đang thực hiện</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="contract-summary-card d-flex align-items-center gap-3">
+                    <div class="rounded-circle p-3 bg-primary-subtle text-primary fs-3">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">@Model.CompletedContracts</div>
+                        <div class="text-muted small">Hợp đồng đã hoàn thành</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="contract-summary-card d-flex align-items-center gap-3">
+                    <div class="rounded-circle p-3 bg-warning-subtle text-warning fs-3">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold text-dark">@Model.TotalEscrowAmount.ToString("#,##0") VNĐ</div>
+                        <div class="text-muted small">Tổng giá trị đang ký quỹ bảo đảm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB FILTER & SEARCH ==================== -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <!-- Tabs -->
+            <div class="d-flex gap-2">
+                <a asp-action="Index" asp-route-status="All" asp-route-keyword="@Model.Keyword" 
+                   class="tab-filter-btn @(Model.SelectedStatus == "All" ? "active" : "")">
+                    Tất cả (@Model.TotalContracts)
+                </a>
+                <a asp-action="Index" asp-route-status="DangThucHien" asp-route-keyword="@Model.Keyword"
+                   class="tab-filter-btn @(Model.SelectedStatus == "DangThucHien" ? "active" : "")">
+                    Đang thực hiện (@Model.ActiveContracts)
+                </a>
+                <a asp-action="Index" asp-route-status="DaHoanThanh" asp-route-keyword="@Model.Keyword"
+                   class="tab-filter-btn @(Model.SelectedStatus == "DaHoanThanh" ? "active" : "")">
+                    Đã hoàn thành (@Model.CompletedContracts)
+                </a>
+            </div>
+
+            <!-- Search input -->
+            <form method="get" asp-action="Index" class="d-flex gap-2" style="max-width: 360px; width: 100%;">
+                <input type="hidden" name="status" value="@Model.SelectedStatus" />
+                <div class="input-group">
+                    <input type="text" name="keyword" value="@Model.Keyword" class="form-control form-control-sm rounded-start-pill ps-3" 
+                           placeholder="Mã HĐ, tên việc, sinh viên..." />
+                    <button type="submit" class="btn btn-outline-success btn-sm rounded-end-pill px-3">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ==================== DANH SÁCH HỢP ĐỒNG ==================== -->
+        @if (!Model.Contracts.Any())
+        {
+            <div class="text-center py-5 bg-white rounded-4 border">
+                <i class="bi bi-file-earmark-x display-4 text-muted"></i>
+                <h6 class="fw-bold mt-3 text-secondary">Không có hợp đồng nào</h6>
+                <p class="text-muted small">Hãy tạo hoặc ký kết hợp đồng mới để bắt đầu dự án.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model.Contracts)
+            {
+                <div class="contract-row-card">
+                    <div class="row align-items-center g-3">
+                        
+                        <!-- Cột 1: Mã HĐ + Tên công việc -->
+                        <div class="col-12 col-md-5">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="fw-bold text-success">#@item.Contract.MaHD</span>
+                                <span class="status-pill @(item.Contract.TrangThai == "DangThucHien" ? "status-pill-progress" : "status-pill-done")">
+                                    <i class="bi @(item.Contract.TrangThai == "DangThucHien" ? "bi-clock" : "bi-check-circle")"></i>
+                                    @(item.Contract.TrangThai == "DangThucHien" ? "Đang thực hiện" : item.Contract.TrangThai)
+                                </span>
+                                <span class="badge bg-light text-muted border">@(item.Contract.Hinhthuclamviec ?? "Remote")</span>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1">
+                                <a href="/HopDong/Details/@item.Contract.MaHD" class="text-dark text-decoration-none hover-green">
+                                    @item.Job.Tieude
+                                </a>
+                            </h5>
+                            <p class="text-muted small text-truncate mb-0">@item.Job.Mota</p>
+                        </div>
+
+                        <!-- Cột 2: Đối tác (Doanh nghiệp & Freelancer) -->
+                        <div class="col-6 col-md-3">
+                            <div class="small">
+                                <div class="text-muted">Doanh nghiệp:</div>
+                                <strong class="text-dark">@(item.Employer.Tencongty ?? item.EmployerUser.HotenUser)</strong>
+                                <div class="text-muted mt-1">Sinh viên:</div>
+                                <strong class="text-success">@item.FreelancerUser.HotenUser</strong>
+                            </div>
+                        </div>
+
+                        <!-- Cột 3: Ký quỹ & Ngày hết hạn -->
+                        <div class="col-6 col-md-2 text-md-end">
+                            <div class="text-muted small">Ký quỹ (Escrow)</div>
+                            <div class="fw-bold text-danger fs-6">
+                                @(item.Contract.Sotienkyquy.HasValue ? item.Contract.Sotienkyquy.Value.ToString("#,##0") + " VNĐ" : "3.500.000 VNĐ")
+                            </div>
+                            <div class="text-muted small mt-1">Hạn: @(item.Contract.NgayKetThuc.HasValue ? item.Contract.NgayKetThuc.Value.ToString("dd/MM/yyyy") : item.Job.Thoigiandukienhoanthanh)</div>
+                        </div>
+
+                        <!-- Cột 4: Nút xem chi tiết -->
+                        <div class="col-12 col-md-2 text-md-end">
+                            <a href="/HopDong/Details/@item.Contract.MaHD" class="btn btn-outline-success rounded-pill btn-sm px-4 fw-semibold w-100 w-md-auto">
+                                Chi tiết <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+</div>

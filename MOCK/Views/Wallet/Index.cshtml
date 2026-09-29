@@ -1,0 +1,286 @@
+@model MOCK.Models.ViewModels.WalletViewModel
+@{
+    ViewData["Title"] = "Ví điện tử & Thông tin tài chính";
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Account" asp-action="Profile" class="text-decoration-none text-muted">Tài khoản</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Ví tài chính</li>
+        </ol>
+    </nav>
+
+    <!-- ALERT NOTIFICATIONS -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- ==================== HERO WALLET CARD ==================== -->
+    <div class="card border-0 shadow-sm p-4 mb-4 text-white position-relative overflow-hidden" 
+         style="border-radius: 20px; background: linear-gradient(135deg, #1C382B 0%, #2A523E 50%, #3B6E53 100%);">
+        
+        <!-- Subtle background watermark -->
+        <i class="bi bi-wallet2 position-absolute" style="font-size: 16rem; right: -30px; bottom: -60px; opacity: 0.07; pointer-events: none;"></i>
+
+        <div class="row align-items-center position-relative">
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-white text-success px-3 py-1 fw-bold" style="border-radius: 20px; font-size: 0.78rem;">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Ví Tài Khoản Bảo Mật Escrow
+                    </span>
+                    <span class="badge bg-warning text-dark px-3 py-1 fw-semibold" style="border-radius: 20px; font-size: 0.78rem;">
+                        Mã ví: #W_@Model.Wallet.MaWallet.ToString("D5")
+                    </span>
+                </div>
+
+                <div class="text-white-50 small mb-1">Chủ tài khoản: <strong>@Model.User.HotenUser</strong> (@Model.User.EmailUser)</div>
+                <div class="small text-white-50 text-uppercase letter-spacing-1">Số dư khả dụng</div>
+                <h1 class="display-5 fw-bold text-white mb-3">
+                    @Model.Wallet.SoDuKhaDung.ToString("#,##0") <span class="fs-4 fw-normal">VNĐ</span>
+                </h1>
+
+                <div class="d-flex flex-wrap gap-4 pt-2 border-top border-white-25">
+                    <div>
+                        <div class="text-white-50 small"><i class="bi bi-lock-fill text-warning me-1"></i>Đang ký quỹ (Escrow):</div>
+                        <div class="fw-bold fs-5 text-warning">@Model.Wallet.SoDuDongBang.ToString("#,##0") VNĐ</div>
+                    </div>
+                    <div>
+                        <div class="text-white-50 small"><i class="bi bi-piggy-bank me-1"></i>Tổng tài sản trong ví:</div>
+                        <div class="fw-bold fs-5 text-white">@Model.TongTaiSan.ToString("#,##0") VNĐ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút hành động nhanh -->
+            <div class="col-lg-5 text-lg-end mt-4 mt-lg-0">
+                <div class="d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Wallet" asp-action="NapTien" class="btn btn-warning flex-grow-1 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+                            <i class="bi bi-plus-circle-fill"></i> Nạp tiền
+                        </a>
+                        <a asp-controller="Wallet" asp-action="RutTien" class="btn btn-light flex-grow-1 fw-bold text-dark shadow-sm d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+                            <i class="bi bi-bank text-success"></i> Rút tiền
+                        </a>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Wallet" asp-action="LichSuGiaoDich" class="btn btn-outline-light flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+                            <i class="bi bi-clock-history"></i> Lịch sử GD
+                        </a>
+                        <a asp-controller="Wallet" asp-action="TaiKhoanNganHang" class="btn btn-outline-light flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+                            <i class="bi bi-credit-card"></i> Tài khoản NH
+                        </a>
+                    </div>
+                    <a asp-controller="Wallet" asp-action="HoTroNapTien" class="btn btn-link text-white-50 text-decoration-none small text-center">
+                        <i class="bi bi-question-circle me-1"></i> Gặp sự cố nạp tiền? Gửi yêu cầu hỗ trợ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== THỐNG KÊ BIẾN ĐỘNG TỔNG QUAN ==================== -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Tổng đã nạp</span>
+                    <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-arrow-down-left"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-success mb-0">+@Model.TongNapTien.ToString("#,##0") đ</h5>
+                <div class="text-muted small" style="font-size: 0.76rem;">Nạp qua VietQR & Cổng TT</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Đã ký quỹ Escrow</span>
+                    <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-shield-shaded"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-dark mb-0">@Model.TongDaThanhToanEscrow.ToString("#,##0") đ</h5>
+                <div class="text-muted small" style="font-size: 0.76rem;">Bảo lãnh an toàn hợp đồng</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Tổng tiền nhận</span>
+                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-primary mb-0">+@Model.TongNhanTien.ToString("#,##0") đ</h5>
+                <div class="text-muted small" style="font-size: 0.76rem;">Thù lao & tiền hoàn trả</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 h-100" style="border-radius: 14px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-semibold">Lịch sử giao dịch</span>
+                    <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-dark mb-0">@Model.RecentTransactions.Count giao dịch</h5>
+                <div class="text-muted small" style="font-size: 0.76rem;"><a asp-controller="Wallet" asp-action="LichSuGiaoDich" class="text-decoration-none">Xem toàn bộ <i class="bi bi-chevron-right"></i></a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTENT: GIAO DỊCH GẦN ĐÂY & HỢP ĐỒNG ESCROW ==================== -->
+    <div class="row g-4">
+        <!-- Cột Trái: Lịch sử 5 giao dịch gần đây -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-arrow-left-right text-success me-2"></i>Giao dịch gần đây
+                    </h5>
+                    <a asp-controller="Wallet" asp-action="LichSuGiaoDich" class="btn btn-sm btn-outline-success fw-semibold" style="border-radius: 8px;">
+                        Xem tất cả
+                    </a>
+                </div>
+
+                @if (Model.RecentTransactions.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var tx in Model.RecentTransactions)
+                        {
+                            bool isPlus = tx.LoaiGiaoDich == "NapTien" || tx.LoaiGiaoDich == "NhanTien" || tx.LoaiGiaoDich == "HoanTien";
+                            <div class="list-group-item px-0 py-3 border-bottom d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center @(isPlus ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")"
+                                         style="width: 44px; height: 44px; flex-shrink: 0;">
+                                        @if (tx.LoaiGiaoDich == "NapTien")
+                                        {
+                                            <i class="bi bi-plus-lg fs-5"></i>
+                                        }
+                                        else if (tx.LoaiGiaoDich == "KyQuy")
+                                        {
+                                            <i class="bi bi-shield-lock-fill fs-5"></i>
+                                        }
+                                        else if (tx.LoaiGiaoDich == "RutTien")
+                                        {
+                                            <i class="bi bi-arrow-up-right fs-5"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-arrow-repeat fs-5"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark mb-0" style="font-size: 0.92rem;">
+                                            @tx.NoiDung
+                                        </div>
+                                        <div class="text-muted small" style="font-size: 0.78rem;">
+                                            <span class="badge bg-light text-secondary border me-1">@tx.PhuongThuc</span>
+                                            <i class="bi bi-clock me-1"></i>@tx.NgayTao.ToString("HH:mm dd/MM/yyyy")
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end">
+                                    <div class="fw-bold @(isPlus ? "text-success" : "text-danger")" style="font-size: 1rem;">
+                                        @(isPlus ? "+" : "-")@tx.SoTien.ToString("#,##0") đ
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success" style="font-size: 0.72rem;">
+                                        @tx.TrangThai
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        Chưa có giao dịch nào được ghi nhận.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Cột Phải: Hợp đồng Escrow & Cơ chế bảo vệ -->
+        <div class="col-lg-5">
+            <!-- Thẻ cơ chế Escrow -->
+            <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 16px; background: #FFFFFF; border-left: 5px solid var(--primary-green, #3B6E53) !important;">
+                <h6 class="fw-bold text-success mb-2">
+                    <i class="bi bi-shield-check me-1"></i> Cơ chế Ký quỹ Escrow an toàn
+                </h6>
+                <p class="text-muted small mb-0" style="font-size: 0.85rem; line-height: 1.5;">
+                    Khi thỏa thuận hợp đồng, tiền thanh toán sẽ được khóa tạm thời trong tài khoản Escrow của hệ thống. 
+                    Tiền chỉ được giải ngân cho Freelancer sau khi Doanh nghiệp nghiệm thu sản phẩm đạt yêu cầu.
+                </p>
+            </div>
+
+            <!-- Danh sách hợp đồng đang ký quỹ -->
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 16px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-file-earmark-lock text-warning me-2"></i>Hợp đồng đang ký quỹ
+                    </h6>
+                    <span class="badge bg-warning text-dark">@Model.DangKyQuyContracts.Count hợp đồng</span>
+                </div>
+
+                @if (Model.DangKyQuyContracts.Any())
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var hd in Model.DangKyQuyContracts)
+                        {
+                            <div class="p-3 border rounded-3 bg-light-subtle">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <a asp-controller="HopDong" asp-action="Details" asp-route-id="@hd.MaHD" class="fw-bold text-decoration-none text-dark hover-green small">
+                                        Mã HĐ: #@hd.MaHD
+                                    </a>
+                                    <span class="badge bg-warning text-dark" style="font-size: 0.72rem;">@hd.TrangThai</span>
+                                </div>
+                                <div class="text-muted small mb-2" style="font-size: 0.8rem;">
+                                    Số tiền ký quỹ: <strong class="text-success">@(hd.Sotienkyquy.HasValue ? hd.Sotienkyquy.Value.ToString("#,##0") + " đ" : "0 đ")</strong>
+                                </div>
+                                <a asp-controller="HopDong" asp-action="Details" asp-route-id="@hd.MaHD" class="btn btn-sm btn-outline-secondary w-100" style="border-radius: 6px; font-size: 0.78rem;">
+                                    <i class="bi bi-eye me-1"></i> Xem tiến độ & giải ngân
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-patch-check fs-2 text-success d-block mb-1"></i>
+                        Hiện không có khoản ký quỹ nào đang bị đóng băng.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-green:hover {
+        color: var(--primary-green, #3B6E53) !important;
+    }
+</style>

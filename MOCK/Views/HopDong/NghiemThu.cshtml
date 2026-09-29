@@ -1,0 +1,353 @@
+@model MOCK.Models.ViewModels.NghiemThuSanPhamViewModel
+@{
+    ViewData["Title"] = "Nghiệm thu sản phẩm hợp đồng - #" + Model.Contract.MaHD;
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Index" class="text-decoration-none text-muted">Hợp đồng</a></li>
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Details" asp-route-id="@Model.Contract.MaHD" class="text-decoration-none text-muted">#@Model.Contract.MaHD</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Nghiệm thu sản phẩm</li>
+        </ol>
+    </nav>
+
+    <!-- ALERTS -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- ==================== HERO CONTRACT SUMMARY ==================== -->
+    <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 20px; background: linear-gradient(135deg, #1C382B 0%, #2A523E 60%, #3B6E53 100%); color: #FFFFFF;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="badge bg-warning text-dark px-3 py-1 fw-bold" style="border-radius: 20px; font-size: 0.78rem;">
+                        <i class="bi bi-file-earmark-check-fill me-1"></i> Hợp đồng: #@Model.Contract.MaHD
+                    </span>
+                    <span class="badge bg-white text-success px-3 py-1 fw-bold" style="border-radius: 20px; font-size: 0.78rem;">
+                        Trạng thái: @Model.Contract.TrangThai
+                    </span>
+                    <span class="badge bg-light text-dark px-3 py-1" style="border-radius: 20px; font-size: 0.78rem;">
+                        Ký quỹ Escrow: @(Model.Contract.Sotienkyquy.HasValue ? Model.Contract.Sotienkyquy.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                    </span>
+                </div>
+
+                <h3 class="fw-bold mb-2">@Model.Job.Tieude</h3>
+                <div class="d-flex flex-wrap gap-4 text-white-50 small">
+                    <div><i class="bi bi-person-badge me-1"></i>Freelancer: <strong>@Model.FreelancerUser.HotenUser</strong></div>
+                    <div><i class="bi bi-building me-1"></i>Doanh nghiệp: <strong>@(Model.Employer.Tencongty ?? Model.EmployerUser.HotenUser)</strong></div>
+                    <div><i class="bi bi-calendar-check me-1"></i>Thời hạn: @(Model.Contract.NgayKetThuc?.ToString("dd/MM/yyyy") ?? "Đúng hạn")</div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a asp-controller="HopDong" asp-action="Details" asp-route-id="@Model.Contract.MaHD" class="btn btn-outline-light px-3 py-2 fw-semibold" style="border-radius: 10px;">
+                    <i class="bi bi-eye me-1"></i> Xem chi tiết hợp đồng
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LATEST SUBMISSION (BÀN GIAO MỚI NHẤT) ==================== -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 18px; background: #FFFFFF;">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                    <div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 mb-1 fw-semibold">
+                            Bản nộp mới nhất
+                        </span>
+                        <h4 class="fw-bold text-dark mb-0">
+                            @(Model.LatestBanGiao != null ? Model.LatestBanGiao.PhienBan : "Chưa có bản nộp nào")
+                        </h4>
+                    </div>
+
+                    @if (Model.LatestBanGiao != null)
+                    {
+                        <div>
+                            @if (Model.LatestBanGiao.TrangThai == "ChoNghiemThu")
+                            {
+                                <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="bi bi-hourglass-split me-1"></i>Đang chờ nghiệm thu</span>
+                            }
+                            else if (Model.LatestBanGiao.TrangThai == "DaDuyet")
+                            {
+                                <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-check2-circle me-1"></i>Đã duyệt nghiệm thu</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i>Yêu cầu chỉnh sửa</span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (Model.LatestBanGiao != null)
+                {
+                    <div class="mb-3 text-muted small">
+                        <i class="bi bi-clock-history me-1"></i> Nộp lúc: <strong>@Model.LatestBanGiao.NgayNop.ToString("HH:mm - dd/MM/yyyy")</strong>
+                    </div>
+
+                    <!-- Mô tả sản phẩm bàn giao -->
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-chat-left-quote text-success me-2"></i>Lời nhắn & Mô tả của Freelancer:</h6>
+                        <p class="text-secondary mb-0" style="font-size: 0.92rem; line-height: 1.6;">
+                            @Model.LatestBanGiao.MotaBanGiao
+                        </p>
+                    </div>
+
+                    <!-- File & Demo link buttons -->
+                    <div class="row g-3 mb-4">
+                        @if (!string.IsNullOrEmpty(Model.LatestBanGiao.FileSanPhamUrl))
+                        {
+                            <div class="col-sm-6">
+                                <a href="@Model.LatestBanGiao.FileSanPhamUrl" target="_blank" class="card p-3 border border-success-subtle bg-success-subtle text-decoration-none h-100 rounded-3 text-center transition-hover">
+                                    <i class="bi bi-file-earmark-zip-fill fs-2 text-success mb-1"></i>
+                                    <strong class="text-success">Tải tệp sản phẩm bàn giao</strong>
+                                    <span class="small text-muted">Source code, File thiết kế .ZIP</span>
+                                </a>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.LatestBanGiao.LinkDemo))
+                        {
+                            <div class="col-sm-6">
+                                <a href="@Model.LatestBanGiao.LinkDemo" target="_blank" class="card p-3 border border-primary-subtle bg-primary-subtle text-decoration-none h-100 rounded-3 text-center transition-hover">
+                                    <i class="bi bi-link-45deg fs-2 text-primary mb-1"></i>
+                                    <strong class="text-primary">Xem sản phẩm Demo trực tuyến</strong>
+                                    <span class="small text-muted">Truy cập liên kết live preview</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Previous feedback (nếu có) -->
+                    @if (!string.IsNullOrEmpty(Model.LatestBanGiao.PhanHoi))
+                    {
+                        <div class="p-3 border-start border-4 border-warning bg-warning-subtle rounded-3 mb-4">
+                            <strong class="text-dark d-block mb-1"><i class="bi bi-chat-dots text-warning me-1"></i>Phản hồi từ Doanh nghiệp:</strong>
+                            <p class="mb-1 text-secondary small">@Model.LatestBanGiao.PhanHoi</p>
+                            @if (Model.LatestBanGiao.NgayPhanHoi.HasValue)
+                            {
+                                <span class="text-muted" style="font-size: 0.75rem;">Phản hồi lúc: @Model.LatestBanGiao.NgayPhanHoi.Value.ToString("HH:mm dd/MM/yyyy")</span>
+                            }
+                        </div>
+                    }
+
+                    <!-- NÚT NGHIỆM THU / YÊU CẦU SỬA / TRANH CHẤP -->
+                    @if (Model.LatestBanGiao.TrangThai == "ChoNghiemThu")
+                    {
+                        <div class="d-flex flex-column flex-sm-row gap-2 pt-3 border-top">
+                            <!-- Nút Chấp nhận nghiệm thu -->
+                            <button type="button" class="btn btn-success btn-lg flex-grow-1 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalDuyetNghiemThu" style="border-radius: 12px; background-color: var(--primary-green, #3B6E53);">
+                                <i class="bi bi-check2-circle me-1"></i> Chấp nhận nghiệm thu & Giải ngân
+                            </button>
+
+                            <!-- Nút Yêu cầu chỉnh sửa -->
+                            <button type="button" class="btn btn-outline-warning btn-lg flex-grow-1 fw-bold" data-bs-toggle="modal" data-bs-target="#modalYeuCauSua" style="border-radius: 12px;">
+                                <i class="bi bi-pencil-square me-1"></i> Yêu cầu chỉnh sửa
+                            </button>
+                        </div>
+                    }
+                    else if (Model.LatestBanGiao.TrangThai == "DaDuyet")
+                    {
+                        <div class="alert alert-success d-flex align-items-center mb-0 mt-3" style="border-radius: 12px;">
+                            <i class="bi bi-check-all fs-3 me-3 text-success"></i>
+                            <div>
+                                <strong class="d-block">Sản phẩm đã được phê duyệt nghiệm thu hoàn tất!</strong>
+                                <span class="small">Số tiền ký quỹ Escrow @(Model.Contract.Sotienkyquy.HasValue ? Model.Contract.Sotienkyquy.Value.ToString("#,##0") + " VNĐ" : "") đã được tự động giải ngân vào ví của Freelancer.</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-cloud-upload fs-1 d-block mb-2"></i>
+                        Freelancer chưa nộp sản phẩm bàn giao nào cho hợp đồng này.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ==================== CỘT PHẢI: LỊCH SỬ CÁC PHIÊN BẢN & TRANH CHẤP ==================== -->
+        <div class="col-lg-4">
+            <!-- Thẻ hỗ trợ giải quyết tranh chấp -->
+            <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 18px; background: #FFF9F2; border-left: 5px solid #E67E22 !important;">
+                <h6 class="fw-bold text-dark mb-2">
+                    <i class="bi bi-shield-exclamation text-warning me-1"></i> Gặp bất đồng về sản phẩm?
+                </h6>
+                <p class="text-muted small mb-3" style="line-height: 1.5;">
+                    Nếu Freelancer không đáp ứng yêu cầu hoặc chậm trễ kéo dài, bạn có thể yêu cầu Trọng tài hệ thống can thiệp đối soát hợp đồng.
+                </p>
+                <a asp-controller="TranhChap" asp-action="Create" asp-route-maHD="@Model.Contract.MaHD" class="btn btn-sm btn-outline-danger fw-bold w-100" style="border-radius: 8px;">
+                    <i class="bi bi-flag-fill me-1"></i> Mở hồ sơ khiếu nại / Tranh chấp
+                </a>
+            </div>
+
+            <!-- Danh sách tất cả phiên bản nộp -->
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 18px; background: #FFFFFF;">
+                <h6 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-clock-history text-success me-2"></i>Lịch sử các phiên bản nộp
+                </h6>
+
+                @if (Model.LichSuBanGiao.Any())
+                {
+                    <div class="timeline position-relative">
+                        @foreach (var v in Model.LichSuBanGiao)
+                        {
+                            <div class="p-3 border rounded-3 mb-2 @(v.MaBanGiao == Model.LatestBanGiao?.MaBanGiao ? "border-success bg-success-subtle text-dark" : "bg-light")">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="text-dark">@v.PhienBan</strong>
+                                    @if (v.TrangThai == "DaDuyet")
+                                    {
+                                        <span class="badge bg-success" style="font-size: 0.7rem;">Đã duyệt</span>
+                                    }
+                                    else if (v.TrangThai == "ChoNghiemThu")
+                                    {
+                                        <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Chờ duyệt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary" style="font-size: 0.7rem;">Đã yêu cầu sửa</span>
+                                    }
+                                </div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">
+                                    <i class="bi bi-calendar3 me-1"></i>@v.NgayNop.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                                @if (!string.IsNullOrEmpty(v.PhanHoi))
+                                {
+                                    <div class="text-muted small mt-1 fst-italic" style="font-size: 0.78rem;">
+                                        Phản hồi: "@v.PhanHoi"
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted small text-center py-3">Chưa có lịch sử phiên bản.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL: CHẤP NHẬN NGHIỆM THU & GIẢI NGÂN ESCROW -->
+<!-- ======================================================== -->
+@if (Model.LatestBanGiao != null)
+{
+    <div class="modal fade" id="modalDuyetNghiemThu" tabindex="-1" aria-labelledby="modalDuyetNghiemThuLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 18px; border: none;">
+                <form asp-controller="HopDong" asp-action="DuyetNghiemThu" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maBanGiao" value="@Model.LatestBanGiao.MaBanGiao" />
+                    <input type="hidden" name="maHD" value="@Model.Contract.MaHD" />
+
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-success" id="modalDuyetNghiemThuLabel">
+                            <i class="bi bi-patch-check-fill me-1"></i> Xác nhận nghiệm thu & Giải ngân
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body py-3">
+                        <div class="p-3 bg-light rounded-3 mb-3 text-center">
+                            <div class="text-muted small">Số tiền Escrow sẽ được giải ngân sang ví Freelancer:</div>
+                            <h3 class="fw-bold text-success mb-0">@(Model.Contract.Sotienkyquy.HasValue ? Model.Contract.Sotienkyquy.Value.ToString("#,##0") + " VNĐ" : "0 VNĐ")</h3>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Đánh giá chất lượng hợp tác (Số sao):</label>
+                            <select name="soSao" class="form-select" style="border-radius: 10px;">
+                                <option value="5">⭐⭐⭐⭐⭐ 5 Sao - Xuất sắc & Hoàn thành vượt mong đợi</option>
+                                <option value="4">⭐⭐⭐⭐ 4 Sao - Rất tốt & Đúng hẹn</option>
+                                <option value="3">⭐⭐⭐ 3 Sao - Đạt yêu cầu cơ bản</option>
+                                <option value="2">⭐⭐ 2 Sao - Cần cải thiện thêm</option>
+                                <option value="1">⭐ 1 Sao - Không hài lòng</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Lời nhận xét & đánh giá cho Freelancer:</label>
+                            <textarea name="danhGia" rows="3" class="form-control" placeholder="Ví dụ: Sản phẩm hoàn thiện rất tốt, giao diện mượt mà và hỗ trợ nhiệt tình..." style="border-radius: 10px;"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-success fw-bold px-4" style="border-radius: 8px; background-color: var(--primary-green, #3B6E53);">
+                            <i class="bi bi-check-lg me-1"></i> Phê duyệt & Giải ngân
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: YÊU CẦU CHỈNH SỬA SẢN PHẨM -->
+    <!-- ======================================================== -->
+    <div class="modal fade" id="modalYeuCauSua" tabindex="-1" aria-labelledby="modalYeuCauSuaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 18px; border: none;">
+                <form asp-controller="HopDong" asp-action="YeuCauChinhSua" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maBanGiao" value="@Model.LatestBanGiao.MaBanGiao" />
+                    <input type="hidden" name="maHD" value="@Model.Contract.MaHD" />
+
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-warning" id="modalYeuCauSuaLabel">
+                            <i class="bi bi-pencil-square me-1"></i> Gửi yêu cầu chỉnh sửa sản phẩm
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body py-3">
+                        <p class="text-muted small mb-2">
+                            Hãy mô tả chi tiết các phần chưa đạt hoặc cần bổ sung để Freelancer nắm rõ và nộp lại phiên bản mới.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Chi tiết góp ý / Danh sách lỗi cần sửa <span class="text-danger">*</span>:</label>
+                            <textarea name="lyDoYeuCau" rows="4" class="form-control" required placeholder="Ví dụ: Cần fix lại responsive mobile phần bảng giá, thay đổi màu nút CTA..." style="border-radius: 10px;"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-warning fw-bold px-4" style="border-radius: 8px;">
+                            <i class="bi bi-send-fill me-1"></i> Gửi yêu cầu sửa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .transition-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+</style>

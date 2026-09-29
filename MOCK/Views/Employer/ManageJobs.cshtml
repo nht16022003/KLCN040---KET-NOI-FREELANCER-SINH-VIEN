@@ -1,0 +1,309 @@
+@model MOCK.Models.ViewModels.EmployerManageJobsViewModel
+@{
+    ViewData["Title"] = "Quản lý tin tuyển dụng đã đăng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .manage-jobs-page {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    /* TOP STATS CARDS */
+    .stat-card-box {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 20px 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .stat-icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    .stat-icon-green {
+        background: #E8F5EC;
+        color: #1B5E36;
+    }
+
+    .stat-icon-blue {
+        background: #EFF6FF;
+        color: #2563EB;
+    }
+
+    .stat-icon-orange {
+        background: #FFF7ED;
+        color: #EA580C;
+    }
+
+    .stat-val-text {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+
+    .stat-label-text {
+        font-size: 0.8rem;
+        color: #64748B;
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+
+    /* JOB TABLE CARD */
+    .job-table-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .job-manage-item-row {
+        border-bottom: 1px solid #F1F5F9;
+        padding: 18px 0;
+        transition: background 0.15s;
+    }
+
+    .job-manage-item-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .job-manage-item-row:hover {
+        background-color: #FAFDFB;
+    }
+
+    .badge-status-job {
+        font-size: 0.76rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    .badge-status-active {
+        background: #EAF6EE;
+        color: #196837;
+        border: 1px solid #C4E2CE;
+    }
+
+    .badge-status-progress {
+        background: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #BFDBFE;
+    }
+
+    .badge-status-closed {
+        background: #F1F5F9;
+        color: #64748B;
+        border: 1px solid #CBD5E1;
+    }
+</style>
+
+<div class="manage-jobs-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- Header & Action Button -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Quản lý tin tuyển dụng</h2>
+                <p class="text-muted small mb-0">Theo dõi trạng thái các bài đăng, quản lý hồ sơ ứng viên và khởi tạo hợp đồng làm việc.</p>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="/JobPost/Create" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm">
+                    <i class="bi bi-plus-circle me-1"></i> Đăng tin tuyển dụng mới
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- 3 Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-icon-circle stat-icon-green">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val-text">@Model.ActiveJobsCount</div>
+                        <div class="stat-label-text">Tin đang mở tuyển</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-icon-circle stat-icon-blue">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val-text">@Model.InProgressJobsCount</div>
+                        <div class="stat-label-text">Tin đang thực hiện (Có HĐ)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="stat-card-box">
+                    <div class="stat-icon-circle stat-icon-orange">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val-text">@Model.TotalJobsCount</div>
+                        <div class="stat-label-text">Tổng số bài tuyển dụng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Job List Table Card -->
+        <div class="job-table-card">
+            
+            <!-- Filters Tab -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-3 mb-2 border-bottom">
+                <div class="d-flex gap-2">
+                    <a href="/Employer/ManageJobs" class="btn btn-sm @(string.IsNullOrEmpty(Model.CurrentStatusFilter) || Model.CurrentStatusFilter == "All" ? "btn-success" : "btn-light border") rounded-pill px-3">
+                        Tất cả (@Model.TotalJobsCount)
+                    </a>
+                    <a href="/Employer/ManageJobs?status=DangTuyen" class="btn btn-sm @(Model.CurrentStatusFilter == "DangTuyen" ? "btn-success" : "btn-light border") rounded-pill px-3">
+                        Đang tuyển (@Model.ActiveJobsCount)
+                    </a>
+                    <a href="/Employer/ManageJobs?status=DangThucHien" class="btn btn-sm @(Model.CurrentStatusFilter == "DangThucHien" ? "btn-success" : "btn-light border") rounded-pill px-3">
+                        Đang làm việc (@Model.InProgressJobsCount)
+                    </a>
+                </div>
+
+                <span class="text-muted small">Hiển thị @Model.Jobs.Count bài đăng</span>
+            </div>
+
+            <!-- List of Jobs -->
+            @if (!Model.Jobs.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-briefcase display-3 text-muted"></i>
+                    <h5 class="fw-bold mt-3 text-secondary">Chưa có bài đăng nào trong mục này</h5>
+                    <p class="small">Nhấn nút bên dưới để tạo bài đăng tuyển dụng sinh viên đầu tiên.</p>
+                    <a href="/JobPost/Create" class="btn btn-sm btn-outline-success rounded-pill px-4">Đăng tin ngay</a>
+                </div>
+            }
+            else
+            {
+                <div>
+                    @foreach (var item in Model.Jobs)
+                    {
+                        <div class="job-manage-item-row">
+                            <div class="row align-items-center g-3">
+                                
+                                <!-- Cột 1: Thông tin bài đăng -->
+                                <div class="col-12 col-lg-5">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge bg-light text-muted border">#@item.Job.MaJob</span>
+                                        @if (item.Job.Status == "DangTuyen")
+                                        {
+                                            <span class="badge-status-job badge-status-active">
+                                                <i class="bi bi-broadcast me-1"></i> Đang mở tuyển
+                                            </span>
+                                        }
+                                        else if (item.Job.Status == "DangThucHien")
+                                        {
+                                            <span class="badge-status-job badge-status-progress">
+                                                <i class="bi bi-gear-wide-connected me-1"></i> Đang thực hiện
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-status-job badge-status-closed">
+                                                @item.Job.Status
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <h5 class="fw-bold mb-1">
+                                        <a href="/JobPost/Details/@item.Job.MaJob" class="text-dark text-decoration-none hover-green">
+                                            @item.Job.Tieude
+                                        </a>
+                                    </h5>
+                                    
+                                    <div class="text-muted small">
+                                        <span class="me-3"><i class="bi bi-calendar-event me-1"></i>Đăng: @item.Job.Thoigiandangtuyen.ToString("dd/MM/yyyy")</span>
+                                        <span><i class="bi bi-clock-history me-1"></i>Hạn: @item.Job.Thoigiandukienhoanthanh</span>
+                                    </div>
+                                </div>
+
+                                <!-- Cột 2: Thù lao & Kỹ năng -->
+                                <div class="col-6 col-lg-3">
+                                    <div class="fw-bold text-danger fs-6 mb-1">
+                                        @(item.Job.Thulao.HasValue ? item.Job.Thulao.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                                    </div>
+                                    <div class="text-truncate text-secondary small" title="@item.Job.Kynangyeucau">
+                                        <i class="bi bi-tools text-success me-1"></i>@(item.Job.Kynangyeucau ?? "Lập trình web, Thiết kế")
+                                    </div>
+                                </div>
+
+                                <!-- Cột 3: Số lượng ứng viên & Hợp đồng -->
+                                <div class="col-6 col-lg-2">
+                                    @if (item.ApplicantCount > 0)
+                                    {
+                                        <div class="fw-bold text-dark mb-1">
+                                            <i class="bi bi-people-fill text-primary me-1"></i>@item.ApplicantCount ứng viên
+                                        </div>
+                                        @if (item.PendingApplicantCount > 0)
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border" style="font-size: 0.72rem;">
+                                                @item.PendingApplicantCount hồ sơ mới
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small italic">Chưa có ứng viên</span>
+                                    }
+                                </div>
+
+                                <!-- Cột 4: Nút Xem ứng viên & Chi tiết -->
+                                <div class="col-12 col-lg-2 text-lg-end">
+                                    <div class="d-flex flex-lg-column gap-2 justify-content-end">
+                                        <a href="/Employer/Applicants/@item.Job.MaJob" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
+                                            <i class="bi bi-person-lines-fill me-1"></i> Xem ứng viên (@item.ApplicantCount)
+                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a href="/JobPost/Details/@item.Job.MaJob" class="btn btn-sm btn-light border rounded-pill px-3 text-muted flex-grow-1">
+                                                Xem tin
+                                            </a>
+                                            <a href="/JobPost/Edit/@item.Job.MaJob" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold" title="Sửa bài đăng">
+                                                <i class="bi bi-pencil-square"></i> Sửa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+
+    </div>
+</div>

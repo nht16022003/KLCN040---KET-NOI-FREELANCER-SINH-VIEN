@@ -1,0 +1,477 @@
+@model MOCK.Models.ViewModels.FreelancerSearchViewModel
+@{
+    ViewData["Title"] = "Khám phá Freelancer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .search-explore-page {
+        background-color: #F8FAF9;
+        min-height: 80vh;
+        padding: 30px 0 60px;
+    }
+
+    /* FILTER SECTION */
+    .filter-section-container {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .filter-section-title {
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #1B4731;
+        letter-spacing: 0.5px;
+        margin-bottom: 0;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .search-main-input-box {
+        display: flex;
+        align-items: center;
+        background: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        border-radius: 30px;
+        padding: 4px 6px 4px 18px;
+        transition: border-color 0.2s;
+    }
+
+    .search-main-input-box:focus-within {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(59, 110, 83, 0.12);
+    }
+
+    .search-main-input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 0.9rem;
+        color: #1E293B;
+    }
+
+    .search-main-btn {
+        background: #D8EADE;
+        color: #245838;
+        border: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .search-main-btn:hover {
+        background: #C4DEC9;
+    }
+
+    .filter-field-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .filter-select {
+        width: 100%;
+        height: 38px;
+        border-radius: 8px;
+        border: 1px solid #CBD5E1;
+        font-size: 0.84rem;
+        color: #334155;
+        padding: 4px 10px;
+        background-color: #FFFFFF;
+        outline: none;
+    }
+
+    .filter-select:focus {
+        border-color: var(--primary-green);
+    }
+
+    /* FREELANCER CARD */
+    .freelancer-card {
+        background: #FFFFFF;
+        border: 1px solid #E2EDE6;
+        border-radius: 20px;
+        padding: 16px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .freelancer-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(42, 82, 62, 0.08);
+        border-color: #BBD9C7;
+    }
+
+    /* CARD TOP HEADER BANNER */
+    .card-top-header {
+        background: #DDEBE2;
+        border-radius: 14px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .avatar-illustration-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
+        background: #7ED0B8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .avatar-illustration-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-header-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .student-name-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #1E293B;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .meta-data-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 8px;
+        font-size: 0.72rem;
+        color: #334155;
+        line-height: 1.35;
+    }
+
+    .meta-data-item strong {
+        color: #0F172A;
+        font-weight: 600;
+    }
+
+    /* CARD BODY DETAILS */
+    .card-body-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-bottom: 14px;
+    }
+
+    .job-title-desc {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #1E293B;
+        margin-bottom: 6px;
+        line-height: 1.35;
+    }
+
+    .school-info-line {
+        font-size: 0.82rem;
+        color: #64748B;
+        margin-bottom: 3px;
+    }
+
+    .location-info-line {
+        font-size: 0.82rem;
+        color: #64748B;
+        margin-bottom: 8px;
+    }
+
+    .skills-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+
+    .skill-pill-badge {
+        display: inline-block;
+        background-color: #E2E8F0;
+        color: #475569;
+        font-size: 0.74rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-right: 4px;
+        margin-bottom: 6px;
+    }
+
+    .card-price-row {
+        margin-top: auto;
+        padding-top: 8px;
+        font-size: 0.82rem;
+        color: #475569;
+    }
+
+    .card-price-value {
+        color: #E11D48;
+        font-weight: 700;
+    }
+
+    /* CARD ACTION BUTTONS */
+    .card-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .btn-card-profile {
+        background-color: #9AA898;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 9px 0;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        display: block;
+    }
+
+    .btn-card-profile:hover {
+        background-color: #849381;
+    }
+
+    .btn-card-hire {
+        background-color: #D6E8D8;
+        color: #2D5838 !important;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 9px 0;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        display: block;
+    }
+
+    .btn-card-hire:hover {
+        background-color: #C3DFC6;
+    }
+</style>
+
+<div class="search-explore-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- ==================== BỘ LỌC TÌM KIẾM ==================== -->
+        <div class="filter-section-container">
+            <form method="get" asp-controller="Freelancer" asp-action="Search" id="filterForm">
+                <div class="row align-items-center g-3">
+                    
+                    <!-- Cột 1: Tiêu đề + Thanh tìm kiếm chính -->
+                    <div class="col-12 col-xl-5">
+                        <div class="d-flex align-items-center gap-3">
+                            <h5 class="filter-section-title">BỘ LỌC TÌM KIẾM</h5>
+                            <div class="search-main-input-box flex-grow-1">
+                                <input type="text" name="keyword" value="@Model.Keyword" class="search-main-input"
+                                       placeholder="Tìm theo tên, trường, chuyên ngành v..v.." />
+                                <button type="submit" class="search-main-btn" title="Tìm kiếm">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Các bộ lọc nhỏ theo dropdowns -->
+                    <div class="col-12 col-xl-7">
+                        <div class="row g-2">
+                            <!-- Chuyên ngành -->
+                            <div class="col-6 col-md-3">
+                                <label class="filter-field-label">Chuyên ngành</label>
+                                <select name="chuyenNganh" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả ngành</option>
+                                    @foreach (var cn in Model.ChuyenNganhs)
+                                    {
+                                        if (Model.SelectedChuyenNganh == cn.MaChuyenNganh)
+                                        {
+                                            <option value="@cn.MaChuyenNganh" selected>@cn.TenChuyenNganh (@cn.MaChuyenNganh)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@cn.MaChuyenNganh">@cn.TenChuyenNganh (@cn.MaChuyenNganh)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Kỹ năng chuyên ngành -->
+                            <div class="col-6 col-md-3">
+                                <label class="filter-field-label">Kỹ năng chuyên ngành</label>
+                                <select name="kyNang" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả kỹ năng</option>
+                                    @foreach (var sk in Model.AllKyNangs)
+                                    {
+                                        if (Model.SelectedKyNang == sk)
+                                        {
+                                            <option value="@sk" selected>@sk</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@sk">@sk</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- GPA -->
+                            <div class="col-6 col-md-2">
+                                <label class="filter-field-label">GPA tối thiểu</label>
+                                <select name="gpa" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả</option>
+                                    <option value="3.6" selected="@(Model.SelectedGPA == 3.6)">>= 3.6 (Xuất sắc)</option>
+                                    <option value="3.2" selected="@(Model.SelectedGPA == 3.2)">>= 3.2 (Giỏi)</option>
+                                    <option value="2.5" selected="@(Model.SelectedGPA == 2.5)">>= 2.5 (Khá)</option>
+                                </select>
+                            </div>
+
+                            <!-- Ngân sách -->
+                            <div class="col-6 col-md-2">
+                                <label class="filter-field-label">Ngân sách</label>
+                                <select name="nganSach" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả</option>
+                                    <option value="100000" selected="@(Model.SelectedNganSach == "100000")"><= 100k</option>
+                                    <option value="200000" selected="@(Model.SelectedNganSach == "200000")"><= 200k</option>
+                                    <option value="500000" selected="@(Model.SelectedNganSach == "500000")"><= 500k</option>
+                                </select>
+                            </div>
+
+                            <!-- Kỹ năng cơ bản -->
+                            <div class="col-6 col-md-2">
+                                <label class="filter-field-label">Kỹ năng cơ bản</label>
+                                <select name="kyNangCoBan" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Tất cả</option>
+                                    @foreach (var bs in Model.AllKyNangCoBans)
+                                    {
+                                        if (Model.SelectedKyNangCoBan == bs)
+                                        {
+                                            <option value="@bs" selected>@bs</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@bs">@bs</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <!-- ==================== DANH SÁCH THẺ FREELANCER ==================== -->
+        @if (!Model.Freelancers.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-search display-3 text-muted"></i>
+                <h5 class="fw-bold mt-3 text-secondary">Không tìm thấy sinh viên Freelancer phù hợp</h5>
+                <p class="text-muted small">Hãy thử điều chỉnh lại bộ lọc hoặc từ khóa tìm kiếm.</p>
+                <a href="/Freelancer/Search" class="btn btn-sm btn-outline-success rounded-pill px-4">Xem tất cả</a>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                @foreach (var item in Model.Freelancers)
+                {
+                    <div class="col">
+                        <div class="freelancer-card">
+                            
+                            <!-- Header Info Block (Xanh nhạt) -->
+                            <div>
+                                <div class="card-top-header">
+                                    <div class="avatar-illustration-box">
+                                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=@(item.User.TenTaiKhoanUser)" 
+                                             alt="@item.User.HotenUser" class="avatar-illustration-img" />
+                                    </div>
+                                    <div class="card-header-info">
+                                        <div class="student-name-title" title="@item.User.HotenUser">@item.User.HotenUser</div>
+                                        <div class="meta-data-grid">
+                                            <div class="meta-data-item">Mã trường: <strong>@item.Student.MaTruong</strong></div>
+                                            <div class="meta-data-item">Sinh viên năm: <strong>@item.Student.NamThu</strong></div>
+                                            <div class="meta-data-item">Ngành: <strong>@item.Student.MaChuyenNganh</strong></div>
+                                            <div class="meta-data-item">GPA: <strong>@item.Student.GPA.ToString("0.0#")</strong></div>
+                                            <div class="meta-data-item">Xếp loại: <strong>@item.XepLoai</strong></div>
+                                            <div class="meta-data-item">Đánh giá: <strong>@item.DanhGia ⭐</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Body Info -->
+                                <div class="card-body-content">
+                                    <div class="job-title-desc text-truncate" title="@item.Student.Gioithieu">
+                                        @(string.IsNullOrEmpty(item.Student.Gioithieu) ? "Freelancer Student" : item.Student.Gioithieu)
+                                    </div>
+                                    <div class="school-info-line text-truncate">
+                                        Trường: @item.Student.TenTruong
+                                    </div>
+                                    <div class="location-info-line text-truncate">
+                                        Địa điểm: @item.Student.DiaDiemFreelancerStudent
+                                    </div>
+                                    <div class="skills-label">Kỹ năng chuyên ngành</div>
+                                    <div class="d-flex flex-wrap mb-2">
+                                        @foreach (var skill in item.KyNangs.Take(3))
+                                        {
+                                            <span class="skill-pill-badge">@skill.TenKyNang</span>
+                                        }
+                                        @if (item.KyNangs.Count > 3)
+                                        {
+                                            <span class="skill-pill-badge">+@(item.KyNangs.Count - 3)</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price & Action Buttons -->
+                            <div>
+                                <div class="card-price-row mb-3">
+                                    Chi phí <span class="card-price-value">@(item.Student.ChiPhiTu.HasValue ? item.Student.ChiPhiTu.Value.ToString("#,##0") + " VNĐ/ Dự án" : "Thỏa thuận")</span>
+                                </div>
+                                <div class="card-actions-grid">
+                                    <a href="/Freelancer/Profile/@item.Student.MaFreelancerStudents" class="btn-card-profile">
+                                        XEM HỒ SƠ
+                                    </a>
+                                    <button type="button" class="btn-card-hire" onclick="alert('Đã gửi yêu cầu kết nối tới @item.User.HotenUser!')">
+                                        THUÊ NGAY
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

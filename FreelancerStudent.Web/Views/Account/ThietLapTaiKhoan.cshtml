@@ -1,0 +1,1316 @@
+@model FreelancerStudent.Web.ViewModels.ThongTinTaiKhoanViewModel
+
+@{
+    ViewData["Title"] = "Thiết lập tài khoản";
+
+    var tab = ViewBag.Tab?.ToString() ?? "thongtin";
+
+    var isThongTin = tab == "thongtin";
+    var isBaoMat = tab == "baomat";
+
+    var trangThaiText = Model.status == "ACTIVE"
+        ? "Đang hoạt động"
+        : Model.status;
+
+    var roleText = Model.tenrole == "FreelancerStudent"
+        ? "Freelancer Student"
+        : Model.tenrole == "NhaTuyenDung"
+            ? "Nhà tuyển dụng"
+            : Model.tenrole;
+
+    var chuCaiDau = !string.IsNullOrWhiteSpace(Model.hovaten)
+        ? Model.hovaten.Substring(0, 1).ToUpper()
+        : "U";
+}
+
+<style>
+    .account-page {
+        background: #f7faf8;
+        padding: 38px 0 70px;
+        min-height: 700px;
+    }
+
+    .account-container {
+        width: 90%;
+        max-width: 1500px;
+        margin: 0 auto;
+    }
+
+    /* ================= PROFILE HEADER ================= */
+
+    .profile-header-card {
+        background: #ffffff;
+        border: 1px solid #e5ece7;
+        border-radius: 28px;
+        padding: 42px 46px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.025);
+        margin-bottom: 30px;
+    }
+
+    .profile-main {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .profile-avatar-wrapper {
+        width: 130px;
+        height: 130px;
+        flex-shrink: 0;
+    }
+
+    .profile-avatar {
+        position: relative;
+
+        width: 130px;
+        height: 130px;
+
+        border-radius: 50%;
+        overflow: hidden;
+
+        background: #edf5f0;
+        border: 5px solid #ffffff;
+
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: #2f7650;
+        font-size: 42px;
+        font-weight: 800;
+
+        cursor: pointer;
+    }
+
+    .profile-avatar-letter {
+        color: #2f7650;
+        font-size: 52px;
+        font-weight: 800;
+    }
+
+    .profile-avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .avatar-hover-overlay {
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        border-radius: 50%;
+
+        background: rgba(0,0,0,0.48);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        gap: 5px;
+
+        color: white;
+
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .avatar-hover-overlay i {
+        font-size: 28px;
+    }
+
+    .avatar-hover-overlay span {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .profile-avatar:hover .avatar-hover-overlay {
+        opacity: 1;
+    }
+
+    .profile-info h1 {
+        font-size: 34px;
+        font-weight: 800;
+        color: #171717;
+        margin: 0;
+    }
+
+    .profile-title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+
+        background: #edf6f0;
+        color: #286644;
+
+        padding: 8px 15px;
+        border-radius: 22px;
+
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .profile-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 18px;
+
+        color: #667085;
+        font-size: 15px;
+        margin-top: 13px;
+    }
+
+    .profile-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .meta-dot {
+        width: 5px;
+        height: 5px;
+        background: #667085;
+        border-radius: 50%;
+    }
+
+    .verify-area {
+        text-align: center;
+        min-width: 220px;
+    }
+
+    .verify-label {
+        color: #475467;
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .verify-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        padding: 10px 18px;
+        border-radius: 24px;
+
+        background: #e7f8ee;
+        border: 1px solid #c5ecd5;
+
+        color: #198754;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    /* ================= TAB ================= */
+
+    .account-tabs {
+        background: #ffffff;
+        border: 1px solid #e4e9e6;
+        border-radius: 20px;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        padding: 10px;
+        margin-bottom: 30px;
+    }
+
+    .account-tab {
+        height: 66px;
+
+        border-radius: 15px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 10px;
+
+        color: #475467;
+        text-decoration: none;
+
+        font-size: 17px;
+        font-weight: 700;
+
+        transition: all .2s;
+    }
+
+    .account-tab:hover {
+        color: #2f7650;
+        background: #f3f8f5;
+    }
+
+    .account-tab.active {
+        background: #3b7457;
+        color: #ffffff;
+
+        box-shadow: 0 6px 18px rgba(59,116,87,.18);
+    }
+
+    /* ================= CONTENT CARD ================= */
+
+    .account-content-card {
+        background: #ffffff;
+        border: 1px solid #e4e9e6;
+        border-radius: 24px;
+
+        padding: 40px 42px;
+
+        box-shadow: 0 5px 20px rgba(0,0,0,.025);
+    }
+
+    .content-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding-bottom: 25px;
+        border-bottom: 1px solid #e9ecef;
+
+        margin-bottom: 32px;
+    }
+
+    .content-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        font-size: 26px;
+        font-weight: 800;
+        color: #171717;
+
+        margin-bottom: 5px;
+    }
+
+    .content-title i {
+        color: #25945f;
+    }
+
+    .content-description {
+        color: #667085;
+        font-size: 15px;
+        margin: 0;
+    }
+
+    .btn-edit-account {
+        border: none;
+        background: #3b7457;
+        color: white;
+
+        padding: 13px 24px;
+
+        border-radius: 30px;
+
+        font-weight: 700;
+        font-size: 15px;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        transition: .2s;
+    }
+
+    .btn-edit-account:hover {
+        background: #2e6047;
+        transform: translateY(-1px);
+    }
+
+    /* ================= INFORMATION ================= */
+
+    .information-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        column-gap: 32px;
+        row-gap: 28px;
+    }
+
+    .information-item label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+
+        color: #667085;
+        font-size: 14px;
+        font-weight: 600;
+
+        margin-bottom: 8px;
+    }
+
+    .information-box {
+        min-height: 62px;
+
+        border: 1px solid #e3e7e5;
+        border-radius: 13px;
+
+        background: #fbfbfd;
+
+        padding: 0 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        color: #1d2939;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .secure-email {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        color: #238557;
+        background: #f1faf5;
+
+        border: 1px solid #d7eee1;
+        border-radius: 8px;
+
+        padding: 5px 9px;
+
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* ================= SECURITY ================= */
+
+    .security-grid {
+        display: grid;
+        grid-template-columns: 1.4fr .9fr;
+        gap: 36px;
+    }
+
+    .security-form-group {
+        margin-bottom: 22px;
+    }
+
+    .security-form-group label {
+        display: block;
+
+        color: #344054;
+        font-size: 15px;
+        font-weight: 700;
+
+        margin-bottom: 8px;
+    }
+
+    .password-box {
+        position: relative;
+    }
+
+    .password-input {
+        width: 100%;
+        height: 58px;
+
+        border: 1px solid #dfe4e1;
+        border-radius: 12px;
+
+        padding: 0 52px 0 17px;
+
+        font-size: 15px;
+        outline: none;
+
+        transition: .2s;
+    }
+
+    .password-input:focus {
+        border-color: #3b7457;
+        box-shadow: 0 0 0 3px rgba(59,116,87,.10);
+    }
+
+    .password-toggle {
+        position: absolute;
+
+        right: 17px;
+        top: 50%;
+
+        transform: translateY(-50%);
+
+        border: none;
+        background: transparent;
+
+        color: #98a2b3;
+
+        font-size: 19px;
+    }
+
+    .btn-change-password {
+        width: 100%;
+        height: 58px;
+
+        border: none;
+        border-radius: 30px;
+
+        background: #3b7457;
+        color: #ffffff;
+
+        font-size: 16px;
+        font-weight: 700;
+
+        margin-top: 8px;
+    }
+
+    .btn-change-password:hover {
+        background: #2e6047;
+    }
+
+    .security-rule {
+        background: #f8fbf9;
+        border: 1px dashed #d5e1da;
+
+        border-radius: 17px;
+
+        padding: 25px;
+        margin-bottom: 22px;
+    }
+
+    .security-rule-title {
+        font-size: 18px;
+        font-weight: 800;
+
+        color: #1d2939;
+
+        display: flex;
+        align-items: center;
+        gap: 9px;
+
+        margin-bottom: 18px;
+    }
+
+    .security-rule-title i {
+        color: #26925e;
+    }
+
+    .rule-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+
+        color: #667085;
+        font-size: 14px;
+
+        margin-bottom: 12px;
+    }
+
+    .rule-item i {
+        color: #20a464;
+    }
+
+    .security-warning {
+        background: #fff8c7;
+        border-radius: 17px;
+
+        padding: 23px;
+
+        display: flex;
+        gap: 13px;
+    }
+
+    .security-warning > i {
+        color: #a76500;
+        font-size: 23px;
+    }
+
+    .security-warning-title {
+        color: #7a4b00;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .security-warning-text {
+        color: #806020;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    @@media (max-width: 900px) {
+        .profile-header-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 25px;
+        }
+
+        .verify-area {
+            text-align: left;
+        }
+
+        .information-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .security-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .account-container {
+            width: 94%;
+        }
+
+        .profile-header-card {
+            padding: 25px;
+        }
+
+        .profile-main {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .profile-avatar-wrapper {
+            width: 95px;
+            height: 95px;
+        }
+
+        .profile-avatar {
+            width: 95px;
+            height: 95px;
+        }
+
+        .profile-avatar-letter {
+            font-size: 36px;
+        }
+
+        .profile-info h1 {
+            font-size: 27px;
+        }
+
+        .account-tabs {
+            grid-template-columns: 1fr;
+        }
+
+        .account-content-card {
+            padding: 25px 20px;
+        }
+
+        .content-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 18px;
+        }
+    }
+</style>
+
+
+<div class="account-page">
+
+    <div class="account-container">
+
+        <!-- =========================
+             THÔNG TIN ĐẦU TRANG
+        ========================== -->
+
+        <div class="profile-header-card">
+
+            <div class="profile-main">
+
+                <div class="profile-avatar-wrapper">
+
+                    <form asp-controller="Account"
+                          asp-action="CapNhatAvatar"
+                          method="post"
+                          enctype="multipart/form-data"
+                          id="avatarForm">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="file"
+                               id="avatarInput"
+                               name="avatar"
+                               accept=".jpg,.jpeg,.png,.webp"
+                               hidden
+                               onchange="document.getElementById('avatarForm').submit();" />
+
+                        <div class="profile-avatar"
+                             onclick="document.getElementById('avatarInput').click();">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.avatarUrl))
+                            {
+                                <img src="@Model.avatarUrl"
+                                     alt="Ảnh đại diện"
+                                     class="profile-avatar-image" />
+                            }
+                            else
+                            {
+                                <span class="profile-avatar-letter">
+                                    @chuCaiDau
+                                </span>
+                            }
+
+                            <div class="avatar-hover-overlay">
+                                <i class="bi bi-camera-fill"></i>
+                                <span>Đổi ảnh</span>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div class="profile-info">
+
+                    <div class="profile-title-row">
+
+                        <h1>@Model.hovaten</h1>
+
+                        <span class="role-badge">
+                            <i class="bi bi-person-badge"></i>
+                            @roleText
+                        </span>
+
+                    </div>
+
+                    <div class="profile-meta">
+
+                        <span>
+                            <i class="bi bi-envelope"></i>
+                            @Model.email
+                        </span>
+
+                        <span class="meta-dot"></span>
+
+                        <span>
+                            <i class="bi bi-calendar-check"></i>
+                            Tham gia từ:
+                            @Model.ngaytao.ToString("dd/MM/yyyy")
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="verify-area">
+
+                <div class="verify-label">
+                    Trạng thái xác thực:
+                </div>
+
+                <div class="verify-badge">
+                    <i class="bi bi-patch-check-fill"></i>
+                    @trangThaiText
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             TAB
+        ========================== -->
+
+        <div class="account-tabs">
+
+            <a asp-controller="Account"
+               asp-action="ThietLapTaiKhoan"
+               asp-route-tab="thongtin"
+               class="account-tab @(isThongTin ? "active" : "")">
+
+                <i class="bi bi-person-circle"></i>
+
+                1. Thông tin cá nhân
+
+            </a>
+
+
+            <a asp-controller="Account"
+               asp-action="ThietLapTaiKhoan"
+               asp-route-tab="baomat"
+               class="account-tab @(isBaoMat ? "active" : "")">
+
+                <i class="bi bi-shield-lock-fill"></i>
+
+                2. Thiết lập bảo mật & Thay đổi mật khẩu
+
+            </a>
+
+        </div>
+
+
+        <!-- ==========================================
+             TAB 1: THÔNG TIN CÁ NHÂN
+        =========================================== -->
+
+        @if (isThongTin)
+        {
+            <div class="account-content-card">
+
+                <div class="content-header">
+
+                    <div>
+
+                        <div class="content-title">
+
+                            <i class="bi bi-person-lines-fill"></i>
+
+                            Chi tiết thông tin cá nhân
+
+                        </div>
+
+                        <p class="content-description">
+                            Xem và quản lý các thông tin cá nhân tài khoản của bạn.
+                        </p>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn-edit-account"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editAccountModal">
+
+                        <i class="bi bi-pencil-square"></i>
+
+                        Chỉnh sửa thông tin
+
+                    </button>
+
+                </div>
+
+
+                <div class="information-grid">
+
+                    <!-- HỌ TÊN -->
+
+                    <div class="information-item">
+
+                        <label>
+                            <i class="bi bi-person"></i>
+                            Họ và tên
+                        </label>
+
+                        <div class="information-box">
+                            @Model.hovaten
+                        </div>
+
+                    </div>
+
+
+                    <!-- USERNAME -->
+
+                    <div class="information-item">
+
+                        <label>
+                            <i class="bi bi-at"></i>
+                            Tên tài khoản (Username)
+                        </label>
+
+                        <div class="information-box">
+                            @@@Model.tentaikhoan
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+
+                    <div class="information-item">
+
+                        <label>
+                            <i class="bi bi-envelope"></i>
+                            Địa chỉ Email
+                        </label>
+
+                        <div class="information-box">
+
+                            <span>
+                                @Model.email
+                            </span>
+
+                            <span class="secure-email">
+
+                                <i class="bi bi-lock-fill"></i>
+
+                                Bảo mật
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SỐ ĐIỆN THOẠI -->
+
+                    <div class="information-item">
+
+                        <label>
+                            <i class="bi bi-telephone"></i>
+                            Số điện thoại liên hệ
+                        </label>
+
+                        <div class="information-box">
+
+                            @(string.IsNullOrWhiteSpace(Model.sodienthoai)
+                                ? "Chưa cập nhật"
+                                : Model.sodienthoai)
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- NGÀY TẠO -->
+
+                    <div class="information-item">
+
+                        <label>
+                            <i class="bi bi-calendar-event"></i>
+                            Ngày tạo tài khoản
+                        </label>
+
+                        <div class="information-box">
+
+                            @Model.ngaytao.ToString("dd/MM/yyyy HH:mm")
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TRẠNG THÁI -->
+
+                    <div class="information-item">
+
+                        <label>
+                            <i class="bi bi-patch-check"></i>
+                            Trạng thái hồ sơ
+                        </label>
+
+                        <div class="information-box">
+
+                            @trangThaiText
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= MODAL CHỈNH SỬA ================= -->
+
+            <div class="modal fade"
+                 id="editAccountModal"
+                 tabindex="-1">
+
+                <div class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content border-0 shadow"
+                         style="border-radius:20px;">
+
+                        <div class="modal-header border-0 px-4 pt-4">
+
+                            <h5 class="modal-title fw-bold">
+
+                                <i class="bi bi-pencil-square text-success me-2"></i>
+
+                                Chỉnh sửa thông tin
+
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+
+                        <form asp-controller="Account"
+                              asp-action="CapNhatThongTinTaiKhoan"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <div class="modal-body px-4">
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Họ và tên
+                                    </label>
+
+                                    <input type="text"
+                                           name="hovaten"
+                                           value="@Model.hovaten"
+                                           class="form-control"
+                                           required />
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Số điện thoại
+                                    </label>
+
+                                    <input type="text"
+                                           name="sodienthoai"
+                                           value="@Model.sodienthoai"
+                                           class="form-control" />
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Tên tài khoản
+                                    </label>
+
+                                    <input type="text"
+                                           value="@Model.tentaikhoan"
+                                           class="form-control"
+                                           disabled />
+
+                                    <small class="text-muted">
+                                        Tên tài khoản không thể thay đổi.
+                                    </small>
+
+                                </div>
+
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Email
+                                    </label>
+
+                                    <input type="text"
+                                           value="@Model.email"
+                                           class="form-control"
+                                           disabled />
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="modal-footer border-0 px-4 pb-4">
+
+                                <button type="button"
+                                        class="btn btn-light rounded-pill px-4"
+                                        data-bs-dismiss="modal">
+
+                                    Hủy bỏ
+
+                                </button>
+
+                                <button type="submit"
+                                        class="btn btn-success rounded-pill px-4">
+
+                                    <i class="bi bi-check-circle me-1"></i>
+
+                                    Lưu thay đổi
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- ==========================================
+             TAB 2: BẢO MẬT
+        =========================================== -->
+
+        @if (isBaoMat)
+        {
+            <div class="account-content-card">
+
+                <div class="content-header">
+
+                    <div>
+
+                        <div class="content-title">
+
+                            <i class="bi bi-key-fill"></i>
+
+                            Thay đổi mật khẩu tài khoản
+
+                        </div>
+
+                        <p class="content-description">
+                            Chủ động đổi mật khẩu định kỳ để nâng cao tính an toàn
+                            và bảo mật cho tài khoản.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="security-grid">
+
+                    <!-- ================= FORM ĐỔI MẬT KHẨU ================= -->
+
+                    <form asp-controller="Account"
+                          asp-action="DoiMatKhau"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- MẬT KHẨU HIỆN TẠI -->
+
+                        <div class="security-form-group">
+
+                            <label>
+                                Mật khẩu hiện tại
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="password-box">
+
+                                <input type="password"
+                                       id="currentPassword"
+                                       name="matKhauHienTai"
+                                       class="password-input"
+                                       placeholder="Nhập mật khẩu đang dùng"
+                                       required />
+
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('currentPassword', this)">
+
+                                    <i class="bi bi-eye"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- MẬT KHẨU MỚI -->
+
+                        <div class="security-form-group">
+
+                            <label>
+                                Mật khẩu mới
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="password-box">
+
+                                <input type="password"
+                                       id="newPassword"
+                                       name="matKhauMoi"
+                                       class="password-input"
+                                       placeholder="Tối thiểu 8 ký tự gồm chữ và số"
+                                       minlength="8"
+                                       required />
+
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('newPassword', this)">
+
+                                    <i class="bi bi-eye"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- XÁC NHẬN MẬT KHẨU MỚI -->
+
+                        <div class="security-form-group">
+
+                            <label>
+                                Xác nhận mật khẩu mới
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="password-box">
+
+                                <input type="password"
+                                       id="confirmPassword"
+                                       name="xacNhanMatKhauMoi"
+                                       class="password-input"
+                                       placeholder="Nhập lại mật khẩu mới"
+                                       minlength="8"
+                                       required />
+
+                                <button type="button"
+                                        class="password-toggle"
+                                        onclick="togglePassword('confirmPassword', this)">
+
+                                    <i class="bi bi-eye"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- NÚT XÁC NHẬN -->
+
+                        <button type="submit"
+                                class="btn-change-password">
+
+                            <i class="bi bi-shield-check me-2"></i>
+
+                            Xác nhận thay đổi mật khẩu
+
+                        </button>
+
+                    </form>
+
+
+                    <!-- ================= QUY TẮC ================= -->
+
+                    <div>
+
+                        <div class="security-rule">
+
+                            <div class="security-rule-title">
+
+                                <i class="bi bi-shield-lock"></i>
+
+                                Quy chuẩn mật khẩu an toàn
+
+                            </div>
+
+
+                            <div class="rule-item">
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                                <span>
+                                    Tối thiểu <strong>8 ký tự</strong>.
+                                </span>
+
+                            </div>
+
+
+                            <div class="rule-item">
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                                <span>
+                                    Chứa cả
+                                    <strong>chữ cái (a-z, A-Z)</strong>
+                                    và
+                                    <strong>chữ số (0-9)</strong>.
+                                </span>
+
+                            </div>
+
+
+                            <div class="rule-item">
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                                <span>
+                                    Mật khẩu xác nhận phải trùng khớp 100%.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="security-warning">
+
+                            <i class="bi bi-exclamation-circle-fill"></i>
+
+                            <div>
+
+                                <div class="security-warning-title">
+                                    Lưu ý bảo mật quan trọng:
+                                </div>
+
+                                <div class="security-warning-text">
+
+                                    Sau khi đổi mật khẩu thành công,
+                                    hệ thống sẽ <strong>tự động đăng xuất</strong>
+                                    tài khoản của bạn để đảm bảo an toàn.
+
+                                    Bạn sẽ cần đăng nhập lại bằng mật khẩu mới.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        function togglePassword(inputId, button) {
+
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector("i");
+
+            if (input.type === "password") {
+
+                input.type = "text";
+
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+
+            }
+            else {
+
+                input.type = "password";
+
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+
+            }
+        }
+
+    </script>
+
+}

@@ -1,0 +1,419 @@
+@model MOCK.Models.ViewModels.FreelancerYeuThichViewModel
+@{
+    ViewData["Title"] = "Quản lý Freelancer quan tâm (Yêu thích)";
+}
+
+<div class="container py-4">
+    <!-- BREADCRUMB -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Employer" asp-action="ManageJobs" class="text-decoration-none text-muted">Nhà tuyển dụng</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Freelancer quan tâm</li>
+        </ol>
+    </nav>
+
+    <!-- ALERT MESSAGES -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- HERO HEADER -->
+    <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 18px; background: linear-gradient(135deg, #1E3A2F 0%, #2A523E 60%, #3B6E53 100%); color: #FFFFFF;">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-warning text-dark px-3 py-1 fw-bold" style="font-size: 0.8rem; border-radius: 20px;">
+                        <i class="bi bi-bookmark-heart-fill me-1"></i> CUS-UC-04.01
+                    </span>
+                    <span class="badge bg-white text-success px-3 py-1 fw-bold" style="font-size: 0.8rem; border-radius: 20px;">
+                        Đã lưu: @Model.TotalCount sinh viên
+                    </span>
+                </div>
+                <h2 class="fw-bold mb-2">Danh Sách Freelancer Quan Tâm (Yêu Thích)</h2>
+                <p class="mb-0 text-white-50" style="font-size: 0.95rem; max-width: 650px;">
+                    Lưu trữ và quản lý các hồ sơ Freelancer sinh viên tiềm năng. Bạn có thể ghi chú riêng, gửi tin nhắn hoặc mời nhận việc trực tiếp bất cứ lúc nào.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a asp-controller="Freelancer" asp-action="Search" class="btn btn-light fw-bold px-4 py-2 text-success shadow-sm" style="border-radius: 30px;">
+                    <i class="bi bi-search me-1"></i> Tìm thêm Freelancer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 14px; background: #FFFFFF;">
+        <form method="get" asp-controller="Employer" asp-action="FreelancerYeuThich" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px;">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="keyword" value="@Model.Keyword" class="form-control border-start-0 bg-light"
+                           placeholder="Tìm kiếm theo tên, trường, kỹ năng, ghi chú..." style="border-radius: 0 10px 10px 0;" />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="chuyenNganh" class="form-select bg-light" style="border-radius: 10px;">
+                    <option value="">-- Tất cả chuyên ngành --</option>
+                    @foreach (var cn in Model.AllChuyenNganhs)
+                    {
+                        if (Model.SelectedChuyenNganh == cn)
+                        {
+                            <option value="@cn" selected>@cn</option>
+                        }
+                        else
+                        {
+                            <option value="@cn">@cn</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="sortBy" class="form-select bg-light" style="border-radius: 10px;">
+                    <option value="">Mới lưu nhất</option>
+                    <!option value="gpa_desc" @(Model.SortBy == "gpa_desc" ? "selected" : "")>GPA cao nhất</!option>
+                    <!option value="price_asc" @(Model.SortBy == "price_asc" ? "selected" : "")>Thù lao thấp nhất</!option>
+                    <!option value="name_asc" @(Model.SortBy == "name_asc" ? "selected" : "")>Tên A-Z</!option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-success flex-grow-1 fw-bold" style="border-radius: 10px; background-color: var(--primary-green, #3B6E53);">
+                    <i class="bi bi-funnel-fill me-1"></i> Lọc
+                </button>
+                @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.SelectedChuyenNganh) || !string.IsNullOrWhiteSpace(Model.SortBy))
+                {
+                    <a asp-controller="Employer" asp-action="FreelancerYeuThich" class="btn btn-outline-secondary" title="Xóa bộ lọc" style="border-radius: 10px;">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- MAIN FREELANCER LIST -->
+    @if (Model.DanhSachYeuThich != null && Model.DanhSachYeuThich.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.DanhSachYeuThich)
+            {
+                <div class="col-lg-6 col-xl-6">
+                    <div class="card h-100 border-0 shadow-sm transition-hover" style="border-radius: 16px; border: 1px solid #EAEFF0; background: #FFFFFF;">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <!-- TOP INFO -->
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="position-relative">
+                                    <img src="~/@item.Avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'"
+                                         alt="@item.HotenUser" class="rounded-circle shadow-sm" style="width: 72px; height: 72px; object-fit: cover; border: 3px solid #EBF4F0;" />
+                                    @if (item.TrangthaiNhanViec)
+                                    {
+                                        <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle" title="Đang nhận việc"></span>
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h5 class="fw-bold mb-0">
+                                            <a asp-controller="Employer" asp-action="FreelancerDetail" asp-route-id="@item.MaFreelancerStudent" class="text-decoration-none text-dark hover-green">
+                                                @item.HotenUser
+                                            </a>
+                                        </h5>
+                                        <!-- ACTION NÚT BỎ LƯU -->
+                                        <form asp-controller="Employer" asp-action="XoaYeuThich" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn bỏ lưu sinh viên @item.HotenUser khỏi danh sách quan tâm?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="maBookMark" value="@item.MaBookMark" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-1" title="Bỏ lưu khỏi danh sách yêu thích">
+                                                <i class="bi bi-heart-fill fs-5 text-danger"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="text-muted mb-1" style="font-size: 0.85rem;">
+                                        <i class="bi bi-mortarboard-fill text-success me-1"></i> @item.TenTruong - Năm @item.NamThu (@item.NienKhoa)
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap" style="font-size: 0.8rem;">
+                                        <span class="badge bg-light text-success border border-success-subtle fw-semibold">
+                                            @item.TenChuyenNganh
+                                        </span>
+                                        <span class="badge bg-warning text-dark fw-semibold">
+                                            <i class="bi bi-star-fill text-dark me-1"></i> GPA: @item.GPA.ToString("0.00")
+                                        </span>
+                                        <span class="badge bg-info-subtle text-info-emphasis fw-semibold">
+                                            <i class="bi bi-check-all me-1"></i> @item.SoHopDongHoanThanh HĐ xong
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BIO & SKILLS -->
+                            <div class="mb-3">
+                                @if (!string.IsNullOrWhiteSpace(item.Gioithieu))
+                                {
+                                    <p class="text-muted small mb-2 text-truncate-2" style="font-size: 0.86rem; line-height: 1.4;">
+                                        @item.Gioithieu
+                                    </p>
+                                }
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var skill in item.KyNangChuyenNganh.Take(4))
+                                    {
+                                        <span class="badge bg-light text-secondary border" style="font-size: 0.75rem; font-weight: 500;">
+                                            @skill
+                                        </span>
+                                    }
+                                    @if (item.KyNangChuyenNganh.Count > 4)
+                                    {
+                                        <span class="badge bg-light text-muted border" style="font-size: 0.75rem;">
+                                            +@(item.KyNangChuyenNganh.Count - 4)
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- THÙ LAO & GHI CHÚ RIÊNG -->
+                            <div class="p-3 mb-3" style="background: #F8FAF9; border-radius: 12px; border-left: 4px solid var(--primary-green, #3B6E53);">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="fw-bold text-success" style="font-size: 0.88rem;">
+                                        <i class="bi bi-cash-stack me-1"></i> Thù lao từ: @(item.ChiPhiTu.HasValue ? item.ChiPhiTu.Value.ToString("N0") + " VNĐ" : "Thương lượng")
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        <i class="bi bi-clock-history me-1"></i> Đã lưu @item.NgayLuu.ToString("dd/MM/yyyy")
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start justify-content-between mt-2 pt-2 border-top border-light-subtle">
+                                    <div class="text-dark small" style="font-size: 0.82rem;">
+                                        <strong class="text-secondary"><i class="bi bi-sticky-fill text-warning me-1"></i> Ghi chú riêng:</strong>
+                                        <span class="text-muted fst-italic" id="note-text-@item.MaBookMark">
+                                            @(string.IsNullOrWhiteSpace(item.GhiChu) ? "Chưa có ghi chú nào cho ứng viên này." : item.GhiChu)
+                                        </span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-link text-success p-0 ms-2 text-decoration-none"
+                                            data-bs-toggle="modal" data-bs-target="#editNoteModal"
+                                            data-bookmark-id="@item.MaBookMark"
+                                            data-student-name="@item.HotenUser"
+                                            data-note-text="@item.GhiChu"
+                                            title="Sửa ghi chú">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- BUTTONS ACTION -->
+                            <div class="mt-auto pt-2 d-flex gap-2">
+                                <a asp-controller="Employer" asp-action="FreelancerDetail" asp-route-id="@item.MaFreelancerStudent"
+                                   class="btn btn-sm btn-outline-success flex-grow-1 fw-bold" style="border-radius: 8px;">
+                                    <i class="bi bi-person-lines-fill me-1"></i> Xem Profile
+                                </a>
+
+                                <button type="button" class="btn btn-sm btn-success flex-grow-1 fw-bold"
+                                        style="border-radius: 8px; background-color: var(--primary-green, #3B6E53);"
+                                        data-bs-toggle="modal" data-bs-target="#inviteModal"
+                                        data-student-id="@item.MaFreelancerStudent"
+                                        data-student-name="@item.HotenUser"
+                                        data-student-major="@item.TenChuyenNganh">
+                                    <i class="bi bi-send-fill me-1"></i> Mời nhận việc
+                                </button>
+
+                                <a asp-controller="NhanTin" asp-action="Index" asp-route-userId="@item.MaUser"
+                                   class="btn btn-sm btn-outline-secondary" style="border-radius: 8px;" title="Nhắn tin trao đổi">
+                                    <i class="bi bi-chat-dots-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- EMPTY STATE -->
+        <div class="card border-0 shadow-sm py-5 text-center my-4" style="border-radius: 18px; background: #FFFFFF;">
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle" style="width: 80px; height: 80px;">
+                        <i class="bi bi-bookmark-heart fs-1"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-2">Chưa có Freelancer nào trong danh sách quan tâm</h4>
+                <p class="text-muted mb-4 mx-auto" style="max-width: 500px; font-size: 0.95rem;">
+                    Khi bạn tìm kiếm và thấy các Freelancer sinh viên tài năng phù hợp, hãy nhấn biểu tượng <strong>Lưu hồ sơ</strong> để theo dõi và kết nối thuận tiện tại đây.
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a asp-controller="Freelancer" asp-action="Search" class="btn btn-success fw-bold px-4 py-2" style="border-radius: 25px; background-color: var(--primary-green, #3B6E53);">
+                        <i class="bi bi-search me-1"></i> Khám phá danh sách Freelancer
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 1: CHỈNH SỬA GHI CHÚ RIÊNG CHO FREELANCER -->
+<!-- ========================================== -->
+<div class="modal fade" id="editNoteModal" tabindex="-1" aria-labelledby="editNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+            <form asp-controller="Employer" asp-action="CapNhatGhiChu" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maBookMark" id="modalBookmarkId" value="" />
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="editNoteModalLabel">
+                        <i class="bi bi-sticky-fill text-warning me-1"></i> Ghi chú riêng cho ứng viên
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="text-muted small mb-2">
+                        Ứng viên: <strong class="text-dark" id="modalStudentName"></strong>
+                    </p>
+                    <div class="mb-3">
+                        <label for="modalGhiChuInput" class="form-label fw-semibold" style="font-size: 0.88rem;">Nội dung ghi chú cá nhân:</label>
+                        <textarea class="form-control" name="ghiChu" id="modalGhiChuInput" rows="4"
+                                  placeholder="Nhập nhận xét nhanh, ấn tượng về đồ án, mức lương mong muốn hoặc dự án dự định giao..."
+                                  style="border-radius: 10px; font-size: 0.9rem;"></textarea>
+                        <div class="form-text" style="font-size: 0.78rem;">Ghi chú này chỉ có mình bạn nhìn thấy để tiện theo dõi ứng viên.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-success fw-bold px-4" style="border-radius: 8px; background-color: var(--primary-green, #3B6E53);">
+                        <i class="bi bi-check-lg me-1"></i> Lưu ghi chú
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 2: GỬI LỜI MỜI NHẬN VIỆC TRỰC TIẾP -->
+<!-- ========================================== -->
+<div class="modal fade" id="inviteModal" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 18px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-success" id="inviteModalLabel">
+                    <i class="bi bi-briefcase-fill me-2"></i> Gửi Đề Xuất Lời Mời Nhận Việc (UngThue)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-light border d-flex align-items-center mb-3 py-2" style="border-radius: 10px;">
+                    <i class="bi bi-person-check-fill text-success fs-4 me-2"></i>
+                    <div>
+                        Gửi lời mời trực tiếp đến: <strong class="text-dark" id="inviteStudentName"></strong>
+                        (<span class="text-muted" id="inviteStudentMajor"></span>)
+                    </div>
+                </div>
+
+                <form id="directHireForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Tiêu đề công việc / Dự án <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="VD: Thiết kế Landing Page giới thiệu sản phẩm / Lập trình API ASP.NET..." style="border-radius: 10px;" required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Ngân sách đề nghị (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" placeholder="VD: 2000000" style="border-radius: 10px;" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Thời hạn hoàn thành dự kiến <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" placeholder="VD: 10 ngày / 2 tuần" style="border-radius: 10px;" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mô tả chi tiết yêu cầu công việc</label>
+                        <textarea class="form-control" rows="4" placeholder="Nêu rõ yêu cầu kỹ thuật, phạm vi công việc, kết quả bàn giao mong muốn..." style="border-radius: 10px;"></textarea>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+                        <button type="button" class="btn btn-success fw-bold px-4" onclick="handleSendInvite()" style="border-radius: 8px; background-color: var(--primary-green, #3B6E53);">
+                            <i class="bi bi-send-fill me-1"></i> Gửi lời mời ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+    .hover-green:hover {
+        color: var(--primary-green, #3B6E53) !important;
+    }
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Xử lý Modal Sửa ghi chú
+        const editNoteModal = document.getElementById('editNoteModal');
+        if (editNoteModal) {
+            editNoteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const bookmarkId = button.getAttribute('data-bookmark-id');
+                const studentName = button.getAttribute('data-student-name');
+                const noteText = button.getAttribute('data-note-text') || '';
+
+                document.getElementById('modalBookmarkId').value = bookmarkId;
+                document.getElementById('modalStudentName').textContent = studentName;
+                document.getElementById('modalGhiChuInput').value = noteText;
+            });
+        }
+
+        // Xử lý Modal Mời nhận việc
+        const inviteModal = document.getElementById('inviteModal');
+        if (inviteModal) {
+            inviteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const studentName = button.getAttribute('data-student-name');
+                const studentMajor = button.getAttribute('data-student-major');
+
+                document.getElementById('inviteStudentName').textContent = studentName;
+                document.getElementById('inviteStudentMajor').textContent = studentMajor;
+            });
+        }
+
+        function handleSendInvite() {
+            alert('Lời mời nhận việc đã được gửi thành công đến sinh viên! Sinh viên sẽ nhận được thông báo qua hệ thống.');
+            const modalEl = document.getElementById('inviteModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+        }
+    </script>
+}

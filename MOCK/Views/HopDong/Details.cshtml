@@ -1,0 +1,344 @@
+@model MOCK.Models.ViewModels.ContractDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết hợp đồng " + Model.Contract.MaHD;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .contract-detail-page {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .contract-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .contract-card-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .contract-status-badge {
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-in-progress {
+        background-color: #EBF7EE;
+        color: #1E6E38;
+        border: 1px solid #CBE5D3;
+    }
+
+    .status-completed {
+        background-color: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #BFDBFE;
+    }
+
+    /* Parties info cards */
+    .party-box {
+        background-color: #FAFDFB;
+        border: 1px solid #E2EDE6;
+        border-radius: 14px;
+        padding: 16px;
+        height: 100%;
+    }
+
+    .party-label-badge {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+
+    .party-a-badge {
+        background-color: #E0E7FF;
+        color: #3730A3;
+    }
+
+    .party-b-badge {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
+
+    /* Escrow Card */
+    .escrow-card {
+        background: linear-gradient(135deg, #F4FAF6 0%, #FFFFFF 100%);
+        border: 1.5px solid #CBE3D3;
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .escrow-amount {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #166534;
+        margin-bottom: 4px;
+    }
+
+    /* Timeline */
+    .timeline-steps {
+        position: relative;
+        padding-left: 24px;
+    }
+
+    .timeline-steps::before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background-color: #E2E8F0;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -24px;
+        top: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #FFFFFF;
+        border: 3px solid #94A3B8;
+    }
+
+    .timeline-item.completed .timeline-dot {
+        border-color: var(--primary-green);
+        background-color: var(--primary-green);
+    }
+
+    .timeline-item.active .timeline-dot {
+        border-color: var(--primary-green);
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(59, 110, 83, 0.2);
+    }
+
+    .timeline-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+    }
+
+    .timeline-desc {
+        font-size: 0.78rem;
+        color: #64748B;
+    }
+</style>
+
+<div class="contract-detail-page">
+    <div class="container-fluid px-lg-5">
+        
+        <!-- ==================== HEADER HỢP ĐỒNG ==================== -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <a href="/HopDong" class="text-decoration-none text-muted small fw-semibold mb-2 d-inline-block">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách hợp đồng
+                </a>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <h3 class="fw-bold mb-0 text-dark">Hợp đồng #@Model.Contract.MaHD</h3>
+                    <span class="contract-status-badge @(Model.Contract.TrangThai == "DangThucHien" ? "status-in-progress" : "status-completed")">
+                        <i class="bi @(Model.Contract.TrangThai == "DangThucHien" ? "bi-hourglass-split" : "bi-check-circle-fill")"></i>
+                        @(Model.Contract.TrangThai == "DangThucHien" ? "Đang thực hiện" : Model.Contract.TrangThai)
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold small" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> In hợp đồng
+                </button>
+                <a href="/Freelancer/Profile/@Model.Freelancer.MaFreelancerStudents" class="btn btn-outline-success rounded-pill px-3 fw-semibold small">
+                    <i class="bi bi-person-lines-fill me-1"></i> Xem hồ sơ sinh viên
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <!-- CỘT TRÁI (8 COLS): NỘI DUNG HỢP ĐỒNG -->
+            <div class="col-12 col-lg-8">
+                
+                <!-- 1. Thông tin công việc -->
+                <div class="contract-card">
+                    <h5 class="contract-card-title">
+                        <i class="bi bi-briefcase text-success"></i> Thông tin công việc ký kết
+                    </h5>
+                    <h5 class="fw-bold text-dark mb-2">@Model.Job.Tieude</h5>
+                    <p class="text-secondary leading-relaxed mb-3">@Model.Job.Mota</p>
+                    
+                    <div class="row g-3 pt-2 border-top">
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted small d-block">Hình thức làm việc</span>
+                            <strong class="text-dark">@(Model.Contract.Hinhthuclamviec ?? "Remote")</strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted small d-block">Ngày bắt đầu</span>
+                            <strong class="text-dark">@(Model.Contract.NgayBatDau.HasValue ? Model.Contract.NgayBatDau.Value.ToString("dd/MM/yyyy") : "Hôm nay")</strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted small d-block">Hạn bàn giao</span>
+                            <strong class="text-danger">@(Model.Contract.NgayKetThuc.HasValue ? Model.Contract.NgayKetThuc.Value.ToString("dd/MM/yyyy") : Model.Job.Thoigiandukienhoanthanh)</strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted small d-block">Kỹ năng yêu cầu</span>
+                            <strong class="text-success text-truncate d-block">@Model.Job.Kynangyeucau</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Thông tin 2 bên tham gia (Bên A & Bên B) -->
+                <div class="contract-card">
+                    <h5 class="contract-card-title">
+                        <i class="bi bi-people text-primary"></i> Các bên tham gia hợp đồng
+                    </h5>
+                    
+                    <div class="row g-3">
+                        <!-- Bên A: Nhà tuyển dụng -->
+                        <div class="col-md-6">
+                            <div class="party-box">
+                                <span class="party-label-badge party-a-badge">Bên A (Khách hàng / Doanh nghiệp)</span>
+                                <h6 class="fw-bold text-dark mb-1">@(Model.Employer.Tencongty ?? Model.EmployerUser.HotenUser)</h6>
+                                <p class="text-muted small mb-2">Đại diện: <strong>@Model.EmployerUser.HotenUser</strong></p>
+                                <div class="small text-secondary">
+                                    <div><i class="bi bi-envelope me-1"></i> @Model.EmployerUser.EmailUser</div>
+                                    <div><i class="bi bi-telephone me-1"></i> @(Model.EmployerUser.SdtUser ?? "0283838383")</div>
+                                    <div><i class="bi bi-geo-alt me-1"></i> @(Model.Employer.Diachi ?? "TP. Hồ Chí Minh")</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bên B: Sinh viên Freelancer -->
+                        <div class="col-md-6">
+                            <div class="party-box">
+                                <span class="party-label-badge party-b-badge">Bên B (Sinh viên thực hiện)</span>
+                                <h6 class="fw-bold text-dark mb-1">@Model.FreelancerUser.HotenUser</h6>
+                                <p class="text-muted small mb-2">Trường: <strong>@Model.Freelancer.TenTruong</strong> (Năm @Model.Freelancer.NamThu)</p>
+                                <div class="small text-secondary">
+                                    <div><i class="bi bi-envelope me-1"></i> @Model.FreelancerUser.EmailUser</div>
+                                    <div><i class="bi bi-telephone me-1"></i> @(Model.FreelancerUser.SdtUser ?? "0901234567")</div>
+                                    <div><i class="bi bi-mortarboard me-1"></i> Ngành @Model.Freelancer.MaChuyenNganh - GPA: @Model.Freelancer.GPA.ToString("0.0#")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Điều khoản thỏa thuận -->
+                <div class="contract-card">
+                    <h5 class="contract-card-title">
+                        <i class="bi bi-shield-check text-success"></i> Điều khoản và Cam kết thực hiện
+                    </h5>
+                    
+                    <div class="small text-secondary leading-relaxed">
+                        <p class="mb-2"><strong>Điều 1 (Trách nhiệm Bên B):</strong> Sinh viên cam kết hoàn thành đúng các hạng mục yêu cầu kỹ thuật và bàn giao mã nguồn / tài liệu trước ngày kết thúc ghi trong hợp đồng.</p>
+                        <p class="mb-2"><strong>Điều 2 (Cam kết Bên A):</strong> Doanh nghiệp có trách nhiệm nghiệm thu sản phẩm trong vòng 03 ngày kể từ khi Bên B bàn giao và hỗ trợ xác nhận giải ngân ký quỹ.</p>
+                        <p class="mb-0"><strong>Điều 3 (Cơ chế Bảo đảm Ký quỹ):</strong> Toàn bộ thù lao được giữ tạm thời tại hệ thống Escrow của Freelancer Students. Tiền chỉ được chuyển vào ví khả dụng của sinh viên khi hai bên xác nhận hoàn thành công việc.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI (4 COLS): KÝ QUỸ & TIẾN ĐỘ -->
+            <div class="col-12 col-lg-4">
+                
+                <!-- Card Ký Quỹ Escrow -->
+                <div class="escrow-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small fw-bold text-uppercase">Số tiền ký quỹ (Escrow)</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Đã đóng băng an toàn</span>
+                    </div>
+                    <div class="escrow-amount">
+                        @(Model.Contract.Sotienkyquy.HasValue ? Model.Contract.Sotienkyquy.Value.ToString("#,##0") + " VNĐ" : "3.500.000 VNĐ")
+                    </div>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i>
+                        Hệ thống đã khóa khoản tiền này để đảm bảo Bên B nhận đủ thù lao sau khi hoàn thành.
+                    </p>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <a href="/HopDong/NghiemThu/@Model.Contract.MaHD" class="btn btn-success rounded-pill py-2 fw-bold text-center">
+                            <i class="bi bi-check-circle me-1"></i> Nghiệm thu & Bàn giao sản phẩm
+                        </a>
+                        <a href="/TranhChap/Create?maHD=@Model.Contract.MaHD" class="btn btn-outline-danger rounded-pill py-2 fw-semibold text-center">
+                            <i class="bi bi-shield-exclamation me-1"></i> Báo cáo sự cố / Mở tranh chấp
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card Tiến độ Timeline -->
+                <div class="contract-card">
+                    <h5 class="contract-card-title">
+                        <i class="bi bi-clock-history text-info"></i> Tiến độ hợp đồng
+                    </h5>
+
+                    <div class="timeline-steps">
+                        <!-- Step 1 -->
+                        <div class="timeline-item completed">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-title">1. Khởi tạo hợp đồng</div>
+                            <div class="timeline-desc">Hai bên thống nhất điều khoản và yêu cầu kỹ thuật.</div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="timeline-item completed">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-title">2. Ký quỹ thành công</div>
+                            <div class="timeline-desc">Doanh nghiệp đã nộp tiền bảo đảm vào hệ thống ví.</div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="timeline-item active">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-title text-success">3. Đang thực hiện</div>
+                            <div class="timeline-desc">Sinh viên đang triển khai dự án theo kế hoạch.</div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-title">4. Nghiệm thu & Hoàn tất</div>
+                            <div class="timeline-desc">Bàn giao sản phẩm cuối và tự động giải ngân thù lao.</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

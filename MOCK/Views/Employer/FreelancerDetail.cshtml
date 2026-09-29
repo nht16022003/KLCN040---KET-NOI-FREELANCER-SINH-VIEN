@@ -1,0 +1,573 @@
+@model MOCK.Models.ViewModels.EmployerFreelancerDetailViewModel
+@{
+    ViewData["Title"] = $"Hồ sơ {Model.User.HotenUser} - Freelancer Sinh Viên";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .freelancer-detail-page {
+        background-color: #F8FAF9;
+        min-height: 88vh;
+        padding-bottom: 70px;
+    }
+
+    .profile-hero-banner {
+        background: linear-gradient(135deg, #1C4D35 0%, #2D6A4F 60%, #40916C 100%);
+        padding: 40px 0 60px;
+        color: #FFFFFF;
+        position: relative;
+    }
+
+    .profile-card-wrapper {
+        margin-top: -45px;
+    }
+
+    .main-profile-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid #E5ECE7;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        padding: 30px;
+    }
+
+    .avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #FFFFFF;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    }
+
+    .badge-verified-student {
+        background: #EBF4F0;
+        color: #2D6A4F;
+        border: 1px solid #C4DEC8;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .stat-box {
+        background: #F8FAF9;
+        border: 1px solid #EAEFEA;
+        border-radius: 14px;
+        padding: 14px 18px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .stat-box:hover {
+        border-color: #3B6E53;
+        background: #FFFFFF;
+    }
+
+    .stat-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #1E293B;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #64748B;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .nav-tabs-custom {
+        border-bottom: 2px solid #EAEFEA;
+        gap: 20px;
+    }
+
+    .nav-tabs-custom .nav-link {
+        border: none;
+        color: #64748B;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 12px 6px;
+        position: relative;
+        background: transparent;
+    }
+
+    .nav-tabs-custom .nav-link.active {
+        color: #2D6A4F;
+    }
+
+    .nav-tabs-custom .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #2D6A4F;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .skill-pill {
+        background: #EBF4F0;
+        color: #2D6A4F;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        border-radius: 30px;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 8px;
+        border: 1px solid #D8EADB;
+    }
+
+    .project-card {
+        background: #FFFFFF;
+        border: 1px solid #EAEFEA;
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .project-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        border-color: #3B6E53;
+    }
+
+    .review-item {
+        background: #FFFFFF;
+        border: 1px solid #EAEFEA;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+
+    .btn-invite-direct {
+        background: #2D6A4F;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 12px 24px;
+        border-radius: 30px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-invite-direct:hover {
+        background: #1C4D35;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(45, 106, 79, 0.3);
+    }
+
+    .btn-bookmark-action {
+        background: #FFFFFF;
+        border: 1px solid #D0D7DE;
+        color: #334155;
+        font-weight: 600;
+        padding: 11px 20px;
+        border-radius: 30px;
+        transition: all 0.2s;
+    }
+
+    .btn-bookmark-action:hover, .btn-bookmark-action.active {
+        border-color: #E11D48;
+        color: #E11D48;
+        background: #FFF1F2;
+    }
+</style>
+
+<div class="freelancer-detail-page">
+    
+    <!-- HERO HEADER -->
+    <div class="profile-hero-banner">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2 text-white-50 small">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-white-50 text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Employer" asp-action="Search" class="text-white-50 text-decoration-none">Tìm Freelancer</a></li>
+                    <li class="breadcrumb-item text-white active" aria-current="page">@Model.User.HotenUser</li>
+                </ol>
+            </nav>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="badge bg-white bg-opacity-25 text-white px-3 py-1 rounded-pill mb-2 fw-semibold">
+                        <i class="bi bi-person-badge me-1"></i>Góc nhìn Nhà tuyển dụng
+                    </span>
+                    <h2 class="fw-bold mb-1">Chi tiết Hồ sơ Ứng viên Freelancer</h2>
+                    <p class="mb-0 text-white-50 small">Đánh giá năng lực, dự án thực tế và gửi lời mời làm việc trực tiếp</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-action="FreelancerYeuThich" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-heart me-1"></i>Ds quan tâm (@Model.TongSoDanhGia)
+                    </a>
+                    <a asp-action="Search" class="btn btn-sm btn-light rounded-pill px-3 py-2 fw-semibold text-dark">
+                        <i class="bi bi-search me-1"></i>Tìm Freelancer khác
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN PROFILE SECTION -->
+    <div class="container profile-card-wrapper">
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-3">
+                <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+        }
+
+        <div class="row g-4">
+            
+            <!-- LEFT PROFILE SUMMARY CARD -->
+            <div class="col-12 col-lg-4">
+                <div class="main-profile-card">
+                    <div class="text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img src="@(string.IsNullOrEmpty(Model.Freelancer.Avatar) ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" : Model.Freelancer.Avatar)" 
+                                 alt="@Model.User.HotenUser" 
+                                 class="avatar-large" />
+                            <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle" style="width: 18px; height: 18px;" title="Sẵn sàng nhận việc"></span>
+                        </div>
+
+                        <h4 class="fw-bold text-dark mb-1">@Model.User.HotenUser</h4>
+                        <div class="text-muted small mb-2">&#64;@Model.User.TenTaiKhoanUser</div>
+
+                        <div class="mb-3">
+                            @if (Model.DaXacMinhSinhVien)
+                            {
+                                <span class="badge-verified-student">
+                                    <i class="bi bi-patch-check-fill text-success"></i> Sinh viên đã xác minh
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1">Đang chờ xác minh</span>
+                            }
+                        </div>
+
+                        <!-- School & Major -->
+                        <div class="bg-light rounded-3 p-3 text-start mb-3 border">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-mortarboard-fill text-success fs-5"></i>
+                                <div>
+                                    <div class="fw-bold text-dark small">@Model.Freelancer.TenTruong (@Model.Freelancer.MaTruong)</div>
+                                    <div class="text-muted" style="font-size: 0.78rem;">@Model.TenChuyenNganh</div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted pt-2 border-top" style="font-size: 0.8rem;">
+                                <span>Niên khóa: <strong class="text-dark">@Model.Freelancer.NienKhoa (Năm @Model.Freelancer.NamThu)</strong></span>
+                                <span>GPA: <strong class="text-success">@Model.Freelancer.GPA / 4.0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Stats Row -->
+                        <div class="row g-2 mb-4">
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-value text-warning"><i class="bi bi-star-fill fs-6 me-1"></i>@Model.DiemDanhGiaTrungBinh</div>
+                                    <div class="stat-label">Đánh giá (@Model.TongSoDanhGia)</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-value text-success">@Model.SoHopDongThanhCong</div>
+                                    <div class="stat-label">Dự án xong</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-value text-primary">@Model.TiLeHoanThanhDungHan%</div>
+                                    <div class="stat-label">Đúng hạn</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Info -->
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-success-subtle text-success border border-success-subtle mb-4">
+                            <span class="small fw-semibold">Mức giá tham khảo:</span>
+                            <span class="fw-bold fs-5">@(Model.Freelancer.ChiPhiTu.HasValue ? $"{Model.Freelancer.ChiPhiTu.Value:N0} đ/job" : "Thỏa thuận")</span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <a asp-action="MoiNhanViec" asp-route-freelancerId="@Model.Freelancer.MaFreelancerStudents" class="btn btn-invite-direct justify-content-center">
+                                <i class="bi bi-send-fill"></i> Gửi lời mời thuê trực tiếp
+                            </a>
+
+                            <div class="d-flex gap-2">
+                                <a asp-controller="NhanTin" asp-action="Index" class="btn btn-outline-secondary flex-grow-1 rounded-pill fw-semibold py-2">
+                                    <i class="bi bi-chat-dots me-1"></i>Nhắn tin
+                                </a>
+
+                                <button type="button" class="btn btn-bookmark-action @(Model.IsBookmarked ? "active" : "")" onclick="toggleBookmark(@Model.Freelancer.MaFreelancerStudents, this)" title="Lưu vào danh sách quan tâm">
+                                    <i class="bi @(Model.IsBookmarked ? "bi-heart-fill" : "bi-heart")"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Contact & Location Box -->
+                <div class="main-profile-card mt-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle me-2 text-success"></i>Thông tin cơ bản</h6>
+                    <div class="d-flex flex-column gap-2 small">
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Khu vực:</span>
+                            <span class="fw-semibold text-dark">@Model.Freelancer.DiaDiemFreelancerStudent</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Ngoại ngữ:</span>
+                            <span class="fw-semibold text-dark">@(string.IsNullOrEmpty(Model.Freelancer.NgonNgu) ? "Tiếng Việt, Tiếng Anh giao tiếp" : Model.Freelancer.NgonNgu)</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1">
+                            <span class="text-muted">Kỹ năng bổ trợ:</span>
+                            <span class="fw-semibold text-dark">@(string.IsNullOrEmpty(Model.Freelancer.KyNangCoBan) ? "Làm việc nhóm, Git, Office" : Model.Freelancer.KyNangCoBan)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT MAIN CONTENT TABS -->
+            <div class="col-12 col-lg-8">
+                <div class="main-profile-card">
+                    
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs nav-tabs-custom mb-4" id="freelancerTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab">
+                                <i class="bi bi-person-lines-fill me-1"></i>Giới thiệu & Kỹ năng
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio" type="button" role="tab">
+                                <i class="bi bi-briefcase-fill me-1"></i>Portfolio & Dự án (@Model.DuAns.Count)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                                <i class="bi bi-star-fill me-1 text-warning"></i>Đánh giá từ NTD (@Model.DanhGias.Count)
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Contents -->
+                    <div class="tab-content" id="freelancerTabContent">
+                        
+                        <!-- TAB 1: ABOUT & SKILLS -->
+                        <div class="tab-pane fade show active" id="about" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-3">Giới thiệu bản thân</h5>
+                            <div class="text-secondary mb-4 lh-lg">
+                                @if (!string.IsNullOrWhiteSpace(Model.Freelancer.Gioithieu))
+                                {
+                                    <p>@Model.Freelancer.Gioithieu</p>
+                                }
+                                else
+                                {
+                                    <p>Xin chào quý nhà tuyển dụng, tôi là sinh viên chuyên ngành @Model.TenChuyenNganh tại @Model.Freelancer.TenTruong. Tôi có nền tảng kiến thức vững chắc, tinh thần học hỏi cao và luôn cam kết chất lượng sản phẩm đúng hạn.</p>
+                                }
+                                @if (Model.Portfolio != null && !string.IsNullOrWhiteSpace(Model.Portfolio.MoTaBanThan))
+                                {
+                                    <div class="p-3 bg-light rounded-3 border mt-2">
+                                        <div class="fw-bold text-dark small mb-1"><i class="bi bi-quote me-1 text-success"></i>Tuyên ngôn nghề nghiệp:</div>
+                                        <div class="small fst-italic">@Model.Portfolio.MoTaBanThan</div>
+                                    </div>
+                                }
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-3">Kỹ năng chuyên môn</h5>
+                            <div class="mb-4">
+                                @if (Model.KyNangs != null && Model.KyNangs.Count > 0)
+                                {
+                                    foreach (var skill in Model.KyNangs)
+                                    {
+                                        <span class="skill-pill"><i class="bi bi-check2 me-1 text-success"></i>@skill</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="skill-pill">C# / ASP.NET</span>
+                                    <span class="skill-pill">HTML / CSS / JavaScript</span>
+                                    <span class="skill-pill">SQL Server</span>
+                                    <span class="skill-pill">Bootstrap</span>
+                                    <span class="skill-pill">Figma UI/UX</span>
+                                }
+                            </div>
+
+                            @if (Model.Portfolio != null && !string.IsNullOrWhiteSpace(Model.Portfolio.Url_video))
+                            {
+                                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-play-circle-fill text-danger me-2"></i>Video giới thiệu năng lực</h5>
+                                <div class="ratio ratio-16x9 rounded-3 overflow-hidden border mb-4">
+                                    <iframe src="@Model.Portfolio.Url_video" title="Video Portfolio" allowfullscreen></iframe>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- TAB 2: PORTFOLIO & PROJECTS -->
+                        <div class="tab-pane fade" id="portfolio" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold text-dark mb-0">Các dự án tiêu biểu đã thực hiện</h5>
+                                <span class="badge bg-light text-muted border">@Model.DuAns.Count dự án</span>
+                            </div>
+
+                            @if (Model.DuAns != null && Model.DuAns.Count > 0)
+                            {
+                                <div class="row g-3">
+                                    @foreach (var duan in Model.DuAns)
+                                    {
+                                        <div class="col-12 col-md-6">
+                                            <div class="project-card">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="fw-bold text-dark mb-0">@duan.TenDuAn</h6>
+                                                    <span class="badge bg-success-subtle text-success small">@duan.VaiTro</span>
+                                                </div>
+                                                <p class="text-muted small flex-grow-1 mb-3">
+                                                    @(string.IsNullOrEmpty(duan.MoTa) ? "Dự án thực tế đạt kết quả tốt, đáp ứng hoàn toàn yêu cầu đặt ra." : duan.MoTa)
+                                                </p>
+                                                
+                                                <div class="mb-3">
+                                                    <span class="badge bg-light text-dark border small fw-normal">
+                                                        <i class="bi bi-cpu me-1 text-primary"></i>@(string.IsNullOrEmpty(duan.Congnghe) ? "ASP.NET Core, SQL Server" : duan.Congnghe)
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex gap-2 pt-2 border-top">
+                                                    @if (!string.IsNullOrEmpty(duan.LinkGithub))
+                                                    {
+                                                        <a href="@duan.LinkGithub" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                                            <i class="bi bi-github me-1"></i>GitHub
+                                                        </a>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(duan.LinkDemo))
+                                                    {
+                                                        <a href="@duan.LinkDemo" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                            <i class="bi bi-box-arrow-up-right me-1"></i>Demo
+                                                        </a>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(duan.Link_file))
+                                                    {
+                                                        <a href="@duan.Link_file" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Tài liệu đính kèm">
+                                                            <i class="bi bi-paperclip"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5 text-muted">
+                                    <i class="bi bi-folder2-open display-4 text-secondary mb-3"></i>
+                                    <h6>Chưa có dự án nào trong Portfolio</h6>
+                                    <p class="small">Freelancer này đang cập nhật thêm các sản phẩm hoàn thiện gần đây.</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- TAB 3: REVIEWS & FEEDBACK -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">Nhận xét từ các Nhà tuyển dụng đã hợp tác</h5>
+                                    <p class="text-muted small mb-0">Được trích xuất từ các hợp đồng đã hoàn thành & nghiệm thu</p>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fs-4 fw-bold text-warning"><i class="bi bi-star-fill me-1"></i>@Model.DiemDanhGiaTrungBinh / 5.0</div>
+                                    <div class="small text-muted">@Model.TongSoDanhGia lượt đánh giá</div>
+                                </div>
+                            </div>
+
+                            @if (Model.DanhGias != null && Model.DanhGias.Count > 0)
+                            {
+                                @foreach (var review in Model.DanhGias)
+                                {
+                                    <div class="review-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="@review.AvatarNhaTuyenDung" alt="@review.TenNhaTuyenDung" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                                <div>
+                                                    <div class="fw-bold text-dark small">@review.TenNhaTuyenDung</div>
+                                                    <div class="text-muted" style="font-size: 0.75rem;">Công việc: <strong class="text-dark">@review.TenCongViec</strong> (@review.MaHD)</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="text-warning small mb-1">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.SoSao)
+                                                        {
+                                                            <i class="bi bi-star-fill"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi bi-star"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                                <div class="text-muted" style="font-size: 0.75rem;">@review.NgayDanhGia.ToString("dd/MM/yyyy")</div>
+                                            </div>
+                                        </div>
+                                        <p class="text-secondary small mb-0 mt-2 fst-italic">
+                                            "@review.NhanXet"
+                                        </p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center py-5 text-muted">
+                                    <i class="bi bi-chat-square-quote display-4 text-secondary mb-3"></i>
+                                    <h6>Chưa có nhận xét nào</h6>
+                                    <p class="small">Bạn có thể là nhà tuyển dụng đầu tiên làm việc và để lại đánh giá cho bạn sinh viên tài năng này!</p>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function toggleBookmark(freelancerId, btn) {
+        fetch('/Employer/ToggleYeuThich', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `maFreelancerStudent=${freelancerId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.isFavorite) {
+                    btn.classList.add('active');
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                } else {
+                    btn.classList.remove('active');
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                }
+            }
+        });
+    }
+</script>

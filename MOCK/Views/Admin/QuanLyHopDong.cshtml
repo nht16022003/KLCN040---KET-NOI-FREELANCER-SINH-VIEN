@@ -1,0 +1,268 @@
+@model MOCK.Models.ViewModels.AdminContractTemplateViewModel
+@{
+    ViewData["Title"] = "Quản lý Hợp đồng & Mẫu điều khoản (AD-UC-10)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-10: Quản lý Hợp đồng Toàn sàn</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-ruled text-primary me-2"></i>Quản lý & Giám sát Hợp đồng (Freelancer & Nhà tuyển dụng)
+            </h3>
+            <p class="text-muted small mb-0">Theo dõi toàn bộ hợp đồng đã giao kết giữa Sinh viên và Doanh nghiệp, bảo chứng ký quỹ Escrow và cấu hình điều khoản tiêu chuẩn (bảng HopDong, MauHopDong, KyQuy).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/QuanLyGiaoDich" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-safe me-1"></i> Quản lý Escrow
+            </a>
+            <a href="/Admin/XuLyTranhChap" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                <i class="bi bi-shield-slash me-1"></i> Xử lý Tranh chấp
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Tổng Hợp Đồng</span>
+                        <h4 class="fw-bold text-dark mt-1 mb-0">@Model.DanhSachChiTietHopDongs.Count</h4>
+                    </div>
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 fs-4">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Đang Thực Hiện</span>
+                        <h4 class="fw-bold text-info mt-1 mb-0">@Model.DanhSachChiTietHopDongs.Count(c => c.Contract.TrangThai == "DangThucHien")</h4>
+                    </div>
+                    <div class="rounded-circle bg-info bg-opacity-10 text-info p-3 fs-4">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Đã Hoàn Thành</span>
+                        <h4 class="fw-bold text-success mt-1 mb-0">@Model.DanhSachChiTietHopDongs.Count(c => c.Contract.TrangThai == "DaHoanThanh" || c.Contract.TrangThai == "HoanThanh")</h4>
+                    </div>
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-3 fs-4">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Tổng Giá Trị Ký Quỹ</span>
+                        <h4 class="fw-bold text-primary mt-1 mb-0">@Model.DanhSachChiTietHopDongs.Sum(c => (decimal)(c.Contract.Sotienkyquy ?? 0)).ToString("N0") <small class="fs-6">đ</small></h4>
+                    </div>
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 fs-4">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Repository Table Full Width -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-files text-success me-2"></i>Danh Sách Hợp Đồng Giao Kết (Freelancer & Nhà Tuyển Dụng)
+                </h5>
+                <p class="text-muted small mb-0">Quản trị viên có thể xem toàn văn hợp đồng, điều khoản cam kết, thông tin 2 bên và dữ liệu ký quỹ.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="filterContractInput" class="form-control bg-light border-start-0" placeholder="Tìm theo mã HĐ, tên SV, NTD..." />
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="contractsTable">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th class="py-3">Mã HĐ</th>
+                        <th class="py-3">Dự án / Công việc</th>
+                        <th class="py-3">Nhà Tuyển Dụng (Bên A)</th>
+                        <th class="py-3">Freelancer Sinh Viên (Bên B)</th>
+                        <th class="py-3 text-end">Giá trị Ký quỹ</th>
+                        <th class="py-3 text-center">Hình thức</th>
+                        <th class="py-3 text-center">Trạng thái</th>
+                        <th class="py-3 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.DanhSachChiTietHopDongs)
+                    {
+                        var statusClass = item.Contract.TrangThai switch
+                        {
+                            "DaHoanThanh" or "HoanThanh" => "bg-success-subtle text-success border border-success-subtle",
+                            "DangThucHien" => "bg-primary-subtle text-primary border border-primary-subtle",
+                            "DaHuy" => "bg-danger-subtle text-danger border border-danger-subtle",
+                            _ => "bg-warning-subtle text-warning border border-warning-subtle"
+                        };
+                        var statusText = item.Contract.TrangThai switch
+                        {
+                            "DaHoanThanh" or "HoanThanh" => "Đã Hoàn Thành",
+                            "DangThucHien" => "Đang Thực Hiện",
+                            "DaHuy" => "Đã Hủy",
+                            _ => item.Contract.TrangThai
+                        };
+
+                        <tr>
+                            <td class="fw-bold text-dark">
+                                <span class="badge bg-light text-dark border">#@item.Contract.MaHD</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark text-truncate" style="max-width: 240px;" title="@item.Job.Tieude">
+                                    @item.Job.Tieude
+                                </div>
+                                <div class="small text-muted">
+                                    Bắt đầu: @((item.Contract.NgayBatDau ?? DateTime.Now).ToString("dd/MM/yyyy"))
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 34px; height: 34px;">
+                                        <i class="bi bi-building text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark small">@(item.Employer.Tencongty ?? item.EmployerUser.HotenUser)</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@item.EmployerUser.EmailUser</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="@(string.IsNullOrEmpty(item.Freelancer.Avatar) ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" : item.Freelancer.Avatar)"
+                                         alt="@item.FreelancerUser.HotenUser" class="rounded-circle border" style="width: 34px; height: 34px; object-fit: cover;" />
+                                    <div>
+                                        <div class="fw-semibold text-dark small">@item.FreelancerUser.HotenUser</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">@(!string.IsNullOrEmpty(item.Freelancer.TenTruong) ? item.Freelancer.TenTruong : "ĐH Công Nghệ")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <div class="fw-bold text-primary">@(((decimal)(item.Contract.Sotienkyquy ?? 0)).ToString("N0")) đ</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">Escrow bảo chứng</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-secondary border small">
+                                    @(item.Contract.Hinhthuclamviec ?? "Remote")
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge @statusClass px-2 py-1 rounded-pill small fw-semibold">
+                                    @statusText
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="/Admin/ChiTietHopDong/@item.Contract.MaHD" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                    <i class="bi bi-eye me-1"></i> Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Contract Template Form -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pencil-square text-primary me-2"></i>Cấu hình Mẫu Điều khoản Hợp đồng Chuẩn Hệ Thống (MauHopDong)</h5>
+        <p class="text-muted small mb-4">Các điều khoản này sẽ được tự động áp dụng làm khung pháp lý cho tất cả hợp đồng tạo mới giữa Nhà tuyển dụng và Freelancer Sinh viên.</p>
+
+        <form method="post" asp-action="CapNhatMauHopDong">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold text-dark">Tiêu đề Mẫu hợp đồng <span class="text-danger">*</span></label>
+                    <input type="text" asp-for="TenMauHopDong" class="form-control bg-light" required />
+                    <span asp-validation-for="TenMauHopDong" class="text-danger small"></span>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-semibold text-dark">Thời hạn nghiệm thu (Ngày) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" asp-for="ThoiHanNghiemThuNgay" class="form-control bg-light" min="1" max="30" required />
+                        <span class="input-group-text bg-light">Ngày</span>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-semibold text-dark">Tỷ lệ giải ngân mặc định (%) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" asp-for="TyLeGiaiNganMacDinh" class="form-control bg-light" min="1" max="100" required />
+                        <span class="input-group-text bg-light">%</span>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-dark">Nội dung Điều khoản Tiêu chuẩn <span class="text-danger">*</span></label>
+                    <textarea asp-for="DieuKhoanChung" class="form-control bg-light font-monospace small" rows="6" required></textarea>
+                    <span asp-validation-for="DieuKhoanChung" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                        <i class="bi bi-save me-1"></i> Lưu & Áp dụng Mẫu Hợp đồng
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('filterContractInput')?.addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#contractsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    </script>
+}

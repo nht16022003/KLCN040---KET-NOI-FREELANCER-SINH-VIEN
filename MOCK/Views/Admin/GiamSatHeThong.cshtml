@@ -1,0 +1,156 @@
+@model MOCK.Models.ViewModels.AdminSystemMonitoringViewModel
+@{
+    ViewData["Title"] = "Giám sát Hoạt động Hệ thống (AD-UC-09.01)";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">AD-UC-09.01: Giám sát Hệ thống</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-cpu text-dark me-2"></i>Giám sát Sức khỏe & Hoạt động Hệ thống Live
+            </h3>
+            <p class="text-muted small mb-0">Theo dõi toàn cảnh hiệu suất nền tảng, lưu lượng giao dịch thời gian thực và lịch sử kiểm toán an ninh.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
+                <i class="bi bi-broadcast me-1"></i> Hệ thống Online 100%
+            </span>
+            <a href="/Admin" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Live Performance Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <span class="text-muted small fw-semibold">TỔNG USER TOÀN SÀN</span>
+                <h3 class="fw-bold text-dark mt-1 mb-0">@Model.TongNguoiDung</h3>
+                <div class="small text-success mt-1"><i class="bi bi-graph-up me-1"></i>Đang tăng trưởng</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <span class="text-muted small fw-semibold">TỔNG TIN TUYỂN DỤNG</span>
+                <h3 class="fw-bold text-primary mt-1 mb-0">@Model.TongBaiDangJob</h3>
+                <div class="small text-muted mt-1">Nhu cầu tuyển dụng thực</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <span class="text-muted small fw-semibold">TỔNG HỢP ĐỒNG ĐÃ KÝ</span>
+                <h3 class="fw-bold text-success mt-1 mb-0">@Model.TongHopDong</h3>
+                <div class="small text-muted mt-1">Đảm bảo Escrow</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <span class="text-muted small fw-semibold">TỔNG LƯU CHUYỂN TIỀN TỆ</span>
+                <h3 class="fw-bold text-warning mt-1 mb-0">@Model.TongTienGiaoDichHeThong.ToString("N0") <small class="fs-6">đ</small></h3>
+                <div class="small text-muted mt-1">Tổng nạp, rút & escrow</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Live System Logs (Transactions) -->
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-activity text-success me-2"></i>Dòng sự kiện Giao dịch (Live Stream)</h5>
+                    <span class="badge bg-success small">Realtime</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small">
+                            <tr>
+                                <th>Mã GD</th>
+                                <th>Loại</th>
+                                <th>Số tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in Model.RecentSystemLogs)
+                            {
+                                <tr>
+                                    <td class="fw-bold small">#@log.MaGiaoDich</td>
+                                    <td><span class="badge bg-light text-dark border small">@log.LoaiGiaoDich</span></td>
+                                    <td class="fw-bold small @(log.SoTien >= 0 ? "text-success" : "text-danger")">
+                                        @log.SoTien.ToString("+#,##0;-#,##0;0") đ
+                                    </td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success small">@log.TrangThai</span></td>
+                                    <td class="small text-muted">@log.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Security / Account Moderation Logs -->
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-shield-lock-fill text-danger me-2"></i>Nhật ký An ninh & Xử lý Tài khoản</h5>
+                    <span class="badge bg-danger small">Audit Trail</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small">
+                            <tr>
+                                <th>Mã LS</th>
+                                <th>User</th>
+                                <th>Hành động</th>
+                                <th>Lý do</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.RecentAccountLogs.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Chưa có nhật ký kỷ luật nào.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var accLog in Model.RecentAccountLogs)
+                                {
+                                    <tr>
+                                        <td class="fw-bold small">#@accLog.MaLichSu</td>
+                                        <td class="small">User #@accLog.MaUser</td>
+                                        <td>
+                                            @if (accLog.HanhDong == "KHOA_TAI_KHOAN")
+                                            {
+                                                <span class="badge bg-danger small">Khóa TK</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success small">Mở khóa</span>
+                                            }
+                                        </td>
+                                        <td class="small text-dark" style="max-width: 180px;">@accLog.LyDo</td>
+                                        <td class="small text-muted">@accLog.NgayXuLy.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

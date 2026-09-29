@@ -1,0 +1,278 @@
+@model MOCK.Models.ViewModels.RutTienViewModel
+@{
+    ViewData["Title"] = "Rút tiền về tài khoản ngân hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .withdrawal-wrapper {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    .withdrawal-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .balance-banner {
+        background: linear-gradient(135deg, #1C4D35 0%, #2D6A4F 100%);
+        border-radius: 16px;
+        padding: 24px;
+        color: #FFFFFF;
+        margin-bottom: 24px;
+    }
+
+    .bank-item-radio {
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .bank-item-radio:hover, .bank-item-radio.selected {
+        border-color: #2D6A4F;
+        background: #F4FBF7;
+    }
+
+    .btn-submit-withdraw {
+        background: #1C4D35;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 13px 32px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(28, 77, 53, 0.25);
+    }
+
+    .btn-submit-withdraw:hover {
+        background: #143726;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="withdrawal-wrapper">
+    <div class="container">
+        
+        <!-- BREADCRUMB -->
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 text-muted small">
+                    <li class="breadcrumb-item"><a asp-controller="Wallet" asp-action="Index" class="text-decoration-none text-muted">Ví & Doanh thu</a></li>
+                    <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Rút tiền về ngân hàng (FRL-UC-11)</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Yêu cầu rút tiền về tài khoản ngân hàng</h2>
+                    <p class="text-muted small mb-0">Rút tiền thu nhập từ các hợp đồng đã hoàn thành vào tài khoản ngân hàng chính chủ.</p>
+                </div>
+                <div>
+                    <a asp-action="TaiKhoanNganHang" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold small">
+                        <i class="bi bi-bank me-1"></i>Quản lý tài khoản ngân hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+                <div class="fw-semibold">@TempData["SuccessMessage"]</div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
+                <div>@TempData["ErrorMessage"]</div>
+            </div>
+        }
+
+        <form asp-action="RutTien" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MaWallet" />
+            <input type="hidden" asp-for="SoDuKhaDung" />
+
+            <div class="row g-4">
+                
+                <!-- MAIN FORM (LEFT) -->
+                <div class="col-12 col-lg-7">
+                    
+                    <!-- WALLET BALANCE BANNER -->
+                    <div class="balance-banner d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <div class="small text-white-50 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Số dư khả dụng có thể rút</div>
+                            <div class="display-6 fw-bold text-white mb-0">@Model.SoDuKhaDung.ToString("#,##0") <span class="fs-5">VNĐ</span></div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill">
+                                <i class="bi bi-shield-check me-1"></i>Xử lý trong 24h
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="withdrawal-card mb-4">
+                        
+                        <!-- AMOUNT INPUT -->
+                        <div class="mb-4">
+                            <label asp-for="SoTienRut" class="form-label fw-semibold text-dark small mb-1">
+                                Số tiền muốn rút (VNĐ) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group mb-2">
+                                <input asp-for="SoTienRut" id="withdrawAmountInput" type="number" step="50000" class="form-control form-control-lg rounded-start-3 fs-5 fw-bold text-success" />
+                                <span class="input-group-text bg-light fw-bold text-muted rounded-end-3">VNĐ</span>
+                            </div>
+                            <span asp-validation-for="SoTienRut" class="text-danger small d-block"></span>
+                            
+                            <!-- QUICK AMOUNT BUTTONS -->
+                            <div class="d-flex gap-2 flex-wrap mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="setAmount(500000)">500.000 đ</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="setAmount(1000000)">1.000.000 đ</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="setAmount(2000000)">2.000.000 đ</button>
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-semibold" onclick="setAmount(@Model.SoDuKhaDung)">Rút tất cả (@Model.SoDuKhaDung.ToString("#,##0") đ)</button>
+                            </div>
+                        </div>
+
+                        <!-- BANK SELECTION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark small mb-2">
+                                Chọn tài khoản nhận tiền <span class="text-danger">*</span>
+                            </label>
+
+                            @if (Model.TaiKhoanDaLuus != null && Model.TaiKhoanDaLuus.Count > 0)
+                            {
+                                @foreach (var acc in Model.TaiKhoanDaLuus)
+                                {
+                                    <div class="bank-item-radio @(acc.LaMacDinh ? "selected" : "")" onclick="selectSavedBank('@acc.TenNganHang', '@acc.SoTaiKhoan', '@acc.TenChuTaiKhoan', this)">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle bg-success-subtle text-success p-2">
+                                                <i class="bi bi-bank fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark small">@acc.TenNganHang - @acc.SoTaiKhoan</div>
+                                                <div class="text-muted" style="font-size: 0.78rem;">Chủ TK: <strong class="text-dark">@acc.TenChuTaiKhoan</strong></div>
+                                            </div>
+                                        </div>
+                                        @if (acc.LaMacDinh)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle small">Mặc định</span>
+                                        }
+                                    </div>
+                                }
+                            }
+
+                            <div class="mt-3 p-3 bg-light rounded-3 border">
+                                <div class="fw-semibold text-dark small mb-2"><i class="bi bi-pencil-square me-1 text-success"></i>Hoặc nhập tài khoản ngân hàng khác:</div>
+                                
+                                <div class="row g-2 mb-2">
+                                    <div class="col-12 col-md-6">
+                                        <input asp-for="TenNganHang" id="bankNameInput" class="form-control form-control-sm rounded-3" placeholder="Tên ngân hàng (VD: Vietcombank)" />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <input asp-for="SoTaiKhoan" id="bankAccNoInput" class="form-control form-control-sm rounded-3" placeholder="Số tài khoản" />
+                                    </div>
+                                </div>
+                                <input asp-for="TenChuTaiKhoan" id="bankAccNameInput" class="form-control form-control-sm rounded-3 text-uppercase" placeholder="Tên chủ tài khoản (Viết hoa không dấu)" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-submit-withdraw">
+                                <i class="bi bi-check2-circle me-2"></i>Xác nhận tạo yêu cầu rút tiền
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SIDEBAR HISTORY & NOTES (RIGHT) -->
+                <div class="col-12 col-lg-5">
+                    
+                    <!-- WITHDRAWAL HISTORY -->
+                    <div class="withdrawal-card mb-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-success me-2"></i>Lịch sử yêu cầu rút tiền</h6>
+                        
+                        @if (Model.LichSuRutTiens != null && Model.LichSuRutTiens.Count > 0)
+                        {
+                            <div class="d-flex flex-column gap-3">
+                                @foreach (var item in Model.LichSuRutTiens)
+                                {
+                                    <div class="p-3 rounded-3 bg-light border d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark small">@item.SoTienRut.ToString("#,##0") VNĐ</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">@item.TenNganHang - @item.SoTaiKhoan</div>
+                                            <div class="text-muted" style="font-size: 0.72rem;">@item.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</div>
+                                        </div>
+                                        <div>
+                                            @if (item.TrangThai == "DaChuyenKhoan")
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle small">Đã chuyển</span>
+                                            }
+                                            else if (item.TrangThai == "ChoDuyet")
+                                            {
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle small">Chờ duyệt</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">Từ chối</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 text-muted small">
+                                <i class="bi bi-receipt display-6 text-secondary mb-2 d-block"></i>
+                                Chưa có giao dịch rút tiền nào.
+                            </div>
+                        }
+                    </div>
+
+                    <!-- POLICY NOTE -->
+                    <div class="withdrawal-card">
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle text-success me-2"></i>Quy định rút tiền</h6>
+                        <ul class="list-unstyled small text-muted d-flex flex-column gap-2 mb-0">
+                            <li>&bull; Số tiền rút tối thiểu: <strong>50.000 VNĐ</strong> / giao dịch.</li>
+                            <li>&bull; Thời gian xử lý: <strong>1 - 24 giờ</strong> làm việc (không tính CN/Lễ).</li>
+                            <li>&bull; Miễn phí hoàn toàn phí rút tiền đối với sinh viên.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function setAmount(amount) {
+        document.getElementById('withdrawAmountInput').value = amount;
+    }
+
+    function selectSavedBank(bankName, accNo, accName, el) {
+        document.getElementById('bankNameInput').value = bankName;
+        document.getElementById('bankAccNoInput').value = accNo;
+        document.getElementById('bankAccNameInput').value = accName;
+
+        document.querySelectorAll('.bank-item-radio').forEach(item => item.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+</script>
