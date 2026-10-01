@@ -31,6 +31,10 @@ CREATE TABLE Users
 )
 GO
 
+ALTER TABLE Users
+ADD avatarUrl NVARCHAR(500) NULL;
+GO
+
 
 CREATE TABLE Admin
 (
@@ -321,6 +325,7 @@ CREATE TABLE JobPost (
 );
 
 SELECT * FROM Users;
+SELECT * FROM NhaTuyenDung;
 
 DELETE FROM Users
 Where maUser = 10
@@ -944,7 +949,8 @@ SELECT * FROM Task_CongViec;
 
 
 
-
+SELECT * FROM UngTuyen T, JobPost J
+WHERE T.maJob = J.maJob
 
 
 DROP TABLE Task_CongViec;

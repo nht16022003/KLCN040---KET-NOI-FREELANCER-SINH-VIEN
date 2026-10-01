@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using FreelancerStudent.Web.Models;
 using FreelancerStudent.Web.Services.Interfaces;
 using FreelancerStudent.Web.ViewModels;
 using FreelancerStudent.Web.ViewModels.Account;
@@ -55,6 +56,99 @@ namespace FreelancerStudent.Web.Services
                 {
                     success = false,
                     message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
+
+
+        //Tuấn Anh
+        public async Task<ApiReponse<JobPostViewModel>> taoJobPost(JobPostViewModel model)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(model);
+
+                var content = new StringContent(
+                    json,
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _guiRequest.PostAsync(
+                    "api/JobPost/TaoJob",
+                    content
+                );
+
+                var noiDungJson =
+                    await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine(
+                    $"===> [TAO JOB HTTP CODE]: {response.StatusCode}"
+                );
+
+                Console.WriteLine(
+                    $"===> [TAO JOB RESPONSE]: {noiDungJson}"
+                );
+
+                var ketQua =
+                    JsonSerializer.Deserialize<ApiReponse<JobPostViewModel>>(
+                        noiDungJson,
+                        _jsonOptions
+                    );
+
+                if (ketQua == null)
+                {
+                    return new ApiReponse<JobPostViewModel>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu API trả về."
+                    };
+                }
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"===> [LỖI TẠO JOB]: {ex.Message}"
+                );
+
+                return new ApiReponse<JobPostViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+
+        //Tuấn
+        //Tuấn
+        public async Task<ApiReponse<List<UngTuyenViewModel>>> layDSUngTuyenTheoMaUser(int maUser)
+        {
+            try
+            {
+                var respnse = await _guiRequest.GetAsync($"api/JobPost/DanhSachUngTuyen/{maUser}");
+
+                var noiDungJson = await respnse.Content.ReadAsStringAsync();
+
+                var ketQua = JsonSerializer.Deserialize<ApiReponse<List<UngTuyenViewModel>>>(noiDungJson, _jsonOptions);
+                if (ketQua == null)
+                {
+                    return new ApiReponse<List<UngTuyenViewModel>>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+                }
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<UngTuyenViewModel>>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API" + ex.Message
                 };
             }
         }

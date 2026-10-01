@@ -46,6 +46,11 @@ namespace FreelancerStudent.API.Repositories
             return ntdMoi;
         }
 
-
+        //Tuan Anh
+        public async Task<NhaTuyenDung?> layNhaTuyenDungTheoMaUserAsync(int maUser)
+        {
+            return await _context.NhaTuyenDungs
+                .FirstOrDefaultAsync(x => x.maUser == maUser);
+        }
     }
 }

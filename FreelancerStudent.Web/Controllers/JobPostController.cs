@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FreelancerStudent.Web.Models;
 using FreelancerStudent.Web.Services.Interfaces;
 using FreelancerStudent.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -44,5 +45,97 @@ namespace FreelancerStudent.Web.Controllers
         }
 
 
+
+        //Tuấn Anh
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var model = new JobPostViewModel
+            {
+                maUser = maUser.Value,
+
+                // Mặc định 1 sinh viên
+                soluongtuyen = 1,
+
+                // Tạm thời phí đăng bài = 0
+                phiDangBai = 0
+            };
+
+            return View(model);
+        }
+
+
+        //Tuấn Anh
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(JobPostViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            // Không lấy maUser từ HTML để tránh người dùng sửa ID
+            model.maUser = maUser.Value;
+
+            if (model.thoigiandukienhoanthanh <= DateTime.Now)
+            {
+                ModelState.AddModelError(
+                    nameof(model.thoigiandukienhoanthanh),
+                    "Hạn hoàn thành phải lớn hơn ngày hiện tại."
+                );
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.phiDangBai = 0;
+                return View(model);
+            }
+
+            var ketQua = await _jobPostService.taoJobPost(model);
+
+            if (ketQua.success)
+            {
+                TempData["Success"] = "Đăng tin tuyển dụng thành công!";
+
+                return RedirectToAction("Index");
+            }
+
+            ModelState.AddModelError(
+                string.Empty,
+                ketQua.message ?? "Không thể đăng tin tuyển dụng."
+            );
+
+            model.phiDangBai = 0;
+
+            return View(model);
+        }
+
+        //Tuấn
+        [HttpGet]
+        public async Task<IActionResult> DanhSachUngTuyen()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+
+            }
+            var ketqua = await _jobPostService.layDSUngTuyenTheoMaUser(maUser.Value);
+
+            var dsUngTuyen = ketqua.data ?? new List<UngTuyenViewModel>();
+
+            return View(dsUngTuyen);
+        }
     }
 }

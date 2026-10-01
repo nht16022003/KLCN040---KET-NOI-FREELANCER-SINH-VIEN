@@ -1,4 +1,5 @@
 using FreelancerStudent.API.DTOs.ReponsesDTO;
+using FreelancerStudent.API.Models;
 
 namespace FreelancerStudent.API.Services.Interfaces
 {
@@ -8,5 +9,9 @@ namespace FreelancerStudent.API.Services.Interfaces
         Task<List<JobPost_ReponseDTO>> layDanhSachJobPostAsync();
 
         Task<JobPost_ReponseDTO> taoJobPostAsync(JobPost_RequestDTO request);
+
+
+        //Tuấn
+        Task<List<UngTuyen_ReponseDTO>> layDanhSachUngTuyen_JobPost_TheoMaUser(int maUser);
     }
 }

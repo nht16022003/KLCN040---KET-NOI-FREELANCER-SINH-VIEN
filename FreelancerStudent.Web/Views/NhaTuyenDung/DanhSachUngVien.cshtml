@@ -1,0 +1,120 @@
+@model List<FreelancerStudent.Web.Models.UngTuyenViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Danh sách ứng viên nộp hồ sơ";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-success">Danh sách ứng viên nộp hồ sơ</h5>
+        <span class="text-muted small">Tổng cộng: <strong>@(Model?.Count ?? 0)</strong> đơn ứng tuyển</span>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var item in Model)
+        {
+            var avatarSinhVien = !string.IsNullOrEmpty(item.avatar)
+                                ? item.avatar
+                                : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenUser ??
+ "Student")}&background=E8F5E9&color=2E7D32";
+
+            <!-- Mỗi ứng viên là một hàng (row) -->
+            <div class="row align-items-center p-3 mb-2 border rounded bg-white shadow-sm">
+                
+                <!-- Cột 1: Thông tin sinh viên ứng tuyển -->
+                <div class="col-md-5 d-flex">
+                    <!-- Ảnh đại diện sinh viên -->
+                    <img src="@avatarSinhVien" alt="@item.tenUser" class="rounded-circle border"
+                         style="width: 50px; height: 50px; object-fit: cover;" />
+
+                    <div style="margin-left: 12px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 class="mb-0" style="font-weight: bold;">@(item.tenUser ?? "Sinh viên ẩn danh")</h6>
+                            <span class="text-muted" style="font-size: 0.8rem;">(Năm thứ @item.namThu)</span>
+                        </div>
+                        
+                        <p class="mb-1 text-muted" style="font-size: 0.85rem;">
+                            @(item.tenTruong ?? "Chưa cập nhật trường") - @(item.tenChuyenNganh ?? "Chuyên ngành khác")
+                        </p>
+                        
+                        <p class="mb-1 text-secondary" style="font-size: 0.8rem;">
+                            <strong>Thư giới thiệu:</strong> @(string.IsNullOrEmpty(item.thuGioiThieu) ? "Không có lời nhắn" :
+                                                item.thuGioiThieu)
+                        </p>
+
+                        <!-- Link xem file CV đính kèm nếu có -->
+                        @if (!string.IsNullOrEmpty(item.fileCV))
+                        {
+                            <a href="@item.fileCV" target="_blank" class="text-primary text-decoration-none"
+                               style="font-size: 0.8rem;">
+                                <i class="bi bi-file-earmark-pdf"></i> Xem CV đính kèm
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Cột 2: Thông tin công việc & Đề xuất -->
+                <div class="col-md-4">
+                    <div>
+                        <strong class="text-dark">Công việc:</strong>
+                        <span class="text-success fw-semibold">@item.tieude</span>
+                    </div>
+                    
+                    <div class="text-muted" style="font-size: 0.85rem; margin-top: 4px;">
+                        <span>Thù lao đề xuất: <strong>@((item.thulaoDeXuat ?? item.thulao ?? 0).ToString("#,##0"))
+                            đ</strong></span>
+                            @if (!string.IsNullOrEmpty(item.thoiGianHoanThanhDeXuat))
+                            {
+                                <span> - Cam kết: <strong>@item.thoiGianHoanThanhDeXuat</strong></span>
+                            }
+                        </div>
+
+                        <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">
+                            Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+
+                    <!-- Cột 3: Trạng thái & Thao tác duyệt -->
+                    <div class="col-md-3 text-end">
+                        <!-- Trạng thái đơn -->
+                        <div class="mb-2">
+                            @if (item.trangThaiUngTuyen == "ChoDuyet")
+                            {
+                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                            }
+                            else if (item.trangThaiUngTuyen == "ChapNhan")
+                            {
+                                <span class="badge bg-success">Đã chấp nhận</span>
+                            }
+                            else if (item.trangThaiUngTuyen == "TuChoi")
+                            {
+                                <span class="badge bg-danger">Đã từ chối</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@item.trangThaiUngTuyen</span>
+                            }
+                        </div>
+
+                        <!-- Các nút thao tác khi còn ở trạng thái Chờ duyệt -->
+                        @if (item.trangThaiUngTuyen == "ChoDuyet")
+                        {
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-sm btn-success">Duyệt</button>
+                                <button class="btn btn-sm btn-outline-danger">Từ chối</button>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+        }
+    else
+        {
+            <div class="alert alert-light border text-center py-4 text-muted mt-3">
+                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                Chưa có sinh viên nào ứng tuyển vào các bài đăng của bạn.
+            </div>
+        }
+    </div>

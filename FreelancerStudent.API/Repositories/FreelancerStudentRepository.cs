@@ -22,5 +22,12 @@ namespace FreelancerStudent.API.Repositories
             return ketqua;
         }
 
+        //Tuấn
+        public async Task<FreelamcerStudents?> layFreelancerStudent_TheoMaUser(int maUser)
+        {
+            var freelancerStudent = await _context.FreelamcerStudents.FirstOrDefaultAsync(f => f.maUser == maUser);
+            return freelancerStudent;
+        }
+
     }
 }

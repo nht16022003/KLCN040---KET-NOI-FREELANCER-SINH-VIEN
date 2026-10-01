@@ -26,6 +26,9 @@ namespace FreelancerStudent.API.Models
         [MaxLength(15)]
         public string? sdtUser { get; set; }
 
+        [MaxLength(500)]
+        public string? avatarUrl { get; set; }
+
         public DateTime? ngaysinh { get; set; }
 
         [Required]

@@ -34,5 +34,7 @@ namespace FreelancerStudent.Web.ViewModels
         public string? status { get; set; } = "DangTuyen";
 
         public int? soluongtuyen { get; set; }
+
+        public int maUser { get; set; }
     }
 }

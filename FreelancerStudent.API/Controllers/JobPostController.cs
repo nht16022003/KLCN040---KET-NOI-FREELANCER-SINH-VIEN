@@ -72,5 +72,28 @@ namespace FreelancerStudent.API.Controllers
 
         }
 
+
+        [HttpGet("DanhSachUngTuyen/{maUser}")]
+        public async Task<IActionResult> layDSUngTuyen(int maUser)
+        {
+            try
+            {
+                var dsResult = await _jobPostService.layDanhSachUngTuyen_JobPost_TheoMaUser(maUser);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy danh sách ứng tuyển thành công!",
+                    data = dsResult
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

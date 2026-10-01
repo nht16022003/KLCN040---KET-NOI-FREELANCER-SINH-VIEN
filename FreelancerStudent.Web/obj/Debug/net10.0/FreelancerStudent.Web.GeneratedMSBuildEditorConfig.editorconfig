@@ -31,6 +31,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxEYW5nTmhhcC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/KLTN/Improve/FreelancerStudent.Web/Views/Account/ThietLapTaiKhoan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxUaGlldExhcFRhaUtob2FuLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/DanhSachNopTuyen.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcRGFuaFNhY2hOb3BUdXllbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -43,8 +51,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/DanhSachUngVien.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhVHV5ZW5EdW5nXERhbmhTYWNoVW5nVmllbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/Index.cshtml]

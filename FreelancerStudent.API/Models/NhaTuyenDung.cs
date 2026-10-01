@@ -12,8 +12,6 @@ namespace FreelancerStudent.API.Models
 
         public int maUser { get; set; }
 
-        [MaxLength(500)]
-        public string? avatar { get; set; }
 
         public string? gioithieu { get; set; }
 

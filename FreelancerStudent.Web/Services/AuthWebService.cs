@@ -142,5 +142,201 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+
+        //Tuấn Anh
+        public async Task<ApiReponse<ThongTinTaiKhoanViewModel>> LayThongTinTaiKhoanAsync(int maUser)
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync(
+                    $"api/Auth/ThongTinTaiKhoan/{maUser}"
+                );
+
+                var noiDung =
+                    await response.Content.ReadAsStringAsync();
+
+                var ketQua =
+                    JsonSerializer.Deserialize<
+                        ApiReponse<ThongTinTaiKhoanViewModel>
+                    >(noiDung, _jsonOptions);
+
+                if (ketQua == null)
+                {
+                    return new ApiReponse<ThongTinTaiKhoanViewModel>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+                }
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<ThongTinTaiKhoanViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+        //Tuấn Anh
+        public async Task<ApiReponse<ThongTinTaiKhoanViewModel>> CapNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoanViewModel model)
+        {
+            try
+            {
+                var apiRequest = new
+                {
+                    maUser = model.maUser,
+                    hovaten = model.hovaten,
+                    sodienthoai = model.sodienthoai
+                };
+
+                var json = JsonSerializer.Serialize(apiRequest);
+
+                var content = new StringContent(
+                    json,
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response =
+                    await _guiRequest.PutAsync(
+                        "api/Auth/CapNhatThongTinTaiKhoan",
+                        content
+                    );
+
+                var noiDung =
+                    await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<
+                    ApiReponse<ThongTinTaiKhoanViewModel>
+                >(noiDung, _jsonOptions)
+                ?? new ApiReponse<ThongTinTaiKhoanViewModel>
+                {
+                    success = false,
+                    message = "Không đọc được dữ liệu từ API."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<ThongTinTaiKhoanViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+        //Tuấn Anh
+        public async Task<ApiReponse<object>> CapNhatAvatarAsync(int maUser, string avatarUrl)
+        {
+            try
+            {
+                var request = new
+                {
+                    maUser = maUser,
+                    avatarUrl = avatarUrl
+                };
+
+                var json =
+                    JsonSerializer.Serialize(request);
+
+                var content =
+                    new StringContent(
+                        json,
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+
+                var response =
+                    await _guiRequest.PutAsync(
+                        "api/Auth/CapNhatAvatar",
+                        content
+                    );
+
+                var noiDung =
+                    await response.Content.ReadAsStringAsync();
+
+                var ketQua =
+                    JsonSerializer.Deserialize<ApiReponse<object>>(
+                        noiDung,
+                        _jsonOptions
+                    );
+
+                return ketQua
+                    ?? new ApiReponse<object>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<object>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+
+        //Tuấn Anh
+        public async Task<ApiReponse<object>> DoiMatKhauAsync(int maUser, DoiMatKhauViewModel model)
+        {
+            try
+            {
+                var apiRequest = new
+                {
+                    maUser = maUser,
+                    matKhauHienTai = model.matKhauHienTai,
+                    matKhauMoi = model.matKhauMoi,
+                    xacNhanMatKhauMoi = model.xacNhanMatKhauMoi
+                };
+
+                var json =
+                    JsonSerializer.Serialize(apiRequest);
+
+                var content = new StringContent(
+                    json,
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response =
+                    await _guiRequest.PutAsync(
+                        "api/Auth/DoiMatKhau",
+                        content
+                    );
+
+                var noiDung =
+                    await response.Content.ReadAsStringAsync();
+
+                var ketQua =
+                    JsonSerializer.Deserialize<ApiReponse<object>>(
+                        noiDung,
+                        _jsonOptions
+                    );
+
+                return ketQua
+                    ?? new ApiReponse<object>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<object>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
     }
 }

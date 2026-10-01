@@ -20,6 +20,13 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> DanhSachUngVien()
+        {
+            return View();
+        }
+
+
+        [HttpGet]
         public async Task<IActionResult> Search()
         {
             //Gọi service lấy danh sách từ API

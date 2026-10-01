@@ -83,5 +83,116 @@ namespace FreelancerStudent.API.Controllers
         }
 
 
+
+        //Tuấn Anh
+
+        [HttpGet("ThongTinTaiKhoan/{maUser}")]
+        public async Task<IActionResult> ThongTinTaiKhoan(int maUser)
+        {
+            try
+            {
+                var ketQua =
+                    await _authService
+                        .layThongTinTaiKhoanAsync(maUser);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy thông tin tài khoản thành công!",
+                    data = ketQua
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        //Tuấn Anh
+
+        [HttpPut("CapNhatThongTinTaiKhoan")]
+        public async Task<IActionResult> CapNhatThongTinTaiKhoan([FromBody] CapNhatThongTinTaiKhoan_RequestDTO request)
+        {
+            try
+            {
+                var ketQua =
+                    await _authService
+                        .capNhatThongTinTaiKhoanAsync(request);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Cập nhật thông tin thành công!",
+                    data = ketQua
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        //Tuấn Anh
+
+        [HttpPut("CapNhatAvatar")]
+        public async Task<IActionResult> CapNhatAvatar([FromBody] CapNhatAvatar_RequestDTO request)
+        {
+            try
+            {
+                await _authService.capNhatAvatarAsync(request);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Cập nhật ảnh đại diện thành công!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        //Tuấn Anh
+        [HttpPut("DoiMatKhau")]
+        public async Task<IActionResult> DoiMatKhau([FromBody] DoiMatKhau_RequestDTO request)
+        {
+            try
+            {
+                await _authService.doiMatKhauAsync(request);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Đổi mật khẩu thành công!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+
     }
 }

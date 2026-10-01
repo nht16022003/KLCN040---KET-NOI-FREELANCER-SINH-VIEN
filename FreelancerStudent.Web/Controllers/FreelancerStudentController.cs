@@ -22,6 +22,11 @@ namespace FreelancerStudent.Web.Controllers
             return View(dsFree);
         }
 
+        public async Task<IActionResult> DanhSachNopTuyen()
+        {
+            return View();
+        }
+
 
     }
 }

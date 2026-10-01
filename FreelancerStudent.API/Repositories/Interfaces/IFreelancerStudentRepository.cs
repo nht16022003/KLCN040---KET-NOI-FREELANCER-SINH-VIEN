@@ -10,5 +10,8 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //Thêm freelancer students dựa vào maRole của Users
         //Task<FreelamcerStudents> themNhaTuyenDungDuaVaoMaRoleCuaUsers(Users user, int maRole);
 
+        //Tuấn
+        Task<FreelamcerStudents?> layFreelancerStudent_TheoMaUser(int maUser);
+
     }
 }

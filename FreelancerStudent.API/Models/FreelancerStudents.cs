@@ -52,8 +52,6 @@ namespace FreelancerStudent.API.Models
 
         public string? gioithieu { get; set; }
 
-        [MaxLength(500)]
-        public string? avatar { get; set; }
 
         [Required]
         public bool trangthaiNhanViec { get; set; } = true;
@@ -69,5 +67,7 @@ namespace FreelancerStudent.API.Models
         public virtual ICollection<KyNang> KyNang { get; set; } = new List<KyNang>();
 
         public virtual ICollection<FreelancerStudent_KyNang> FreelancerStudent_KyNangs { get; set; } = new List<FreelancerStudent_KyNang>();
+
+        public virtual ICollection<UngTuyen> UngTuyens { get; set; } = new List<UngTuyen>();
     }
 }

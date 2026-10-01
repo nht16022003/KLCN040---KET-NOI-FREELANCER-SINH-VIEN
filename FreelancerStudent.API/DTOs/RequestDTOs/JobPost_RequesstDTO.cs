@@ -41,6 +41,8 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         [Range(1, 50, ErrorMessage = "Số lượng tuyển phải từ 1 đến 50 người")]
         public int? soluongtuyen { get; set; }
 
+        public int maUser { get; set; }
+
 
     }
 }

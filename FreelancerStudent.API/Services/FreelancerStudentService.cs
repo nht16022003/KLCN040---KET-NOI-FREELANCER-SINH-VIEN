@@ -74,7 +74,7 @@ namespace FreelancerStudent.API.Services
                 GPA = free.GPA,
                 nienKhoa = free.nienKhoa,
                 gioithieu = free.gioithieu,
-                avatar = free.avatar,
+
                 trangthaiNhanViec = free.trangthaiNhanViec,
                 chiPhiTu = free.chiPhiTu
             }).ToList();

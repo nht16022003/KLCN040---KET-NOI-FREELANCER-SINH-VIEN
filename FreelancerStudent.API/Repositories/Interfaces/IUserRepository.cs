@@ -16,7 +16,11 @@ namespace FreelancerStudent.API.Repositories.Interfaces
 
         Task<Users> timUserTheoTenTaiKhoan(string tentaikhoan);
 
+        //Tuan Anh
 
+        Task<Users?> timUserTheoMaUserAsync(int maUser);
+
+        Task<Users> capNhatThongTinUserAsync(Users user);
 
     }
 }

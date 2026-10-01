@@ -29,5 +29,25 @@ namespace FreelancerStudent.API.Repositories
             return job;
         }
 
+        //Tuấn
+        public async Task<List<UngTuyen>> layTatCaDanhSachUngTuyenVaoJobPost_TheoNTD(int maNhaTuyenDung)
+        {
+            var dsUTuyen = await _context.UngTuyens.Include(u => u.JobPosts).
+            Include(u => u.FreelamcerStudents).ThenInclude(f => f!.User).
+            Where(u => u.JobPosts != null && u.JobPosts.maNhaTuyenDung == maNhaTuyenDung)
+            .OrderByDescending(u => u.ngayUngTuyen).ToListAsync();
+            return dsUTuyen;
+        }
+
+        //Tuấn
+        public async Task<List<UngTuyen>> layTatCaDanhSachUngTuyenVaoJobPost_TheoFreelancerStudents(int maFreelancerStudents)
+        {
+            var dsUngTuyen = await _context.UngTuyens.Include(u => u.JobPosts)
+            .ThenInclude(j => j!.NhaTuyenDung).Include(u => u.FreelamcerStudents).ThenInclude(f => f!.User)
+            .Where(u => u.maFreelancerStudent == maFreelancerStudents).OrderByDescending(u => u.ngayUngTuyen).ToListAsync();
+
+            return dsUngTuyen;
+        }
+
     }
 }

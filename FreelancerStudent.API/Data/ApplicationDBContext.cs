@@ -26,6 +26,10 @@ namespace FreelancerStudent.API.Data
 
         public DbSet<Wallet> Wallets { get; set; }
 
+        public DbSet<UngTuyen> UngTuyens { get; set; }
+
+        public DbSet<FreelancerStudent_KyNang> FreelancerStudent_KyNangs { get; set; }
+
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
         //index và dữ liệu mẫu
@@ -122,6 +126,17 @@ namespace FreelancerStudent.API.Data
                 .WithOne(u => u.Wallet)
                 .HasForeignKey<Wallet>(w => w.maUser)
                 .OnDelete(DeleteBehavior.Cascade); //Xóa Users thì xóa luôn ví 
+            });
+
+            modelBuilder.Entity<UngTuyen>(entity =>
+            {
+                entity.HasKey(u => u.maUngTuyen);
+
+                //1 JobPost có nhiều đơn ứng tuyển
+                entity.HasOne(u => u.JobPosts).WithMany(j => j.UngTuyens).HasForeignKey(u => u.maJob).OnDelete(DeleteBehavior.Cascade);
+
+                //1 sinh viên có thể nộp nhiều đơn ứng tuyển
+                entity.HasOne(u => u.FreelamcerStudents).WithMany(f => f.UngTuyens).HasForeignKey(u => u.maFreelancerStudent).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

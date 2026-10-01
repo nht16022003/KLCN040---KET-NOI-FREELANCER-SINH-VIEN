@@ -128,5 +128,198 @@ namespace FreelancerStudent.API.Services
             return ketquadangnhap;
         }
 
+
+        //Tuấn Anh
+
+        public async Task<ThongTinTaiKhoan_ReponseDTO>
+           layThongTinTaiKhoanAsync(int maUser)
+        {
+            var user =
+                await _userRepository.timUserTheoMaUserAsync(maUser);
+
+            if (user == null)
+            {
+                throw new Exception(
+                    "Không tìm thấy thông tin tài khoản!"
+                );
+            }
+
+            return new ThongTinTaiKhoan_ReponseDTO
+            {
+                maUser = user.maUser,
+
+                hovaten = user.hotenUser,
+
+                tentaikhoan = user.tenTaiKhoanUser,
+
+                email = user.emailUser,
+
+                sodienthoai = user.sdtUser,
+
+                avatarUrl = user.avatarUrl,
+
+                status = user.status,
+
+                ngaytao = user.ngayTao,
+
+                tenrole = user.Roles?.tenRole ?? ""
+            };
+        }
+
+        //Tuấn Anh
+        public async Task<ThongTinTaiKhoan_ReponseDTO> capNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoan_RequestDTO request)
+        {
+            var user =
+                await _userRepository.timUserTheoMaUserAsync(
+                    request.maUser
+                );
+
+            if (user == null)
+            {
+                throw new Exception(
+                    "Không tìm thấy tài khoản!"
+                );
+            }
+
+            if (string.IsNullOrWhiteSpace(request.hovaten))
+            {
+                throw new Exception(
+                    "Họ và tên không được để trống!"
+                );
+            }
+
+            user.hotenUser = request.hovaten.Trim();
+
+            user.sdtUser =
+                string.IsNullOrWhiteSpace(request.sodienthoai)
+                    ? null
+                    : request.sodienthoai.Trim();
+
+            var userDaCapNhat =
+                await _userRepository
+                    .capNhatThongTinUserAsync(user);
+
+            return new ThongTinTaiKhoan_ReponseDTO
+            {
+                maUser = userDaCapNhat.maUser,
+                hovaten = userDaCapNhat.hotenUser,
+                tentaikhoan = userDaCapNhat.tenTaiKhoanUser,
+                email = userDaCapNhat.emailUser,
+                sodienthoai = userDaCapNhat.sdtUser,
+                status = userDaCapNhat.status,
+                ngaytao = userDaCapNhat.ngayTao,
+                tenrole = userDaCapNhat.Roles?.tenRole ?? ""
+            };
+        }
+
+
+        //Tuấn Anh
+
+        public async Task<bool> capNhatAvatarAsync(CapNhatAvatar_RequestDTO request)
+        {
+            var user =
+                await _userRepository
+                    .timUserTheoMaUserAsync(request.maUser);
+
+            if (user == null)
+            {
+                throw new Exception(
+                    "Không tìm thấy tài khoản!"
+                );
+            }
+
+            if (string.IsNullOrWhiteSpace(request.avatarUrl))
+            {
+                throw new Exception(
+                    "Đường dẫn ảnh đại diện không hợp lệ!"
+                );
+            }
+
+            user.avatarUrl = request.avatarUrl;
+
+            await _userRepository
+                .capNhatThongTinUserAsync(user);
+
+            return true;
+        }
+
+
+        //Tuấn Anh
+
+        public async Task doiMatKhauAsync(DoiMatKhau_RequestDTO request)
+        {
+            var user = await _userRepository
+                .timUserTheoMaUserAsync(request.maUser);
+
+            if (user == null)
+            {
+                throw new Exception("Không tìm thấy tài khoản!");
+            }
+
+            // 1. Kiểm tra mật khẩu hiện tại
+            bool matKhauDung = PasswordHasher.VerifyPassword(
+                request.matKhauHienTai,
+                user.pashWordHash
+            );
+
+            if (!matKhauDung)
+            {
+                throw new Exception(
+                    "Mật khẩu hiện tại không chính xác!"
+                );
+            }
+
+            // 2. Kiểm tra mật khẩu mới
+            if (string.IsNullOrWhiteSpace(request.matKhauMoi)
+                || request.matKhauMoi.Length < 8)
+            {
+                throw new Exception(
+                    "Mật khẩu mới phải có ít nhất 8 ký tự!"
+                );
+            }
+
+            // 3. Phải có chữ
+            bool coChu = request.matKhauMoi.Any(char.IsLetter);
+
+            // 4. Phải có số
+            bool coSo = request.matKhauMoi.Any(char.IsDigit);
+
+            if (!coChu || !coSo)
+            {
+                throw new Exception(
+                    "Mật khẩu mới phải bao gồm cả chữ cái và chữ số!"
+                );
+            }
+
+            // 5. Xác nhận mật khẩu
+            if (request.matKhauMoi != request.xacNhanMatKhauMoi)
+            {
+                throw new Exception(
+                    "Xác nhận mật khẩu mới không khớp!"
+                );
+            }
+
+            // 6. Không cho đặt lại đúng mật khẩu cũ
+            bool trungMatKhauCu = PasswordHasher.VerifyPassword(
+                request.matKhauMoi,
+                user.pashWordHash
+            );
+
+            if (trungMatKhauCu)
+            {
+                throw new Exception(
+                    "Mật khẩu mới phải khác mật khẩu hiện tại!"
+                );
+            }
+
+            // 7. Hash mật khẩu mới
+            user.pashWordHash =
+                PasswordHasher.HashPassword(request.matKhauMoi);
+
+            // 8. Lưu database
+            await _userRepository
+                .capNhatThongTinUserAsync(user);
+        }
+
     }
 }

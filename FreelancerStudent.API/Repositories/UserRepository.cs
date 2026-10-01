@@ -78,5 +78,25 @@ namespace FreelancerStudent.API.Repositories
          || u.emailUser.Trim().ToLower() == tentaikhoan.Trim().ToLower());
             return ketqua!;
         }
+
+
+        //Tuấn Anh
+
+        public async Task<Users?> timUserTheoMaUserAsync(int maUser)
+        {
+            return await _context.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.maUser == maUser);
+        }
+        //Tuấn Anh
+
+        public async Task<Users> capNhatThongTinUserAsync(Users user)
+        {
+            _context.Users.Update(user);
+
+            await _context.SaveChangesAsync();
+
+            return user;
+        }
     }
 }

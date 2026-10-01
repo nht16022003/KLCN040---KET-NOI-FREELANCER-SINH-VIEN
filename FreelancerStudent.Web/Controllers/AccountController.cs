@@ -148,5 +148,272 @@ namespace FreelancerStudent.Web.Controllers
             //Chuyển hướng về login
             return RedirectToAction("DangNhap", "Account");
         }
+
+
+
+        //Tuấn Anh
+        [HttpGet]
+        public async Task<IActionResult> ThietLapTaiKhoan(string tab = "thongtin")
+        {
+            var maUser =
+                HttpContext.Session.GetInt32("maUser");
+
+            if (maUser == null)
+            {
+                return RedirectToAction(
+                    "DangNhap",
+                    "Account"
+                );
+            }
+
+            var ketQua =
+                await _authWebService
+                    .LayThongTinTaiKhoanAsync(maUser.Value);
+
+            if (!ketQua.success || ketQua.data == null)
+            {
+                TempData["ErrorMessage"] =
+                    ketQua.message
+                    ?? "Không lấy được thông tin tài khoản.";
+
+                return RedirectToAction(
+                    "Index",
+                    "Home"
+                );
+            }
+
+            ViewBag.Tab = tab;
+
+            return View(ketQua.data);
+        }
+
+
+        //Tuấn Anh
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatThongTinTaiKhoan(CapNhatThongTinTaiKhoanViewModel model)
+        {
+            var maUser =
+                HttpContext.Session.GetInt32("maUser");
+
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap");
+            }
+
+            // Không tin maUser gửi từ HTML
+            model.maUser = maUser.Value;
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] =
+                    "Thông tin nhập chưa hợp lệ.";
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "thongtin" }
+                );
+            }
+
+            var ketQua =
+                await _authWebService
+                    .CapNhatThongTinTaiKhoanAsync(model);
+
+            if (!ketQua.success)
+            {
+                TempData["ErrorMessage"] =
+                    ketQua.message;
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "thongtin" }
+                );
+            }
+
+            // Cập nhật tên trên Header luôn
+            if (ketQua.data != null)
+            {
+                HttpContext.Session.SetString(
+                    "hovaten",
+                    ketQua.data.hovaten
+                );
+            }
+
+            TempData["SuccessMessage"] =
+                "Cập nhật thông tin thành công!";
+
+            return RedirectToAction(
+                "ThietLapTaiKhoan",
+                new { tab = "thongtin" }
+            );
+        }
+
+
+        //Tuấn Anh
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatAvatar(IFormFile avatar)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (avatar == null || avatar.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Vui lòng chọn ảnh.";
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "thongtin" }
+                );
+            }
+
+            // Giới hạn 5MB
+            if (avatar.Length > 5 * 1024 * 1024)
+            {
+                TempData["ErrorMessage"] =
+                    "Dung lượng ảnh không được vượt quá 5MB.";
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "thongtin" }
+                );
+            }
+
+            var extension =
+                Path.GetExtension(avatar.FileName).ToLower();
+
+            var allowedExtensions = new[]
+            {
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".webp"
+            };
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                TempData["ErrorMessage"] =
+                    "Chỉ hỗ trợ ảnh JPG, JPEG, PNG hoặc WEBP.";
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "thongtin" }
+                );
+            }
+
+            var folderPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "uploads",
+                "avatars"
+            );
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            var fileName =
+                $"avatar_{maUser}_{Guid.NewGuid():N}{extension}";
+
+            var filePath =
+                Path.Combine(folderPath, fileName);
+
+            using (var stream = new FileStream(
+                filePath,
+                FileMode.Create))
+            {
+                await avatar.CopyToAsync(stream);
+            }
+
+            var avatarUrl =
+                $"/uploads/avatars/{fileName}";
+
+            // Bước tiếp theo sẽ gửi avatarUrl xuống API
+            var ketQua =
+                await _authWebService.CapNhatAvatarAsync(
+                    maUser.Value,
+                    avatarUrl
+                );
+
+            if (!ketQua.success)
+            {
+                // Nếu DB không cập nhật được thì xóa file vừa upload
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+
+                TempData["ErrorMessage"] =
+                    ketQua.message ?? "Cập nhật avatar thất bại.";
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "thongtin" }
+                );
+            }
+
+            HttpContext.Session.SetString(
+                "UserAvatar",
+                avatarUrl
+            );
+
+            TempData["SuccessMessage"] =
+                "Cập nhật ảnh đại diện thành công!";
+
+            return RedirectToAction(
+                "ThietLapTaiKhoan",
+                new { tab = "thongtin" }
+            );
+        }
+
+        //Tuấn Anh
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiMatKhau(
+            DoiMatKhauViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] =
+                    "Vui lòng nhập đầy đủ thông tin mật khẩu.";
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "baomat" }
+                );
+            }
+
+            var ketQua = await _authWebService.DoiMatKhauAsync(
+                maUser.Value,
+                model
+            );
+
+            if (!ketQua.success)
+            {
+                TempData["ErrorMessage"] = ketQua.message;
+
+                return RedirectToAction(
+                    "ThietLapTaiKhoan",
+                    new { tab = "baomat" }
+                );
+            }
+
+            TempData["SuccessMessage"] =
+                "Đổi mật khẩu thành công!";
+
+            return RedirectToAction("Index", "Home");
+        }
     }
 }

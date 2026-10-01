@@ -95,3 +95,4 @@ D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\refint\FreelancerStudent
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.pdb
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.genruntimeconfig.cache
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\ref\FreelancerStudent.Web.dll
+D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.sourcelink.json
