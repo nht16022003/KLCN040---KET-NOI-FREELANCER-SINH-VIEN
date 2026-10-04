@@ -15,7 +15,7 @@ namespace FreelancerStudent.API.Models
         [MaxLength(150)]
         public string tenChuyenNganh { get; set; } = string.Empty;
 
-        public virtual ICollection<FreelamcerStudents> FreelancerStudents { get; set; } = new List<FreelamcerStudents>();
+        public virtual ICollection<FreelancerStudents> FreelancerStudents { get; set; } = new List<FreelancerStudents>();
         //1 chuyên ngành có thể có nhiều freelancerstudent
     }
 }

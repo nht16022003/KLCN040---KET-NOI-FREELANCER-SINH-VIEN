@@ -1,9 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\FreelancerStudent.API",
-    "\\FreelancerStudent.API\\Models"
+    "\\FreelancerStudent.API\\Models",
+    "\\MOCK",
+    "\\MOCK\\Models",
+    "\\MOCK\\Models\\Entities",
+    "\\MOCK\\Models\\ViewModels"
   ],
-  "SelectedNode": "\\FreelancerStudent.API",
+  "SelectedNode": "\\MOCK\\Models\\ViewModels\\JobDetailViewModel.cs",
   "PreviewInSolutionExplorer": false
 }

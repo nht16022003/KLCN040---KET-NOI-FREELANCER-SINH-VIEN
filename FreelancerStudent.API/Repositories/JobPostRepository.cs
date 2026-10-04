@@ -22,6 +22,12 @@ namespace FreelancerStudent.API.Repositories
             return dsJobPost;
         }
 
+        public async Task<JobPost?> layJobPostTheoMaAsync(string maJob)
+        {
+            return await _context.JobPosts
+                .FirstOrDefaultAsync(job => job.maJob == maJob);
+        }
+
         public async Task<JobPost> themJobPostAsync(JobPost job)
         {
             await _context.JobPosts.AddAsync(job);

@@ -59,6 +59,53 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+        //XS
+        public async Task<ApiReponse<JobDetailViewModel>> layChiTietJobPost(string maJob)
+        {
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                return new ApiReponse<JobDetailViewModel>
+                {
+                    success = false,
+                    message = "Mã công việc không hợp lệ."
+                };
+            }
+
+            try
+            {
+                var response = await _guiRequest.GetAsync(
+                    $"api/JobPost/ChiTietJobPost/{Uri.EscapeDataString(maJob.Trim())}");
+                var noiDungJson = await response.Content.ReadAsStringAsync();
+
+                var ketQua = JsonSerializer.Deserialize<ApiReponse<JobDetailViewModel>>(
+                    noiDungJson,
+                    _jsonOptions);
+
+                if (ketQua == null)
+                {
+                    return new ApiReponse<JobDetailViewModel>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+                }
+
+                if (!response.IsSuccessStatusCode && string.IsNullOrWhiteSpace(ketQua.message))
+                {
+                    ketQua.message = "Không thể lấy chi tiết công việc từ API.";
+                }
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<JobDetailViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
 
 
         //Tuấn Anh

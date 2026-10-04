@@ -51,6 +51,76 @@ namespace FreelancerStudent.API.Services
             return dsResult;
         }
 
+        //XS
+        public async Task<JobPostDetail_ReponseDTO?> layChiTietJobPostAsync(string maJob)
+        {
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                throw new ArgumentException("Mã công việc không được để trống!", nameof(maJob));
+            }
+
+            var job = await _jopPostRepository.layJobPostTheoMaAsync(maJob.Trim());
+            if (job == null)
+            {
+                return null;
+            }
+
+            var jobs = await _jopPostRepository.layTatCaJobPostAsync();
+            var employers = await _ntd.layTatCaNhaTuyenDungAsync();
+            var employer = employers.FirstOrDefault(x => x.maNhaTuyenDung == job.maNhaTuyenDung);
+
+            var jobDto = new JobPost_ReponseDTO
+            {
+                maJob = job.maJob,
+                maNhaTuyenDung = job.maNhaTuyenDung,
+                tieude = job.tieude,
+                mota = job.mota,
+                kynangyeucau = job.kynangyeucau,
+                thulao = job.thulao,
+                fileDinhKem = job.fileDinhKem,
+                phiDangBai = job.phiDangBai,
+                thoigiandangtuyen = job.thoigiandangtuyen,
+                thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                status = job.status,
+                soluongtuyen = job.soluongtuyen
+            };
+
+            return new JobPostDetail_ReponseDTO
+            {
+                Job = jobDto,
+                Employer = employer == null ? null : new NhaTuyenDung_ResponseDTO
+                {
+                    maNhaTuyenDung = employer.maNhaTuyenDung,
+                    maUser = employer.maUser,
+                    tencongty = employer.tencongty,
+                    linhvuc = employer.linhvuc,
+                    diachi = employer.diachi,
+                    gioithieu = employer.gioithieu,
+                    logo = employer.logo,
+                    sosaodanhgia = employer.sosaodanhgia,
+                    trangthai = employer.trangthai,
+                    ngayDangKy = employer.ngayDangKy
+                },
+                RelatedJobs = jobs
+                    .Where(x => x.maNhaTuyenDung == job.maNhaTuyenDung && x.maJob != job.maJob)
+                    .Select(x => new JobPost_ReponseDTO
+                    {
+                        maJob = x.maJob,
+                        maNhaTuyenDung = x.maNhaTuyenDung,
+                        tieude = x.tieude,
+                        mota = x.mota,
+                        kynangyeucau = x.kynangyeucau,
+                        thulao = x.thulao,
+                        fileDinhKem = x.fileDinhKem,
+                        phiDangBai = x.phiDangBai,
+                        thoigiandangtuyen = x.thoigiandangtuyen,
+                        thoigiandukienhoanthanh = x.thoigiandukienhoanthanh,
+                        status = x.status,
+                        soluongtuyen = x.soluongtuyen
+                    }).ToList()
+            };
+        }
+
 
         public async Task<JobPost_ReponseDTO> taoJobPostAsync(JobPost_RequestDTO request)
         {

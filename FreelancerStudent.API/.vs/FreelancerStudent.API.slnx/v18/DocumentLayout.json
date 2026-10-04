@@ -1,12 +1,219 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\KLTN\\Improve\\FreelancerStudent.API\\",
-  "Documents": [],
+  "WorkspaceRootPath": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\repositories\\jobpostrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:repositories\\jobpostrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\services\\jobpostservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:services\\jobpostservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\controllers\\jobpostcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:controllers\\jobpostcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\s\u01A1n\\.copilot\\plans\\plan-thm-api-ly-chi-tit-cng-vic.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownSecurePreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\repositories\\interfaces\\ijobpostrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:repositories\\interfaces\\ijobpostrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\repositories\\interfaces\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:repositories\\interfaces\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\repositories\\interfaces\\ifreelancerstudentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:repositories\\interfaces\\ifreelancerstudentrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|d:\\da\\nht16022003\\klcn040---ket-noi-freelancer-sinh-vien\\freelancerstudent.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{1D5D04D0-0218-A91F-6AD6-977887C2E5CF}|FreelancerStudent.API.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{75c83ab3-5264-45e8-ad32-5c8a41ad477d}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "JobPostRepository.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\JobPostRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\JobPostRepository.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\JobPostRepository.cs",
+              "RelativeToolTip": "Repositories\\JobPostRepository.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAnwBsAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-02T05:48:51.463Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "IJobPostRepository.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\Interfaces\\IJobPostRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\Interfaces\\IJobPostRepository.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\Interfaces\\IJobPostRepository.cs",
+              "RelativeToolTip": "Repositories\\Interfaces\\IJobPostRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-02T05:48:42.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "JobPostService.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Services\\JobPostService.cs",
+              "RelativeDocumentMoniker": "Services\\JobPostService.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Services\\JobPostService.cs",
+              "RelativeToolTip": "Services\\JobPostService.cs",
+              "ViewState": "AgIAADMAAAAAAAAAAAAkwDsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-02T05:49:05.836Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "JobPostController.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Controllers\\JobPostController.cs",
+              "RelativeDocumentMoniker": "Controllers\\JobPostController.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Controllers\\JobPostController.cs",
+              "RelativeToolTip": "Controllers\\JobPostController.cs",
+              "ViewState": "AgIAACsAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-02T05:49:13.235Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "plan-thm-api-ly-chi-tit-cng-vic.md [Preview]",
+              "DocumentMoniker": "C:\\Users\\s\u01A1n\\.copilot\\plans\\plan-thm-api-ly-chi-tit-cng-vic.md",
+              "ToolTip": "C:\\Users\\s\u01A1n\\.copilot\\plans\\plan-thm-api-ly-chi-tit-cng-vic.md [Preview]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-10-02T05:48:43.63Z",
+              "EditorCaption": " [Preview]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "UserRepository.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\UserRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\UserRepository.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\UserRepository.cs",
+              "RelativeToolTip": "Repositories\\UserRepository.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAwwFUAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T16:11:38.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\Interfaces\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\Interfaces\\IUserRepository.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\Interfaces\\IUserRepository.cs",
+              "RelativeToolTip": "Repositories\\Interfaces\\IUserRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T16:11:18.529Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IFreelancerStudentRepository.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\Interfaces\\IFreelancerStudentRepository.cs",
+              "RelativeDocumentMoniker": "Repositories\\Interfaces\\IFreelancerStudentRepository.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Repositories\\Interfaces\\IFreelancerStudentRepository.cs",
+              "RelativeToolTip": "Repositories\\Interfaces\\IFreelancerStudentRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T16:10:33.761Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "Services\\AuthService.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Services\\AuthService.cs",
+              "RelativeToolTip": "Services\\AuthService.cs",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAswIgAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T16:08:08.383Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-01T16:01:48.723Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\FreelancerStudent.API\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-10-01T15:08:09.226Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

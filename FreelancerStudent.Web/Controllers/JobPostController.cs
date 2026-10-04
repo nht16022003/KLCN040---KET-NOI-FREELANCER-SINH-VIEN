@@ -28,6 +28,30 @@ namespace FreelancerStudent.Web.Controllers
             return View(dsJobPost);
         }
 
+        //XS
+        [HttpGet]
+        public async Task<IActionResult> Detail(string maJob)
+        {
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                return NotFound();
+            }
+
+            var ketQua = await _jobPostService.layChiTietJobPost(maJob);
+
+            if (!ketQua.success || ketQua.data == null)
+            {
+                if (!string.IsNullOrWhiteSpace(ketQua.message))
+                {
+                    TempData["Error"] = ketQua.message;
+                }
+
+                return NotFound();
+            }
+
+            return View(ketQua.data);
+        }
+
         [HttpGet]
         public IActionResult DangKy()
         {

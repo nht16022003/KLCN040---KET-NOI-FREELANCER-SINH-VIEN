@@ -29,6 +29,32 @@ namespace FreelancerStudent.Web.Services
 
 
         }
+        //XS
+        public async Task<ApiReponse<FreelancerStudentProfileViewModel>> layProfileFreelancerStudentAsync(int maFreelancerStudents)
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync(
+                    $"api/FreelancerStudent/Profile/{maFreelancerStudents}");
+                var json = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<FreelancerStudentProfileViewModel>>(
+                           json, _jsonOptions)
+                       ?? new ApiReponse<FreelancerStudentProfileViewModel>
+                       {
+                           success = false,
+                           message = "Không thể đọc dữ liệu hồ sơ freelancer."
+                       };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<FreelancerStudentProfileViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
 
         public async Task<ApiReponse<List<FreelacerStudentViewModel>>> layDanhSachFreelancerStudentAsync()
         {

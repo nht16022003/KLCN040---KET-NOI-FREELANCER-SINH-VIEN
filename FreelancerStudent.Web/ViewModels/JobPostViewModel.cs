@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace FreelancerStudent.Web.ViewModels
 {
@@ -36,5 +37,32 @@ namespace FreelancerStudent.Web.ViewModels
         public int? soluongtuyen { get; set; }
 
         public int maUser { get; set; }
+
+        [JsonIgnore]
+        public string MaJob => maJob;
+
+        [JsonIgnore]
+        public string Tieude => tieude;
+
+        [JsonIgnore]
+        public string? Mota => mota;
+
+        [JsonIgnore]
+        public string? Kynangyeucau => kynangyeucau;
+
+        [JsonIgnore]
+        public decimal? Thulao => thulao;
+
+        [JsonIgnore]
+        public DateTime Thoigiandangtuyen => thoigiandangtuyen;
+
+        [JsonIgnore]
+        public DateTime Thoigiandukienhoanthanh => thoigiandukienhoanthanh;
+
+        [JsonIgnore]
+        public string? Status => status;
+
+        [JsonIgnore]
+        public int? Soluongtuyen => soluongtuyen;
     }
 }

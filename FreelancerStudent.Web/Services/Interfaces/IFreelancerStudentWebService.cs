@@ -6,5 +6,7 @@ namespace FreelancerStudent.Web.Services.Interfaces
     public interface IFreelancerStudentWebService
     {
         Task<ApiReponse<List<FreelacerStudentViewModel>>> layDanhSachFreelancerStudentAsync();
+
+        Task<ApiReponse<FreelancerStudentProfileViewModel>> layProfileFreelancerStudentAsync(int maFreelancerStudents);
     }
 }

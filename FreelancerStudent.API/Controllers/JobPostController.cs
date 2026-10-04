@@ -43,6 +43,47 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+        [HttpGet("ChiTietJobPost/{maJob}")]
+        public async Task<IActionResult> layChiTietJobPost(string maJob)
+        {
+            try
+            {
+                var ketqua = await _jobPostService.layChiTietJobPostAsync(maJob);
+
+                if (ketqua == null)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy công việc!"
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy chi tiết công việc thành công!",
+                    data = ketqua
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Lỗi khi lấy chi tiết công việc: " + ex.Message
+                });
+            }
+        }
+
         [HttpPost("TaoJob")]
         public async Task<IActionResult> TaoJob([FromBody] JobPost_RequestDTO request)
         {

@@ -18,55 +18,62 @@
 </style>
 <div class="container py-4">
     <h4 class="mb-4 text-success fw-bold">Các bài đăng tuyển dụng</h4>
+
     <div class="row g-4">
         @if (Model != null && Model.Count > 0)
         {
-            @foreach (var jobPostViewModel in Model)
+            foreach (var jobPostViewModel in Model)
             {
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm border-0 rounded-3">
                         <div class="card-body">
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                              
-                                <div class="card-header">
-                                    <h5 class="card-title mb-1 fw-bold">@(jobPostViewModel.tieude ?? "")</h5>
-                                </div>
-                                <p style="font-size:10px;">@(jobPostViewModel.mota)/p>>
-                                  
-                                </div>
-                                <p style="font-weight:bold;"> Kỹ năng yêu cầu: <span>@(jobPostViewModel.kynangyeucau)</span></p>
-                                <p style="color:red; font-weight:bold;">Thù lao: <span style=color:black>@(jobPostViewModel.thulao)
-                                    VNĐ</span></p>
-                                    <p>Thời gian đăng tuyển: @(jobPostViewModel.thoigiandangtuyen)</p>
-                                </div>
-                               
-                           
-                                <div class="d-flex justify-content-evenly align-items-center gap-3 mb-3">
-                                    <!-- 1. Nút Xem Chi Tiết: Chuyển trang và truyền maJob lên URL -->
-                                    <a asp-controller="Job" asp-action="ChiTiet" asp-route-id="" class="btn btn-outline-success">
-                                        Xem Chi Tiết
-                                    </a>
-
-                                    <!-- 2. Nút Thuê Ngay: Chuyển sang trang tạo hợp đồng và truyền maJob -->
-                                    <a asp-controller="HopDong" asp-action="TaoHopDong" asp-route-jobId="" class="btn btn-success">
-                                        Ứng Tuyển
-                                    </a>
-                                </div>
-
-                          
-                            
-                       
+                            <div class="card-header mb-3">
+                                <h5 class="card-title mb-1 fw-bold">@jobPostViewModel.tieude</h5>
                             </div>
-                        
-                       
+
+                            <p class="small">@jobPostViewModel.mota</p>
+                            <p class="fw-bold">
+                                Kỹ năng yêu cầu:
+                                <span class="fw-normal">@jobPostViewModel.kynangyeucau</span>
+                            </p>
+                            <p class="fw-bold text-danger">
+                                Thù lao:
+                                <span class="fw-normal text-dark">
+                                    @(jobPostViewModel.thulao.HasValue
+                                        ? jobPostViewModel.thulao.Value.ToString("N0") + " VNĐ"
+                                        : "Thỏa thuận")
+                                </span>
+                            </p>
+                            <p>
+                                Thời gian đăng tuyển:
+                                @jobPostViewModel.thoigiandangtuyen.ToString("dd/MM/yyyy HH:mm")
+                            </p>
                         </div>
-                    }
-                }
-        else
-                {
-                    <div class="col-12">
-                        <div class="alert alert-info">Chưa có nhà tuyển dụng nào.</div>
+
+                        <div class="card-footer bg-transparent border-0 d-flex justify-content-evenly align-items-center gap-3 mb-3">
+                            <a asp-controller="JobPost"
+                               asp-action="Detail"
+                               asp-route-maJob="@jobPostViewModel.maJob"
+                               class="btn btn-outline-success">
+                                Xem Chi Tiết
+                            </a>
+
+                            <a asp-controller="HopDong"
+                               asp-action="TaoHopDong"
+                               asp-route-jobId="@jobPostViewModel.maJob"
+                               class="btn btn-success">
+                                Ứng Tuyển
+                            </a>
+                        </div>
                     </div>
-                }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">Chưa có bài đăng tuyển dụng nào.</div>
             </div>
-        </div>
+        }
+    </div>
+</div>

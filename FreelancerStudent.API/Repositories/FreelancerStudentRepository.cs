@@ -16,18 +16,24 @@ namespace FreelancerStudent.API.Repositories
         }
 
 
-        public async Task<List<FreelamcerStudents>> layTatCaFreelancerStudentsAsync()
+        public async Task<List<FreelancerStudents>> layTatCaFreelancerStudentsAsync()
         {
-            var ketqua = await _context.FreelamcerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).ToListAsync();
+            var ketqua = await _context.FreelancerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).ToListAsync();
             return ketqua;
         }
 
         //Tuấn
-        public async Task<FreelamcerStudents?> layFreelancerStudent_TheoMaUser(int maUser)
+        public async Task<FreelancerStudents?> layFreelancerStudent_TheoMaUser(int maUser)
         {
-            var freelancerStudent = await _context.FreelamcerStudents.FirstOrDefaultAsync(f => f.maUser == maUser);
+            var freelancerStudent = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maUser == maUser);
             return freelancerStudent;
         }
 
+        //XS
+        public async Task<FreelancerStudents?> layTheoMaFreelancerStudents(int maFreelancerStudents)
+        {
+            var freelancerStudent = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudents);
+            return freelancerStudent;
+        }
     }
 }

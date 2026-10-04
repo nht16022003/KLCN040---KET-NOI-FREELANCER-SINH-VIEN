@@ -1,0 +1,627 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "FreelancerStudent.API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/Auth/dangky": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DangKy_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DangKy_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DangKy_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/DangNhap": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DangNhap_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DangNhap_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DangNhap_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/ThongTinTaiKhoan/{maUser}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "maUser",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/CapNhatThongTinTaiKhoan": {
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapNhatThongTinTaiKhoan_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapNhatThongTinTaiKhoan_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapNhatThongTinTaiKhoan_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/CapNhatAvatar": {
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapNhatAvatar_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapNhatAvatar_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CapNhatAvatar_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/DoiMatKhau": {
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoiMatKhau_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoiMatKhau_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoiMatKhau_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/FreelancerStudent/Profile/{maFreelancerStudents}": {
+      "get": {
+        "tags": [
+          "FreelancerStudent"
+        ],
+        "parameters": [
+          {
+            "name": "maFreelancerStudents",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/FreelancerStudent/DanhSachFreelancerStudent": {
+      "get": {
+        "tags": [
+          "FreelancerStudent"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/JobPost/DanhSachJobPost": {
+      "get": {
+        "tags": [
+          "JobPost"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/JobPost/ChiTietJobPost/{maJob}": {
+      "get": {
+        "tags": [
+          "JobPost"
+        ],
+        "parameters": [
+          {
+            "name": "maJob",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/JobPost/TaoJob": {
+      "post": {
+        "tags": [
+          "JobPost"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobPost_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobPost_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobPost_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/JobPost/DanhSachUngTuyen/{maUser}": {
+      "get": {
+        "tags": [
+          "JobPost"
+        ],
+        "parameters": [
+          {
+            "name": "maUser",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/NhaTuyenDung/DanhSachNhaTuyenDung": {
+      "get": {
+        "tags": [
+          "NhaTuyenDung"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Wallet/LayViTheoUser/{maUser}": {
+      "get": {
+        "tags": [
+          "Wallet"
+        ],
+        "parameters": [
+          {
+            "name": "maUser",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/WeatherForecast": {
+      "get": {
+        "tags": [
+          "WeatherForecast"
+        ],
+        "operationId": "GetWeatherForecast",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CapNhatAvatar_RequestDTO": {
+        "type": "object",
+        "properties": {
+          "maUser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CapNhatThongTinTaiKhoan_RequestDTO": {
+        "required": [
+          "hovaten",
+          "maUser"
+        ],
+        "type": "object",
+        "properties": {
+          "maUser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hovaten": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sodienthoai": {
+            "maxLength": 15,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DangKy_RequestDTO": {
+        "required": [
+          "email",
+          "hovaten",
+          "marole",
+          "password",
+          "tentaikhoan",
+          "xacnhanmatkhau"
+        ],
+        "type": "object",
+        "properties": {
+          "hovaten": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tentaikhoan": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "sodienthoai": {
+            "type": "string",
+            "format": "tel",
+            "nullable": true
+          },
+          "password": {
+            "minLength": 6,
+            "type": "string"
+          },
+          "xacnhanmatkhau": {
+            "minLength": 6,
+            "type": "string"
+          },
+          "marole": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DangNhap_RequestDTO": {
+        "required": [
+          "password",
+          "tentaikhoan_email"
+        ],
+        "type": "object",
+        "properties": {
+          "tentaikhoan_email": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "password": {
+            "minLength": 6,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DoiMatKhau_RequestDTO": {
+        "required": [
+          "matKhauHienTai",
+          "matKhauMoi",
+          "xacNhanMatKhauMoi"
+        ],
+        "type": "object",
+        "properties": {
+          "maUser": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matKhauHienTai": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "matKhauMoi": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "xacNhanMatKhauMoi": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JobPost_RequestDTO": {
+        "required": [
+          "maNhaTuyenDung",
+          "mota",
+          "soluongtuyen",
+          "thoigiandukienhoanthanh",
+          "thulao",
+          "tieude"
+        ],
+        "type": "object",
+        "properties": {
+          "maNhaTuyenDung": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tieude": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "mota": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "kynangyeucau": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "thulao": {
+            "maximum": 100000000,
+            "minimum": 50000,
+            "type": "number",
+            "format": "double"
+          },
+          "fileDinhKem": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "phiDangBai": {
+            "type": "number",
+            "format": "double"
+          },
+          "thoigiandangtuyen": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "thoigiandukienhoanthanh": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "soluongtuyen": {
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "maUser": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WeatherForecast": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "temperatureC": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "temperatureF": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "FreelancerStudent"
+    },
+    {
+      "name": "JobPost"
+    },
+    {
+      "name": "NhaTuyenDung"
+    },
+    {
+      "name": "Wallet"
+    },
+    {
+      "name": "WeatherForecast"
+    }
+  ]
+}

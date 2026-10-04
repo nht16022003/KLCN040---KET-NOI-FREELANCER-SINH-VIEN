@@ -8,6 +8,9 @@ namespace FreelancerStudent.Web.Services.Interfaces
     {
         Task<ApiReponse<List<JobPostViewModel>>> layDanhSachJobPost();
 
+        //XS
+        Task<ApiReponse<JobDetailViewModel>> layChiTietJobPost(string maJob);
+
 
 
         //Tuấn Anh

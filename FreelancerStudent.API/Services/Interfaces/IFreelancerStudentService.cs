@@ -7,5 +7,7 @@ namespace FreelancerStudent.API.Services.Interfaces
     {
         //Lấy danh sách freelancer students
         Task<List<FreelancerStudent_ReponseDTO>> layDanhSachFreelancerStudent();
+
+        Task<FreelancerStudentProfile_ReponseDTO?> layProfileFreelancerStudent(int maFreelancerStudents);
     }
 }

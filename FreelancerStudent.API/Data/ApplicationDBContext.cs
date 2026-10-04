@@ -12,7 +12,7 @@ namespace FreelancerStudent.API.Data
         //Khai báo các bảng trong Database, tương ứng với các bảng trong CSDL
         public DbSet<Users> Users { get; set; }
         public DbSet<Roles> Roles { get; set; }
-        public DbSet<FreelamcerStudents> FreelamcerStudents { get; set; }
+        public DbSet<FreelancerStudents> FreelancerStudents { get; set; }
 
         public DbSet<Admin> Admins { get; set; }
 
@@ -64,11 +64,11 @@ namespace FreelancerStudent.API.Data
 
             });
 
-            modelBuilder.Entity<FreelamcerStudents>(entity =>
+            modelBuilder.Entity<FreelancerStudents>(entity =>
             {
                 entity.HasKey(f => f.maFreelancerStudents);
 
-                entity.HasOne(f => f.User).WithOne(u => u.FreelamcerStudents).HasForeignKey<FreelamcerStudents>(f => f.maUser);
+                entity.HasOne(f => f.User).WithOne(u => u.FreelamcerStudents).HasForeignKey<FreelancerStudents>(f => f.maUser);
                 //Một freelancer có một user, ở phía user cũng chỉ có 1 freelancerstudent ở freelancer thì có khóa ngoại là f.mauuser
 
                 entity.HasOne(f => f.ChuyenNganh).WithMany(c => c.FreelancerStudents).HasForeignKey(f => f.maChuyenNganh);

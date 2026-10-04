@@ -1,0 +1,229 @@
+[
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.AuthController",
+    "Method": "CapNhatAvatar",
+    "RelativePath": "api/Auth/CapNhatAvatar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "CapNhatAvatar_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.AuthController",
+    "Method": "CapNhatThongTinTaiKhoan",
+    "RelativePath": "api/Auth/CapNhatThongTinTaiKhoan",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "CapNhatThongTinTaiKhoan_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.AuthController",
+    "Method": "DangKy",
+    "RelativePath": "api/Auth/dangky",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "DangKy_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.AuthController",
+    "Method": "DangNhap",
+    "RelativePath": "api/Auth/DangNhap",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "DangNhap_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.AuthController",
+    "Method": "DoiMatKhau",
+    "RelativePath": "api/Auth/DoiMatKhau",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "DoiMatKhau_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.AuthController",
+    "Method": "ThongTinTaiKhoan",
+    "RelativePath": "api/Auth/ThongTinTaiKhoan/{maUser}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maUser",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.FreelancerStudentController",
+    "Method": "layDanhSachFreelancerStudents",
+    "RelativePath": "api/FreelancerStudent/DanhSachFreelancerStudent",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.FreelancerStudentController",
+    "Method": "layProfile",
+    "RelativePath": "api/FreelancerStudent/Profile/{maFreelancerStudents}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maFreelancerStudents",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.JobPostController",
+    "Method": "layChiTietJobPost",
+    "RelativePath": "api/JobPost/ChiTietJobPost/{maJob}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maJob",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.JobPostController",
+    "Method": "layDanhSachJobPost",
+    "RelativePath": "api/JobPost/DanhSachJobPost",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.JobPostController",
+    "Method": "layDSUngTuyen",
+    "RelativePath": "api/JobPost/DanhSachUngTuyen/{maUser}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maUser",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.JobPostController",
+    "Method": "TaoJob",
+    "RelativePath": "api/JobPost/TaoJob",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "FreelancerStudent.API.DTOs.ReponsesDTO.JobPost_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.NhaTuyenDungController",
+    "Method": "layDanhSachNTD",
+    "RelativePath": "api/NhaTuyenDung/DanhSachNhaTuyenDung",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.WalletController",
+    "Method": "LayViTheoUser",
+    "RelativePath": "api/Wallet/LayViTheoUser/{maUser}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maUser",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.WeatherForecastController",
+    "Method": "Get",
+    "RelativePath": "WeatherForecast",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[FreelancerStudent.API.WeatherForecast, FreelancerStudent.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetWeatherForecast"
+  }
+]

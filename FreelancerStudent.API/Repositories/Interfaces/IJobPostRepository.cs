@@ -7,6 +7,9 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //Lấy tất cả JobPost
         Task<List<JobPost>> layTatCaJobPostAsync();
 
+        //XS
+        Task<JobPost?> layJobPostTheoMaAsync(string maJob);
+
         Task<JobPost> themJobPostAsync(JobPost job);
 
 

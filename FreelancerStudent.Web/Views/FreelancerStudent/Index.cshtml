@@ -26,50 +26,39 @@
                 <div class="col-md-4">
                     <div class="card h-100 shadow-sm border-0 rounded-3">
                         <div class="card-body">
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                              
-                                <div class="card-header">
-                                    <h5 class="card-title mb-1 fw-bold">@(freelacerStudentViewModel.tenUser?? "")</h5>
-                                </div>
-                                <p style="font-size:10px;">@(freelacerStudentViewModel.tenTruong)/p>>
-                                  
-                                </div>
-                                <p style="font-weight:bold;">Chuyên ngành:
-                                    <span>@(freelacerStudentViewModel.tenChuyenNganh)</span>
-                                </p>
-                                <p style="color:red; font-weight:bold;">GPA: <span
-                                    style=color:black>@(freelacerStudentViewModel.GPA)
-                                    VNĐ</span></p>
-                                    <p>Thời gian đăng tuyển: @(freelacerStudentViewModel.trangthaiNhanViec)</p>
-                                </div>
-                               
-                           
-                                <div class="d-flex justify-content-evenly align-items-center gap-3 mb-3">
-                                    <!-- 1. Nút Xem Chi Tiết: Chuyển trang và truyền maJob lên URL -->
-                                    <a asp-controller="Job" asp-action="ChiTiet" asp-route-id="" class="btn btn-outline-success">
-                                        Xem Chi Tiết
-                                    </a>
-
-                                    <!-- 2. Nút Thuê Ngay: Chuyển sang trang tạo hợp đồng và truyền maJob -->
-                                    <a asp-controller="HopDong" asp-action="TaoHopDong" asp-route-jobId="" class="btn btn-success">
-                                        Thuê Ngay
-                                    </a>
-                                </div>
-
-                          
-                            
-                       
+                            <div class="card-header mb-3">
+                                <h5 class="card-title mb-1 fw-bold">@freelacerStudentViewModel.tenUser</h5>
                             </div>
-                        
-                       
+                            <p class="small">Trường: @freelacerStudentViewModel.tenTruong</p>
+                            <p class="fw-bold">Chuyên ngành:
+                                <span class="fw-normal">@freelacerStudentViewModel.tenChuyenNganh</span>
+                            </p>
+                            <p class="fw-bold">GPA:
+                                <span class="fw-normal">@freelacerStudentViewModel.GPA.ToString("0.0#")</span>
+                            </p>
+                            <p>
+                                Trạng thái:
+                                @(freelacerStudentViewModel.trangthaiNhanViec ? "Đang nhận việc" : "Tạm ngưng")
+                            </p>
                         </div>
-                    }
-                }
-        else
-                {
-                    <div class="col-12">
-                        <div class="alert alert-info">Chưa có nhà tuyển dụng nào.</div>
+
+                        <div class="card-footer bg-transparent border-0 d-flex justify-content-center mb-3">
+                            <a asp-controller="FreelancerStudent"
+                               asp-action="Profile"
+                               asp-route-maFreelancerStudents="@freelacerStudentViewModel.maFreelancerStudents"
+                               class="btn btn-outline-success">
+                                Xem hồ sơ
+                            </a>
+                        </div>
                     </div>
-                }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">Chưa có freelancer nào.</div>
             </div>
-        </div>
+        }
+    </div>
+</div>

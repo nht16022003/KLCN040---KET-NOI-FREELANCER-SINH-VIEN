@@ -1,0 +1,408 @@
+﻿@model FreelancerStudent.Web.ViewModels.JobDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết công việc - " + Model.Job.Tieude;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var skillsList = !string.IsNullOrEmpty(Model.Job.Kynangyeucau)
+        ? Model.Job.Kynangyeucau.Split(new[] { ',', ';' }, System.StringSplitOptions.TrimEntries)
+        : new string[0];
+}
+
+<style>
+    .job-detail-page {
+        background-color: #F8FAF9;
+        min-height: 85vh;
+        padding: 30px 0 60px;
+    }
+
+    /* TOP HEADER CARD */
+    .job-header-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .job-title-main {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .company-sub-link {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1E6E38;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .company-sub-link:hover {
+        color: #144E27;
+        text-decoration: underline;
+    }
+
+    .job-meta-chips-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 14px;
+        font-size: 0.84rem;
+        color: #64748B;
+    }
+
+    .job-meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #F1F5F9;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+
+    .status-badge-job {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 5px 14px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-badge-active {
+        background-color: #EAF6EE;
+        color: #196837;
+        border: 1px solid #C4E2CE;
+    }
+
+    .status-badge-closed {
+        background-color: #F1F5F9;
+        color: #64748B;
+        border: 1px solid #CBD5E1;
+    }
+
+    /* CONTENT CARDS */
+    .section-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .skill-pill-tag {
+        background: #EEF6F1;
+        color: #1C5F37;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid #D2E7DC;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 8px;
+    }
+
+    /* SALARY & ACTION SIDEBAR */
+    .salary-box-card {
+        background: linear-gradient(135deg, #F3FAF5 0%, #FFFFFF 100%);
+        border: 1.5px solid #C9E5D2;
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .salary-amount-text {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #E11D48;
+        margin-bottom: 4px;
+    }
+
+    .btn-apply-job {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 12px;
+        border-radius: 30px;
+        border: none;
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(27, 94, 54, 0.25);
+    }
+
+    .btn-apply-job:hover {
+        background-color: #14492A;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(27, 94, 54, 0.35);
+    }
+
+    .related-job-item {
+        border-bottom: 1px dashed #E2E8F0;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .related-job-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="job-detail-page">
+    <div class="container-fluid px-lg-5">
+
+        <!-- Breadcrumb & Back -->
+        <div class="mb-3">
+            <a href="/Employer/Search" class="text-decoration-none text-muted small fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại khám phá nhà tuyển dụng & việc làm
+            </a>
+        </div>
+
+        <!-- ==================== 1. JOB HEADER CARD ==================== -->
+        <div class="job-header-card">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-light text-muted border">Mã tin: #@Model.Job.MaJob</span>
+                        <span class="status-badge-job @(Model.Job.Status == "DangTuyen" ? "status-badge-active" : "status-badge-closed")">
+                            <i class="bi @(Model.Job.Status == "DangTuyen" ? "bi-check-circle-fill" : "bi-clock-history")"></i>
+                            @(Model.Job.Status == "DangTuyen" ? "Đang mở tuyển" : Model.Job.Status)
+                        </span>
+                    </div>
+
+                    <h1 class="job-title-main">@Model.Job.Tieude</h1>
+
+                    <div>
+                        <a href="/Employer/Profile/@(Model.Employer?.MaNhaTuyenDung ?? 1)" class="company-sub-link">
+                            <i class="bi bi-building"></i>
+                            @(Model.Employer?.Tencongty ?? Model.Employer?.HotenUser ?? "Công ty TNHH Công Nghệ ABC")
+                            <i class="bi bi-patch-check-fill text-primary" title="Đã xác thực doanh nghiệp"></i>
+                        </a>
+                    </div>
+
+                    <div class="job-meta-chips-row">
+                        <span class="job-meta-chip">
+                            <i class="bi bi-geo-alt-fill text-danger"></i> @(Model.Employer?.Diachi ?? "Quận 1, TP.HCM")
+                        </span>
+                        <span class="job-meta-chip">
+                            <i class="bi bi-calendar-event text-primary"></i> Đăng ngày: @Model.Job.Thoigiandangtuyen.ToString("dd/MM/yyyy")
+                        </span>
+                        <span class="job-meta-chip">
+                            <i class="bi bi-clock-history text-info"></i> Hạn hoàn thành: @Model.Job.Thoigiandukienhoanthanh
+                        </span>
+                        <span class="job-meta-chip">
+                            <i class="bi bi-people text-secondary"></i> Tuyển: @(Model.Job.Soluongtuyen ?? 1) bạn
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" onclick="alert('Đã lưu bài viết vào mục yêu thích!')">
+                        <i class="bi bi-heart me-1"></i> Lưu tin
+                    </button>
+                    <button type="button" class="btn btn-outline-success rounded-pill px-3" onclick="navigator.clipboard.writeText(window.location.href); alert('Đã sao chép link bài đăng!');">
+                        <i class="bi bi-share me-1"></i> Chia sẻ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 2. MAIN 2-COLUMN GRID ==================== -->
+        <div class="row g-4">
+
+            <!-- CỘT TRÁI (8 COLS): MÔ TẢ & YÊU CẦU & ỨNG TUYỂN -->
+            <div class="col-12 col-lg-8">
+
+                <!-- 1. Mô tả công việc -->
+                <div class="section-card">
+                    <h5 class="section-card-title">
+                        <i class="bi bi-file-earmark-text text-success"></i> Mô tả chi tiết công việc
+                    </h5>
+                    <p class="text-secondary leading-relaxed mb-4" style="line-height: 1.7; font-size: 0.95rem;">
+                        @Model.Job.Mota
+                    </p>
+
+                    <h6 class="fw-bold text-dark mb-2">Các hạng mục công việc dự kiến:</h6>
+                    <ul class="text-secondary small mb-0 ps-3">
+                        <li class="mb-2">Trao đổi và tiếp nhận yêu cầu từ đại diện doanh nghiệp.</li>
+                        <li class="mb-2">Triển khai đúng tiến độ và cập nhật báo cáo theo từng giai đoạn.</li>
+                        <li class="mb-2">Bàn giao toàn bộ mã nguồn / thiết kế kèm tài liệu hướng dẫn.</li>
+                        <li>Hỗ trợ chỉnh sửa và nghiệm thu sản phẩm cuối cùng.</li>
+                    </ul>
+                </div>
+
+                <!-- 2. Kỹ năng yêu cầu -->
+                <div class="section-card">
+                    <h5 class="section-card-title">
+                        <i class="bi bi-stars text-warning"></i> Kỹ năng chuyên môn yêu cầu
+                    </h5>
+                    <div class="d-flex flex-wrap mb-3">
+                        @if (skillsList.Length > 0)
+                        {
+                            @foreach (var skill in skillsList)
+                            {
+                                <span class="skill-pill-tag">@skill</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="skill-pill-tag">@(Model.Job.Kynangyeucau ?? "Lập trình web, Thiết kế")</span>
+                        }
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-info-circle me-1"></i> Ưu tiên các bạn sinh viên có sản phẩm thực tế trong Portfolio liên quan đến các kỹ năng trên.
+                    </p>
+                </div>
+
+                <!-- 3. Quyền lợi sinh viên -->
+                <div class="section-card">
+                    <h5 class="section-card-title">
+                        <i class="bi bi-shield-check text-success"></i> Quyền lợi & Cam kết thanh toán
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="fw-bold text-dark mb-1"><i class="bi bi-lock-fill text-success me-2"></i>Bảo đảm Ký quỹ Escrow</h6>
+                                <p class="text-muted small mb-0">Doanh nghiệp ký quỹ 100% thù lao lên hệ thống trước khi bắt đầu, đảm bảo không rủi ro quỵt tiền.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <h6 class="fw-bold text-dark mb-1"><i class="bi bi-clock text-primary me-2"></i>Thời gian linh hoạt</h6>
+                                <p class="text-muted small mb-0">Chủ động sắp xếp thời gian học và làm việc, phù hợp với lịch học tại trường.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Hộp ứng tuyển trực tiếp -->
+                <div class="section-card" id="applyBox">
+                    <h5 class="section-card-title">
+                        <i class="bi bi-send-fill text-primary"></i> Gửi hồ sơ ứng tuyển công việc này
+                    </h5>
+
+                    <form onsubmit="event.preventDefault(); alert('Ứng tuyển thành công! Nhà tuyển dụng sẽ nhận được thông báo và xem xét hồ sơ của bạn.');">
+                        <div class="mb-3">
+                            <label class="form-label text-dark fw-bold small">Thư giới thiệu / Đề xuất thực hiện:</label>
+                            <textarea class="form-control" rows="4" placeholder="Giới thiệu kinh nghiệm phù hợp, kế hoạch triển khai và cam kết thời gian hoàn thành..."></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-dark fw-bold small">Mức thù lao đề xuất (VNĐ):</label>
+                                <input type="text" class="form-control" value="@(Model.Job.Thulao.HasValue ? Model.Job.Thulao.Value.ToString("#,##0") : "1,500,000")" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dark fw-bold small">Thời gian hoàn thành dự kiến:</label>
+                                <input type="text" class="form-control" value="@Model.Job.Thoigiandukienhoanthanh" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-bold">
+                            <i class="bi bi-send me-1"></i> Xác nhận gửi ứng tuyển
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI (4 COLS): THÙ LAO & THÔNG TIN DOANH NGHIỆP -->
+            <div class="col-12 col-lg-4">
+
+                <!-- Card Mức Thù Lao -->
+                <div class="salary-box-card">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Mức thù lao ngân sách</span>
+                    <div class="salary-amount-text">
+                        @(Model.Job.Thulao.HasValue ? Model.Job.Thulao.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                    </div>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>Đã có ký quỹ bảo đảm từ hệ thống
+                    </p>
+
+                    <a href="#applyBox" class="btn-apply-job">
+                        <i class="bi bi-send-fill"></i> Ứng tuyển ngay
+                    </a>
+                </div>
+
+                <!-- Card Thông tin Doanh Nghiệp -->
+                <div class="section-card">
+                    <h5 class="section-card-title">
+                        <i class="bi bi-building text-success"></i> Về nhà tuyển dụng
+                    </h5>
+
+                    <div class="text-center py-2 mb-3">
+                        <div class="rounded-circle bg-light border mx-auto d-flex align-items-center justify-content-center text-success fs-2 mb-2" style="width: 70px; height: 70px;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">
+                            @(Model.Employer?.Tencongty ?? Model.Employer?.HotenUser ?? "Công ty TNHH Công Nghệ ABC")
+                        </h6>
+                        <span class="text-warning small"><i class="bi bi-star-fill"></i> @(Model.Employer?.Sosaodanhgia ?? 4.8) ⭐</span>
+                    </div>
+
+                    <div class="small text-secondary mb-3">
+                        <p class="mb-2"><i class="bi bi-briefcase me-2"></i><strong>Lĩnh vực:</strong> @(Model.Employer?.Linhvuc ?? "Công nghệ thông tin")</p>
+                        <p class="mb-2"><i class="bi bi-geo-alt me-2"></i><strong>Địa chỉ:</strong> @(Model.Employer?.Diachi ?? "Quận 1, TP.HCM")</p>
+                        <p class="mb-0"><i class="bi bi-calendar me-2"></i><strong>Tham gia:</strong> @(Model.Employer?.NgayDangKy.ToString("MM/yyyy") ?? "2024")</p>
+                    </div>
+
+                    <a href="/Employer/Profile/@(Model.Employer?.MaNhaTuyenDung ?? 1)" class="btn btn-outline-success btn-sm w-100 rounded-pill fw-semibold">
+                        Xem hồ sơ công ty
+                    </a>
+                </div>
+
+                <!-- Card Các việc làm khác của công ty -->
+                @if (Model.RelatedJobs.Any())
+                {
+                    <div class="section-card">
+                        <h5 class="section-card-title">
+                            <i class="bi bi-collection text-primary"></i> Việc làm khác cùng công ty
+                        </h5>
+
+                        <div>
+                            @foreach (var related in Model.RelatedJobs)
+                            {
+                                <div class="related-job-item">
+                                    <a href="/JobPost/Detail?maJob=@related.MaJob" class="text-dark fw-bold text-decoration-none small d-block mb-1 hover-green">
+                                        @related.Tieude
+                                    </a>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-danger fw-bold small">
+                                            @(related.Thulao.HasValue ? related.Thulao.Value.ToString("#,##0") + "đ" : "Thỏa thuận")
+                                        </span>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Hạn: @related.Thoigiandukienhoanthanh</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

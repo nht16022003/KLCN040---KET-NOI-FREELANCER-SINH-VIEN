@@ -6,6 +6,7 @@
 "Freelancer Student");
     var userAvatar = Context.Session.GetString("UserAvatar") ??
 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80";
+    var maUserDangNhap = Context.Session.GetInt32("maUser");
 }
 
 <!DOCTYPE html>
@@ -928,8 +929,13 @@
                                                                             <li><a class="dropdown-item" href="/Account/MinhChung"><i
                                                                                 class="bi bi-patch-check-fill text-success me-2"></i> Minh chứng sinh viên</a>
                                                                             </li>
-                                                                            <li><a class="dropdown-item" href="/Freelancer/HoSo"><i class="bi bi-person-vcard me-2"></i>
-                                                                                Hồ sơ năng lực sinh viên</a></li>
+                                                                         @if (maUserDangNhap.HasValue)
+                                                                         {
+                                                                             <li><a class="dropdown-item" asp-controller="FreelancerStudent"
+                                                                                    asp-action="Profile"
+                                                                                    asp-route-maUser="@maUserDangNhap.Value"><i class="bi bi-person-vcard me-2"></i>
+                                                                                     Hồ sơ năng lực sinh viên</a></li>
+                                                                         }
                                                                                 <li><a class="dropdown-item" href="/Freelancer/Portfolio"><i
                                                                                     class="bi bi-collection-play me-2"></i> Portfolio cá nhân</a></li>
                                                                                     <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich"><i

@@ -16,7 +16,7 @@ namespace FreelancerStudent.API.Models
 
 
         // Navigation
-        public virtual FreelamcerStudents? FreelancerStudent { get; set; }
+        public virtual FreelancerStudents? FreelancerStudent { get; set; }
         public virtual KyNang? KyNang { get; set; }
     }
 }
