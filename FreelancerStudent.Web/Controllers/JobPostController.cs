@@ -12,9 +12,12 @@ namespace FreelancerStudent.Web.Controllers
     {
         private readonly IJobPostWebService _jobPostService; //Khai báo để sử dụng serviceswweb
 
-        public JobPostController(IJobPostWebService jobPostWebService)
+        private readonly INhaTuyenDungWebService _nhaTuyenDungService;
+
+        public JobPostController(IJobPostWebService jobPostWebService, INhaTuyenDungWebService nhaTuyenDungWebService)
         {
             _jobPostService = jobPostWebService;
+            _nhaTuyenDungService = nhaTuyenDungWebService;
         }
 
         public async Task<IActionResult> Index()
@@ -137,5 +140,145 @@ namespace FreelancerStudent.Web.Controllers
 
             return View(dsUngTuyen);
         }
+
+        //Tuấn
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DuyetUngTuyen(int maUngTuyen, string trangThai)
+        {
+            var ketQua = await _jobPostService.duyetUngTuyenAsync(maUngTuyen, trangThai);
+            if (ketQua.success)
+            {
+                TempData["SuccessMessage"] = ketQua.message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = ketQua.message;
+            }
+            // Tải lại trang Danh sách ứng tuyển
+            return RedirectToAction("DanhSachUngTuyen");
+        }
+
+        //Tuan
+        [HttpGet]
+        public async Task<IActionResult> UngTuyen(string maJob)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            //Lay thong tin bai jobpost
+
+            var dsJob = await _jobPostService.layDanhSachJobPost();
+            var job = dsJob.data?.FirstOrDefault(j => j.maJob == maJob);
+            if (job == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy công việc này!";
+                return RedirectToAction("Index");
+            }
+
+            // Lấy danh sách Nhà tuyển dụng để tìm người đăng bài Job này
+            var dsNTD = await _nhaTuyenDungService.layDanhSachNhaTuyenDungAsync();
+            var ntd = dsNTD.data?.FirstOrDefault(n => n.maNhaTuyenDung == job.maNhaTuyenDung);
+
+            var model = new UngTuyenViewModel
+            {
+                maJob = job.maJob,
+                maUser = maUser.Value,
+                tieude = job.tieude,
+                mota = job.mota,
+                thulao = job.thulao,
+                kynangyeucau = job.kynangyeucau,
+                thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                soluongtuyen = job.soluongtuyen,
+
+                // Điền sẵn giá gốc của bài Job vào ô đề xuất
+                thulaoDeXuat = job.thulao,
+                // Thông tin Nhà tuyển dụng
+                maNhaTuyenDung = job.maNhaTuyenDung,
+                tenCongTy = !string.IsNullOrWhiteSpace(ntd?.tencongty) ? ntd.tencongty : ntd?.hotenUser,
+                avatarNhaTuyenDung = ntd?.logo ?? ntd?.avatar
+            };
+            return View(model);
+        }
+
+
+        //Tuan
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UngTuyen(UngTuyenViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            model.maUser = maUser.Value;
+
+            var ketQua = await _jobPostService.nopDonUngTuyenAsync(model);
+
+            if (ketQua.success)
+            {
+                TempData["SuccessMessage"] = "Ứng tuyển thành công!";
+                // Chuyển hướng về trang Danh sách bài đã nộp của sinh viên
+                return RedirectToAction("DanhSachNopTuyen", "FreelancerStudent");
+            }
+
+
+
+            ModelState.AddModelError(string.Empty, ketQua.message ?? "Có lỗi xảy ra khi nộp đơn ứng tuyển.");
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> QuanLyTinTuyenDung()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var ketQua = await _jobPostService.layJobCuaToiAsync(maUser.Value);
+            var dsJob = ketQua?.data ?? new List<JobPostViewModel>();
+
+            return View(dsJob);
+        }
+
+        //Tuấn
+        [HttpGet]
+        public async Task<IActionResult> Edit(string maJob)
+        {
+            var dsJob = await _jobPostService.layDanhSachJobPost();
+            var job = dsJob.data?.FirstOrDefault(j => j.maJob == maJob);
+            if (job == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài tuyển dụng!";
+                return RedirectToAction("QuanLyTinTuyenDung");
+            }
+            return View(job);
+        }
+        //Tuấn
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(JobPostViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var ketQua = await _jobPostService.capNhatJobPostAsync(model);
+            if (ketQua.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật bài tuyển dụng thành công!";
+                return RedirectToAction("QuanLyTinTuyenDung");
+            }
+
+            ModelState.AddModelError(string.Empty, ketQua.message ?? "Cập nhật thất bại.");
+            return View(model);
+        }
+
+
     }
 }

@@ -289,3 +289,4 @@ D:\KLTN\Improve\MOCK\obj\Debug\net10.0\refint\MOCK.dll
 D:\KLTN\Improve\MOCK\obj\Debug\net10.0\MOCK.pdb
 D:\KLTN\Improve\MOCK\obj\Debug\net10.0\MOCK.genruntimeconfig.cache
 D:\KLTN\Improve\MOCK\obj\Debug\net10.0\ref\MOCK.dll
+D:\KLTN\Improve\MOCK\obj\Debug\net10.0\MOCK.sourcelink.json

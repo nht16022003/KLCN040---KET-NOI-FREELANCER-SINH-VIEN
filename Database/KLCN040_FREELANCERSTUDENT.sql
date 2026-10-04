@@ -124,6 +124,9 @@ CREATE TABLE FreelancerStudents
 )
 Go
 
+ALTER TABLE FreelancerStudents
+DROP COLUMN avatar;
+
 CREATE TABLE FreelancerStudent_KyNang
 (
     maFreelancerStudents INT NOT NULL,
@@ -168,6 +171,11 @@ CREATE TABLE NhaTuyenDung
     CONSTRAINT UQ_NhaTuyenDung_maUser UNIQUE (maUser)
 )
 Go
+
+ALTER TABLE NhaTuyenDung
+DROP COLUMN avatar;
+
+select * from users;
 
 
 CREATE TABLE FreelancerYeuThich
@@ -350,6 +358,7 @@ CREATE TABLE UngTuyen (
     CONSTRAINT FK_UngTuyen_Job FOREIGN KEY (maJob) REFERENCES JobPost(maJob) ON DELETE CASCADE,
     CONSTRAINT FK_UngTuyen_Freelancer FOREIGN KEY (maFreelancerStudent) REFERENCES FreelancerStudents(maFreelancerStudents)
 );
+
 
 
 CREATE TABLE UngThue (
@@ -610,6 +619,9 @@ VALUES
 (N'Quản Trị Viên Hệ Thống', 'admin_sys', 'hash_pass_admin', 'admin@freelancego.vn', '0988888888', '1995-01-01', N'ACTIVE', GETDATE(), 3);
 GO
 
+SELECT * FROM USERS;
+SELECT * FROM FreelancerStudents;
+
 -- 2.1. ADMIN
 INSERT INTO Admin (hotenAdmin, maUser) VALUES (N'Quản Trị Viên Hệ Thống', 5);
 GO
@@ -622,6 +634,18 @@ VALUES
 (2, N'Giấy xác nhận sinh viên', 'uploads/minhchung/user2_giay_xac_nhan.pdf', GETDATE(), N'Đã xác minh', GETDATE(), NULL, 1),
 (3, N'Thẻ sinh viên', 'uploads/minhchung/user3_the_sinh_vien.jpg', GETDATE(), N'Đang gửi', NULL, NULL, NULL);
 GO
+
+-- 1. Xem mã Nhà tuyển dụng của Nguyễn Hoàng Tuấn
+SELECT u.maUser, u.hotenUser, u.maRole, ntd.maNhaTuyenDung 
+FROM Users u 
+LEFT JOIN NhaTuyenDung ntd ON u.maUser = ntd.maUser 
+WHERE u.hotenUser LIKE N'%Nguyễn Hoàng Tuấn%';
+
+-- 2. Xem các bài Job mà Nguyễn Hoàng Tuấn đã đăng
+SELECT maJob, tieude, maNhaTuyenDung FROM JobPost WHERE maNhaTuyenDung = 2;
+
+-- 3. Xem các đơn ứng tuyển đã nộp vào các bài Job trên
+SELECT * FROM UngTuyen WHERE maJob IN (SELECT maJob FROM JobPost WHERE maNhaTuyenDung = 2);
 
 
 -- 4. CHUYÊN NGÀNH
@@ -917,8 +941,9 @@ SELECT * FROM LichSu_XuLyTaiKhoan;
 SELECT * FROM MinhChung_FreelancerStudents;
 SELECT * FROM ChuyenNganh;
 SELECT * FROM FreelancerStudents;
-SELECT * FROM KynangChuyennganh_FreelancerStudent;
+
 SELECT * FROM BaiDangTimViec_FreelancerStudent;
+SELECT * FROM FreelancerStudent_KyNang;
 SELECT * FROM NhaTuyenDung;
 SELECT * FROM FreelancerYeuThich;
 SELECT * FROM Wallet;
@@ -949,7 +974,9 @@ SELECT * FROM Task_CongViec;
 
 
 
-SELECT * FROM UngTuyen T, JobPost J
+
+
+SELECT * FROM JobPost T, UngTuyen J
 WHERE T.maJob = J.maJob
 
 

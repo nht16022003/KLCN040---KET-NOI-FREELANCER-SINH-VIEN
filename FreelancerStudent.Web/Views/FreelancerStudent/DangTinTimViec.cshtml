@@ -1,0 +1,78 @@
+@model FreelancerStudent.Web.ViewModels.DangTinTimViecViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Đăng tin tìm việc & Giới thiệu dịch vụ";
+}
+
+<div class="container py-4" style="max-width: 780px;">
+    <!-- Nút quay lại -->
+    <div class="mb-3">
+        <a asp-controller="FreelancerStudent" asp-action="QuanLyTimViec" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách bài đăng
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill mb-2 fw-semibold">
+                <i class="bi bi-briefcase-fill me-1"></i>Hồ sơ dịch vụ Freelancer
+            </span>
+            <h3 class="fw-bold text-dark">Đăng tin tìm việc làm</h3>
+            <p class="text-muted small">Quảng bá năng lực, kỹ năng và mức thù lao để Nhà tuyển dụng chủ động liên hệ
+                thuê bạn.</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small mb-3"></div>
+
+            <form asp-controller="FreelancerStudent" asp-action="DangTinTimViec" method="post">
+                <input type="hidden" asp-for="maUser" />
+
+                <!-- Tiêu đề -->
+                <div class="mb-3">
+                    <label asp-for="tieude" class="form-label fw-bold small"></label> <span class="text-danger">*</span>
+                    <input asp-for="tieude" class="form-control form-control-lg"
+                           placeholder="Ví dụ: Nhận thiết kế Web Frontend ReactJS, Banner Canva, Viết Content SEO..."
+                           required />
+                    <span asp-validation-for="tieude" class="text-danger small"></span>
+                </div>
+
+                <!-- Kỹ năng chuyên môn -->
+                <div class="mb-3">
+                    <label asp-for="kynang" class="form-label fw-bold small"></label> <span class="text-danger">*</span>
+                    <input asp-for="kynang" class="form-control"
+                           placeholder="Ví dụ: HTML, CSS, JavaScript, Photoshop, Figma, Python..." required />
+                    <small class="text-muted" style="font-size: 0.78rem;">Các kỹ năng cách nhau bởi dấu phẩy để hệ thống gắn
+                        tag đẹp mắt.</small>
+                        <span asp-validation-for="kynang" class="text-danger small d-block"></span>
+                    </div>
+
+                    <!-- Mức thù lao đề xuất tối thiểu -->
+                    <div class="mb-3">
+                        <label asp-for="mucGiaTu" class="form-label fw-bold small"></label> <span class="text-danger">*</span>
+                        <div class="input-group">
+                            <input asp-for="mucGiaTu" type="number" class="form-control" step="50000" min="10000" required />
+                            <span class="input-group-text fw-bold">VNĐ</span>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.78rem;">Mức thù lao tối thiểu tham khảo cho mỗi Job/Dự
+                            án.</small>
+                            <span asp-validation-for="mucGiaTu" class="text-danger small d-block"></span>
+                        </div>
+
+                        <!-- Mô tả chi tiết năng lực & dịch vụ -->
+                        <div class="mb-4">
+                            <label asp-for="mota" class="form-label fw-bold small"></label> <span class="text-danger">*</span>
+                            <textarea asp-for="mota" class="form-control" rows="6"
+                                      placeholder="Giới thiệu kinh nghiệm, các dự án từng làm, thời gian rảnh bạn có thể nhận việc và cam kết chất lượng..."
+                                      required></textarea>
+                            <span asp-validation-for="mota" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Nút submit -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm">
+                                <i class="bi bi-send-fill me-2"></i>Đăng tin tìm việc ngay
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>

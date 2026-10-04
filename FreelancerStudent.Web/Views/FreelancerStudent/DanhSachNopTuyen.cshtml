@@ -1,69 +1,115 @@
+@model List<FreelancerStudent.Web.Models.UngTuyenViewModel>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Danh sách công việc đã ứng tuyển";
 }
 
 <div class="container mt-4">
-    <h5 class="mb-3 fw-bold">Danh sách công việc đã ứng tuyển</h5>
-
-    <!-- Mỗi bài đã nộp là 1 hàng (row) đơn giản -->
-    <div class="row align-items-center p-3 mb-2 border rounded bg-white">
-        
-        <!-- Cột 1: Thông tin Bài đăng & Nhà tuyển dụng -->
-        <div class="col-md-5 d-flex align-items-center">
-            <!-- Logo Công ty hoặc Avatar của NTD -->
-            <img src="https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=100" alt="Avatar"
-                 class="rounded border" style="width: 50px; height: 50px; object-fit: cover;" />
-
-            <div style="margin-left: 12px;">
-                <!-- Tiêu đề công việc -->
-                <h6 class="mb-1 fw-bold">
-                    <a href="#" class="text-decoration-none text-dark">Thiết kế Website Bán Hàng</a>
-                </h6>
-                
-                <!-- Người đăng: Công ty hoặc Cá nhân -->
-                <p class="mb-1 text-muted" style="font-size: 0.85rem;">
-                    <i class="bi bi-building"></i> Công ty TNHH ABC
-                    <span class="text-secondary">(Đăng bởi: Nguyễn Hoàng Tuấn)</span>
-                    
-                    <!-- Nếu là cá nhân (không có công ty) thì hiển thị: -->
-                    <!-- <i class="bi bi-person"></i> Nguyễn Hoàng Tuấn <small class="text-secondary">(Cá nhân)</small> -->
-                </p>
-
-                <!-- Ngân sách của Job -->
-                <div class="text-secondary" style="font-size: 0.8rem;">
-                    Ngân sách bài đăng: <strong>3,000,000 đ</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cột 2: Đề xuất mà sinh viên đã gửi đi -->
-        <div class="col-md-4">
-            <div style="font-size: 0.85rem;">
-                <strong class="text-dark">Lương đề xuất:</strong>
-                <span class="text-success fw-bold">2,500,000 đ</span>
-            </div>
-            
-            <div class="text-muted" style="font-size: 0.85rem; margin-top: 2px;">
-                Thời gian cam kết: <strong>2 tuần</strong>
-            </div>
-
-            <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">
-                Ngày nộp đơn: 01/10/2026
-            </div>
-        </div>
-
-        <!-- Cột 3: Trạng thái duyệt & Xem chi tiết -->
-        <div class="col-md-3 text-end">
-            <!-- Trạng thái -->
-            <div class="mb-2">
-                <span class="badge bg-warning text-dark">Chờ NTD duyệt</span>
-            </div>
-
-            <!-- Nút bấm -->
-            <div>
-                <a href="#" class="btn btn-sm btn-outline-success">Xem chi tiết bài</a>
-            </div>
-        </div>
-
+    <!-- TIÊU ĐỀ TRANG -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0 fw-bold text-success">
+            Danh sách công việc bạn đã ứng tuyển
+        </h5>
+        <a asp-controller="JobPost" asp-action="Index" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-search me-1"></i>Tìm thêm Job mới
+        </a>
     </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show p-2 small mb-3">
+            <i class="bi bi-check-circle me-1"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- NẾU CHƯA NỘP ĐƠN NÀO -->
+    @if (Model == null || !Model.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 bg-white rounded-3">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-2 mb-3">Bạn chưa nộp đơn ứng tuyển cho công việc nào.</p>
+            <div>
+                <a asp-controller="JobPost" asp-action="Index" class="btn btn-success">
+                    Khám phá danh sách Job ngay
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- NẾU ĐÃ CÓ ĐƠN -> LẶP HIỂN THỊ TỪNG DÒNG -->
+        @foreach (var item in Model)
+        {
+            <div class="row align-items-center p-3 mb-3 border rounded-3 bg-white shadow-sm">
+                
+                <!-- Cột 1: Thông tin Bài đăng & Nhà tuyển dụng -->
+                <div class="col-md-5 d-flex align-items-center">
+                    <img src="@(string.IsNullOrEmpty(item.avatarNhaTuyenDung) ? "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=100" : item.avatarNhaTuyenDung)"
+                         alt="Avatar" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;" />
+
+                    <div style="margin-left: 12px;">
+                        <h6 class="mb-1 fw-bold text-dark">
+                            @item.tieude
+                        </h6>
+                        
+                        <p class="mb-1 text-muted small">
+                            <i class="bi bi-building text-success"></i>
+                            @(string.IsNullOrEmpty(item.tenCongTy) ? "Nhà tuyển dụng cá nhân" : item.tenCongTy)
+                        </p>
+
+                        <div class="text-secondary small">
+                            Ngân sách Job: <strong class="text-danger">@((item.thulao ?? 0).ToString("#,##0")) VNĐ</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Đề xuất mà sinh viên đã gửi đi -->
+                <div class="col-md-4 my-2 my-md-0">
+                    <div class="small">
+                        <strong class="text-dark">Lương bạn đề xuất:</strong>
+                        <span class="text-success fw-bold">@((item.thulaoDeXuat ?? 0).ToString("#,##0")) VNĐ</span>
+                    </div>
+                    
+                    <div class="text-muted small mt-1">
+                        Cam kết hoàn thành: <strong>@(string.IsNullOrEmpty(item.thoiGianHoanThanhDeXuat) ? "Theo yêu cầu" :
+                                                                                            item.thoiGianHoanThanhDeXuat)</strong>
+                    </div>
+
+                    <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                        <i class="bi bi-calendar-event me-1"></i>Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <!-- Cột 3: Trạng thái duyệt của Nhà tuyển dụng -->
+                <div class="col-md-3 text-md-end">
+                    <div class="mb-2">
+                        @if (item.trangThaiUngTuyen == "ChoDuyet")
+                        {
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3 py-2">
+                                <i class="bi bi-hourglass-split me-1"></i>Chờ NTD duyệt
+                            </span>
+                        }
+                        else if (item.trangThaiUngTuyen == "ChapNhan")
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+                                <i class="bi bi-check-circle-fill me-1"></i>Đã được chấp nhận
+                            </span>
+                        }
+                        else if (item.trangThaiUngTuyen == "TuChoi")
+                        {
+                            <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">
+                                <i class="bi bi-x-circle-fill me-1"></i>Bị từ chối
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary px-3 py-2">@item.trangThaiUngTuyen</span>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        }
+    }
 </div>

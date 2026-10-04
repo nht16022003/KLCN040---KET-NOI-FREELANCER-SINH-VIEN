@@ -2,74 +2,212 @@
 @model List<FreelancerStudent.Web.ViewModels.FreelacerStudentViewModel>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Danh sách Freelancer Sinh viên";
 }
-<style>
-    .card-header {
-        background-color: rgba(173, 246, 214, 0.302);
-    }
 
-    .btnXemChiTiet {
-        background-color: whitesmoke;
-    }
-
-    p {
-        margin-bottom: 2px;
-    }
-</style>
 <div class="container py-4">
-    <h4 class="mb-4 text-success fw-bold">Các bài đăng tuyển dụng</h4>
-    <div class="row g-4">
-        @if (Model != null && Model.Count > 0)
-        {
-            @foreach (var freelacerStudentViewModel in Model)
-            {
+    <!-- TIÊU ĐỀ TRANG -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="text-success fw-bold mb-1">
+                Tìm kiếm & Tuyển chọn Freelancer Sinh viên
+            </h4>
+            <span class="text-muted small">Khám phá thông tin, hồ sơ năng lực và kết nối trực tiếp với các bạn sinh
+                viên</span>
+            </div>
+            <span class="badge bg-light text-success border border-success px-3 py-2 rounded-0">
+                Tổng cộng: @(Model?.Count ?? 0) sinh viên
+            </span>
+        </div>
+
+        <!-- THANH BỘ LỌC TÌM KIẾM FREELANCER (FLAT DESIGN, ROUNDED-0) -->
+        <div class="card border rounded-0 p-3 mb-4 bg-light shadow-sm">
+            <div class="row g-2 align-items-center">
+                <!-- 1. Từ khoá -->
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white rounded-0 border-end-0 text-muted small">Tìm</span>
+                        <input type="text" id="filterKeyword" class="form-control rounded-0 border-start-0"
+                               placeholder="Tìm theo tên, trường học, kỹ năng...">
+                    </div>
+                </div>
+
+                <!-- 2. Chuyên ngành -->
                 <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border-0 rounded-3">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                              
-                                <div class="card-header">
-                                    <h5 class="card-title mb-1 fw-bold">@(freelacerStudentViewModel.tenUser?? "")</h5>
-                                </div>
-                                <p style="font-size:10px;">@(freelacerStudentViewModel.tenTruong)/p>>
-                                  
-                                </div>
-                                <p style="font-weight:bold;">Chuyên ngành:
-                                    <span>@(freelacerStudentViewModel.tenChuyenNganh)</span>
-                                </p>
-                                <p style="color:red; font-weight:bold;">GPA: <span
-                                    style=color:black>@(freelacerStudentViewModel.GPA)
-                                    VNĐ</span></p>
-                                    <p>Thời gian đăng tuyển: @(freelacerStudentViewModel.trangthaiNhanViec)</p>
-                                </div>
-                               
-                           
-                                <div class="d-flex justify-content-evenly align-items-center gap-3 mb-3">
-                                    <!-- 1. Nút Xem Chi Tiết: Chuyển trang và truyền maJob lên URL -->
-                                    <a asp-controller="Job" asp-action="ChiTiet" asp-route-id="" class="btn btn-outline-success">
-                                        Xem Chi Tiết
-                                    </a>
+                    <select id="filterMajor" class="form-select rounded-0">
+                        <option value="">-- Tất cả chuyên ngành --</option>
+                        @if (Model != null)
+                        {
+                            var chuyenNganhs = Model.Where(x => !string.IsNullOrEmpty(x.tenChuyenNganh))
+                                                    .Select(x => x.tenChuyenNganh!)
+                                                    .Distinct()
+                                                    .OrderBy(x => x);
+                            foreach (var cn in chuyenNganhs)
+                            {
+                                <option value="@cn">@cn</option>
+                            }
+                        }
+                    </select>
+                </div>
 
-                                    <!-- 2. Nút Thuê Ngay: Chuyển sang trang tạo hợp đồng và truyền maJob -->
-                                    <a asp-controller="HopDong" asp-action="TaoHopDong" asp-route-jobId="" class="btn btn-success">
-                                        Thuê Ngay
-                                    </a>
-                                </div>
+                <!-- 3. Trạng thái nhận việc -->
+                <div class="col-md-3">
+                    <select id="filterStatus" class="form-select rounded-0">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="true">Sẵn sàng nhận việc</option>
+                        <option value="false">Tạm ngưng</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-                          
-                            
-                       
-                            </div>
+        <!-- DANH SÁCH SINH VIÊN (CARD VUÔNG VỨC) -->
+        <div class="row g-3" id="freelancerListContainer">
+            @if (Model != null && Model.Count > 0)
+            {
+                @foreach (var sv in Model)
+                {
+                    var avatarUrl = !string.IsNullOrEmpty(sv.avatar)
+                        ? sv.avatar
+                        : "./assets/image/Trong_NTD.jpg";
+
+                    <div class="col-md-6 col-lg-4 freelancer-card-wrapper" data-name="@((sv.tenUser ?? "").ToLower())"
+                         data-school="@((sv.tenTruong ?? "").ToLower())" data-skills="@((sv.kyNangCoBan ?? "").ToLower())"
+                         data-major="@(sv.tenChuyenNganh ?? "")" data-ready="@(sv.trangthaiNhanViec ? "true" : "false")">
+                        <div class="card h-100 border p-3 bg-white rounded-0 d-flex flex-column shadow-sm">
                         
-                       
+                            <!-- Header Card: Avatar vuông + Tên + Năm học -->
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img src=".\assets\image\@sv.avatar" alt="@sv.tenUser" class="border rounded-0"
+                                     style="width: 55px; height: 55px; object-fit: cover; flex-shrink: 0;" />
+                            
+                                <div class="overflow-hidden">
+                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="@sv.tenUser">
+                                        @(sv.tenUser ?? "Sinh viên ẩn danh")
+                                    </h6>
+                                    <span class="text-muted small d-block" style="font-size: 0.8rem;">
+                                        Sinh viên năm @sv.namThu
+                                    </span>
+                                    <span class="badge bg-light text-success border rounded-0" style="font-size: 0.72rem;">
+                                        @(string.IsNullOrEmpty(sv.tenChuyenNganh) ? "Đa ngành" : sv.tenChuyenNganh)
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Khung thông tin trường học & GPA (Vuông góc) -->
+                            <div class="p-2 mb-2 bg-light border rounded-0 small" style="font-size: 0.82rem;">
+                                <div class="mb-1 text-truncate">
+                                    <strong>Trường:</strong> @(string.IsNullOrEmpty(sv.tenTruong) ? "Chưa cập nhật" : sv.tenTruong)
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span><strong>GPA:</strong> @sv.GPA/4.0</span>
+                                    <span>Khu vực: @(string.IsNullOrEmpty(sv.diaDiemFreelancerStudent) ? "Toàn quốc" :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    sv.diaDiemFreelancerStudent)</span>
+                                    </div>
+                                </div>
+
+                                <!-- Kỹ năng (Tag vuông) -->
+                                @if (!string.IsNullOrEmpty(sv.kyNangCoBan))
+                                {
+                                    <div class="mb-2">
+                                        <span class="text-muted small d-block mb-1" style="font-size: 0.75rem;">Kỹ năng:</span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var kn in sv.kyNangCoBan.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                            {
+                                                <span class="badge bg-light text-dark border rounded-0"
+                                                      style="font-size: 0.72rem;">@kn.Trim()</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Trạng thái nhận việc & Mức thù lao -->
+                                <div class="d-flex justify-content-between align-items-center mb-3 mt-auto">
+                                    <div>
+                                        @if (sv.trangthaiNhanViec)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success px-2 py-1 rounded-0"
+                                                  style="font-size: 0.75rem;">
+                                                Sẵn sàng nhận việc
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-0"
+                                                  style="font-size: 0.75rem;">
+                                                Tạm ngưng
+                                            </span>
+                                        }
+                                    </div>
+                                    <span class="text-danger fw-bold small">
+                                        @(sv.chiPhiTu.HasValue && sv.chiPhiTu > 0 ? $"{sv.chiPhiTu.Value.ToString("#,##0")} đ" : "Thỏa thuận")
+                                    </span>
+                                </div>
+
+                                <!-- Footer Card: 2 Nút (Xem Chi Tiết & Nhắn Tin Trao Đổi) Vuông góc -->
+                                <div class="pt-2 border-top d-flex gap-2">
+                                    <!-- 1. Nút Xem chi tiết -->
+                                    <a href="/FreelancerStudent/Profile/@sv.maFreelancerStudents"
+                                       class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-0 fw-semibold">
+                                        Xem hồ sơ
+                                    </a>
+
+                                    <!-- 2. Nút Nhắn tin trao đổi -->
+                                    <a href="/Chat?maFreelancerStudent=@sv.maFreelancerStudents"
+                                       class="btn btn-sm btn-success flex-grow-1 rounded-0 fw-semibold"
+                                       style="background-color: #1B5E36; border-color: #1B5E36;">
+                                        Nhắn tin
+                                    </a>
+                                </div>
+
+                            </div>
                         </div>
                     }
                 }
         else
                 {
                     <div class="col-12">
-                        <div class="alert alert-info">Chưa có nhà tuyển dụng nào.</div>
+                        <div class="alert alert-light border rounded-0 text-center py-5 text-muted">
+                            Hiện tại chưa có hồ sơ sinh viên nào trong hệ thống.
+                        </div>
                     </div>
                 }
             </div>
         </div>
+
+        @section Scripts {
+            <script>
+                const filterKeyword = document.getElementById("filterKeyword");
+                const filterMajor = document.getElementById("filterMajor");
+                const filterStatus = document.getElementById("filterStatus");
+                const cards = document.querySelectorAll(".freelancer-card-wrapper");
+
+                function applyFilter() {
+                    const kw = filterKeyword.value.toLowerCase().trim();
+                    const major = filterMajor.value;
+                    const status = filterStatus.value;
+
+                    cards.forEach(card => {
+                        const name = card.getAttribute("data-name") || "";
+                        const school = card.getAttribute("data-school") || "";
+                        const skills = card.getAttribute("data-skills") || "";
+                        const cardMajor = card.getAttribute("data-major") || "";
+                        const ready = card.getAttribute("data-ready") || "";
+
+                        let matchKw = !kw || name.includes(kw) || school.includes(kw) || skills.includes(kw);
+                        let matchMajor = !major || cardMajor === major;
+                        let matchStatus = !status || ready === status;
+
+                        if (matchKw && matchMajor && matchStatus) {
+                            card.classList.remove("d-none");
+                        } else {
+                            card.classList.add("d-none");
+                        }
+                    });
+                }
+
+                if (filterKeyword) filterKeyword.addEventListener("input", applyFilter);
+                if (filterMajor) filterMajor.addEventListener("change", applyFilter);
+                if (filterStatus) filterStatus.addEventListener("change", applyFilter);
+            </script>
+        }

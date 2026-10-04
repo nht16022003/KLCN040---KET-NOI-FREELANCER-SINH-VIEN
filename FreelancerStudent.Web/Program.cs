@@ -39,6 +39,9 @@ builder.Services.AddScoped<IAuthWebService, AuthWebService>();
 builder.Services.AddScoped<INhaTuyenDungWebService, NhaTuyenDungWebService>();
 builder.Services.AddScoped<IJobPostWebService, JobPostWebService>();
 builder.Services.AddScoped<IFreelancerStudentWebService, FreelancerStudentWebService>();
+builder.Services.AddScoped<IBaiDangTimViecWebService, BaiDangTimViecWebService>();
+builder.Services.AddScoped<IChatWebService, ChatWebService>();
+
 
 var app = builder.Build();
 

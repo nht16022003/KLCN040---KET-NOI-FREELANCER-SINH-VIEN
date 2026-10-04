@@ -1,0 +1,64 @@
+@model FreelancerStudent.Web.ViewModels.JobPostViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Chỉnh sửa bài tuyển dụng";
+}
+
+<div class="container py-4" style="max-width: 780px;">
+    <div class="mb-3">
+        <a asp-action="QuanLyTinTuyenDung" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card border p-4 bg-white rounded-0 shadow-sm">
+        <h4 class="fw-bold text-success mb-3">Chỉnh sửa tin tuyển dụng</h4>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small mb-3"></div>
+
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="maJob" />
+            <input type="hidden" asp-for="maNhaTuyenDung" />
+
+            <div class="mb-3">
+                <label asp-for="tieude" class="form-label fw-bold small">Tiêu đề bài đăng</label> <span
+                class="text-danger">*</span>
+                <input asp-for="tieude" class="form-control rounded-0" required />
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="thulao" class="form-label fw-bold small">Ngân sách (VNĐ)</label> <span
+                    class="text-danger">*</span>
+                    <input asp-for="thulao" type="number" class="form-control rounded-0" required />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="soluongtuyen" class="form-label fw-bold small">Số lượng tuyển</label> <span
+                    class="text-danger">*</span>
+                    <input asp-for="soluongtuyen" type="number" class="form-control rounded-0" min="1" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="kynangyeucau" class="form-label fw-bold small">Kỹ năng yêu cầu</label>
+                <input asp-for="kynangyeucau" class="form-control rounded-0" placeholder="Cách nhau bởi dấu phẩy..." />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="thoigiandukienhoanthanh" class="form-label fw-bold small">Hạn hoàn thành</label> <span
+                class="text-danger">*</span>
+                <input asp-for="thoigiandukienhoanthanh" type="date" class="form-control rounded-0" required />
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="mota" class="form-label fw-bold small">Mô tả công việc</label> <span
+                class="text-danger">*</span>
+                <textarea asp-for="mota" class="form-control rounded-0" rows="5" required></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="QuanLyTinTuyenDung" class="btn btn-outline-secondary rounded-0 px-3">Hủy</a>
+                <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>

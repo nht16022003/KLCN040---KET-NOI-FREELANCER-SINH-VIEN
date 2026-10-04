@@ -1,0 +1,119 @@
+@model FreelancerStudent.Web.Models.UngTuyenViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Nộp đơn ứng tuyển - " + Model.tieude;
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        
+        <!-- CỘT 1 (BÊN TRÁI): THÔNG TIN BÀI ĐĂNG CỦA NHÀ TUYỂN DỤNG -->
+        <div class="col-lg-5">
+            <div class="card border rounded-0 p-3 bg-light shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-light text-success border border-success rounded-0">
+                        Mã tin: #@Model.maJob
+                    </span>
+                    <span class="text-muted small">Tuyển: @(Model.soluongtuyen ?? 1) bạn</span>
+                </div>
+
+                <!-- Tiêu đề -->
+                <h5 class="fw-bold text-dark mb-2">@Model.tieude</h5>
+
+                <!-- Người đăng -->
+                <div class="d-flex align-items-center gap-2 mb-3 text-muted small">
+                    <span>Đơn vị: @(string.IsNullOrEmpty(Model.tenCongTy) ? "Nhà tuyển dụng cá nhân" : Model.tenCongTy)</span>
+                </div>
+
+                <!-- Ngân sách -->
+                <div class="p-2 mb-3 bg-white rounded-0 border">
+                    <span class="text-muted small d-block">Ngân sách công việc:</span>
+                    <h5 class="text-danger fw-bold mb-0">@((Model.thulao ?? 0).ToString("#,##0")) VNĐ</h5>
+                </div>
+
+                <!-- Kỹ năng yêu cầu -->
+                <div class="mb-3">
+                    <strong class="small text-dark d-block mb-1">Kỹ năng yêu cầu:</strong>
+                    <span class="badge bg-white text-dark border rounded-0 p-2">
+                        @(string.IsNullOrEmpty(Model.kynangyeucau) ? "Không có yêu cầu cụ thể" : Model.kynangyeucau)
+                    </span>
+                </div>
+
+                <!-- Hạn hoàn thành -->
+                <div class="mb-3 small text-muted">
+                    Hạn hoàn thành: <strong>@Model.thoigiandukienhoanthanh.ToString("dd/MM/yyyy")</strong>
+                </div>
+
+                <!-- Mô tả chi tiết -->
+                <div class="border-top pt-2 mt-auto">
+                    <strong class="small text-dark d-block mb-1">Mô tả chi tiết:</strong>
+                    <p class="text-secondary small mb-0" style="white-space: pre-line; line-height: 1.6;">
+                        @(string.IsNullOrEmpty(Model.mota) ? "Chưa có mô tả chi tiết." : Model.mota)
+                    </p>
+                </div>
+
+                <!-- Nút trao đổi qua Chat với NTD -->
+                <div class="pt-3 border-top mt-3">
+                    <a href="/Chat?maJob=@Model.maJob" class="btn btn-outline-success btn-sm w-100 rounded-0 fw-semibold">
+                        Nhắn tin trao đổi trước với NTD
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT 2 (BÊN PHẢI): FORM ĐIỀN ĐƠN ỨNG TUYỂN CỦA SINH VIÊN -->
+        <div class="col-lg-7">
+            <div class="card border rounded-0 p-4 bg-white shadow-sm">
+                <h5 class="fw-bold text-success mb-3">Đề xuất ứng tuyển của bạn</h5>
+    
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small mb-3 rounded-0"></div>
+
+                <form asp-controller="JobPost" asp-action="UngTuyen" method="post">
+                    <!-- Các trường ẩn để gửi kèm -->
+                    <input type="hidden" asp-for="maJob" />
+                    <input type="hidden" asp-for="tieude" />
+                    <input type="hidden" asp-for="thulao" />
+
+                    <!-- Mức thù lao mong muốn -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Mức thù lao bạn đề xuất (VNĐ):</label>
+                        <input asp-for="thulaoDeXuat" type="number" class="form-control rounded-0" required />
+                        <small class="text-muted" style="font-size: 0.75rem;">Mặc định lấy theo mức ngân sách của bài Job, bạn có thể chỉnh sửa.</small>
+                    </div>
+
+                    <!-- Thời gian cam kết -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Thời gian hoàn thành cam kết:</label>
+                        <input asp-for="thoiGianHoanThanhDeXuat" type="text" class="form-control rounded-0"
+                               placeholder="Ví dụ: 3 ngày, 1 tuần, 15 ngày..." required />
+                    </div>
+
+                    <!-- Thư giới thiệu -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Thư giới thiệu bản thân & kế hoạch làm:</label>
+                        <textarea asp-for="thuGioiThieu" class="form-control rounded-0" rows="4"
+                                  placeholder="Nêu kinh nghiệm, điểm mạnh và cam kết của bạn..." required></textarea>
+                    </div>
+
+                    <!-- Link file CV / Portfolio (Tùy chọn) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Link CV / Sản phẩm mẫu (Google Drive, Canva, Github...):</label>
+                        <input asp-for="fileCV" type="text" class="form-control rounded-0" placeholder="https://..." />
+                    </div>
+
+                    <!-- Nút gửi -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-controller="JobPost" asp-action="Index" class="btn btn-outline-secondary rounded-0">
+                            Quay lại danh sách
+                        </a>
+                        <button type="submit" class="btn btn-success fw-bold px-4 rounded-0"
+                                style="background-color: #1B5E36; border-color: #1B5E36;">
+                            Xác nhận nộp đơn
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

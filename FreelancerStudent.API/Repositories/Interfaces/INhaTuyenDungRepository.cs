@@ -7,6 +7,7 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //Lấy tất cả nhà tuyển dụng
         Task<List<NhaTuyenDung>> layTatCaNhaTuyenDungAsync();
 
+        //Tuấn
         //Thêm nhà tuyển dụng dựa vào maRole của Users
         Task<NhaTuyenDung> themNhaTuyenDungDuaVaoMaRoleCuaUsers(Users user, int maRole);
 

@@ -17,5 +17,19 @@ namespace FreelancerStudent.Web.Services.Interfaces
 
         //Tuấn
         Task<ApiReponse<List<UngTuyenViewModel>>> layDSUngTuyenTheoMaUser(int maUser);
+
+        //Tuấn
+        Task<ApiReponse<bool>> duyetUngTuyenAsync(int maUngTuyen, string trangThai);
+
+
+        //Tuấn
+        Task<ApiReponse<bool>> nopDonUngTuyenAsync(UngTuyenViewModel model);
+
+        //Tuấn 
+        Task<ApiReponse<List<JobPostViewModel>>> layJobCuaToiAsync(int maUser);
+
+
+        //Tuấn
+        Task<ApiReponse<bool>> capNhatJobPostAsync(JobPostViewModel model);
     }
 }

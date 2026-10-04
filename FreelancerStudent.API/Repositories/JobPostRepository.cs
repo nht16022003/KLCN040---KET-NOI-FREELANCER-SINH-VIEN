@@ -49,5 +49,52 @@ namespace FreelancerStudent.API.Repositories
             return dsUngTuyen;
         }
 
+        //Tuấn
+        public async Task<bool> capNhatTrangThaiUngTuyenAsync(int maUngTuyen, string trangthai)
+        {
+            var ungtuyen = await _context.UngTuyens.FirstOrDefaultAsync(u => u.maUngTuyen == maUngTuyen);
+            if (ungtuyen == null)
+            {
+                return false;
+            }
+
+            ungtuyen.trangThaiUngTuyen = trangthai;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        //Tuấn
+        public async Task<UngTuyen> themUngTuyenAsync(UngTuyen ungTuyen)
+        {
+            await _context.UngTuyens.AddAsync(ungTuyen);
+            await _context.SaveChangesAsync();
+            return ungTuyen;
+        }
+
+
+        //Tuấn
+        public async Task<List<JobPost>> layJobPostTheoMaNTDAsync(int maNhaTuyenDung)
+        {
+            return await _context.JobPosts
+                .Include(j => j.UngTuyens) // Nạp kèm đơn ứng tuyển để đếm số lượng ứng viên
+                .Where(j => j.maNhaTuyenDung == maNhaTuyenDung)
+                .OrderByDescending(j => j.thoigiandangtuyen)
+                .ToListAsync();
+        }
+
+        //Tuan
+        public async Task<JobPost> layJobPostTheoMaAsync(string maJob)
+        {
+            return await _context.JobPosts.FirstOrDefaultAsync(j => j.maJob == maJob);
+        }
+
+        //Tuấn
+        public async Task<bool> capNhatJobPostAsync(JobPost job)
+        {
+            _context.JobPosts.Update(job);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

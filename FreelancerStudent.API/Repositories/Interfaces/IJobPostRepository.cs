@@ -14,10 +14,25 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         Task<List<UngTuyen>> layTatCaDanhSachUngTuyenVaoJobPost_TheoNTD(int maNhaTuyenDung); //lấy ds ứng tuyển theo nhà tuyển dụng 
         //ở phía ntd xem ds ứng tuyển mà freelancer gửi sang
 
+
+        //Tuấn
         Task<List<UngTuyen>> layTatCaDanhSachUngTuyenVaoJobPost_TheoFreelancerStudents(int maFreelancerStudents); //lấy ds ứng tuyển theo freelancer
         //ở phía freelancer có thể xem là đã nộp tuyển vào đâu
 
+        //Tuấn
+        Task<bool> capNhatTrangThaiUngTuyenAsync(int maUngTuyen, string trangthai);
 
+        //Tuấn
+        Task<UngTuyen> themUngTuyenAsync(UngTuyen ungTuyen);
+
+        //Tuấn
+        Task<List<JobPost>> layJobPostTheoMaNTDAsync(int maNhaTuyenDung);
+
+        //Tuan
+        Task<JobPost> layJobPostTheoMaAsync(string maJob);
+
+        //Tuấn
+        Task<bool> capNhatJobPostAsync(JobPost job);
 
     }
 }

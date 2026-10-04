@@ -1,9 +1,11 @@
 using System.Reflection.Metadata.Ecma335;
+using FreelancerStudent.API.DTOs.ReponseDTOs;
 using FreelancerStudent.API.DTOs.ReponsesDTO;
 using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
+using Microsoft.VisualBasic;
 
 namespace FreelancerStudent.API.Services
 {
@@ -74,7 +76,7 @@ namespace FreelancerStudent.API.Services
                 GPA = free.GPA,
                 nienKhoa = free.nienKhoa,
                 gioithieu = free.gioithieu,
-
+                avatar = free.User.avatarUrl,
                 trangthaiNhanViec = free.trangthaiNhanViec,
                 chiPhiTu = free.chiPhiTu
             }).ToList();
@@ -82,14 +84,63 @@ namespace FreelancerStudent.API.Services
             return dsResult;
         }
 
-        /*
-        
+        public async Task<FreelancerStudent_ReponseDTO> layFreelancerStudent_TheoMaUser(int maUser)
+        {
+            var re = await _freelancerStudentRepository.layFreelancerStudent_TheoMaUser(maUser);
 
-          
+            if (re == null) return null;
 
-        */
+            return new FreelancerStudent_ReponseDTO
+            {
+                maUser = re.maUser,
+                tenUser = re.User!.hotenUser
+            };
+        }
 
+        //Tuấn
+        public async Task<ChiTietHoSoFreelancer_ReponseDTO?> layChiTietHoSoAsync(int maFreelancerStudents)
+        {
+            var entity = await _freelancerStudentRepository.layChiTietTheoIdAsync(maFreelancerStudents);
+            if (entity == null) return null;
+
+            return new ChiTietHoSoFreelancer_ReponseDTO
+            {
+                maFreelancerStudents = entity.maFreelancerStudents,
+                maUser = entity.maUser,
+                tenUser = entity.User?.hotenUser ?? string.Empty,
+                sdt = entity.User?.sdtUser,
+                email = entity.User?.emailUser,
+                avatar = entity.User?.avatarUrl,
+                maChuyenNganh = entity.maChuyenNganh,
+                tenChuyenNganh = entity.ChuyenNganh?.tenChuyenNganh ?? entity.maChuyenNganh,
+                tenTruong = entity.tenTruong,
+                diaDiemFreelancerStudent = entity.diaDiemFreelancerStudent,
+                namThu = entity.namThu,
+                GPA = entity.GPA,
+                nienKhoa = entity.nienKhoa,
+                gioithieu = entity.gioithieu,
+                kyNangCoBan = entity.kyNangCoBan,
+                ngonNgu = entity.ngonNgu,
+                trangthaiNhanViec = entity.trangthaiNhanViec,
+                chiPhiTu = entity.chiPhiTu,
+                danhSachKyNang = entity.FreelancerStudent_KyNangs
+                    .Where(k => k.KyNang != null)
+                    .Select(k => k.KyNang!.tenKyNang)
+                    .ToList()
+            };
+        }
+
+
+        //Tuấn
+        public async Task<bool> capNhatHoSoAsync(ChiTietHoSoFreelancer_ReponseDTO dto)
+        {
+            // thực thi việc lưu
+            return await _freelancerStudentRepository.capNhatHoSoAsync(dto);
+        }
 
 
     }
+
+
+
 }

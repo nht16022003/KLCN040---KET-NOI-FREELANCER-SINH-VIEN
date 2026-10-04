@@ -152,5 +152,90 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+        public async Task<ApiReponse<bool>> duyetUngTuyenAsync(int maUngTuyen, string trangThai)
+        {
+            try
+            {
+                var request = new
+                {
+                    maUngTuyen = maUngTuyen,
+                    trangThai = trangThai
+                };
+
+                var json = JsonSerializer.Serialize(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _guiRequest.PostAsync("api/JobPost/DuyetUngTuyen", content);
+                var noiDung = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(noiDung, _jsonOptions) ??
+                new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Không đọc được dữ liệu trả về."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> nopDonUngTuyenAsync(UngTuyenViewModel model)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(model);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _guiRequest.PostAsync("api/JobPost/UngTuyen", content);
+                var noiDung = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(noiDung, _jsonOptions)
+                    ?? new ApiReponse<bool> { success = false, message = "Lỗi đọc dữ liệu API." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool> { success = false, message = ex.Message };
+            }
+        }
+
+
+        //Tuấn
+        public async Task<ApiReponse<List<JobPostViewModel>>> layJobCuaToiAsync(int maUser)
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync($"api/JobPost/CuaToi/{maUser}");
+                var data = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<List<JobPostViewModel>>>(data, _jsonOptions)
+                    ?? new ApiReponse<List<JobPostViewModel>> { success = false, message = "Lỗi đọc dữ liệu." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<JobPostViewModel>> { success = false, message = ex.Message };
+            }
+        }
+
+
+        //Tuấn
+        public async Task<ApiReponse<bool>> capNhatJobPostAsync(JobPostViewModel model)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(model);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _guiRequest.PutAsync("api/JobPost/CapNhat", content);
+                var data = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(data, _jsonOptions)
+                    ?? new ApiReponse<bool> { success = false, message = "Lỗi đọc dữ liệu." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool> { success = false, message = ex.Message };
+            }
+        }
+
     }
 }

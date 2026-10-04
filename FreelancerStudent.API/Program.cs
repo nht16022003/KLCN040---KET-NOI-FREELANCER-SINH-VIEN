@@ -22,6 +22,11 @@ builder.Services.AddScoped<IJobPostRepository, JobPostRepository>();
 builder.Services.AddScoped<IJobPostService, JobPostService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IBaiDangTimViecRepository, BaiDangTimViecRepository>();
+builder.Services.AddScoped<IBaiDangTimViecService, BaiDangTimViecService>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
 
 // 2. Đăng ký Controllers
 builder.Services.AddControllers();

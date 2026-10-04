@@ -43,6 +43,8 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
         public int maUser { get; set; }
 
+        public string maJob { get; set; } = string.Empty;
+
 
     }
 }

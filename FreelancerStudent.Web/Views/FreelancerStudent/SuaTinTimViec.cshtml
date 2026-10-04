@@ -1,0 +1,67 @@
+@model FreelancerStudent.Web.ViewModels.DangTinTimViecViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Chỉnh sửa bài đăng tìm việc";
+}
+
+<div class="container py-4" style="max-width: 780px;">
+    <div class="mb-3">
+        <a asp-action="QuanLyTimViec" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách bài đăng
+        </a>
+    </div>
+
+    <div class="card border p-4 bg-white rounded-0 shadow-sm">
+        <div class="mb-3 border-bottom pb-2">
+            <h4 class="fw-bold text-success mb-1">Chỉnh sửa tin tìm việc</h4>
+            <span class="text-muted small">Mã bài đăng: #@ViewBag.MaBaiDang</span>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 small mb-3"></div>
+
+        <form asp-action="SuaTinTimViec" asp-route-maBaiDang="@ViewBag.MaBaiDang" method="post">
+            <input type="hidden" asp-for="maUser" />
+
+            <!-- Tiêu đề -->
+            <div class="mb-3">
+                <label asp-for="tieude" class="form-label fw-bold small">Tiêu đề bài đăng</label> <span
+                class="text-danger">*</span>
+                <input asp-for="tieude" class="form-control rounded-0" required />
+                <span asp-validation-for="tieude" class="text-danger small"></span>
+            </div>
+
+            <!-- Kỹ năng -->
+            <div class="mb-3">
+                <label asp-for="kynang" class="form-label fw-bold small">Kỹ năng chuyên môn (cách nhau bởi dấu
+                    phẩy)</label> <span class="text-danger">*</span>
+                    <input asp-for="kynang" class="form-control rounded-0" required />
+                    <span asp-validation-for="kynang" class="text-danger small"></span>
+                </div>
+
+                <!-- Mức giá từ -->
+                <div class="mb-3">
+                    <label asp-for="mucGiaTu" class="form-label fw-bold small">Mức thù lao mong muốn tối thiểu (VNĐ)</label>
+                    <span class="text-danger">*</span>
+                    <input asp-for="mucGiaTu" type="number" class="form-control rounded-0" min="10000" step="50000"
+                           required />
+                    <span asp-validation-for="mucGiaTu" class="text-danger small"></span>
+                </div>
+
+                <!-- Mô tả -->
+                <div class="mb-4">
+                    <label asp-for="mota" class="form-label fw-bold small">Mô tả năng lực & dịch vụ</label> <span
+                    class="text-danger">*</span>
+                    <textarea asp-for="mota" class="form-control rounded-0" rows="5" required></textarea>
+                    <span asp-validation-for="mota" class="text-danger small"></span>
+                </div>
+
+                <!-- Nút bấm -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="QuanLyTimViec" class="btn btn-outline-secondary rounded-0 px-3">Hủy</a>
+                    <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold">
+                        <i class="bi bi-check2 me-1"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>

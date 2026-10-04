@@ -64,10 +64,13 @@ namespace FreelancerStudent.API.Models
         [ForeignKey("maChuyenNganh")]
         public virtual ChuyenNganh? ChuyenNganh { get; set; }
 
-        public virtual ICollection<KyNang> KyNang { get; set; } = new List<KyNang>();
+        //public virtual ICollection<KyNang> KyNang { get; set; } = new List<KyNang>();
 
         public virtual ICollection<FreelancerStudent_KyNang> FreelancerStudent_KyNangs { get; set; } = new List<FreelancerStudent_KyNang>();
 
         public virtual ICollection<UngTuyen> UngTuyens { get; set; } = new List<UngTuyen>();
+
+        public virtual ICollection<BaiDangTimViecFreelancerStudent> BaiDangTimViecs { get; set; } = new List<BaiDangTimViecFreelancerStudent>();
+
     }
 }

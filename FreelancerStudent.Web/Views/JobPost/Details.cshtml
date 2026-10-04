@@ -1,0 +1,31 @@
+<form asp-controller="JobPost" asp-action="UngTuyen" method="post" class="p-3 border rounded bg-white">
+    <!-- Mã Job ẩn -->
+    <input type="hidden" name="maJob" value="@Model.maJob" />
+
+    <h6 class="fw-bold text-success mb-3">Ứng tuyển công việc này</h6>
+
+    <!-- Thư giới thiệu -->
+    <div class="mb-3">
+        <label class="form-label small fw-bold">Thư giới thiệu bản thân & kế hoạch làm việc:</label>
+        <textarea name="thuGioiThieu" class="form-control" rows="3" required
+                  placeholder="Nêu kinh nghiệm, kỹ năng phù hợp của bạn..."></textarea>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <!-- Thù lao đề xuất -->
+        <div class="col-md-6">
+            <label class="form-label small fw-bold">Mức thù lao đề xuất (VNĐ):</label>
+            <input type="number" name="thulaoDeXuat" class="form-control" value="@Model.thulao" />
+        </div>
+        <!-- Thời gian cam kết -->
+        <div class="col-md-6">
+            <label class="form-label small fw-bold">Thời gian hoàn thành cam kết:</label>
+            <input type="text" name="thoiGianHoanThanhDeXuat" class="form-control"
+                   placeholder="Ví dụ: 3 ngày, 1 tuần..." />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success fw-bold px-4">
+        <i class="bi bi-send me-1"></i> Gửi đơn ứng tuyển
+    </button>
+</form>

@@ -5,9 +5,11 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
         <h5 class="fw-bold mb-0 text-success">Danh sách ứng viên nộp hồ sơ</h5>
-        <span class="text-muted small">Tổng cộng: <strong>@(Model?.Count ?? 0)</strong> đơn ứng tuyển</span>
+        <span class="badge bg-light text-success border border-success rounded-0 px-3 py-2">
+            Tổng cộng: @(Model?.Count ?? 0) đơn ứng tuyển
+        </span>
     </div>
 
     @if (Model != null && Model.Count > 0)
@@ -16,16 +18,15 @@
         {
             var avatarSinhVien = !string.IsNullOrEmpty(item.avatar)
                                 ? item.avatar
-                                : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenUser ??
- "Student")}&background=E8F5E9&color=2E7D32";
+                                : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenUser ?? "Student")}&background=E8F5E9&color=2E7D32";
 
             <!-- Mỗi ứng viên là một hàng (row) -->
-            <div class="row align-items-center p-3 mb-2 border rounded bg-white shadow-sm">
+            <div class="row align-items-center p-3 mb-2 border rounded-0 bg-white shadow-sm">
                 
                 <!-- Cột 1: Thông tin sinh viên ứng tuyển -->
                 <div class="col-md-5 d-flex">
                     <!-- Ảnh đại diện sinh viên -->
-                    <img src="@avatarSinhVien" alt="@item.tenUser" class="rounded-circle border"
+                    <img src="@avatarSinhVien" alt="@item.tenUser" class="rounded-0 border"
                          style="width: 50px; height: 50px; object-fit: cover;" />
 
                     <div style="margin-left: 12px;">
@@ -39,8 +40,7 @@
                         </p>
                         
                         <p class="mb-1 text-secondary" style="font-size: 0.8rem;">
-                            <strong>Thư giới thiệu:</strong> @(string.IsNullOrEmpty(item.thuGioiThieu) ? "Không có lời nhắn" :
-                                                item.thuGioiThieu)
+                            <strong>Thư giới thiệu:</strong> @(string.IsNullOrEmpty(item.thuGioiThieu) ? "Không có lời nhắn" : item.thuGioiThieu)
                         </p>
 
                         <!-- Link xem file CV đính kèm nếu có -->
@@ -48,7 +48,7 @@
                         {
                             <a href="@item.fileCV" target="_blank" class="text-primary text-decoration-none"
                                style="font-size: 0.8rem;">
-                                <i class="bi bi-file-earmark-pdf"></i> Xem CV đính kèm
+                                Xem CV đính kèm
                             </a>
                         }
                     </div>
@@ -62,59 +62,82 @@
                     </div>
                     
                     <div class="text-muted" style="font-size: 0.85rem; margin-top: 4px;">
-                        <span>Thù lao đề xuất: <strong>@((item.thulaoDeXuat ?? item.thulao ?? 0).ToString("#,##0"))
-                            đ</strong></span>
-                            @if (!string.IsNullOrEmpty(item.thoiGianHoanThanhDeXuat))
-                            {
-                                <span> - Cam kết: <strong>@item.thoiGianHoanThanhDeXuat</strong></span>
-                            }
-                        </div>
-
-                        <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">
-                            Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
-                        </div>
+                        <span>Thù lao đề xuất: <strong>@((item.thulaoDeXuat ?? item.thulao ?? 0).ToString("#,##0")) đ</strong></span>
+                        @if (!string.IsNullOrEmpty(item.thoiGianHoanThanhDeXuat))
+                        {
+                            <span> - Cam kết: <strong>@item.thoiGianHoanThanhDeXuat</strong></span>
+                        }
                     </div>
 
-                    <!-- Cột 3: Trạng thái & Thao tác duyệt -->
-                    <div class="col-md-3 text-end">
-                        <!-- Trạng thái đơn -->
-                        <div class="mb-2">
-                            @if (item.trangThaiUngTuyen == "ChoDuyet")
-                            {
-                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
-                            }
-                            else if (item.trangThaiUngTuyen == "ChapNhan")
-                            {
-                                <span class="badge bg-success">Đã chấp nhận</span>
-                            }
-                            else if (item.trangThaiUngTuyen == "TuChoi")
-                            {
-                                <span class="badge bg-danger">Đã từ chối</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">@item.trangThaiUngTuyen</span>
-                            }
-                        </div>
+                    <div class="text-muted" style="font-size: 0.8rem; margin-top: 2px;">
+                        Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
 
-                        <!-- Các nút thao tác khi còn ở trạng thái Chờ duyệt -->
+                <!-- Trạng thái & Thao tác duyệt -->
+                <div class="col-md-3 text-end">
+                    <!-- Trạng thái đơn -->
+                    <div class="mb-2">
                         @if (item.trangThaiUngTuyen == "ChoDuyet")
                         {
-                            <div class="d-flex justify-content-end gap-2">
-                                <button class="btn btn-sm btn-success">Duyệt</button>
-                                <button class="btn btn-sm btn-outline-danger">Từ chối</button>
-                            </div>
+                            <span class="badge bg-warning text-dark rounded-0">Chờ duyệt</span>
+                        }
+                        else if (item.trangThaiUngTuyen == "ChapNhan")
+                        {
+                            <span class="badge bg-success rounded-0">Đã chấp nhận</span>
+                        }
+                        else if (item.trangThaiUngTuyen == "TuChoi")
+                        {
+                            <span class="badge bg-danger rounded-0">Đã từ chối</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary rounded-0">@item.trangThaiUngTuyen</span>
+                        }
+                    </div>
+
+                    <!-- Các nút thao tác -->
+                    <div class="d-flex justify-content-end gap-2 align-items-center">
+                        <!-- Nút Nhắn tin trao đổi -->
+                        <a href="/Chat?maFreelancerStudent=@item.maFreelancerStudents&maJob=@item.maJob" 
+                           class="btn btn-sm btn-outline-success rounded-0">
+                            Trao đổi
+                        </a>
+
+                        @if (item.trangThaiUngTuyen == "ChoDuyet")
+                        {
+                            <!-- Nút Duyệt / Chấp nhận -->
+                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post">
+                                <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
+                                <input type="hidden" name="trangThai" value="ChapNhan" />
+                                <button type="submit" class="btn btn-sm btn-success rounded-0"
+                                        style="background-color: #1B5E36; border-color: #1B5E36;"
+                                        onclick="return confirm('Bạn có chắc chắn muốn duyệt ứng viên này?');">
+                                    Duyệt
+                                </button>
+                            </form>
+
+                            <!-- Nút Từ chối -->
+                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post">
+                                <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
+                                <input type="hidden" name="trangThai" value="TuChoi" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-0"
+                                        onclick="return confirm('Bạn có chắc chắn muốn từ chối ứng viên này?');">
+                                    Từ chối
+                                </button>
+                            </form>
                         }
                     </div>
 
                 </div>
-            }
-        }
-    else
-        {
-            <div class="alert alert-light border text-center py-4 text-muted mt-3">
-                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                Chưa có sinh viên nào ứng tuyển vào các bài đăng của bạn.
+
             </div>
         }
-    </div>
+    }
+    else
+    {
+        <div class="alert alert-light border rounded-0 text-center py-4 text-muted mt-3">
+            Chưa có sinh viên nào ứng tuyển vào các bài đăng của bạn.
+        </div>
+    }
+</div>

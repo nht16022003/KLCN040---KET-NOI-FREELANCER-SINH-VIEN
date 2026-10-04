@@ -12,12 +12,15 @@ namespace FreelancerStudent.API.Services
         private readonly INhaTuyenDungRepository _nhaTuyenDungRepository;
         private readonly IWalletRepository _walletRepository;
 
+        private readonly IFreelancerStudentRepository _freelancerStudent;
+
         public AuthService(IUserRepository userRepository, INhaTuyenDungRepository nhaTuyenDungRepository,
-        IWalletRepository walletRepository)
+        IWalletRepository walletRepository, IFreelancerStudentRepository freelancerStudent)
         {
             _userRepository = userRepository;
             _nhaTuyenDungRepository = nhaTuyenDungRepository;
             _walletRepository = walletRepository;
+            _freelancerStudent = freelancerStudent;
         }
 
         public async Task<DangKy_ReponseDTO> DangKyTaiKhoanAsync(DangKy_RequestDTO request)
@@ -67,6 +70,11 @@ namespace FreelancerStudent.API.Services
             if (luuUser.maRole == 2)
             {
                 await _nhaTuyenDungRepository.themNhaTuyenDungDuaVaoMaRoleCuaUsers(luuUser, luuUser.maRole);
+                await _walletRepository.themViChoUserTheoMaUser(luuUser.maUser);
+            }
+            else if (luuUser.maRole == 1)
+            {
+                await _freelancerStudent.themFreelancerStudent_DuaVaoMaRoleCuaUsers(luuUser, luuUser.maRole);
                 await _walletRepository.themViChoUserTheoMaUser(luuUser.maUser);
             }
 

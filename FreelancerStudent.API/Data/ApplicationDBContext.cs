@@ -30,6 +30,12 @@ namespace FreelancerStudent.API.Data
 
         public DbSet<FreelancerStudent_KyNang> FreelancerStudent_KyNangs { get; set; }
 
+        public DbSet<BaiDangTimViecFreelancerStudent> BaiDangTimViecFreelancerStudents { get; set; }
+
+        public DbSet<PhongChat> PhongChats { get; set; }
+        public DbSet<TinNhanChat> TinNhanChats { get; set; }
+
+
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
         //index và dữ liệu mẫu
@@ -137,6 +143,16 @@ namespace FreelancerStudent.API.Data
 
                 //1 sinh viên có thể nộp nhiều đơn ứng tuyển
                 entity.HasOne(u => u.FreelamcerStudents).WithMany(f => f.UngTuyens).HasForeignKey(u => u.maFreelancerStudent).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<BaiDangTimViecFreelancerStudent>(entity =>
+            {
+                entity.HasKey(b => b.maBaiDang);
+
+                entity.HasOne(b => b.FreelamcerStudents)
+                .WithMany(f => f.BaiDangTimViecs)
+                .HasForeignKey(b => b.maFreelancerStudent)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

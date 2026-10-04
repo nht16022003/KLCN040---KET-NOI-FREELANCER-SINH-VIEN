@@ -1,0 +1,215 @@
+@model FreelancerStudent.Web.ViewModels.ChiTietHoSoFreelancerViewModel
+@{
+    ViewData["Title"] = "Hồ sơ của " + Model.TenUser;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var chuyenNganhName = !string.IsNullOrEmpty(Model.TenChuyenNganh) ? Model.TenChuyenNganh :
+                          (Model.MaChuyenNganh == "KTPM" ? "Kỹ thuật phần mềm" :
+                          Model.MaChuyenNganh == "TKDH" ? "Thiết kế đồ họa" :
+                          "Công nghệ thông tin");
+}
+
+<div class="container py-4">
+    
+    <!-- 1. THẺ THÔNG TIN CHÍNH (HEADER CARD) -->
+    <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            
+            <!-- Avatar & Thông tin cá nhân -->
+            <div class="d-flex align-items-center gap-3">
+                <img src="@(string.IsNullOrEmpty(Model.Avatar) ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(Model.TenUser)}&background=E8F5E9&color=2E7D32" : Model.Avatar)"
+                     alt="@Model.TenUser" class="border rounded-0"
+                     style="width: 85px; height: 85px; object-fit: cover;" />
+                
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h4 class="fw-bold text-dark mb-0">@Model.TenUser</h4>
+                        @if (Model.TrangthaiNhanViec)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-0">
+                                Sẵn sàng nhận việc
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary border rounded-0">
+                                Tạm ngưng
+                            </span>
+                        }
+                    </div>
+
+                    <div class="text-success fw-bold mb-1">
+                        @chuyenNganhName
+                    </div>
+
+                    <div class="text-muted small">
+                        <span>Trường: @(string.IsNullOrEmpty(Model.TenTruong) ? "Chưa cập nhật trường" : Model.TenTruong)</span>
+                        <span class="mx-2">•</span>
+                        <span>Khu vực: @(string.IsNullOrEmpty(Model.DiaDiemFreelancerStudent) ? "Toàn quốc" : Model.DiaDiemFreelancerStudent)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mức giá & Nút thao tác -->
+            <div class="text-md-end border-top pt-3 pt-md-0 border-md-0">
+                <div class="text-muted small mb-1">Thù lao từ:</div>
+                <div class="fs-4 fw-bold text-success mb-2">
+                    @(Model.ChiPhiTu.HasValue && Model.ChiPhiTu.Value > 0 ? Model.ChiPhiTu.Value.ToString("N0") + " VNĐ" : "Thỏa thuận")
+                </div>
+
+                @if (Context.Session.GetInt32("maUser") == Model.MaUser)
+                {
+                    <a href="/FreelancerStudent/HoSo" class="btn btn-outline-success rounded-0 px-3 fw-bold">
+                        Cập nhật hồ sơ
+                    </a>
+                }
+                else
+                {
+                    <a href="/Chat?maFreelancerStudent=@Model.MaFreelancerStudents" class="btn btn-success rounded-0 px-4 fw-bold"
+                       style="background-color: #1B5E36; border-color: #1B5E36;">
+                        Nhắn tin trao đổi
+                    </a>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 2. THANH THỐNG SỐ TÓM TẮT -->
+    <div class="card border rounded-0 shadow-sm p-3 mb-4 bg-white">
+        <div class="row text-center g-3">
+            <div class="col-6 col-md-3 border-end">
+                <div class="text-muted small">Điểm GPA</div>
+                <div class="fs-5 fw-bold text-success">@Model.GPA / 4.0</div>
+            </div>
+            <div class="col-6 col-md-3 border-end">
+                <div class="text-muted small">Sinh viên</div>
+                <div class="fs-5 fw-bold text-dark">Năm @Model.NamThu</div>
+            </div>
+            <div class="col-6 col-md-3 border-end">
+                <div class="text-muted small">Niên khóa</div>
+                <div class="fs-5 fw-bold text-dark">@(string.IsNullOrEmpty(Model.NienKhoa) ? "N/A" : Model.NienKhoa)</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="text-muted small">Trạng thái</div>
+                <div class="fs-5 fw-bold @(Model.TrangthaiNhanViec ? "text-success" : "text-muted")">
+                    @(Model.TrangthaiNhanViec ? "Đang nhận việc" : "Đang bận")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. NỘI DUNG CHI TIẾT (BỐ CỤC 2 CỘT) -->
+    <div class="row g-4">
+    
+        <!-- CỘT TRÁI (8 CỘT): GIỚI THIỆU & KỸ NĂNG -->
+        <div class="col-12 col-lg-8">
+        
+            <!-- GIỚI THIỆU BẢN THÂN -->
+            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
+                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
+                    Giới thiệu bản thân
+                </h5>
+                <p class="text-secondary mb-0" style="line-height: 1.7; white-space: pre-line;">
+                    @(string.IsNullOrEmpty(Model.Gioithieu)
+                        ? "Freelancer này chưa cập nhật nội dung giới thiệu."
+                        : Model.Gioithieu)
+                </p>
+            </div>
+
+            <!-- KỸ NĂNG CHUYÊN MÔN -->
+            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
+                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
+                    Kỹ năng chuyên môn
+                </h5>
+                @if (Model.DanhSachKyNang != null && Model.DanhSachKyNang.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var kyNang in Model.DanhSachKyNang)
+                        {
+                            <span class="badge bg-light text-dark border rounded-0 px-3 py-2 fs-6 fw-normal">
+                                @kyNang
+                            </span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">Chưa có kỹ năng chuyên môn nào được cập nhật.</p>
+                }
+            </div>
+
+            <!-- NGOẠI NGỮ & TIN HỌC -->
+            <div class="card border rounded-0 shadow-sm p-4 bg-white">
+                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
+                    Kỹ năng văn phòng & Ngoại ngữ
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light border rounded-0">
+                            <strong class="d-block text-dark small mb-1">Ngoại ngữ:</strong>
+                            <span class="text-secondary">@(string.IsNullOrEmpty(Model.NgonNgu) ? "Chưa cập nhật" : Model.NgonNgu)</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light border rounded-0">
+                            <strong class="d-block text-dark small mb-1">Tin học / Kỹ năng cơ bản:</strong>
+                            <span class="text-secondary">@(string.IsNullOrEmpty(Model.KyNangCoBan) ? "Chưa cập nhật" : Model.KyNangCoBan)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CỘT PHẢI (4 CỘT): HỌC VẤN & LIÊN HỆ -->
+        <div class="col-12 col-lg-4">
+
+            <!-- HỌC VẤN -->
+            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
+                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
+                    Thông tin học vấn
+                </h5>
+                <ul class="list-unstyled mb-0 small">
+                    <li class="mb-3">
+                        <div class="text-muted">Trường Đại học / Cao đẳng</div>
+                        <div class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.TenTruong) ? "Chưa cập nhật" : Model.TenTruong)</div>
+                    </li>
+                    <li class="mb-3">
+                        <div class="text-muted">Chuyên ngành đào tạo</div>
+                        <div class="fw-bold text-success">@chuyenNganhName</div>
+                    </li>
+                    <li class="mb-3">
+                        <div class="text-muted">Giai đoạn đào tạo</div>
+                        <div class="fw-bold text-dark">Sinh viên năm @Model.NamThu (@(string.IsNullOrEmpty(Model.NienKhoa) ? "N/A" : Model.NienKhoa))</div>
+                    </li>
+                    <li class="mb-0">
+                        <div class="text-muted">Điểm trung bình (GPA)</div>
+                        <div class="fw-bold text-primary fs-6">@Model.GPA / 4.0</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- THÔNG TIN LIÊN HỆ -->
+            <div class="card border rounded-0 shadow-sm p-4 bg-white">
+                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
+                    Thông tin liên hệ
+                </h5>
+                <div class="small">
+                    <div class="mb-3">
+                        <div class="text-muted">Email liên hệ</div>
+                        <div class="fw-bold text-dark text-break">@Model.Email</div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Sdt))
+                    {
+                        <div class="mb-0">
+                            <div class="text-muted">Số điện thoại</div>
+                            <div class="fw-bold text-dark">@Model.Sdt</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

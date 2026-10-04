@@ -41,6 +41,70 @@ namespace FreelancerStudent.API.Controllers
                 });
             }
         }
+        [HttpGet("maUser")]
+        public async Task<IActionResult> layFreelancerTheoMaUSer(int maUser)
+        {
+            try
+            {
+                //Gọi service
+                var ketquads = await _freelancerStudentService.layFreelancerStudent_TheoMaUser(maUser);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy thành công!",
+                    data = ketquads
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Lỗi khi lấy: " + ex.Message
+                });
+            }
+        }
+
+        //Tuấn
+        [HttpGet("ChiTiet/{id}")]
+        public async Task<IActionResult> layChiTietHoSo(int id)
+        {
+            try
+            {
+                var ketqua = await _freelancerStudentService.layChiTietHoSoAsync(id);
+                if (ketqua == null)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy hồ sơ Freelancer này." });
+                }
+
+                return Ok(new { success = true, data = ketqua });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Lỗi khi lấy hồ sơ: " + ex.Message });
+            }
+        }
+
+        //Tuấn
+        [HttpPut("CapNhatHoSo")]
+        public async Task<IActionResult> CapNhatHoSo([FromBody] DTOs.ReponseDTOs.ChiTietHoSoFreelancer_ReponseDTO dto)
+        {
+            try
+            {
+                var ketqua = await _freelancerStudentService.capNhatHoSoAsync(dto);
+                if (!ketqua)
+                {
+                    return BadRequest(new { success = false, message = "Cập nhật hồ sơ thất bại!" });
+                }
+
+                return Ok(new { success = true, message = "Cập nhật hồ sơ thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Lỗi khi cập nhật hồ sơ: " + ex.Message });
+            }
+        }
 
 
     }

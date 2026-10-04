@@ -1,0 +1,399 @@
+@using FreelancerStudent.Web.ViewModels.Chat
+@model ChatIndexViewModel
+
+@{
+    ViewData["Title"] = "Tin nhắn & Trao đổi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var activeRoom = Model.PhongHienTai;
+}
+
+<div class="container-fluid py-3 px-lg-4">
+    <div class="card border rounded-0 shadow-sm bg-white overflow-hidden" style="height: calc(100vh - 140px); min-height: 600px;">
+        <div class="row g-0 h-100">
+
+            <!-- CỘT TRÁI: DANH SÁCH HỘI THOẠI (COL-MD-4) -->
+            <div class="col-12 col-md-4 col-lg-3 border-end d-flex flex-column h-100 bg-light">
+                <!-- Header danh sách -->
+                <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold text-success mb-0">
+                        Hội thoại (@Model.DanhSachPhong.Count)
+                    </h6>
+                </div>
+
+                <!-- Ô tìm kiếm cuộc trò chuyện -->
+                <div class="p-2 border-bottom bg-white">
+                    <input type="text" id="searchConversation" class="form-control form-control-sm rounded-0" placeholder="Tìm kiếm người dùng...">
+                </div>
+
+                <!-- Danh sách các phòng chat -->
+                <div class="overflow-y-auto flex-grow-1" id="conversationList">
+                    @if (Model.DanhSachPhong != null && Model.DanhSachPhong.Count > 0)
+                    {
+                        @foreach (var room in Model.DanhSachPhong)
+                        {
+                            bool isCurrentActive = activeRoom != null && activeRoom.maPhongChat == room.maPhongChat;
+                            
+                            // Xác định đối phương là ai (nếu mình là Client thì đối phương là Freelancer và ngược lại)
+                            bool isMeClient = Model.CurrentUserId == room.maUserClient;
+                            string partnerName = isMeClient ? (room.tenFreelancer ?? "Freelancer") : (room.tenClient ?? "Nhà tuyển dụng");
+                            string partnerAvatar = (isMeClient ? room.avatarFreelancer : room.avatarClient)
+                                ?? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(partnerName)}&background=E8F5E9&color=1B5E36";
+
+                            <a href="/Chat?maPhongChat=@room.maPhongChat" 
+                               class="d-block p-3 border-bottom text-decoration-none transition-all conversation-item @(isCurrentActive ? "bg-white border-start border-4 border-success shadow-sm" : "text-dark hover-bg")">
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- Avatar -->
+                                    <div class="position-relative">
+                                        <img src="@partnerAvatar" alt="@partnerName" 
+                                             class="border rounded-0" style="width: 44px; height: 44px; object-fit: cover;" />
+                                        @if (room.soTinNhanChuaDoc > 0)
+                                        {
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style="font-size: 0.65rem;">
+                                                @room.soTinNhanChuaDoc
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Thông tin tóm tắt -->
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="mb-0 text-truncate fw-bold @(isCurrentActive ? "text-success" : "text-dark")" style="font-size: 0.9rem;">
+                                                @partnerName
+                                            </h6>
+                                            <small class="text-muted" style="font-size: 0.72rem;">
+                                                @(room.thoiGianTinNhanCuoi?.ToString("HH:mm dd/MM") ?? "")
+                                            </small>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(room.tieuDeJob))
+                                        {
+                                            <div class="text-truncate text-muted small mb-1" style="font-size: 0.75rem;">
+                                                Việc: @room.tieuDeJob
+                                            </div>
+                                        }
+
+                                        <p class="mb-0 text-truncate small text-secondary" style="font-size: 0.8rem;">
+                                            @(room.tinNhanCuoi ?? "Chưa có tin nhắn")
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 text-muted px-3">
+                            <p class="small mb-0">Chưa có cuộc trò chuyện nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: KHUNG CHAT CHI TIẾT (COL-MD-8) -->
+            <div class="col-12 col-md-8 col-lg-9 d-flex flex-column h-100 bg-white">
+                @if (activeRoom != null)
+                {
+                    bool isMeClientActive = Model.CurrentUserId == activeRoom.maUserClient;
+                    string partnerNameActive = isMeClientActive ? (activeRoom.tenFreelancer ?? "Freelancer") : (activeRoom.tenClient ?? "Nhà tuyển dụng");
+                    string partnerAvatarActive = (isMeClientActive ? activeRoom.avatarFreelancer : activeRoom.avatarClient)
+                        ?? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(partnerNameActive)}&background=E8F5E9&color=1B5E36";
+
+                    <!-- 1. Header Khung Chat -->
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="@partnerAvatarActive" alt="@partnerNameActive" 
+                                 class="border rounded-0" style="width: 48px; height: 48px; object-fit: cover;" />
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">@partnerNameActive</h6>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="badge @(isMeClientActive ? "bg-primary-subtle text-primary border border-primary" : "bg-success-subtle text-success border border-success") rounded-0" style="font-size: 0.72rem;">
+                                        @(isMeClientActive ? "Ứng viên Freelancer" : "Nhà tuyển dụng")
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(activeRoom.tieuDeJob))
+                                    {
+                                        <span class="badge bg-white text-secondary border rounded-0 text-truncate" style="font-size: 0.72rem; max-width: 280px;">
+                                            Việc: @activeRoom.tieuDeJob
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nút thao tác mở hồ sơ -->
+                        <div>
+                            @if (isMeClientActive && activeRoom.maFreelancerStudent > 0)
+                            {
+                                <a href="/FreelancerStudent/Profile/@activeRoom.maFreelancerStudent" target="_blank" 
+                                   class="btn btn-sm btn-success rounded-0 fw-semibold px-3" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                    Xem chi tiết hồ sơ
+                                </a>
+                            }
+                            else if (!isMeClientActive && activeRoom.maUserClient > 0)
+                            {
+                                <a href="/NhaTuyenDung/Search" class="btn btn-sm btn-outline-secondary rounded-0">
+                                    Khám phá NTD
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- BANNER THÔNG TIN CÔNG VIỆC ĐANG TRAO ĐỔI (NẾU CÓ) -->
+                    @if (!string.IsNullOrEmpty(activeRoom.maJob))
+                    {
+                        <div class="px-3 py-2 bg-light border-bottom d-flex justify-content-between align-items-center border-start border-4 border-success">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <span class="badge bg-success text-white rounded-0" style="font-size: 0.72rem; background-color: #1B5E36 !important;">
+                                    #@activeRoom.maJob
+                                </span>
+                                <span class="fw-bold text-dark small text-truncate">
+                                    @(activeRoom.tieuDeJob ?? "Công việc tuyển dụng")
+                                </span>
+                                @if (activeRoom.thulaoJob.HasValue && activeRoom.thulaoJob > 0)
+                                {
+                                    <span class="text-danger fw-bold small ms-1">
+                                        (@activeRoom.thulaoJob.Value.ToString("#,##0") VNĐ)
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                @if (isMeClientActive)
+                                {
+                                    <a href="/NhaTuyenDung/DanhSachUngVien?maJob=@activeRoom.maJob" class="btn btn-sm btn-outline-success rounded-0 py-1 px-3 fw-semibold text-nowrap" style="font-size: 0.75rem;">
+                                        Duyệt ứng viên bài này
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="/JobPost/UngTuyen?maJob=@activeRoom.maJob" class="btn btn-sm btn-success rounded-0 py-1 px-3 fw-semibold text-nowrap" style="font-size: 0.75rem; background-color: #1B5E36; border-color: #1B5E36;">
+                                        Xem bài & Ứng tuyển
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- 2. Danh sách tin nhắn (Body chat) -->
+                    <div class="flex-grow-1 p-3 overflow-y-auto bg-white" id="messageContainer" style="background-color: #fafafa !important;">
+                        <div id="messagesList" class="d-flex flex-column gap-3">
+                            @if (Model.LichSuTinNhan != null && Model.LichSuTinNhan.Count > 0)
+                            {
+                                @foreach (var msg in Model.LichSuTinNhan)
+                                {
+                                    bool isMyMsg = msg.maNguoiGui == Model.CurrentUserId;
+
+                                    <div class="d-flex @(isMyMsg ? "justify-content-end" : "justify-content-start") message-item" data-id="@msg.maTinNhan">
+                                        <div class="d-flex gap-2 max-w-75" style="max-width: 75%;">
+                                            @if (!isMyMsg)
+                                            {
+                                                var senderAvatar = !string.IsNullOrEmpty(msg.avatarNguoiGui)
+                                                    ? msg.avatarNguoiGui
+                                                    : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(msg.tenNguoiGui ?? "User")}&background=E8F5E9&color=1B5E36";
+
+                                                <img src="@senderAvatar" alt="@msg.tenNguoiGui" 
+                                                     class="border rounded-0 align-self-end mb-1" style="width: 32px; height: 32px; object-fit: cover;" />
+                                            }
+
+                                            <div>
+                                                <div class="p-3 rounded-0 shadow-sm @(isMyMsg ? "bg-success text-white" : "bg-white text-dark border")" 
+                                                     style="@(isMyMsg ? "background-color: #1B5E36 !important;" : "")">
+                                                    @if (!isMyMsg)
+                                                    {
+                                                        <div class="fw-bold mb-1 text-success" style="font-size: 0.75rem;">@msg.tenNguoiGui</div>
+                                                    }
+                                                    <div class="text-break" style="font-size: 0.9rem; white-space: pre-line;">@msg.noiDung</div>
+
+                                                    @if (!string.IsNullOrEmpty(msg.fileDinhKem))
+                                                    {
+                                                        <div class="mt-2 pt-2 border-top @(isMyMsg ? "border-white-50" : "border-light")">
+                                                            <a href="@msg.fileDinhKem" target="_blank" class="@(isMyMsg ? "text-white text-decoration-underline" : "text-success") small">
+                                                                Tệp đính kèm
+                                                            </a>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="small text-muted mt-1 px-1 @(isMyMsg ? "text-end" : "text-start")" style="font-size: 0.7rem;">
+                                                    @msg.ngayGui.ToString("HH:mm - dd/MM/yyyy")
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center py-5 text-muted empty-chat">
+                                    <p class="mb-0">Hãy bắt đầu gửi tin nhắn trao đổi đầu tiên!</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 3. Khung nhập tin nhắn (Footer) -->
+                    <div class="p-3 border-top bg-light">
+                        <form id="chatForm" class="d-flex gap-2 align-items-center">
+                            <input type="hidden" id="currentRoomId" value="@activeRoom.maPhongChat" />
+                            <input type="text" id="messageInput" class="form-control rounded-0 border py-2" 
+                                   placeholder="Nhập nội dung trao đổi... (Nhấn Enter để gửi)" autocomplete="off" required />
+                            <button type="submit" id="btnSend" class="btn btn-success rounded-0 px-4 py-2 fw-semibold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                Gửi
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted p-4">
+                        <div class="p-4 border bg-light text-center rounded-0" style="max-width: 400px;">
+                            <h6 class="fw-bold text-dark mb-1">Chưa chọn cuộc trò chuyện</h6>
+                            <p class="small text-muted mb-0">Vui lòng chọn một cuộc hội thoại bên trái hoặc liên hệ ứng viên từ danh sách để bắt đầu nhắn tin.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-bg:hover {
+        background-color: #e9ecef !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const currentUserId = @Model.CurrentUserId;
+        const currentRoomId = document.getElementById("currentRoomId") ? parseInt(document.getElementById("currentRoomId").value) : 0;
+        const messageContainer = document.getElementById("messageContainer");
+        const messagesList = document.getElementById("messagesList");
+        const chatForm = document.getElementById("chatForm");
+        const messageInput = document.getElementById("messageInput");
+        const btnSend = document.getElementById("btnSend");
+
+        // Cuộn xuống đáy khung chat
+        function scrollToBottom() {
+            if (messageContainer) {
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+        }
+
+        // Khởi động cuộn xuống dưới cùng khi mới load trang
+        scrollToBottom();
+
+        // Gửi tin nhắn qua AJAX
+        if (chatForm) {
+            chatForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const text = messageInput.value.trim();
+                if (!text || currentRoomId === 0) return;
+
+                btnSend.disabled = true;
+                messageInput.value = "";
+
+                try {
+                    const response = await fetch("/Chat/GuiTinNhan", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            maPhongChat: currentRoomId,
+                            noiDung: text,
+                            fileDinhKem: null
+                        })
+                    });
+
+                    const res = await response.json();
+                    if (res.success && res.data) {
+                        appendMessage(res.data, true);
+                        scrollToBottom();
+                    } else {
+                        alert(res.message || "Không thể gửi tin nhắn");
+                    }
+                } catch (err) {
+                    console.error("Lỗi khi gửi tin nhắn:", err);
+                } finally {
+                    btnSend.disabled = false;
+                    messageInput.focus();
+                }
+            });
+        }
+
+        // Hàm render thêm 1 tin nhắn vào DOM
+        function appendMessage(msg, isMyMsg) {
+            const emptyNotice = document.querySelector(".empty-chat");
+            if (emptyNotice) emptyNotice.remove();
+
+            // Kiểm tra xem tin nhắn đã có trên màn hình chưa để tránh trùng lặp
+            if (document.querySelector(`.message-item[data-id="${msg.maTinNhan}"]`)) return;
+
+            const timeStr = new Date(msg.ngayGui).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(msg.ngayGui).toLocaleDateString();
+            const avatarUrl = msg.avatarNguoiGui || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.tenNguoiGui || 'User')}&background=E8F5E9&color=1B5E36`;
+
+            const wrapper = document.createElement("div");
+            wrapper.className = `d-flex ${isMyMsg ? "justify-content-end" : "justify-content-start"} message-item`;
+            wrapper.setAttribute("data-id", msg.maTinNhan);
+
+            let html = `
+                <div class="d-flex gap-2 max-w-75" style="max-width: 75%;">
+                    ${!isMyMsg ? `<img src="${avatarUrl}" class="border rounded-0 align-self-end mb-1" style="width: 32px; height: 32px; object-fit: cover;" />` : ''}
+                    <div>
+                        <div class="p-3 rounded-0 shadow-sm ${isMyMsg ? 'bg-success text-white' : 'bg-white text-dark border'}" 
+                             style="${isMyMsg ? 'background-color: #1B5E36 !important;' : ''}">
+                            ${!isMyMsg ? `<div class="fw-bold mb-1 text-success" style="font-size: 0.75rem;">${msg.tenNguoiGui || 'Người dùng'}</div>` : ''}
+                            <div class="text-break" style="font-size: 0.9rem; white-space: pre-line;">${msg.noiDung || ''}</div>
+                        </div>
+                        <div class="small text-muted mt-1 px-1 ${isMyMsg ? 'text-end' : 'text-start'}" style="font-size: 0.7rem;">
+                            ${timeStr}
+                        </div>
+                    </div>
+                </div>
+            `;
+            wrapper.innerHTML = html;
+            messagesList.appendChild(wrapper);
+        }
+
+        // Tự động Polling cập nhật tin nhắn mới mỗi 3 giây
+        if (currentRoomId > 0) {
+            setInterval(async () => {
+                try {
+                    const response = await fetch(`/Chat/LayTinNhan?maPhongChat=${currentRoomId}`);
+                    const res = await response.json();
+                    if (res.success && res.data && res.data.length > 0) {
+                        let hasNew = false;
+                        res.data.forEach(msg => {
+                            if (!document.querySelector(`.message-item[data-id="${msg.maTinNhan}"]`)) {
+                                const isMyMsg = msg.maNguoiGui === currentUserId;
+                                appendMessage(msg, isMyMsg);
+                                hasNew = true;
+                            }
+                        });
+                        if (hasNew) {
+                            scrollToBottom();
+                        }
+                    }
+                } catch (e) {
+                    console.log("Polling error:", e);
+                }
+            }, 3000);
+        }
+
+        // Lọc danh sách hội thoại bên trái
+        const searchInput = document.getElementById("searchConversation");
+        if (searchInput) {
+            searchInput.addEventListener("input", function (e) {
+                const keyword = e.target.value.toLowerCase();
+                document.querySelectorAll(".conversation-item").forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    if (text.includes(keyword)) {
+                        item.classList.remove("d-none");
+                    } else {
+                        item.classList.add("d-none");
+                    }
+                });
+            });
+        }
+    </script>
+}

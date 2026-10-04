@@ -199,5 +199,91 @@ namespace FreelancerStudent.API.Services
             }).ToList();
 
         }
+
+        //Tuấn
+        //Tuấn
+        public async Task<bool> duyetUngTuyenAsync(DuyetUngTuyen_RequestDTO request)
+        {
+            if (request.maUngTuyen <= 0)
+            {
+                throw new Exception("Mã đơn ứng tuyển không hợp lệ!");
+            }
+            if (request.trangThai != "ChapNhan" && request.trangThai != "TuChoi")
+            {
+                throw new Exception("Trạng thái duyệt không hợp lệ! (Chỉ chấp nhận 'ChapNhan' hoặc 'TuChoi')");
+            }
+
+            var ketQua = await _jopPostRepository.capNhatTrangThaiUngTuyenAsync(request.maUngTuyen, request.trangThai);
+
+            if (!ketQua)
+            {
+                throw new Exception("Không tìm thấy đơn ứng tuyển để cập nhật!");
+            }
+            return true;
+
+        }
+
+        public async Task<bool> nopDonUngTuyenAsync(UngTuyen_RequestDTO requets)
+        {
+            var sinhvien = await _free.layFreelancerStudent_TheoMaUser(requets.maUser);
+            if (sinhvien == null)
+            {
+                throw new Exception("Chưa tìm thấy hồ sơ Sinh viên của bạn để ứng tuyển!");
+            }
+
+
+            var ungTuyenMoi = new UngTuyen
+            {
+                maJob = requets.maJob,
+                maFreelancerStudent = sinhvien.maFreelancerStudents,
+                thuGioiThieu = requets.thuGioiThieu.Trim(),
+                thulaoDeXuat = requets.thulaoDeXuat,
+                thoiGianHoanThanhDeXuat = requets.thoiGianHoanThanhDeXuat,
+                fileCV = requets.fileCV,
+                ngayUngTuyen = DateTime.UtcNow,
+                trangThaiUngTuyen = "ChoDuyet"
+            };
+
+            await _jopPostRepository.themUngTuyenAsync(ungTuyenMoi);
+            return true;
+        }
+
+
+        //Tuấn
+        public async Task<List<JobPost_ReponseDTO>> layJobPostTheoMaUserAsync(int maUser)
+        {
+            var ntd = await _ntd.layNhaTuyenDungTheoMaUserAsync(maUser);
+            if (ntd == null) return new List<JobPost_ReponseDTO>();
+            var ds = await _jopPostRepository.layJobPostTheoMaNTDAsync(ntd.maNhaTuyenDung);
+            return ds.Select(job => new JobPost_ReponseDTO
+            {
+                maJob = job.maJob,
+                maNhaTuyenDung = job.maNhaTuyenDung,
+                tieude = job.tieude,
+                mota = job.mota,
+                kynangyeucau = job.kynangyeucau,
+                thulao = job.thulao,
+                soluongtuyen = job.soluongtuyen,
+                thoigiandangtuyen = job.thoigiandangtuyen,
+                thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                status = job.status
+            }).ToList();
+        }
+
+
+        //Tuấn
+        public async Task<bool> capNhatJobPostAsync(JobPost_RequestDTO reqeuest)
+        {
+            var job = await _jopPostRepository.layJobPostTheoMaAsync(reqeuest.maJob);
+            if (job == null) throw new Exception("Không tìm thấy bài tuyển dụng!");
+            job.tieude = reqeuest.tieude.Trim();
+            job.mota = reqeuest.mota.Trim();
+            job.kynangyeucau = reqeuest.kynangyeucau?.Trim();
+            job.thulao = reqeuest.thulao;
+            job.soluongtuyen = reqeuest.soluongtuyen;
+            job.thoigiandukienhoanthanh = reqeuest.thoigiandukienhoanthanh;
+            return await _jopPostRepository.capNhatJobPostAsync(job);
+        }
+
     }
 }

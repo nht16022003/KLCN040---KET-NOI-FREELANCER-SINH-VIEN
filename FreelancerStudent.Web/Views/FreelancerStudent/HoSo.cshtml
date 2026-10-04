@@ -1,0 +1,208 @@
+@model FreelancerStudent.Web.ViewModels.ChiTietHoSoFreelancerViewModel
+@{
+    ViewData["Title"] = "Cài đặt hồ sơ & Năng lực";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .card-profile {
+        background: #FFFFFF;
+        border: 1px solid #DEE2E6;
+        padding: 30px;
+    }
+
+    .section-title {
+        color: #198754;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border-bottom: 2px solid #E9ECEF;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="card card-profile rounded-0 shadow-sm">
+                
+                <!-- HEADER -->
+                <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+                    <div>
+                        <h3 class="fw-bold text-dark mb-1">Cập nhật hồ sơ & Kỹ năng nhận việc</h3>
+                        <p class="text-muted small mb-0">Tối ưu thông tin cá nhân để thu hút nhiều doanh nghiệp tìm đến.
+                        </p>
+                    </div>
+                    @if (Model != null && Model.MaFreelancerStudents > 0)
+                    {
+                        <a href="/FreelancerStudent/Profile/@Model.MaFreelancerStudents"
+                           class="btn btn-outline-success rounded-0">
+                            <i class="bi bi-person me-1"></i> Xem hồ sơ công khai
+                        </a>
+                    }
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-0 mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-0 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-controller="FreelancerStudent" asp-action="HoSo" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MaUser" />
+                    <input type="hidden" asp-for="MaFreelancerStudents" />
+
+                    <!-- PHẦN 1: THÔNG TIN CÁ NHÂN -->
+                    <div class="mb-4">
+                        <div class="section-title">
+                            <i class="bi bi-person-fill me-2"></i>1. Thông tin cá nhân & Liên hệ
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Họ và tên <span
+                                    class="text-danger">*</span></label>
+                                    <input asp-for="TenUser" class="form-control rounded-0" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small">Số điện thoại liên hệ</label>
+                                    <input asp-for="Sdt" class="form-control rounded-0" placeholder="0901234567" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PHẦN 2: THIẾT LẬP NHẬN VIỆC & MỨC THÙ LAO -->
+                        <div class="mb-4">
+                            <div class="section-title">
+                                <i class="bi bi-toggle-on me-2"></i>2. Trạng thái & Mức thù lao khởi điểm
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div
+                                        class="p-3 bg-light border rounded-0 h-100 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold small mb-1">Sẵn sàng nhận việc freelance</div>
+                                            <div class="text-muted" style="font-size: 0.8rem;">Bật để hồ sơ hiển thị trên
+                                                trang Khám phá Freelancer.</div>
+                                            </div>
+                                            <div class="form-check form-switch fs-4 mb-0">
+                                                <input asp-for="TrangthaiNhanViec" class="form-check-input" type="checkbox"
+                                                       role="switch">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light border rounded-0 h-100">
+                                            <label class="form-label fw-bold small mb-1">Mức giá / thù lao từ (VNĐ/dự
+                                                án)</label>
+                                                <div class="input-group">
+                                                    <input asp-for="ChiPhiTu" type="number" step="50000"
+                                                           class="form-control rounded-0" placeholder="100000" />
+                                                    <span class="input-group-text bg-white rounded-0">VNĐ</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PHẦN 3: HỌC VẤN & NGÀNH NGHỀ -->
+                                <div class="mb-4">
+                                    <div class="section-title">
+                                        <i class="bi bi-mortarboard-fill me-2"></i>3. Thông tin học vấn & Chuyên ngành
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold small">Chuyên ngành <span
+                                                class="text-danger">*</span></label>
+                                                <select asp-for="MaChuyenNganh" class="form-select rounded-0" required>
+                                                    <option value="">-- Chọn chuyên ngành --</option>
+                                                    <option value="KTPM">Kỹ thuật phần mềm (KTPM)</option>
+                                                    <option value="TKDH">Thiết kế đồ họa (TKDH)</option>
+                                                    <option value="CNTT">Công nghệ thông tin (CNTT)</option>
+                                                    <option value="MKT">Digital Marketing</option>
+                                                    <option value="TMDT">Thương mại điện tử</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold small">Trường Đại học / Cao đẳng</label>
+                                                <input asp-for="TenTruong" class="form-control rounded-0"
+                                                       placeholder="VD: Đại học FPT, ĐH Bách Khoa..." />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold small">Sinh viên năm thứ</label>
+                                                <select asp-for="NamThu" class="form-select rounded-0">
+                                                    <option value="1">Năm 1</option>
+                                                    <option value="2">Năm 2</option>
+                                                    <option value="3">Năm 3</option>
+                                                    <option value="4">Năm 4</option>
+                                                    <option value="5">Đã tốt nghiệp</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold small">Điểm GPA tích lũy (Thang 4.0)</label>
+                                                <input asp-for="GPA" type="number" step="0.01" class="form-control rounded-0"
+                                                       placeholder="VD: 3.5" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold small">Niên khóa</label>
+                                                <input asp-for="NienKhoa" class="form-control rounded-0"
+                                                       placeholder="VD: 2021 - 2025" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- PHẦN 4: KỸ NĂNG & GIỚI THIỆU -->
+                                    <div class="mb-4">
+                                        <div class="section-title">
+                                            <i class="bi bi-tools me-2"></i>4. Kỹ năng & Giới thiệu bản thân
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small">Giới thiệu bản thân (Bio)</label>
+                                            <textarea asp-for="Gioithieu" class="form-control rounded-0" rows="3"
+                                                      placeholder="Giới thiệu điểm mạnh, kinh nghiệm đồ án và định hướng nghề nghiệp..."></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small">Kỹ năng chuyên môn</label>
+                                            <input asp-for="NewSkillsInput" class="form-control rounded-0"
+                                                   placeholder="Ví dụ: C#, ASP.NET Core, SQL Server, Flutter, Figma (phân cách bằng dấu phẩy)" />
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold small">Kỹ năng cơ bản / Tin học văn phòng</label>
+                                                <input asp-for="KyNangCoBan" class="form-control rounded-0"
+                                                       placeholder="Word, Excel, PowerPoint..." />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold small">Ngoại ngữ</label>
+                                                <input asp-for="NgonNgu" class="form-control rounded-0"
+                                                       placeholder="Tiếng Anh (TOEIC 750), Tiếng Nhật (N3)..." />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- NÚT THAO TÁC -->
+                                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                        <a href="/FreelancerStudent/QuanLyTimViec" class="btn btn-outline-secondary rounded-0 px-4">
+                                            <i class="bi bi-arrow-left me-1"></i> Quay lại
+                                        </a>
+                                        <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold">
+                                            <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi hồ sơ
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
