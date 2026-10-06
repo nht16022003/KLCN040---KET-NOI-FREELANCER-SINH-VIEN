@@ -1,0 +1,887 @@
+@{
+    ViewData["Title"] = "Nạp tiền";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Nạp tiền vào ví
+            </h4>
+
+            <p class="text-muted">
+                Chọn số tiền bạn muốn nạp
+            </p>
+
+
+            <!-- Các mức tiền gợi ý -->
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-3">
+                    <button type="button"
+                            class="btn btn-outline-primary w-100 amount-btn"
+                            data-amount="100000">
+                        100.000đ
+                    </button>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="button"
+                            class="btn btn-outline-primary w-100 amount-btn"
+                            data-amount="200000">
+                        200.000đ
+                    </button>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="button"
+                            class="btn btn-outline-primary w-100 amount-btn"
+                            data-amount="500000">
+                        500.000đ
+                    </button>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="button"
+                            class="btn btn-outline-primary w-100 amount-btn"
+                            data-amount="1000000">
+                        1.000.000đ
+                    </button>
+                </div>
+
+            </div>
+
+
+            <!-- Nhập số tiền khác -->
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Hoặc nhập số tiền khác
+                </label>
+
+                <input type="number"
+                       id="soTien"
+                       class="form-control"
+                       placeholder="Nhập số tiền muốn nạp" />
+
+                <div id="thongBaoLoi"
+                     class="text-danger mt-2">
+                </div>
+
+            </div>
+
+
+            <!-- Nút xác nhận -->
+            <button type="button"
+                    id="btnXacNhan"
+                    class="btn btn-primary">
+                Xác nhận
+            </button>
+
+        </div>
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- THÔNG TIN GIAO DỊCH SAU KHI TẠO THÀNH CÔNG -->
+    <!-- ================================================= -->
+
+    <div id="thongTinGiaoDich"
+         class="card shadow-sm mt-4"
+         style="display:none;">
+
+        <div class="card-body">
+
+            <h5 class="mb-4">
+                Thông tin giao dịch
+            </h5>
+
+
+            <!-- QR -->
+            <div class="text-center mb-4">
+
+                <p class="fw-bold mb-2">
+                    Quét mã QR để chuyển khoản
+                </p>
+
+                <!--
+                    Không còn sử dụng qr.jpg cố định.
+
+                    JavaScript sẽ thay src của ảnh này
+                    bằng QR tương ứng với giao dịch.
+                -->
+
+                <img id="qrThanhToan"
+                     src=""
+                     alt="Mã QR thanh toán"
+                     style="width:300px;
+                            max-width:100%;
+                            height:auto;
+                            object-fit:contain;" />
+
+            </div>
+
+
+            <!-- Thông tin ngân hàng -->
+            <div class="mb-4">
+
+                <h6 class="fw-bold">
+                    Thông tin tài khoản nhận
+                </h6>
+
+                <p class="mb-1">
+                    Ngân hàng:
+                    <strong>MB Bank</strong>
+                </p>
+
+                <p class="mb-1">
+                    Số tài khoản:
+                    <strong>0378896290</strong>
+                </p>
+
+                <p class="mb-1">
+                    Chủ tài khoản:
+                    <strong>DANG TUAN ANH</strong>
+                </p>
+
+            </div>
+
+
+            <!-- Thông tin giao dịch -->
+
+            <p>
+                Mã giao dịch:
+                <strong id="maGiaoDich"></strong>
+            </p>
+
+            <p>
+                Số tiền:
+                <strong id="soTienGiaoDich"></strong>
+            </p>
+
+            <p>
+                Nội dung chuyển khoản:
+                <strong id="noiDungChuyenKhoan"></strong>
+            </p>
+
+            <p>
+                Trạng thái:
+                <strong id="trangThai"></strong>
+            </p>
+
+
+            <!-- Thời gian còn lại của giao dịch -->
+            <p>
+                Thời gian còn lại:
+                <strong id="thoiGianConLai"
+                        class="text-danger">
+                    30:00
+                </strong>
+            </p>
+
+
+            <div class="alert alert-warning mt-3">
+                Vui lòng chuyển đúng số tiền và giữ nguyên
+                nội dung chuyển khoản để hệ thống có thể
+                xác nhận giao dịch.
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+
+        // =================================================
+        // LẤY CÁC COMPONENT TRÊN GIAO DIỆN
+        // =================================================
+
+        // Biến lưu interval kiểm tra trạng thái
+        let intervalKiemTraTrangThai = null;
+
+        // Biến lưu interval đồng hồ đếm ngược
+        let intervalDemNguoc = null;
+
+
+        const soTienInput =
+            document.getElementById("soTien");
+
+
+        const thongBaoLoi =
+            document.getElementById("thongBaoLoi");
+
+
+        const btnXacNhan =
+            document.getElementById("btnXacNhan");
+
+
+
+        // =================================================
+        // CHỌN MỨC TIỀN GỢI Ý
+        // =================================================
+
+        document.querySelectorAll(".amount-btn")
+            .forEach(function (button) {
+
+                button.addEventListener("click", function () {
+
+                    soTienInput.value =
+                        this.dataset.amount;
+
+                    thongBaoLoi.innerText = "";
+
+                });
+
+            });
+
+
+
+        // =================================================
+        // ĐỒNG HỒ ĐẾM NGƯỢC THỜI GIAN GIAO DỊCH
+        // =================================================
+
+        function batDauDemNguoc(ngayHetHan)
+        {
+            // Nếu đang có đồng hồ cũ thì dừng
+            if (intervalDemNguoc)
+            {
+                clearInterval(intervalDemNguoc);
+                intervalDemNguoc = null;
+            }
+
+
+            const thoiGianConLai =
+                document.getElementById("thoiGianConLai");
+
+
+            function capNhatDongHo()
+            {
+                const hienTai = new Date();
+
+                const hetHan =
+                    new Date(ngayHetHan);
+
+
+                const khoangThoiGian =
+                    hetHan.getTime()
+                    - hienTai.getTime();
+
+
+
+                // =========================================
+                // HẾT THỜI GIAN
+                // =========================================
+
+                if (khoangThoiGian <= 0)
+                {
+                    thoiGianConLai.innerText =
+                        "00:00";
+
+
+                    if (intervalDemNguoc)
+                    {
+                        clearInterval(
+                            intervalDemNguoc
+                        );
+
+                        intervalDemNguoc = null;
+                    }
+
+
+                    return;
+                }
+
+
+
+                // =========================================
+                // TÍNH PHÚT VÀ GIÂY
+                // =========================================
+
+                const tongSoGiay =
+                    Math.floor(
+                        khoangThoiGian / 1000
+                    );
+
+
+                const phut =
+                    Math.floor(
+                        tongSoGiay / 60
+                    );
+
+
+                const giay =
+                    tongSoGiay % 60;
+
+
+
+                // =========================================
+                // FORMAT 29:05
+                // =========================================
+
+                const phutHienThi =
+                    String(phut)
+                        .padStart(2, "0");
+
+
+                const giayHienThi =
+                    String(giay)
+                        .padStart(2, "0");
+
+
+                thoiGianConLai.innerText =
+                    phutHienThi
+                    + ":"
+                    + giayHienThi;
+            }
+
+
+            // Chạy ngay lập tức
+            capNhatDongHo();
+
+
+            // Sau đó mỗi 1 giây cập nhật một lần
+            intervalDemNguoc =
+                setInterval(
+                    capNhatDongHo,
+                    1000
+                );
+        }
+
+
+
+        // =================================================
+        // KIỂM TRA TRẠNG THÁI GIAO DỊCH
+        // =================================================
+
+        async function kiemTraTrangThaiGiaoDich(
+            maGiaoDich,
+            soTien)
+        {
+            try
+            {
+                const response =
+                    await fetch(
+                        "/Wallet/TrangThai?maGiaoDich="
+                        + encodeURIComponent(
+                            maGiaoDich
+                        )
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!result.success)
+                {
+                    console.log(
+                        "Không kiểm tra được trạng thái:",
+                        result.message
+                    );
+
+                    return;
+                }
+
+
+                const giaoDich =
+                    result.data;
+
+
+                console.log(
+                    "Trạng thái giao dịch:",
+                    giaoDich.trangThai
+                );
+
+
+
+                // =========================================
+                // GIAO DỊCH HOÀN THÀNH
+                // =========================================
+
+                if (giaoDich.trangThai === "HoanThanh")
+                {
+                    document
+                        .getElementById("trangThai")
+                        .innerText =
+                            "Hoàn thành";
+
+
+                    // Dừng kiểm tra trạng thái
+                    if (intervalKiemTraTrangThai)
+                    {
+                        clearInterval(
+                            intervalKiemTraTrangThai
+                        );
+
+                        intervalKiemTraTrangThai =
+                            null;
+                    }
+
+
+                    // Dừng đồng hồ đếm ngược
+                    if (intervalDemNguoc)
+                    {
+                        clearInterval(
+                            intervalDemNguoc
+                        );
+
+                        intervalDemNguoc =
+                            null;
+                    }
+
+
+                    document
+                        .getElementById(
+                            "thoiGianConLai"
+                        )
+                        .innerText =
+                            "Đã thanh toán";
+
+
+                    alert(
+                        "Đã nạp thành công "
+                        + Number(soTien)
+                            .toLocaleString(
+                                "vi-VN"
+                            )
+                        + "đ"
+                    );
+
+
+                    return;
+                }
+
+
+
+                // =========================================
+                // GIAO DỊCH HẾT HẠN
+                // =========================================
+
+                if (giaoDich.trangThai === "HetHan")
+                {
+                    document
+                        .getElementById("trangThai")
+                        .innerText =
+                            "Hết hạn";
+
+
+                    // Dừng kiểm tra trạng thái
+                    if (intervalKiemTraTrangThai)
+                    {
+                        clearInterval(
+                            intervalKiemTraTrangThai
+                        );
+
+                        intervalKiemTraTrangThai =
+                            null;
+                    }
+
+
+                    // Dừng đồng hồ
+                    if (intervalDemNguoc)
+                    {
+                        clearInterval(
+                            intervalDemNguoc
+                        );
+
+                        intervalDemNguoc =
+                            null;
+                    }
+
+
+                    document
+                        .getElementById(
+                            "thoiGianConLai"
+                        )
+                        .innerText =
+                            "00:00";
+
+
+                    // Làm mờ QR đã hết hạn
+                    document
+                        .getElementById(
+                            "qrThanhToan"
+                        )
+                        .style.opacity =
+                            "0.3";
+
+
+                    document
+                        .getElementById(
+                            "qrThanhToan"
+                        )
+                        .style.pointerEvents =
+                            "none";
+
+
+                    alert(
+                        "Giao dịch nạp tiền đã hết hạn."
+                    );
+
+
+                    return;
+                }
+
+
+
+                // =========================================
+                // GIAO DỊCH VẪN ĐANG XỬ LÝ
+                // =========================================
+
+                document
+                    .getElementById("trangThai")
+                    .innerText =
+                        "Đang xử lý";
+
+            }
+            catch (error)
+            {
+                console.error(
+                    "Lỗi kiểm tra trạng thái:",
+                    error
+                );
+            }
+        }
+
+
+
+        // =================================================
+        // BẤM XÁC NHẬN NẠP TIỀN
+        // =================================================
+
+        btnXacNhan.addEventListener(
+            "click",
+            async function ()
+            {
+
+                const soTien =
+                    Number(
+                        soTienInput.value
+                    );
+
+
+
+                // =========================================
+                // KIỂM TRA SỐ TIỀN
+                // =========================================
+
+                if (
+                    soTien < 100000 ||
+                    soTien % 50000 !== 0
+                )
+                {
+                    thongBaoLoi.innerText =
+                        "Số tiền nạp phải từ 100.000đ trở lên và phải là bội số của 50.000đ.";
+
+                    return;
+                }
+
+
+                thongBaoLoi.innerText = "";
+
+
+                try
+                {
+
+                    // =====================================
+                    // GỌI WALLET CONTROLLER BÊN WEB
+                    // =====================================
+
+                    const response =
+                        await fetch(
+                            "/Wallet/TaoGiaoDich",
+                            {
+                                method: "POST",
+
+                                headers:
+                                {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify(
+                                    {
+                                        soTien: soTien
+                                    }
+                                )
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+
+                    // =====================================
+                    // API TRẢ VỀ LỖI
+                    // =====================================
+
+                    if (!result.success)
+                    {
+                        thongBaoLoi.innerText =
+                            result.message;
+
+                        return;
+                    }
+
+
+
+                    // =====================================
+                    // LẤY THÔNG TIN GIAO DỊCH
+                    // =====================================
+
+                    const giaoDich =
+                        result.data;
+
+
+
+                    // =====================================
+                    // BẮT ĐẦU ĐỒNG HỒ ĐẾM NGƯỢC
+                    // =====================================
+
+                    batDauDemNguoc(
+                        giaoDich.ngayHetHan
+                    );
+
+
+
+                    // =====================================
+                    // HIỂN THỊ KHUNG GIAO DỊCH
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "thongTinGiaoDich"
+                        )
+                        .style.display =
+                            "block";
+
+
+
+                    // =====================================
+                    // HIỂN THỊ MÃ GIAO DỊCH
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "maGiaoDich"
+                        )
+                        .innerText =
+                            giaoDich.maGiaoDich;
+
+
+
+                    // =====================================
+                    // HIỂN THỊ SỐ TIỀN
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "soTienGiaoDich"
+                        )
+                        .innerText =
+                            Number(
+                                giaoDich.soTien
+                            )
+                            .toLocaleString(
+                                "vi-VN"
+                            )
+                            + "đ";
+
+
+
+                    // =====================================
+                    // HIỂN THỊ NỘI DUNG CHUYỂN KHOẢN
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "noiDungChuyenKhoan"
+                        )
+                        .innerText =
+                            giaoDich
+                                .noiDungChuyenKhoan;
+
+
+
+                    // =====================================
+                    // TRẠNG THÁI
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "trangThai"
+                        )
+                        .innerText =
+                            "Đang xử lý";
+
+
+
+                    // =====================================
+                    // RESET HIỂN THỊ QR
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "qrThanhToan"
+                        )
+                        .style.opacity =
+                            "1";
+
+
+                    document
+                        .getElementById(
+                            "qrThanhToan"
+                        )
+                        .style.pointerEvents =
+                            "auto";
+
+
+
+                    // =====================================
+                    // TẠO VIETQR ĐỘNG
+                    // =====================================
+
+                    const nganHang =
+                        "MB";
+
+
+                    const soTaiKhoan =
+                        "0378896290";
+
+
+                    const tenChuTaiKhoan =
+                        "DANG TUAN ANH";
+
+
+                    const soTienQR =
+                        giaoDich.soTien;
+
+
+                    const noiDungQR =
+                        giaoDich
+                            .noiDungChuyenKhoan;
+
+
+
+                    // Encode để tránh lỗi ký tự
+                    const noiDungEncode =
+                        encodeURIComponent(
+                            noiDungQR
+                        );
+
+
+                    const tenChuTaiKhoanEncode =
+                        encodeURIComponent(
+                            tenChuTaiKhoan
+                        );
+
+
+
+                    // Tạo URL QR
+                    const qrUrl =
+                        "https://img.vietqr.io/image/"
+                        + nganHang
+                        + "-"
+                        + soTaiKhoan
+                        + "-compact2.png"
+                        + "?amount="
+                        + soTienQR
+                        + "&addInfo="
+                        + noiDungEncode
+                        + "&accountName="
+                        + tenChuTaiKhoanEncode;
+
+
+
+                    // =====================================
+                    // GÁN QR VÀO ẢNH
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "qrThanhToan"
+                        )
+                        .src =
+                            qrUrl;
+
+
+
+                    // =====================================
+                    // CUỘN XUỐNG PHẦN QR
+                    // =====================================
+
+                    document
+                        .getElementById(
+                            "thongTinGiaoDich"
+                        )
+                        .scrollIntoView(
+                            {
+                                behavior:
+                                    "smooth"
+                            }
+                        );
+
+
+
+                    // =====================================
+                    // BẮT ĐẦU KIỂM TRA TRẠNG THÁI
+                    // =====================================
+
+                    // Nếu trước đó đang có interval
+                    // thì dừng lại
+                    if (intervalKiemTraTrangThai)
+                    {
+                        clearInterval(
+                            intervalKiemTraTrangThai
+                        );
+
+                        intervalKiemTraTrangThai =
+                            null;
+                    }
+
+
+                    // Kiểm tra ngay lần đầu
+                    await kiemTraTrangThaiGiaoDich(
+                        giaoDich.maGiaoDich,
+                        giaoDich.soTien
+                    );
+
+
+                    // Sau đó cứ 5 giây
+                    // kiểm tra một lần
+                    intervalKiemTraTrangThai =
+                        setInterval(
+                            function ()
+                            {
+                                kiemTraTrangThaiGiaoDich(
+                                    giaoDich.maGiaoDich,
+                                    giaoDich.soTien
+                                );
+                            },
+                            5000
+                        );
+
+                }
+                catch (error)
+                {
+                    console.error(error);
+
+                    thongBaoLoi.innerText =
+                        "Có lỗi xảy ra khi tạo giao dịch.";
+                }
+
+            }
+        );
+
+    });
+
+</script>

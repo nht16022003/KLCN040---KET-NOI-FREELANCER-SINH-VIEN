@@ -1,4 +1,6 @@
-﻿@using Microsoft.AspNetCore.Http
+﻿@using FreelancerStudent.Web.Services.Interfaces
+@inject IWalletWebService WalletWebService
+@using Microsoft.AspNetCore.Http
 @{
     var role = Context.Session.GetString("tenRole");
     var userName = Context.Session.GetString("hovaten") ?? (role == "NhaTuyenDung" ? "tuan_depzai" : "Son_ko_thogminh");
@@ -6,7 +8,21 @@
 "Freelancer Student");
     var userAvatar = Context.Session.GetString("UserAvatar") ??
 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80";
+    decimal soDuKhaDung = 0;
+
+    var maUser = Context.Session.GetInt32("maUser");
+
+    if (maUser.HasValue && role == "NhaTuyenDung")
+    {
+        var ketQuaVi = await WalletWebService.layViTheoUser(maUser.Value);
+
+        if (ketQuaVi.success && ketQuaVi.data != null)
+        {
+            soDuKhaDung = ketQuaVi.data.soDuKhaDung;
+        }
+    }
 }
+    
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -248,7 +264,8 @@
             .portal-user-info {
                 display: flex;
                 flex-direction: column;
-                text-align: left;
+                align-items: flex-start;
+                line-height: 1.2;
             }
 
             .portal-user-name {
@@ -731,7 +748,7 @@
                         <!-- Nút Khám phá Freelancer -->
                         <a href="/Freelancer/Search" class="search-pill-btn">
                             <i class="bi bi-search"></i>
-                            <span>Khám phá Freelancer</span>
+                            <span>Khám phá</span>
                         </a>
 
                         <!-- Navigation chính -->
@@ -746,7 +763,7 @@
                             </a>
                             <a href="/Wallet" class="portal-nav-link">
                                 <i class="bi bi-wallet2"></i>
-                                <span>Ví & Thanh toán</span>
+                                <span>Nạp tiền</span>
                             </a>
                         </nav>
                     </div>
@@ -779,9 +796,10 @@
                             <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
                                data-bs-toggle="dropdown" aria-expanded="false">
                                 <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
-                                <div class="portal-user-info d-none d-lg-block">
+                                <div class="portal-user-info d-none d-lg-flex">
                                     <span class="portal-user-name">@userName</span>
                                     <span class="portal-user-tag">@userRoleTitle</span>
+                                    <span class="portal-user-tag">Số dư: @soDuKhaDung.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))đ</span>
                                 </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">

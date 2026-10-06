@@ -22,7 +22,8 @@ builder.Services.AddScoped<IJobPostRepository, JobPostRepository>();
 builder.Services.AddScoped<IJobPostService, JobPostService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-
+builder.Services.AddScoped<IGiaoDichNapTienRepository, GiaoDichNapTienRepository>();
+builder.Services.AddScoped<IGiaoDichNapTienService, GiaoDichNapTienService>();
 // 2. Đăng ký Controllers
 builder.Services.AddControllers();
 

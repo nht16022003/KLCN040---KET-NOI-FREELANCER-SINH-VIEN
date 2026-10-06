@@ -4,10 +4,15 @@ namespace FreelancerStudent.API.Repositories.Interfaces
 {
     public interface IWalletRepository
     {
-        //Lấy ví theo mã user
+        // Lấy ví theo mã user
         Task<Wallet> layViTheoMaUser(int maUser);
 
-        //Thêm ví cho User vừa được tạo theo mã user
+        // Thêm ví cho User vừa được tạo theo mã user
         Task<Wallet> themViChoUserTheoMaUser(int maUser);
+
+        // Cập nhật thông tin ví
+        Task capNhatViAsync(Wallet wallet);
+        
+        Task<Wallet> layViTheoMaWallet(int maWallet);
     }
 }

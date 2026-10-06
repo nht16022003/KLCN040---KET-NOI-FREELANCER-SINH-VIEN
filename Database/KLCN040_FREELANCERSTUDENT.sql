@@ -570,6 +570,34 @@ CREATE TABLE Task_CongViec
 
 )
 GO
+CREATE TABLE GiaoDichNapTien
+(
+    maNapTien INT IDENTITY(1,1) PRIMARY KEY,
+
+    maWallet INT NOT NULL,
+
+    maGiaoDich VARCHAR(50) NOT NULL UNIQUE,
+
+    soTien DECIMAL(18,2) NOT NULL,
+
+    noiDungChuyenKhoan VARCHAR(100) NOT NULL,
+
+    trangThai NVARCHAR(30) NOT NULL DEFAULT N'DangXuLy',
+
+    ngayTao DATETIME NOT NULL DEFAULT GETDATE(),
+
+    ngayHetHan DATETIME NOT NULL,
+
+    ngayHoanThanh DATETIME NULL,
+
+    maGiaoDichNganHang VARCHAR(100) NULL,
+
+    maAdminXuLy INT NULL,
+
+    CONSTRAINT FK_GiaoDichNapTien_Wallet
+        FOREIGN KEY (maWallet)
+        REFERENCES Wallet(maWallet)
+);
 
 -- 1. ROLES (Phân quyền người dùng)
 
@@ -927,59 +955,4 @@ SELECT * FROM DanhGia_NhanXet;
 SELECT * FROM ThongBao;
 SELECT * FROM GiaiDoan_HopDong;
 SELECT * FROM Task_CongViec;
-
-
-
-
-
-
-DROP TABLE Task_CongViec;
-DROP TABLE GiaiDoan_HopDong;
-
-DROP TABLE ThongBao;
-DROP TABLE DanhGia_NhanXet;
-
-DROP TABLE FileGhimChat;
-DROP TABLE TinNhanChat;
-DROP TABLE PhongChat;
-
-DROP TABLE BANGCHUNG_TRANHCHAP;
-DROP TABLE TranhChap;
-
-DROP TABLE YeuCauGiaHanDeadline;
-DROP TABLE TaiKhoanNganHang;
-DROP TABLE YeuCauNapTien;
-
-DROP TABLE BanGiao_SanPham;
-DROP TABLE HopDong;
-
-DROP TABLE UngThue;
-DROP TABLE UngTuyen;
-DROP TABLE JobPost;
-
-DROP TABLE DuAn_Trong_Portfolio;
-DROP TABLE Portfolio;
-
-DROP TABLE YeuCauRutTien;
-DROP TABLE LichSuGiaoDich;
-DROP TABLE YeuCauHoTro;
-DROP TABLE CauHinhPhiHoaHong_PhiDangBai;
-DROP TABLE DieuChinhSoDu;
-
-DROP TABLE FreelancerYeuThich;
-DROP TABLE NhaTuyenDung;
-
-DROP TABLE BaiDangTimViec_FreelancerStudent;
-DROP TABLE KyNang;
-DROP TABLE FreelancerStudents;
-
-DROP TABLE ChuyenNganh;
-
-DROP TABLE MinhChung_FreelancerStudents;
-DROP TABLE LichSu_XuLyTaiKhoan;
-
-DROP TABLE Admin;
-DROP TABLE Wallet;
-
-DROP TABLE Users;
-DROP TABLE Roles;
+SELECT * FROM GiaoDichNapTien;

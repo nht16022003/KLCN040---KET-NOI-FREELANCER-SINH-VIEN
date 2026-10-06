@@ -39,7 +39,8 @@ builder.Services.AddScoped<IAuthWebService, AuthWebService>();
 builder.Services.AddScoped<INhaTuyenDungWebService, NhaTuyenDungWebService>();
 builder.Services.AddScoped<IJobPostWebService, JobPostWebService>();
 builder.Services.AddScoped<IFreelancerStudentWebService, FreelancerStudentWebService>();
-
+builder.Services.AddScoped<IWalletWebService, WalletWebService>();
+builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
