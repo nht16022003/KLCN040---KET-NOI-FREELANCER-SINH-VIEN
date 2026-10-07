@@ -17,22 +17,22 @@ namespace FreelancerStudent.API.Repositories
         }
 
 
-        public async Task<List<FreelamcerStudents>> layTatCaFreelancerStudentsAsync()
+        public async Task<List<FreelancerStudents>> layTatCaFreelancerStudentsAsync()
         {
-            var ketqua = await _context.FreelamcerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).ToListAsync();
+            var ketqua = await _context.FreelancerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).ToListAsync();
             return ketqua;
         }
 
         //Tuấn
-        public async Task<FreelamcerStudents?> layFreelancerStudent_TheoMaUser(int maUser)
+        public async Task<FreelancerStudents?> layFreelancerStudent_TheoMaUser(int maUser)
         {
-            var freelancerStudent = await _context.FreelamcerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).FirstOrDefaultAsync(f => f.maUser == maUser);
+            var freelancerStudent = await _context.FreelancerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).FirstOrDefaultAsync(f => f.maUser == maUser);
             return freelancerStudent;
         }
 
 
         //Tuấn
-        public async Task<FreelamcerStudents> themFreelancerStudent_DuaVaoMaRoleCuaUsers(Users user, int maRole)
+        public async Task<FreelancerStudents> themFreelancerStudent_DuaVaoMaRoleCuaUsers(Users user, int maRole)
         {
             if (maRole != 1)
             {
@@ -44,7 +44,7 @@ namespace FreelancerStudent.API.Repositories
                 .Select(c => c.maChuyenNganh)
                 .FirstOrDefaultAsync() ?? "CNTT";
 
-            var freeMoi = new FreelamcerStudents
+            var freeMoi = new FreelancerStudents
             {
                 maUser = user.maUser,
                 maChuyenNganh = maChuyenNganhMacDinh,
@@ -59,7 +59,7 @@ namespace FreelancerStudent.API.Repositories
                 trangthaiNhanViec = true,
                 chiPhiTu = 0
             };
-            await _context.FreelamcerStudents.AddAsync(freeMoi);
+            await _context.FreelancerStudents.AddAsync(freeMoi);
             await _context.SaveChangesAsync();
 
             return freeMoi;
@@ -67,9 +67,9 @@ namespace FreelancerStudent.API.Repositories
 
 
         //Tuấn
-        public async Task<FreelamcerStudents?> layChiTietTheoIdAsync(int id)
+        public async Task<FreelancerStudents?> layChiTietTheoIdAsync(int id)
         {
-            return await _context.FreelamcerStudents
+            return await _context.FreelancerStudents
                 .Include(f => f.User)
                 .Include(f => f.ChuyenNganh)
                 .Include(f => f.FreelancerStudent_KyNangs)
@@ -81,7 +81,7 @@ namespace FreelancerStudent.API.Repositories
         public async Task<bool> capNhatHoSoAsync(ChiTietHoSoFreelancer_ReponseDTO dto)
         {
             //  Tìm bản ghi Freelancer theo mã User đang đăng nhập
-            var student = await _context.FreelamcerStudents
+            var student = await _context.FreelancerStudents
                 .Include(f => f.User)
                 .Include(f => f.FreelancerStudent_KyNangs)
                 .FirstOrDefaultAsync(f => f.maUser == dto.maUser);

@@ -2,6 +2,7 @@ using FreelancerStudent.API.Data;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+
 namespace FreelancerStudent.API.Repositories
 {
     public class ChatRepository : IChatRepository
@@ -18,10 +19,10 @@ namespace FreelancerStudent.API.Repositories
         public async Task<PhongChat> LayHoacTaoPhongChatAsync(int maUserClient, int maFreelancerStudent, string? maJob)
         {
             // 1. Tự động tìm kiếm nếu maFreelancerStudent được truyền vào là maUser của sinh viên
-            var freeById = await _context.FreelamcerStudents.FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudent);
+            var freeById = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudent);
             if (freeById == null)
             {
-                var freeByUser = await _context.FreelamcerStudents.FirstOrDefaultAsync(f => f.maUser == maFreelancerStudent);
+                var freeByUser = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maUser == maFreelancerStudent);
                 if (freeByUser != null)
                 {
                     maFreelancerStudent = freeByUser.maFreelancerStudents;
@@ -85,7 +86,7 @@ namespace FreelancerStudent.API.Repositories
         public async Task<List<PhongChat>> LayDanhSachPhongChatTheoUserAsync(int maUser)
         {
             // Lấy maFreelancerStudents nếu user này là Freelancer
-            var freelancer = await _context.FreelamcerStudents.FirstOrDefaultAsync(f => f.maUser == maUser);
+            var freelancer = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maUser == maUser);
             int maFree = freelancer?.maFreelancerStudents ?? 0;
             return await _context.PhongChats
                 .Include(p => p.UserClient)

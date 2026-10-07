@@ -31,6 +31,6 @@ namespace FreelancerStudent.API.Models
         public string trangthai { get; set; } = "DangHienThi"; // DangHienThi, DaAn, DaNhanViec
 
         [ForeignKey("maFreelancerStudent")]
-        public virtual FreelamcerStudents? FreelamcerStudents { get; set; }
+        public virtual FreelancerStudents? FreelamcerStudents { get; set; }
     }
 }

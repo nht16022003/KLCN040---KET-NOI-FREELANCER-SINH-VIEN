@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace FreelancerStudent.API.Models
 {
     [Table("FreelancerStudents")]
-    public class FreelamcerStudents
+    public class FreelancerStudents
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
