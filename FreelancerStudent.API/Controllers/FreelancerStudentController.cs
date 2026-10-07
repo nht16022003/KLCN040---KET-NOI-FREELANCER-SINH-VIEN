@@ -106,6 +106,31 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+        //Xuân Sơn
+        //XS
+        [HttpGet("Profile/{maFreelancerStudents:int}")]
+        public async Task<IActionResult> layProfile(int maFreelancerStudents)
+        {
+            var profile = await _freelancerStudentService
+                .layProfileFreelancerStudent(maFreelancerStudents);
+
+            if (profile == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy hồ sơ freelancer."
+                });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy hồ sơ freelancer thành công.",
+                data = profile
+            });
+        }
+
 
     }
 }
