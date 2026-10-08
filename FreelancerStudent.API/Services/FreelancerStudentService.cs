@@ -10,10 +10,14 @@ namespace FreelancerStudent.API.Services
     public class FreelancerStudentService : IFreelancerStudentService
     {
         private readonly IFreelancerStudentRepository _freelancerStudentRepository; //Sử dụng để gọi các dữ liệu đucợ laays từ database để service xử lý
+        private readonly IPortfolioService _portfolioService;
 
-        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository)
+        public FreelancerStudentService(
+            IFreelancerStudentRepository freelancerStudentRepository,
+            IPortfolioService portfolioService)
         {
             _freelancerStudentRepository = freelancerStudentRepository;
+            _portfolioService = portfolioService;
         }
 
 
@@ -96,6 +100,8 @@ namespace FreelancerStudent.API.Services
                 return null;
             }
 
+            var portfolio = await _portfolioService.layPortfolioAsync(maFreelancerStudents);
+
             return new FreelancerStudentProfile_ReponseDTO
             {
                 User = new ProfileUserResponse
@@ -123,7 +129,24 @@ namespace FreelancerStudent.API.Services
                 ChuyenNganh = freelancer.ChuyenNganh == null ? null : new ProfileMajorResponse
                 {
                     TenChuyenNganh = freelancer.ChuyenNganh.tenChuyenNganh
-                }
+                },
+                Portfolio = portfolio == null ? null : new ProfilePortfolioResponse
+                {
+                    MoTaBanThan = portfolio.moTaBanThan,
+                    Url_video = portfolio.url_video
+                },
+                DuAns = portfolio?.projects.Select(project => new ProfileProjectResponse
+                {
+                    MaDA = project.maDA,
+                    LaDuAnNoiBat = project.laDuAnNoiBat,
+                    TenDuAn = project.tenDuAn,
+                    VaiTro = project.vaiTro ?? string.Empty,
+                    MoTa = project.moTa ?? string.Empty,
+                    Congnghe = project.congnghe ?? string.Empty,
+                    LinkGithub = project.linkGithub,
+                    LinkDemo = project.linkDemo,
+                    Link_file = project.link_file
+                }).ToList() ?? new List<ProfileProjectResponse>()
             };
         }
 

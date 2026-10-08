@@ -56,12 +56,15 @@ namespace FreelancerStudent.Web.ViewModels
 
     public class ProfileProjectViewModel
     {
+        public string MaDA { get; set; } = string.Empty;
+        public bool LaDuAnNoiBat { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public string VaiTro { get; set; } = string.Empty;
         public string MoTa { get; set; } = string.Empty;
         public string Congnghe { get; set; } = string.Empty;
         public string? LinkGithub { get; set; }
         public string? LinkDemo { get; set; }
+        public string? Link_file { get; set; }
     }
 
     public class ProfileEvidenceViewModel

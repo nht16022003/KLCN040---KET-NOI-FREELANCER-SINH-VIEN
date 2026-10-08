@@ -936,7 +936,7 @@
                                                                                     asp-route-maUser="@maUserDangNhap.Value"><i class="bi bi-person-vcard me-2"></i>
                                                                                      Hồ sơ năng lực sinh viên</a></li>
                                                                          }
-                                                                                <li><a class="dropdown-item" href="/Freelancer/Portfolio"><i
+                                                                                     <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Portfolio"><i
                                                                                     class="bi bi-collection-play me-2"></i> Portfolio cá nhân</a></li>
                                                                                     <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich"><i
                                                                                         class="bi bi-building-check text-primary me-2"></i> NTD quan tâm (Đã lưu)</a>
@@ -970,7 +970,7 @@
                                                                                     <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link"><i
                                                                                         class="bi bi-building-check me-1"></i>NTD quan tâm</a>
                                                                                         <a href="/Wallet" class="subnav-link"><i class="bi bi-wallet2 me-1"></i>Ví & Thu nhập</a>
-                                                                                        <a href="/Freelancer/Portfolio" class="subnav-link">Portfolio cá nhân</a>
+                                                                                        <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
                                                                                         <a href="/Account/MinhChung" class="subnav-link text-success fw-bold"><i
                                                                                             class="bi bi-shield-check me-1"></i>Minh chứng sinh viên</a>
                                                                                             <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>

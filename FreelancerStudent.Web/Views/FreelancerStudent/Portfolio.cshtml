@@ -1,0 +1,176 @@
+﻿@model FreelancerStudent.Web.ViewModels.PortfolioViewModel
+@{
+    ViewData["Title"] = "Portfolio cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .portfolio-manage-page { background-color: #F8FAF9; min-height: 85vh; padding: 30px 0 60px; }
+    .section-card { background: #FFFFFF; border: 1px solid #E5ECE7; border-radius: 20px; padding: 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02); }
+    .project-item-box { border: 1.5px solid #E2EDE6; border-radius: 16px; padding: 20px; background: #FFFFFF; margin-bottom: 16px; }
+</style>
+
+<div class="portfolio-manage-page">
+    <div class="container-fluid px-lg-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">Portfolio cá nhân</h2>
+                <p class="text-muted small mb-0">Danh sách dự án được lấy từ Portfolio API.</p>
+            </div>
+            <a asp-controller="FreelancerStudent" asp-action="Profile" asp-route-maUser="@Context.Session.GetInt32("maUser")" class="btn btn-outline-success rounded-pill px-4">
+                <i class="bi bi-eye me-1"></i> Xem hồ sơ công khai
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-7">
+                <div class="section-card">
+                    <h4 class="fw-bold text-dark mb-3"><i class="bi bi-folder2-open text-success me-2"></i>Dự án trong Portfolio (@Model.projects.Count)</h4>
+                    @if (!Model.projects.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-plus display-3"></i>
+                            <h6 class="fw-bold mt-2">Chưa có dự án nào</h6>
+                            <p class="small mb-0">Bạn chưa thêm dự án nào.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var project in Model.projects)
+                        {
+                            <div class="project-item-box">
+                                <h5 class="fw-bold text-dark">@project.tenDuAn</h5>
+                                <p class="text-muted small mb-2">@project.vaiTro</p>
+                                <p class="text-secondary small mb-2">@project.moTa</p>
+                                <span class="badge bg-success-subtle text-success">@project.congnghe</span>
+                                <div class="d-flex gap-2 mt-3 pt-3 border-top">
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill"
+                                            data-bs-toggle="modal" data-bs-target="#editProjectModal-@project.maDA">
+                                        <i class="bi bi-pencil me-1"></i>Sửa
+                                    </button>
+                                    <form asp-action="DeleteProject" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa dự án này?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="maDA" value="@project.maDA" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
+                                            <i class="bi bi-trash me-1"></i>Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+@foreach (var project in Model.projects)
+{
+    <div class="modal fade" id="editProjectModal-@project.maDA" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Sửa dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="UpdateProject" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="EditMaDA" value="@project.maDA" />
+                    <div class="modal-body">
+                        <input name="projects[0].maDA" value="@project.maDA" type="hidden" />
+                        <input name="projects[0].tenDuAn" value="@project.tenDuAn" class="form-control mb-2" required />
+                        <input name="projects[0].vaiTro" value="@project.vaiTro" class="form-control mb-2" placeholder="Vai trò" />
+                        <input name="projects[0].congnghe" value="@project.congnghe" class="form-control mb-2" placeholder="Công nghệ" />
+                        <textarea name="projects[0].moTa" class="form-control mb-2" placeholder="Mô tả">@project.moTa</textarea>
+                        <input name="projects[0].linkGithub" value="@project.linkGithub" class="form-control mb-2" placeholder="GitHub" />
+                        <input name="projects[0].linkDemo" value="@project.linkDemo" class="form-control" placeholder="Demo" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary rounded-pill">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+                <div class="text-center mb-4">
+                    <button type="button" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                        <i class="bi bi-plus-circle me-1"></i> Thêm dự án
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <div class="section-card">
+                    <h4 class="fw-bold text-dark mb-3"><i class="bi bi-file-person text-success me-2"></i>Giới thiệu Portfolio</h4>
+                    <p class="text-secondary small mb-0">@(Model.moTaBanThan ?? "Chưa cập nhật phần giới thiệu.")</p>
+                </div>
+
+                <div class="section-card">
+                    <h4 class="fw-bold text-dark mb-3"><i class="bi bi-play-btn text-success me-2"></i>Video giới thiệu</h4>
+                    @if (string.IsNullOrWhiteSpace(Model.url_video))
+                    {
+                        <p class="text-muted small mb-0">Chưa có video giới thiệu.</p>
+                    }
+                    else if (Model.url_video.Contains("youtube.com", StringComparison.OrdinalIgnoreCase) || Model.url_video.Contains("youtu.be", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="ratio ratio-16x9">
+                            <iframe src="@Model.url_video" title="Video giới thiệu Portfolio" allowfullscreen></iframe>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@Model.url_video" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success btn-sm rounded-pill">
+                            Mở video giới thiệu
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+<div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="addProjectModalLabel">Thêm dự án mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <form asp-action="AddProject" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input asp-for="NewTenDuAn" class="form-control mb-2" placeholder="Tên dự án" required />
+                    <input asp-for="NewVaiTro" class="form-control mb-2" placeholder="Vai trò" />
+                    <input asp-for="NewCongNghe" class="form-control mb-2" placeholder="Công nghệ sử dụng" />
+                    <textarea asp-for="NewMoTa" class="form-control mb-2" placeholder="Mô tả"></textarea>
+                    <input asp-for="NewLinkGithub" class="form-control mb-2" placeholder="Link GitHub" />
+                    <input asp-for="NewLinkDemo" class="form-control" placeholder="Link Demo" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success rounded-pill">Lưu dự án</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 text-center p-4">
+                <i class="bi bi-check-circle-fill text-success display-4"></i>
+                <h5 class="fw-bold mt-3">@TempData["Success"]</h5>
+                <p class="text-muted mb-3">@TempData["Success"]</p>
+                <button type="button" class="btn btn-success rounded-pill" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        });
+    </script>
+}
+    </div>
+</div>

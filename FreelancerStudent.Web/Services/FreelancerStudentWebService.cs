@@ -29,6 +29,85 @@ namespace FreelancerStudent.Web.Services
 
 
         }
+
+        public async Task<ApiReponse<PortfolioViewModel>> layPortfolioAsync(int maFreelancerStudents)
+        {
+            var response = await _guiRequest.GetAsync($"api/Portfolio/{maFreelancerStudents}");
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return new ApiReponse<PortfolioViewModel>
+                {
+                    success = true,
+                    data = new PortfolioViewModel
+                    {
+                        maFreelancerStudents = maFreelancerStudents
+                    },
+                    message = "Portfolio chưa có dữ liệu."
+                };
+            }
+
+            return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
+                ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể đọc Portfolio." };
+        }
+
+        public async Task<ApiReponse<PortfolioViewModel>> themDuAnAsync(
+            DuAnTrongPortfolioViewModel project, int maFreelancerStudents)
+        {
+            var request = new
+            {
+                maFreelancerStudents,
+                tenDuAn = project.tenDuAn,
+                vaiTro = project.vaiTro,
+                moTa = project.moTa,
+                congnghe = project.congnghe,
+                linkGithub = project.linkGithub,
+                linkDemo = project.linkDemo,
+                link_file = project.link_file
+            };
+            var response = await _guiRequest.PostAsJsonAsync("api/Portfolio/projects", request);
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
+                ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể thêm dự án." };
+        }
+
+        public async Task<ApiReponse<PortfolioViewModel>> suaDuAnAsync(
+            DuAnTrongPortfolioViewModel project, int maFreelancerStudents)
+        {
+            var request = new
+            {
+                maDA = project.maDA,
+                maFreelancerStudents,
+                tenDuAn = project.tenDuAn,
+                vaiTro = project.vaiTro,
+                moTa = project.moTa,
+                congnghe = project.congnghe,
+                linkGithub = project.linkGithub,
+                linkDemo = project.linkDemo,
+                link_file = project.link_file
+            };
+            var response = await _guiRequest.PutAsJsonAsync("api/Portfolio/projects", request);
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
+                ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể sửa dự án." };
+        }
+
+        public async Task<ApiReponse<PortfolioViewModel>> xoaDuAnAsync(string maDA, int maFreelancerStudents)
+        {
+            var response = await _guiRequest.DeleteAsync($"api/Portfolio/projects/{maDA}?maFreelancerStudents={maFreelancerStudents}");
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
+                ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể xóa dự án." };
+        }
+
+        public async Task<ApiReponse<PortfolioViewModel>> capNhatDuAnNoiBatAsync(int maFreelancerStudents, List<string> maDAs)
+        {
+            var response = await _guiRequest.PutAsJsonAsync("api/Portfolio/featured", new { maFreelancerStudents, maDAs });
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
+                ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể cập nhật dự án nổi bật." };
+        }
         //XS
         public async Task<ApiReponse<FreelancerStudentProfileViewModel>> layProfileFreelancerStudentAsync(int maFreelancerStudents)
         {

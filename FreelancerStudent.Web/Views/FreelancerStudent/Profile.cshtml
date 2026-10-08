@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Hồ sơ của " + Model.tenUser;
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var isProfileOwner = ViewData["IsProfileOwner"] as bool? == true;
     var chuyenNganhName = Model.ChuyenNganh?.TenChuyenNganh ??
                           (Model.MaChuyenNganh == "KTPM" ? "Kỹ thuật phần mềm" :
                           Model.MaChuyenNganh == "TKDH" ? "Thiết kế đồ họa" :
@@ -453,6 +454,43 @@
                 </div>
             </div>
 
+@if (isProfileOwner)
+{
+    <div class="modal fade" id="featuredProjectsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Chọn dự án nổi bật</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <form asp-controller="FreelancerStudent" asp-action="UpdateFeaturedProjects" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        @foreach (var project in Model.DuAns)
+                        {
+                            <label class="d-flex align-items-start gap-2 border rounded-3 p-3 mb-2">
+                                <input class="form-check-input mt-1" type="checkbox" name="maDAs" value="@project.MaDA" @(project.LaDuAnNoiBat ? "checked" : null) />
+                                <span>
+                                    <strong>@project.TenDuAn</strong>
+                                    <small class="d-block text-muted">@project.MoTa</small>
+                                </span>
+                            </label>
+                        }
+                        @if (!Model.DuAns.Any())
+                        {
+                            <p class="text-muted mb-0">Bạn chưa có dự án để chọn.</p>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success rounded-pill">Lưu lựa chọn</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
             <!-- Profile Info Header Content -->
             <div class="profile-header-content">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
@@ -712,7 +750,15 @@
                                             <div class="section-card">
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                                     <h5 class="section-card-title mb-0">Dự án nổi bật</h5>
-                                                    <span class="badge bg-light text-muted border">@Model.DuAns.Count dự án</span>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-light text-muted border">@Model.DuAns.Count dự án</span>
+                                                        @if (isProfileOwner)
+                                                        {
+                                                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#featuredProjectsModal">
+                                                                <i class="bi bi-star me-1"></i>Thêm dự án nổi bật
+                                                            </button>
+                                                        }
+                                                    </div>
                                                 </div>
 
                                                 @if (!Model.DuAns.Any())
@@ -725,9 +771,10 @@
                                                 else
                                                 {
                                                     <div class="project-grid-box">
-                                                        @foreach (var da in Model.DuAns)
+                                                        @foreach (var da in Model.DuAns.Where(x => x.LaDuAnNoiBat))
                                                         {
                                                             <div class="project-preview-card">
+                                                                <span class="badge text-bg-warning mb-2"><i class="bi bi-star-fill me-1"></i>Dự án nổi bật</span>
                                                                 <div>
                                                                     <div class="project-title text-truncate" title="@da.TenDuAn">@da.TenDuAn</div>
                                                                     <div class="project-role-tag"><i class="bi bi-person-workspace me-1"></i>@da.VaiTro</div>
@@ -735,6 +782,7 @@
                                                                     <div class="small text-muted mb-2">
                                                                         <strong>Công nghệ:</strong> @da.Congnghe
                                                                     </div>
+
                                                                 </div>
                                                                 <div class="d-flex gap-2 pt-2 border-top">
                                                                     @if (!string.IsNullOrEmpty(da.LinkGithub))

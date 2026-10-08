@@ -8,23 +8,23 @@
     "net10.0": []
   },
   "packageFolders": {
-    "C:\\Users\\HTuan\\.nuget\\packages\\": {},
+    "C:\\Users\\sơn\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\KLTN\\Improve\\MOCK\\MOCK.csproj",
+      "projectUniqueName": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\MOCK\\MOCK.csproj",
       "projectName": "MOCK",
-      "projectPath": "D:\\KLTN\\Improve\\MOCK\\MOCK.csproj",
-      "packagesPath": "C:\\Users\\HTuan\\.nuget\\packages\\",
-      "outputPath": "D:\\KLTN\\Improve\\MOCK\\obj\\",
+      "projectPath": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\MOCK\\MOCK.csproj",
+      "packagesPath": "C:\\Users\\sơn\\.nuget\\packages\\",
+      "outputPath": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\MOCK\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\HTuan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\sơn\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -52,7 +52,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "10.0.400"
     },
     "frameworks": {
       "net10.0": {
@@ -77,7 +77,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

@@ -190,6 +190,91 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "FreelancerStudent.API.Controllers.PortfolioController",
+    "Method": "Get",
+    "RelativePath": "api/Portfolio/{maFreelancerStudents}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maFreelancerStudents",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.PortfolioController",
+    "Method": "UpdateFeatured",
+    "RelativePath": "api/Portfolio/featured",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "FreelancerStudent.API.DTOs.ReponsesDTO.DuAnNoiBat_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.PortfolioController",
+    "Method": "UpdateProject",
+    "RelativePath": "api/Portfolio/projects",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "FreelancerStudent.API.DTOs.ReponsesDTO.DuAnTrongPortfolio_UpdateRequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.PortfolioController",
+    "Method": "AddProject",
+    "RelativePath": "api/Portfolio/projects",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "FreelancerStudent.API.DTOs.ReponsesDTO.DuAnTrongPortfolio_RequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FreelancerStudent.API.Controllers.PortfolioController",
+    "Method": "DeleteProject",
+    "RelativePath": "api/Portfolio/projects/{maDA}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "maDA",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "maFreelancerStudents",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "FreelancerStudent.API.Controllers.WalletController",
     "Method": "LayViTheoUser",
     "RelativePath": "api/Wallet/LayViTheoUser/{maUser}",

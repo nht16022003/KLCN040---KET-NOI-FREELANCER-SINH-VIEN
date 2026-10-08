@@ -30,6 +30,11 @@ namespace FreelancerStudent.API.Data
 
         public DbSet<FreelancerStudent_KyNang> FreelancerStudent_KyNangs { get; set; }
 
+        public DbSet<Portfolio> Portfolios { get; set; }
+
+        public DbSet<DuAnTrongPortfolio> DuAnTrongPortfolios { get; set; }
+
+
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
         //index và dữ liệu mẫu
@@ -62,6 +67,53 @@ namespace FreelancerStudent.API.Data
 
                 entity.HasMany(r => r.Users).WithOne(u => u.Roles).HasForeignKey(u => u.maRole); //r là đối tượng trong Roles và u.maRole trong Users chính là khóa ngoại đến Roles
 
+            });
+
+            modelBuilder.Entity<Portfolio>(entity =>
+            {
+                entity.HasKey(x => x.maPortfolio);
+
+                entity.Property(x => x.maPortfolio)
+                    .HasColumnName("maPortfolio")
+                    .HasColumnType("varchar(20)");
+
+                entity.Property(x => x.url_video)
+                    .HasColumnName("url_video")
+                    .HasColumnType("varchar(255)");
+
+                entity.HasIndex(x => x.maFreelancerStudents)
+                    .IsUnique();
+
+                entity.HasOne(x => x.FreelancerStudent)
+                    .WithMany()
+                    .HasForeignKey(x => x.maFreelancerStudents)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<DuAnTrongPortfolio>(entity =>
+            {
+                entity.HasKey(x => x.maDA);
+
+                entity.Property(x => x.maDA)
+                    .HasColumnName("maDA")
+                    .HasColumnType("varchar(20)");
+
+                entity.Property(x => x.maPortfolio)
+                    .HasColumnName("maPortfolio")
+                    .HasColumnType("varchar(20)");
+
+                entity.Property(x => x.tenDuAn).HasMaxLength(200);
+                entity.Property(x => x.vaiTro).HasMaxLength(50);
+                entity.Property(x => x.congnghe).HasMaxLength(50);
+                entity.Property(x => x.linkGithub).HasMaxLength(255);
+                entity.Property(x => x.linkDemo).HasMaxLength(255);
+                entity.Property(x => x.link_file).HasMaxLength(255);
+                entity.Property(x => x.laDuAnNoiBat).HasColumnName("laDuAnNoiBat");
+
+                entity.HasOne(x => x.Portfolio)
+                    .WithMany()
+                    .HasForeignKey(x => x.maPortfolio)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<FreelancerStudents>(entity =>

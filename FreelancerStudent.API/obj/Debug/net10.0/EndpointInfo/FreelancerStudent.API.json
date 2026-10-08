@@ -318,6 +318,150 @@
         }
       }
     },
+    "/api/Portfolio/{maFreelancerStudents}": {
+      "get": {
+        "tags": [
+          "Portfolio"
+        ],
+        "parameters": [
+          {
+            "name": "maFreelancerStudents",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Portfolio/projects": {
+      "put": {
+        "tags": [
+          "Portfolio"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnTrongPortfolio_UpdateRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnTrongPortfolio_UpdateRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnTrongPortfolio_UpdateRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Portfolio"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnTrongPortfolio_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnTrongPortfolio_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnTrongPortfolio_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Portfolio/projects/{maDA}": {
+      "delete": {
+        "tags": [
+          "Portfolio"
+        ],
+        "parameters": [
+          {
+            "name": "maDA",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maFreelancerStudents",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Portfolio/featured": {
+      "put": {
+        "tags": [
+          "Portfolio"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnNoiBat_RequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnNoiBat_RequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuAnNoiBat_RequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Wallet/LayViTheoUser/{maUser}": {
       "get": {
         "tags": [
@@ -510,6 +654,127 @@
         },
         "additionalProperties": false
       },
+      "DuAnNoiBat_RequestDTO": {
+        "required": [
+          "maFreelancerStudents"
+        ],
+        "type": "object",
+        "properties": {
+          "maFreelancerStudents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maDAs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DuAnTrongPortfolio_RequestDTO": {
+        "required": [
+          "maFreelancerStudents",
+          "tenDuAn"
+        ],
+        "type": "object",
+        "properties": {
+          "maFreelancerStudents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tenDuAn": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "vaiTro": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "moTa": {
+            "type": "string",
+            "nullable": true
+          },
+          "congnghe": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "linkGithub": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "linkDemo": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "link_file": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DuAnTrongPortfolio_UpdateRequestDTO": {
+        "required": [
+          "maDA",
+          "maFreelancerStudents",
+          "tenDuAn"
+        ],
+        "type": "object",
+        "properties": {
+          "maFreelancerStudents": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tenDuAn": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "vaiTro": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "moTa": {
+            "type": "string",
+            "nullable": true
+          },
+          "congnghe": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "linkGithub": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "linkDemo": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "link_file": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true
+          },
+          "maDA": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "JobPost_RequestDTO": {
         "required": [
           "maNhaTuyenDung",
@@ -616,6 +881,9 @@
     },
     {
       "name": "NhaTuyenDung"
+    },
+    {
+      "name": "Portfolio"
     },
     {
       "name": "Wallet"
