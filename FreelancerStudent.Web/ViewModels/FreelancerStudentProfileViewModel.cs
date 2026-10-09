@@ -24,6 +24,7 @@ namespace FreelancerStudent.Web.ViewModels
 
     public class ProfileFreelancerViewModel
     {
+        public int MaFreelancerStudents { get; set; }
         public string MaChuyenNganh { get; set; } = string.Empty;
         public string TenTruong { get; set; } = string.Empty;
         public string MaTruong { get; set; } = string.Empty;

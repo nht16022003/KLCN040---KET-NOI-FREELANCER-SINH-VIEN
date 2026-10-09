@@ -27,6 +27,12 @@ namespace FreelancerStudent.API.Repositories
             return portfolio;
         }
 
+        public async Task capNhatPortfolioAsync(Portfolio portfolio)
+        {
+            _context.Portfolios.Update(portfolio);
+            await _context.SaveChangesAsync();
+        }
+
         public Task<List<DuAnTrongPortfolio>> layDuAnAsync(string maPortfolio)
         {
             return _context.DuAnTrongPortfolios

@@ -23,24 +23,34 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Profile(int maUser)
+        public async Task<IActionResult> Profile(int? maUser, int? maFreelancerStudents)
         {
-            if (maUser <= 0)
+            if ((!maUser.HasValue || maUser <= 0) && (!maFreelancerStudents.HasValue || maFreelancerStudents <= 0))
             {
                 return NotFound();
             }
 
-            ViewData["IsProfileOwner"] = HttpContext.Session.GetInt32("maUser") == maUser;
-
-            var listResult = await _freelancerStudentWebService
-                .layDanhSachFreelancerStudentAsync();
-            var freelancer = listResult.data?.FirstOrDefault(x => x.maUser == maUser);
+            FreelacerStudentViewModel? freelancer;
+            if (maFreelancerStudents.HasValue && maFreelancerStudents > 0)
+            {
+                var listResult = await _freelancerStudentWebService
+                    .layDanhSachFreelancerStudentAsync();
+                freelancer = listResult.data?.FirstOrDefault(x => x.maFreelancerStudents == maFreelancerStudents.Value);
+            }
+            else
+            {
+                var listResult = await _freelancerStudentWebService
+                    .layDanhSachFreelancerStudentAsync();
+                freelancer = listResult.data?.FirstOrDefault(x => x.maUser == maUser!.Value);
+            }
 
             if (freelancer == null)
             {
                 TempData["Error"] = "Không tìm thấy hồ sơ freelancer của tài khoản đang đăng nhập.";
                 return NotFound();
             }
+
+            ViewData["IsProfileOwner"] = freelancer.maUser == HttpContext.Session.GetInt32("maUser");
 
             var result = await _freelancerStudentWebService
                 .layProfileFreelancerStudentAsync(freelancer.maFreelancerStudents);
@@ -96,6 +106,26 @@ namespace FreelancerStudent.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePortfolio(PortfolioViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            var freelancer = await GetCurrentFreelancerAsync(maUser);
+            if (freelancer == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            model.maFreelancerStudents = freelancer.maFreelancerStudents;
+            var result = await _freelancerStudentWebService.capNhatPortfolioAsync(model);
+            TempData[result.success ? "Success" : "Error"] = result.success
+                ? "Đã cập nhật video giới thiệu."
+                : result.message;
+
+            return RedirectToAction(nameof(Portfolio));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProject(PortfolioViewModel model)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
@@ -124,17 +154,18 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Portfolio()
+        public async Task<IActionResult> Portfolio(int? maFreelancerStudents)
         {
-            var maUser = HttpContext.Session.GetInt32("maUser");
-            if (!maUser.HasValue)
+            var currentUserId = HttpContext.Session.GetInt32("maUser");
+            if (!currentUserId.HasValue && !maFreelancerStudents.HasValue)
             {
                 return RedirectToAction("DangNhap", "Account");
             }
 
-            var listResult = await _freelancerStudentWebService
-                .layDanhSachFreelancerStudentAsync();
-            var freelancer = listResult.data?.FirstOrDefault(x => x.maUser == maUser.Value);
+            var listResult = await _freelancerStudentWebService.layDanhSachFreelancerStudentAsync();
+            var freelancer = maFreelancerStudents.HasValue
+                ? listResult.data?.FirstOrDefault(x => x.maFreelancerStudents == maFreelancerStudents.Value)
+                : listResult.data?.FirstOrDefault(x => x.maUser == currentUserId!.Value);
 
             if (freelancer == null)
             {

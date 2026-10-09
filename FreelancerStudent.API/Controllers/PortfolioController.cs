@@ -24,6 +24,15 @@ namespace FreelancerStudent.API.Controllers
                 : Ok(new { success = true, data });
         }
 
+        [HttpPut]
+        public async Task<IActionResult> UpdatePortfolio([FromBody] Portfolio_UpdateRequestDTO request)
+        {
+            var data = await _service.capNhatPortfolioAsync(request);
+            return data == null
+                ? NotFound(new { success = false, message = "Portfolio không tồn tại" })
+                : Ok(new { success = true, data });
+        }
+
         [HttpPut("projects")]
         public async Task<IActionResult> UpdateProject([FromBody] DuAnTrongPortfolio_UpdateRequestDTO request)
         {

@@ -29,6 +29,18 @@ namespace FreelancerStudent.API.Services
             return result;
         }
 
+        public async Task<Portfolio_ReponseDTO?> capNhatPortfolioAsync(Portfolio_UpdateRequestDTO request)
+        {
+            var portfolio = await _repository.layTheoMaFreelancerAsync(request.maFreelancerStudents);
+            if (portfolio == null) return null;
+
+            portfolio.moTaBanThan = request.moTaBanThan;
+            portfolio.url_video = request.url_video;
+            await _repository.capNhatPortfolioAsync(portfolio);
+
+            return await layPortfolioAsync(request.maFreelancerStudents);
+        }
+
         public async Task<Portfolio_ReponseDTO?> themDuAnAsync(DuAnTrongPortfolio_RequestDTO request)
         {
             var portfolio = await _repository.layTheoMaFreelancerAsync(request.maFreelancerStudents);

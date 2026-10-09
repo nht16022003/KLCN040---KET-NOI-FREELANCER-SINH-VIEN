@@ -52,6 +52,20 @@ namespace FreelancerStudent.Web.Services
                 ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể đọc Portfolio." };
         }
 
+        public async Task<ApiReponse<PortfolioViewModel>> capNhatPortfolioAsync(PortfolioViewModel portfolio)
+        {
+            var request = new
+            {
+                maFreelancerStudents = portfolio.maFreelancerStudents,
+                moTaBanThan = portfolio.moTaBanThan,
+                url_video = portfolio.url_video
+            };
+            var response = await _guiRequest.PutAsJsonAsync("api/Portfolio", request);
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
+                ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể cập nhật Portfolio." };
+        }
+
         public async Task<ApiReponse<PortfolioViewModel>> themDuAnAsync(
             DuAnTrongPortfolioViewModel project, int maFreelancerStudents)
         {

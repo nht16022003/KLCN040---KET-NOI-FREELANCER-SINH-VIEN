@@ -21,6 +21,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
     public class ProfileFreelancerResponse
     {
+        public int MaFreelancerStudents { get; set; }
         public string MaChuyenNganh { get; set; } = string.Empty;
         public string TenTruong { get; set; } = string.Empty;
         public string MaTruong { get; set; } = string.Empty;

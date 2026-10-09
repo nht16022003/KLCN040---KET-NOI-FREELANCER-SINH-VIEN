@@ -42,4 +42,15 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
         public List<string> maDAs { get; set; } = new();
     }
+
+    public class Portfolio_UpdateRequestDTO
+    {
+        [Required]
+        public int maFreelancerStudents { get; set; }
+
+        public string? moTaBanThan { get; set; }
+
+        [MaxLength(255)]
+        public string? url_video { get; set; }
+    }
 }

@@ -164,10 +164,10 @@ D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\o
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\staticwebassets.development.json
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\swae.build.ex.cache
+D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\Freelanc.712F78FF.Up2Date
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.dll
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\refint\FreelancerStudent.API.dll
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.pdb
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.genruntimeconfig.cache
 D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\ref\FreelancerStudent.API.dll
-D:\DA\nht16022003\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\FreelancerStudent.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

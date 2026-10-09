@@ -6,6 +6,7 @@ namespace FreelancerStudent.API.Repositories.Interfaces
     {
         Task<Portfolio?> layTheoMaFreelancerAsync(int maFreelancerStudents);
         Task<Portfolio> taoPortfolioAsync(Portfolio portfolio);
+        Task capNhatPortfolioAsync(Portfolio portfolio);
         Task<List<DuAnTrongPortfolio>> layDuAnAsync(string maPortfolio);
         Task<DuAnTrongPortfolio> themDuAnAsync(DuAnTrongPortfolio project);
         Task<DuAnTrongPortfolio?> layDuAnTheoMaAsync(string maDA);

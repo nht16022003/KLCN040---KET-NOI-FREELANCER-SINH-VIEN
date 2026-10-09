@@ -627,7 +627,7 @@
                         <a href="#tongquan" class="profile-tab-item active">
                             <i class="bi bi-grid-1x2"></i> Tổng quan
                         </a>
-                        <a href="#duan" class="profile-tab-item">
+                        <a href="#portfolio-content" class="profile-tab-item" data-profile-tab="portfolio">
                             <i class="bi bi-folder"></i> Dự án (@Model.DuAns.Count)
                         </a>
                         <a href="#danhgia" class="profile-tab-item">
@@ -650,8 +650,13 @@
                         </a>
                     </div>
 
+                    <!-- ==================== PORTFOLIO CONTENT ==================== -->
+                    <div id="portfolio-content" class="d-none mb-4">
+                        <partial name="_portfolio" model="Model" view-data="ViewData" />
+                    </div>
+
                     <!-- ==================== 4. MAIN 3-COLUMN CONTENT GRID ==================== -->
-                    <div class="row g-4">
+                    <div id="profile-overview-content" class="row g-4">
             
                         <!-- CỘT 1: THÔNG TIN CƠ BẢN (LEFT) -->
                         <div class="col-12 col-lg-3">
@@ -894,3 +899,28 @@
 
                                     </div>
                                 </div>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        const overviewContent = document.getElementById('profile-overview-content');
+                                        const portfolioContent = document.getElementById('portfolio-content');
+                                        const overviewTab = document.querySelector('.profile-tab-item[href="#tongquan"]');
+                                        const portfolioTab = document.querySelector('[data-profile-tab="portfolio"]');
+
+                                        overviewTab.addEventListener('click', function (event) {
+                                            event.preventDefault();
+                                            overviewContent.classList.remove('d-none');
+                                            portfolioContent.classList.add('d-none');
+                                            overviewTab.classList.add('active');
+                                            portfolioTab.classList.remove('active');
+                                        });
+
+                                        portfolioTab.addEventListener('click', function (event) {
+                                            event.preventDefault();
+                                            overviewContent.classList.add('d-none');
+                                            portfolioContent.classList.remove('d-none');
+                                            overviewTab.classList.remove('active');
+                                            portfolioTab.classList.add('active');
+                                        });
+                                    });
+                                </script>
