@@ -9,5 +9,12 @@ namespace FreelancerStudent.API.Repositories.Interfaces
 
         //Thêm ví cho User vừa được tạo theo mã user
         Task<Wallet> themViChoUserTheoMaUser(int maUser);
+
+
+        //Tuan Anh
+        // Cập nhật thông tin ví
+        Task capNhatViAsync(Wallet wallet);
+
+        Task<Wallet> layViTheoMaWallet(int maWallet);
     }
 }

@@ -6,101 +6,61 @@
 }
 
 <div class="container py-4">
-    <!-- TIÊU ĐỀ TRANG -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <h4 class="text-success fw-bold mb-1">
-                Các công việc đang tuyển dụng
-            </h4>
-            <span class="text-muted small">Tìm kiếm cơ hội việc làm Freelance phù hợp với sinh viên</span>
-        </div>
-        <span class="badge bg-light text-success border border-success px-3 py-2 rounded-0">
-            Tổng cộng: @(Model?.Count ?? 0) công việc
-        </span>
-    </div>
+    <h4 class="mb-4 text-success fw-bold">Các bài đăng tuyển dụng</h4>
 
-    <!-- DANH SÁCH BÀI ĐĂNG DẠNG LƯỚI CARD -->
-    <div class="row g-3">
+    <div class="row g-4">
         @if (Model != null && Model.Count > 0)
         {
-            @foreach (var job in Model)
+            foreach (var jobPostViewModel in Model)
             {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border rounded-0 p-3 bg-white shadow-sm d-flex flex-column">
-                        
-                        <!-- Header Card: Mã Job & Số lượng tuyển -->
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-light text-muted border rounded-0">#@job.maJob</span>
-                            <span class="text-muted small" style="font-size: 0.78rem;">
-                                Tuyển @(job.soluongtuyen ?? 1) bạn
-                            </span>
-                        </div>
-
-                        <!-- Tiêu đề bài Job -->
-                        <h6 class="fw-bold text-dark mb-2" style="min-height: 40px; line-height: 1.4;">
-                            @job.tieude
-                        </h6>
-
-                        <!-- Mức thù lao / Ngân sách -->
-                        <div class="p-2 mb-2 bg-light rounded-0 border">
-                            <span class="text-muted small d-block" style="font-size: 0.75rem;">Mức thù lao:</span>
-                            <span class="text-danger fw-bold fs-6">
-                                @((job.thulao ?? 0).ToString("#,##0")) VNĐ
-                            </span>
-                        </div>
-
-                        <!-- Mô tả ngắn -->
-                        @if (!string.IsNullOrEmpty(job.mota))
-                        {
-                            <p class="text-secondary small mb-2"
-                               style="font-size: 0.82rem; max-height: 42px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                @job.mota
-                            </p>
-                        }
-
-                        <!-- Kỹ năng yêu cầu -->
-                        <div class="mb-3">
-                            <span class="text-muted small d-block mb-1" style="font-size: 0.75rem;">Kỹ năng yêu cầu:</span>
-                            @if (!string.IsNullOrEmpty(job.kynangyeucau))
-                            {
-                                <div class="d-flex flex-wrap gap-1">
-                                    @foreach (var kn in job.kynangyeucau.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                    {
-                                        <span class="badge bg-light text-dark border rounded-0" style="font-size: 0.72rem;">@kn.Trim()</span>
-                                    }
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border rounded-3 bg-white">
+                        <div class="card-body">
+                            @{
+                                var tenNTD = !string.IsNullOrEmpty(jobPostViewModel.tenCongTy) ? jobPostViewModel.tenCongTy : "Nhà tuyển dụng";
+                                var avatarNTD = !string.IsNullOrEmpty(jobPostViewModel.avatarNhaTuyenDung)
+                                    ? jobPostViewModel.avatarNhaTuyenDung
+                                    : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenNTD)}&background=E8F5E9&color=1B5E36";
+                            }
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <img src="@avatarNTD" alt="@tenNTD" class="rounded-circle border" style="width: 36px; height: 36px; object-fit: cover; flex-shrink: 0;" />
+                                <div class="overflow-hidden">
+                                    <span class="text-muted small fw-semibold text-truncate d-block">@tenNTD</span>
                                 </div>
-                            }
-                            else
-                            {
-                                <span class="text-muted small" style="font-size: 0.75rem;">Không yêu cầu cụ thể</span>
-                            }
-                        </div>
-
-                        <!-- Thời gian đăng & hạn hoàn thành -->
-                        <div class="mt-auto border-top pt-2 mb-3 text-muted" style="font-size: 0.78rem;">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Đăng ngày:</span>
-                                <strong>@job.thoigiandangtuyen.ToString("dd/MM/yyyy")</strong>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Hạn hoàn thành:</span>
-                                <strong class="text-primary">@job.thoigiandukienhoanthanh.ToString("dd/MM/yyyy")</strong>
-                            </div>
+                            <h5 class="card-title mb-2 fw-bold text-dark">@jobPostViewModel.tieude</h5>
+
+                            <p class="small">@jobPostViewModel.mota</p>
+                            <p class="fw-bold">
+                                Kỹ năng yêu cầu:
+                                <span class="fw-normal">@jobPostViewModel.kynangyeucau</span>
+                            </p>
+                            <p class="fw-bold text-danger">
+                                Thù lao:
+                                <span class="fw-normal text-dark">
+                                    @(jobPostViewModel.thulao.HasValue
+                                        ? jobPostViewModel.thulao.Value.ToString("N0") + " VNĐ"
+                                        : "Thỏa thuận")
+                                </span>
+                            </p>
+                            <p>
+                                Thời gian đăng tuyển:
+                                @jobPostViewModel.thoigiandangtuyen.ToString("dd/MM/yyyy HH:mm")
+                            </p>
                         </div>
 
-                        <!-- Nút hành động: Trao đổi & Ứng tuyển -->
-                        <div class="d-flex gap-2">
-                            <a href="/Chat?maJob=@job.maJob&maUserNTD=@job.maUser"
-                               class="btn btn-outline-success fw-semibold py-2 flex-grow-1 rounded-0">
-                                Trao đổi
+                        <div
+                            class="card-footer bg-transparent border-0 d-flex justify-content-evenly align-items-center gap-3 mb-3">
+                            <a asp-controller="JobPost" asp-action="Detail" asp-route-maJob="@jobPostViewModel.maJob"
+                               class="btn btn-outline-success">
+                                Xem Chi Tiết
                             </a>
-                            <a asp-controller="JobPost" asp-action="UngTuyen" asp-route-maJob="@job.maJob"
-                               class="btn btn-success fw-semibold py-2 flex-grow-1 rounded-0"
-                               style="background-color: #1B5E36; border-color: #1B5E36;">
-                                Ứng tuyển
+
+                            <a asp-controller="HopDong" asp-action="TaoHopDong" asp-route-jobId="@jobPostViewModel.maJob"
+                               class="btn btn-success">
+                                Ứng Tuyển
                             </a>
                         </div>
-
                     </div>
                 </div>
             }
@@ -108,9 +68,7 @@
         else
         {
             <div class="col-12">
-                <div class="alert alert-light border rounded-0 text-center py-5 text-muted">
-                    Hiện tại chưa có bài đăng tuyển dụng nào.
-                </div>
+                <div class="alert alert-info">Chưa có bài đăng tuyển dụng nào.</div>
             </div>
         }
     </div>

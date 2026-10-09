@@ -9,14 +9,14 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
         <div>
             <h4 class="fw-bold text-success mb-1">
-                <i class="bi bi-person-lines-fill me-2"></i>Bài đăng tìm việc của bạn
+                Bài đăng tìm việc của bạn
             </h4>
             <p class="text-muted small mb-0">Quản lý các bài giới thiệu dịch vụ để Nhà tuyển dụng chủ động xem và liên
                 hệ.</p>
             </div>
             <a asp-controller="FreelancerStudent" asp-action="DangTinTimViec"
                class="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm">
-                <i class="bi bi-plus-circle me-1"></i>Đăng bài tìm việc mới
+                Đăng bài tìm việc mới
             </a>
         </div>
 
@@ -24,7 +24,7 @@
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show p-3 small mb-3 rounded-3 shadow-sm">
-                <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                @TempData["SuccessMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
@@ -33,7 +33,6 @@
         @if (Model == null || !Model.Any())
         {
             <div class="card border-0 shadow-sm text-center py-5 bg-white rounded-4">
-                <i class="bi bi-card-checklist text-muted" style="font-size: 3.5rem;"></i>
                 <h6 class="fw-bold text-dark mt-3">Bạn chưa có bài đăng tìm việc nào</h6>
                 <p class="text-muted small mb-3">Đăng tin để giới thiệu kỹ năng và mức giá dịch vụ giúp các Nhà tuyển dụng dễ
                     dàng tìm thấy bạn.</p>
@@ -60,7 +59,7 @@
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <span class="badge bg-light text-muted border">#@item.maBaiDang</span>
                                             <span class="text-muted small">
-                                                <i class="bi bi-clock me-1"></i>Đăng ngày: @item.thoigiandang.ToString("dd/MM/yyyy")
+                                                Đăng ngày: @item.thoigiandang.ToString("dd/MM/yyyy")
                                             </span>
                                         </div>
 
@@ -86,19 +85,19 @@
                                         </div>
                                     </div>
 
-                                    <!-- Trạng thái & Thao tác -->
-                                    <div class="col-lg-4 text-lg-end border-top border-lg-0 pt-3 pt-lg-0">
-                                        <div class="mb-3">
+                                    <!-- Trạng thái & Thao tác (Dạng cột dọc) -->
+                                    <div class="col-lg-4 text-md-end border-top border-lg-0 pt-3 pt-lg-0">
+                                        <div class="mb-2 d-flex justify-content-lg-end">
                                             @if (item.trangthai == "DangHienThi")
                                             {
                                                 <span class="badge bg-success px-3 py-2">
-                                                    <i class="bi bi-eye-fill me-1"></i>Đang hiển thị
+                                                    Đang hiển thị
                                                 </span>
                                             }
                                             else if (item.trangthai == "DaAn")
                                             {
                                                 <span class="badge bg-secondary px-3 py-2">
-                                                    <i class="bi bi-eye-slash-fill me-1"></i>Đã ẩn
+                                                    Đã ẩn
                                                 </span>
                                             }
                                             else
@@ -107,41 +106,41 @@
                                             }
                                         </div>
 
-                                        <div class="d-flex justify-content-lg-end gap-2">
+                                        <div class="d-flex flex-column gap-2 justify-content-center" style="max-width: 160px; margin-left: auto;">
                                             <!-- Nút Sửa tin -->
                                             <a asp-controller="FreelancerStudent" asp-action="SuaTinTimViec"
-                                               asp-route-maBaiDang="@item.maBaiDang" class="btn btn-sm btn-outline-primary rounded-0"
+                                               asp-route-maBaiDang="@item.maBaiDang" class="btn btn-sm btn-outline-primary w-100"
                                                title="Sửa bài đăng">
-                                                <i class="bi bi-pencil me-1"></i>Sửa tin
+                                                Sửa tin
                                             </a>
                                             <!-- Nút Ẩn / Hiện tin -->
                                             @if (item.trangthai == "DangHienThi")
                                             {
-                                                <form asp-controller="FreelancerStudent" asp-action="DoiTrangThaiBaiDang" method="post">
+                                                <form asp-controller="FreelancerStudent" asp-action="DoiTrangThaiBaiDang" method="post" class="w-100 mb-0">
                                                     <input type="hidden" name="maBaiDang" value="@item.maBaiDang" />
                                                     <input type="hidden" name="trangThai" value="DaAn" />
-                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Ẩn tin">
-                                                        <i class="bi bi-eye-slash me-1"></i>Tạm ẩn tin
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100" title="Ẩn tin">
+                                                        Tạm ẩn tin
                                                     </button>
                                                 </form>
                                             }
                                             else
                                             {
-                                                <form asp-controller="FreelancerStudent" asp-action="DoiTrangThaiBaiDang" method="post">
+                                                <form asp-controller="FreelancerStudent" asp-action="DoiTrangThaiBaiDang" method="post" class="w-100 mb-0">
                                                     <input type="hidden" name="maBaiDang" value="@item.maBaiDang" />
                                                     <input type="hidden" name="trangThai" value="DangHienThi" />
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Hiển thị tin">
-                                                        <i class="bi bi-eye me-1"></i>Hiện tin
+                                                    <button type="submit" class="btn btn-sm btn-outline-success w-100" title="Hiển thị tin">
+                                                        Hiện tin
                                                     </button>
                                                 </form>
                                             }
 
                                             <!-- Nút Xóa tin -->
-                                            <form asp-controller="FreelancerStudent" asp-action="XoaBaiDang" method="post"
+                                            <form asp-controller="FreelancerStudent" asp-action="XoaBaiDang" method="post" class="w-100 mb-0"
                                                   onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài đăng tìm việc này không?');">
                                                 <input type="hidden" name="maBaiDang" value="@item.maBaiDang" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa tin">
-                                                    <i class="bi bi-trash"></i>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Xóa tin">
+                                                    Xóa
                                                 </button>
                                             </form>
                                         </div>

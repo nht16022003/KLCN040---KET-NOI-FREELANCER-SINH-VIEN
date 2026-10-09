@@ -35,6 +35,8 @@ namespace FreelancerStudent.API.Data
         public DbSet<PhongChat> PhongChats { get; set; }
         public DbSet<TinNhanChat> TinNhanChats { get; set; }
 
+        public DbSet<GiaoDichNapTien> GiaoDichNapTiens { get; set; }
+
 
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
@@ -154,6 +156,20 @@ namespace FreelancerStudent.API.Data
                 .HasForeignKey(b => b.maFreelancerStudent)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<GiaoDichNapTien>(entity =>
+           {
+               entity.ToTable("GiaoDichNapTien");
+               entity.HasKey(g => g.maNapTien);
+
+               entity.HasIndex(g => g.maGiaoDich)
+                .IsUnique();
+
+               entity.HasOne(g => g.Wallet)
+           .WithMany()
+           .HasForeignKey(g => g.maWallet)
+           .OnDelete(DeleteBehavior.Restrict);
+           });
+
         }
     }
 }

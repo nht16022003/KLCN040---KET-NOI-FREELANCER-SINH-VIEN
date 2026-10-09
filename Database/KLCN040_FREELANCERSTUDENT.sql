@@ -598,6 +598,35 @@ CREATE TABLE Task_CongViec
 )
 GO
 
+CREATE TABLE GiaoDichNapTien
+(
+    maNapTien INT IDENTITY(1,1) PRIMARY KEY,
+
+    maWallet INT NOT NULL,
+
+    maGiaoDich VARCHAR(50) NOT NULL UNIQUE,
+
+    soTien DECIMAL(18,2) NOT NULL,
+
+    noiDungChuyenKhoan VARCHAR(100) NOT NULL,
+
+    trangThai NVARCHAR(30) NOT NULL DEFAULT N'DangXuLy',
+
+    ngayTao DATETIME NOT NULL DEFAULT GETDATE(),
+
+    ngayHetHan DATETIME NOT NULL,
+
+    ngayHoanThanh DATETIME NULL,
+
+    maGiaoDichNganHang VARCHAR(100) NULL,
+
+    maAdminXuLy INT NULL,
+
+    CONSTRAINT FK_GiaoDichNapTien_Wallet
+        FOREIGN KEY (maWallet)
+        REFERENCES Wallet(maWallet)
+);
+
 -- 1. ROLES (Phân quyền người dùng)
 
 INSERT INTO Roles (maRole, tenRole) VALUES 
@@ -971,7 +1000,7 @@ SELECT * FROM DanhGia_NhanXet;
 SELECT * FROM ThongBao;
 SELECT * FROM GiaiDoan_HopDong;
 SELECT * FROM Task_CongViec;
-
+SELECT * FROM GiaoDichNapTien;
 
 
 

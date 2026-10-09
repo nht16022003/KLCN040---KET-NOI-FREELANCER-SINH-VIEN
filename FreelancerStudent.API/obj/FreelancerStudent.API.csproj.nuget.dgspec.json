@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj": {}
+    "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj": {}
   },
   "projects": {
-    "D:\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj": {
+    "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj",
+        "projectUniqueName": "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj",
         "projectName": "FreelancerStudent.API",
-        "projectPath": "D:\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj",
+        "projectPath": "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.API\\FreelancerStudent.API.csproj",
         "packagesPath": "C:\\Users\\HTuan\\.nuget\\packages\\",
-        "outputPath": "D:\\KLTN\\Improve\\FreelancerStudent.API\\obj\\",
+        "outputPath": "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

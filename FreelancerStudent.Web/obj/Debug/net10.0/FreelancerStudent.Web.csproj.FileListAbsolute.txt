@@ -1,11 +1,11 @@
+D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.exe
+D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.dll
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\appsettings.Development.json
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\appsettings.json
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.staticwebassets.runtime.json
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.staticwebassets.endpoints.json
-D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.exe
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.deps.json
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.runtimeconfig.json
-D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.dll
 D:\KLTN\Improve\FreelancerStudent.Web\bin\Debug\net10.0\FreelancerStudent.Web.pdb
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\rpswa.dswa.cache.json
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.GeneratedMSBuildEditorConfig.editorconfig
@@ -15,6 +15,7 @@ D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.cs
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.MvcApplicationPartsAssemblyInfo.cache
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.RazorAssemblyInfo.cache
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.RazorAssemblyInfo.cs
+D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.sourcelink.json
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\rjimswa.dswa.cache.json
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -95,4 +96,3 @@ D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\refint\FreelancerStudent
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.pdb
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.genruntimeconfig.cache
 D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\ref\FreelancerStudent.Web.dll
-D:\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\FreelancerStudent.Web.sourcelink.json

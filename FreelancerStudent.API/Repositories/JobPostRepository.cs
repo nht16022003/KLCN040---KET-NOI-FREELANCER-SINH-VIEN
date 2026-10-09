@@ -18,8 +18,19 @@ namespace FreelancerStudent.API.Repositories
 
         public async Task<List<JobPost>> layTatCaJobPostAsync()
         {
-            var dsJobPost = await _context.JobPosts.ToListAsync();
+            var dsJobPost = await _context.JobPosts
+                .Include(j => j.NhaTuyenDung)
+                    .ThenInclude(ntd => ntd!.User)
+                .ToListAsync();
             return dsJobPost;
+        }
+
+        public async Task<JobPost?> layJobPostTheoMaAsync(string maJob)
+        {
+            return await _context.JobPosts
+                .Include(j => j.NhaTuyenDung)
+                    .ThenInclude(ntd => ntd!.User)
+                .FirstOrDefaultAsync(job => job.maJob == maJob);
         }
 
         public async Task<JobPost> themJobPostAsync(JobPost job)
@@ -42,9 +53,15 @@ namespace FreelancerStudent.API.Repositories
         //Tuấn
         public async Task<List<UngTuyen>> layTatCaDanhSachUngTuyenVaoJobPost_TheoFreelancerStudents(int maFreelancerStudents)
         {
-            var dsUngTuyen = await _context.UngTuyens.Include(u => u.JobPosts)
-            .ThenInclude(j => j!.NhaTuyenDung).Include(u => u.FreelamcerStudents).ThenInclude(f => f!.User)
-            .Where(u => u.maFreelancerStudent == maFreelancerStudents).OrderByDescending(u => u.ngayUngTuyen).ToListAsync();
+            var dsUngTuyen = await _context.UngTuyens
+                .Include(u => u.JobPosts)
+                    .ThenInclude(j => j!.NhaTuyenDung)
+                        .ThenInclude(ntd => ntd!.User)
+                .Include(u => u.FreelamcerStudents)
+                    .ThenInclude(f => f!.User)
+                .Where(u => u.maFreelancerStudent == maFreelancerStudents)
+                .OrderByDescending(u => u.ngayUngTuyen)
+                .ToListAsync();
 
             return dsUngTuyen;
         }
@@ -82,11 +99,6 @@ namespace FreelancerStudent.API.Repositories
                 .ToListAsync();
         }
 
-        //Tuan
-        public async Task<JobPost> layJobPostTheoMaAsync(string maJob)
-        {
-            return await _context.JobPosts.FirstOrDefaultAsync(j => j.maJob == maJob);
-        }
 
         //Tuấn
         public async Task<bool> capNhatJobPostAsync(JobPost job)

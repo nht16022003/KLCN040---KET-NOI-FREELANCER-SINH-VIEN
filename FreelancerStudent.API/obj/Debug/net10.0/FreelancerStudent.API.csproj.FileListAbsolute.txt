@@ -68,6 +68,7 @@ D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.As
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.csproj.CoreCompileInputs.cache
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.MvcApplicationPartsAssemblyInfo.cs
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.MvcApplicationPartsAssemblyInfo.cache
+D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.sourcelink.json
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\rjimswa.dswa.cache.json
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -83,4 +84,3 @@ D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\refint\FreelancerStudent
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.pdb
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.genruntimeconfig.cache
 D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\ref\FreelancerStudent.API.dll
-D:\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.sourcelink.json

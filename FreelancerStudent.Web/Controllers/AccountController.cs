@@ -17,23 +17,23 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult DangKy()
+        public async Task<IActionResult> DangKy()
         {
-            if (User.Identity?.IsAuthenticated == true)
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (User.Identity?.IsAuthenticated == true && maUser.HasValue)
             {
                 return RedirectToAction("Index", "Home");
             }
 
-            //Nếu chưa đăng ký thì trả về View DangKy với
-            //model là DangKyViewModel
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+
             return View(new DangKyViewModel());
-            //new DangKyViewModel() tức là tạo object để truyền dữ liệu từ Controller -> View
-            //Trong view tương ứng sẽ @model DangKyViewModel
-            //Sau đó có thể sửa dụng @Model.hovaten
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangKy(DangKyViewModel model)
         {
             if (!ModelState.IsValid)
@@ -55,18 +55,24 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult DangNhap()
+        public async Task<IActionResult> DangNhap()
         {
-            if (User.Identity?.IsAuthenticated == true)
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (User.Identity?.IsAuthenticated == true && maUser.HasValue)
             {
                 return RedirectToAction("Index", "Home");
+            }
+
+            // Nếu cookie trình duyệt còn nhưng server đã restart mất Session, tự động xóa cookie cũ
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
             return View(new DangNhapViewModel());
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangNhap(DangNhapViewModel model)
         {
             if (!ModelState.IsValid)
@@ -79,7 +85,7 @@ namespace FreelancerStudent.Web.Controllers
 
             if (!ketqua_dangnhap.success || ketqua_dangnhap.data == null)
             {
-                ModelState.AddModelError(string.Empty, ketqua_dangnhap.message);
+                ModelState.AddModelError(string.Empty, ketqua_dangnhap.message!);
                 return View(model);
             }
 
@@ -91,6 +97,7 @@ namespace FreelancerStudent.Web.Controllers
             HttpContext.Session.SetInt32("maUser", user.maUser);
             HttpContext.Session.SetString("hovaten", user.hovaten);
             HttpContext.Session.SetString("tenRole", user.tenrole);
+            HttpContext.Session.SetString("UserAvatar", user.avatarUrl ?? "");
 
             //Cấp Cookie claims dùng để phân quyền
             var claims = new List<Claim>

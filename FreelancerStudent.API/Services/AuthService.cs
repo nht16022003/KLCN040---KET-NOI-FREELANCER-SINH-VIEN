@@ -130,7 +130,8 @@ namespace FreelancerStudent.API.Services
                 sodienthoai = user.sdtUser,
                 marole = user.maRole,
                 tenrole = tenRole,
-                status = user.status
+                status = user.status,
+                avatarUrl = user.avatarUrl
             };
 
             return ketquadangnhap;

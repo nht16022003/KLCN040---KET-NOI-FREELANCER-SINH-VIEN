@@ -12,125 +12,133 @@ build_property.EntryPointFilePath =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = FreelancerStudent.Web
 build_property.RootNamespace = FreelancerStudent.Web
-build_property.ProjectDir = D:\KLTN\Improve\FreelancerStudent.Web\
+build_property.ProjectDir = D:\KLTN\KLTN\Improve\FreelancerStudent.Web\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 10.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = D:\KLTN\Improve\FreelancerStudent.Web
+build_property.MSBuildProjectDirectory = D:\KLTN\KLTN\Improve\FreelancerStudent.Web
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Account/DangKy.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Account/DangKy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxEYW5nS3kuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Account/DangNhap.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Account/DangNhap.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxEYW5nTmhhcC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Account/ThietLapTaiKhoan.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Account/ThietLapTaiKhoan.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxUaGlldExhcFRhaUtob2FuLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Chat/Index.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Chat/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/DangTinTimViec.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/DangTinTimViec.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcRGFuZ1RpblRpbVZpZWMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/DanhSachNopTuyen.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/DanhSachNopTuyen.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcRGFuaFNhY2hOb3BUdXllbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/HoSo.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/HoSo.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcSG9Tby5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Index.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Profile.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Profile.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcUHJvZmlsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/QuanLyTimViec.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/QuanLyTimViec.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcUXVhbkx5VGltVmllYy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Search.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/Search.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcU2VhcmNoLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/SuaTinTimViec.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/FreelancerStudent/SuaTinTimViec.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnJlZWxhbmNlclN0dWRlbnRcU3VhVGluVGltVmllYy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Home/Index.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Home/Privacy.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Create.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Details.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Detail.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxEZXRhaWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Edit.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Index.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/QuanLyTinTuyenDung.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/QuanLyTinTuyenDung.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxRdWFuTHlUaW5UdXllbkR1bmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/UngTuyen.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/UngTuyen.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxVbmdUdXllbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/DanhSachUngVien.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/DanhSachUngVien.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhVHV5ZW5EdW5nXERhbmhTYWNoVW5nVmllbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/Index.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhVHV5ZW5EdW5nXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/Search.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/Search.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhVHV5ZW5EdW5nXFNlYXJjaC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Shared/Error.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Shared/_ValidationScriptsPartial.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/_ViewImports.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Wallet/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2FsbGV0XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/_ViewStart.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/KLTN/Improve/FreelancerStudent.Web/Views/Shared/_Layout.cshtml]
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-kqpczco85k

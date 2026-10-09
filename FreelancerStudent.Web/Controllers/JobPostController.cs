@@ -31,6 +31,30 @@ namespace FreelancerStudent.Web.Controllers
             return View(dsJobPost);
         }
 
+        //XS
+        [HttpGet]
+        public async Task<IActionResult> Detail(string maJob)
+        {
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                return NotFound();
+            }
+
+            var ketQua = await _jobPostService.layChiTietJobPost(maJob);
+
+            if (!ketQua.success || ketQua.data == null)
+            {
+                if (!string.IsNullOrWhiteSpace(ketQua.message))
+                {
+                    TempData["Error"] = ketQua.message;
+                }
+
+                return NotFound();
+            }
+
+            return View(ketQua.data);
+        }
+
         [HttpGet]
         public IActionResult DangKy()
         {
@@ -277,6 +301,48 @@ namespace FreelancerStudent.Web.Controllers
 
             ModelState.AddModelError(string.Empty, ketQua.message ?? "Cập nhật thất bại.");
             return View(model);
+        }
+
+        // Đổi trạng thái tin tuyển dụng (Đang tuyển <-> Đã đóng / Tạm dừng)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiTrangThai(string maJob, string trangThaiMoi)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                TempData["ErrorMessage"] = "Mã bài tuyển dụng không hợp lệ.";
+                return RedirectToAction("QuanLyTinTuyenDung");
+            }
+
+            var dsJob = await _jobPostService.layDanhSachJobPost();
+            var job = dsJob.data?.FirstOrDefault(j => j.maJob == maJob);
+            if (job == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài tuyển dụng!";
+                return RedirectToAction("QuanLyTinTuyenDung");
+            }
+
+            job.status = trangThaiMoi;
+            var ketQua = await _jobPostService.capNhatJobPostAsync(job);
+
+            if (ketQua.success)
+            {
+                TempData["SuccessMessage"] = trangThaiMoi == "DangTuyen" 
+                    ? "Đã mở lại tin tuyển dụng thành công!" 
+                    : "Đã đóng tin tuyển dụng!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = ketQua.message ?? "Không thể cập nhật trạng thái tin.";
+            }
+
+            return RedirectToAction("QuanLyTinTuyenDung");
         }
 
 

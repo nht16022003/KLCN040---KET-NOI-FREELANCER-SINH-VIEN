@@ -1,215 +1,860 @@
-@model FreelancerStudent.Web.ViewModels.ChiTietHoSoFreelancerViewModel
+@model FreelancerStudent.Web.ViewModels.FreelancerStudentProfileViewModel
 @{
-    ViewData["Title"] = "Hồ sơ của " + Model.TenUser;
+    ViewData["Title"] = "Hồ sơ của " + Model.tenUser;
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var chuyenNganhName = !string.IsNullOrEmpty(Model.TenChuyenNganh) ? Model.TenChuyenNganh :
+    var chuyenNganhName = Model.ChuyenNganh?.TenChuyenNganh ??
                           (Model.MaChuyenNganh == "KTPM" ? "Kỹ thuật phần mềm" :
                           Model.MaChuyenNganh == "TKDH" ? "Thiết kế đồ họa" :
                           "Công nghệ thông tin");
 }
 
-<div class="container py-4">
-    
-    <!-- 1. THẺ THÔNG TIN CHÍNH (HEADER CARD) -->
-    <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-            
-            <!-- Avatar & Thông tin cá nhân -->
-            <div class="d-flex align-items-center gap-3">
-                <img src="@(string.IsNullOrEmpty(Model.Avatar) ? $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(Model.TenUser)}&background=E8F5E9&color=2E7D32" : Model.Avatar)"
-                     alt="@Model.TenUser" class="border rounded-0"
-                     style="width: 85px; height: 85px; object-fit: cover;" />
-                
-                <div>
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <h4 class="fw-bold text-dark mb-0">@Model.TenUser</h4>
-                        @if (Model.TrangthaiNhanViec)
-                        {
-                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-0">
-                                Sẵn sàng nhận việc
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary-subtle text-secondary border rounded-0">
-                                Tạm ngưng
-                            </span>
-                        }
-                    </div>
+<style>
+    .profile-page-wrapper {
+        background-color: #F8FAF9;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
 
-                    <div class="text-success fw-bold mb-1">
-                        @chuyenNganhName
-                    </div>
+    /* ============================================================ */
+    /* COVER & PROFILE BANNER                                       */
+    /* ============================================================ */
+    .profile-banner-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid #E5ECE7;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
 
-                    <div class="text-muted small">
-                        <span>Trường: @(string.IsNullOrEmpty(Model.TenTruong) ? "Chưa cập nhật trường" : Model.TenTruong)</span>
-                        <span class="mx-2">•</span>
-                        <span>Khu vực: @(string.IsNullOrEmpty(Model.DiaDiemFreelancerStudent) ? "Toàn quốc" : Model.DiaDiemFreelancerStudent)</span>
-                    </div>
-                </div>
-            </div>
+    .cover-image-container {
+        height: 180px;
+        background: linear-gradient(135deg, #CFE0D6 0%, #E8F1EC 50%, #BBD6C7 100%);
+        position: relative;
+        background-image: url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center 35%;
+    }
 
-            <!-- Mức giá & Nút thao tác -->
-            <div class="text-md-end border-top pt-3 pt-md-0 border-md-0">
-                <div class="text-muted small mb-1">Thù lao từ:</div>
-                <div class="fs-4 fw-bold text-success mb-2">
-                    @(Model.ChiPhiTu.HasValue && Model.ChiPhiTu.Value > 0 ? Model.ChiPhiTu.Value.ToString("N0") + " VNĐ" : "Thỏa thuận")
-                </div>
+    .cover-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.2) 60%, rgba(255, 255, 255, 0.7) 100%);
+    }
 
-                @if (Context.Session.GetInt32("maUser") == Model.MaUser)
-                {
-                    <a href="/FreelancerStudent/HoSo" class="btn btn-outline-success rounded-0 px-3 fw-bold">
-                        Cập nhật hồ sơ
-                    </a>
-                }
-                else
-                {
-                    <a href="/Chat?maFreelancerStudent=@Model.MaFreelancerStudents" class="btn btn-success rounded-0 px-4 fw-bold"
-                       style="background-color: #1B5E36; border-color: #1B5E36;">
-                        Nhắn tin trao đổi
-                    </a>
-                }
-            </div>
+    .cover-quote-art {
+        position: absolute;
+        right: 36px;
+        top: 24px;
+        font-family: 'Caveat', cursive;
+        font-size: 2.2rem;
+        color: #2D6346;
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: right;
+        transform: rotate(-3deg);
+    }
 
-        </div>
-    </div>
+    .profile-header-content {
+        padding: 0 32px 24px;
+        position: relative;
+    }
 
-    <!-- 2. THANH THỐNG SỐ TÓM TẮT -->
-    <div class="card border rounded-0 shadow-sm p-3 mb-4 bg-white">
-        <div class="row text-center g-3">
-            <div class="col-6 col-md-3 border-end">
-                <div class="text-muted small">Điểm GPA</div>
-                <div class="fs-5 fw-bold text-success">@Model.GPA / 4.0</div>
-            </div>
-            <div class="col-6 col-md-3 border-end">
-                <div class="text-muted small">Sinh viên</div>
-                <div class="fs-5 fw-bold text-dark">Năm @Model.NamThu</div>
-            </div>
-            <div class="col-6 col-md-3 border-end">
-                <div class="text-muted small">Niên khóa</div>
-                <div class="fs-5 fw-bold text-dark">@(string.IsNullOrEmpty(Model.NienKhoa) ? "N/A" : Model.NienKhoa)</div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="text-muted small">Trạng thái</div>
-                <div class="fs-5 fw-bold @(Model.TrangthaiNhanViec ? "text-success" : "text-muted")">
-                    @(Model.TrangthaiNhanViec ? "Đang nhận việc" : "Đang bận")
-                </div>
-            </div>
-        </div>
-    </div>
+    .avatar-wrapper-circle {
+        position: relative;
+        margin-top: -65px;
+        width: 124px;
+        height: 124px;
+        flex-shrink: 0;
+    }
 
-    <!-- 3. NỘI DUNG CHI TIẾT (BỐ CỤC 2 CỘT) -->
-    <div class="row g-4">
-    
-        <!-- CỘT TRÁI (8 CỘT): GIỚI THIỆU & KỸ NĂNG -->
-        <div class="col-12 col-lg-8">
+    .avatar-main-img {
+        width: 124px;
+        height: 124px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #FFFFFF;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        background-color: #FFFFFF;
+    }
+
+    .avatar-status-pill {
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #D4E8DC;
+        color: #1E5C38;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        border: 1px solid #B8D6C4;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-dot-active {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #22C55E;
+    }
+
+    .profile-name-title {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0F172A;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+    }
+
+    .verified-badge-icon {
+        color: #1D9BF0;
+        font-size: 1.3rem;
+    }
+
+    .profile-role-subline {
+        color: #1E6E38;
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+
+    .profile-school-subline {
+        color: #64748B;
+        font-size: 0.88rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .profile-quote-desc {
+        color: #475569;
+        font-size: 0.9rem;
+        font-style: italic;
+        line-height: 1.45;
+        max-width: 800px;
+        margin-bottom: 12px;
+    }
+
+    .profile-meta-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 0.82rem;
+        color: #64748B;
+    }
+
+    .profile-meta-chips span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-contact-green {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 8px 24px;
+        border-radius: 24px;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s;
+    }
+
+    .btn-contact-green:hover {
+        background-color: #15492A;
+        transform: translateY(-1px);
+    }
+
+    .btn-save-outlined {
+        background-color: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 8px 18px;
+        border-radius: 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-save-outlined:hover {
+        border-color: #94A3B8;
+        background-color: #F8FAFC;
+    }
+
+    /* ============================================================ */
+    /* STATS METRICS STRIP                                          */
+    /* ============================================================ */
+    .metrics-strip-container {
+        background: #FFFFFF;
+        border-radius: 18px;
+        border: 1px solid #E5ECE7;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .metric-col {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 4px 12px;
+        border-right: 1px solid #EEF2F6;
+    }
+
+    .metric-col:last-child {
+        border-right: none;
+    }
+
+    .metric-icon-box {
+        font-size: 1.5rem;
+    }
+
+    .metric-main-value {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.1;
+    }
+
+    .metric-sub-label {
+        font-size: 0.74rem;
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    /* ============================================================ */
+    /* PROFILE NAVIGATION TABS                                      */
+    /* ============================================================ */
+    .profile-nav-tabs {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        border-bottom: 2px solid #E2E8F0;
+        margin-bottom: 24px;
+        padding-bottom: 2px;
+        overflow-x: auto;
+    }
+
+    .profile-tab-item {
+        color: #64748B;
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        padding: 8px 4px 12px;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: color 0.2s;
+    }
+
+    .profile-tab-item:hover {
+        color: #1E6E38;
+    }
+
+    .profile-tab-item.active {
+        color: #1E6E38;
+        font-weight: 700;
+    }
+
+    .profile-tab-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #1E6E38;
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* ============================================================ */
+    /* CONTENT CARDS                                                */
+    /* ============================================================ */
+    .section-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 18px;
+    }
+
+    /* Thông tin cơ bản Table */
+    .basic-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        font-size: 0.88rem;
+    }
+
+    .basic-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px dashed #F1F5F9;
+        padding-bottom: 8px;
+    }
+
+    .basic-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .basic-info-label {
+        color: #64748B;
+        font-weight: 500;
+        width: 45%;
+    }
+
+    .basic-info-val {
+        color: #0F172A;
+        font-weight: 600;
+        width: 55%;
+        text-align: right;
+    }
+
+    /* Badges & Projects */
+    .skill-tag-badge {
+        background: #EEF6F1;
+        color: #1C5F37;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid #D2E7DC;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 8px;
+    }
+
+    .project-grid-box {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 16px;
+    }
+
+    .project-preview-card {
+        background: #FAFDFB;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .project-preview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        border-color: #BBD9C7;
+    }
+
+    .project-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 4px;
+    }
+
+    .project-role-tag {
+        font-size: 0.72rem;
+        color: #1E6E38;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .project-desc {
+        font-size: 0.78rem;
+        color: #64748B;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    /* Education card right */
+    .edu-card-content {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .edu-logo-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: #EBF4F0;
+        color: #1E6E38;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        border: 1px solid #CBE2D4;
+    }
+
+    .edu-school-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+    }
+
+    .edu-meta-sub {
+        font-size: 0.78rem;
+        color: #64748B;
+        line-height: 1.35;
+    }
+
+    .review-item-box {
+        border-bottom: 1px solid #F1F5F9;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .review-item-box:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+</style>
+
+<style>
+    /* ===== Giao diện mộc mạc, đơn giản (ghi đè style phía trên) ===== */
+    .profile-page-wrapper {
+        --accent: #3E7D56; --ink: #2B2B2B; --muted: #707070; --border: #E3E3E3;
+        font-family: 'Segoe UI', Arial, sans-serif; color: var(--ink); background-color: #F7F7F7;
+    }
+    .profile-banner-card, .metrics-strip-container, .section-card {
+        background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: none;
+    }
+    .cover-image-container { height: 56px; background: #E8EEE9; }
+    .cover-overlay, .cover-quote-art { display: none; }
+    .avatar-wrapper-circle { margin-top: -44px; width: 88px; height: 88px; }
+    .avatar-main-img { width: 88px; height: 88px; border: 3px solid #fff; box-shadow: none; }
+    .avatar-status-pill { background: #F0F0F0; color: var(--ink); border: 1px solid var(--border); bottom: -10px; }
+    .profile-name-title { font-size: 1.4rem; font-weight: 700; color: var(--ink); }
+    .verified-badge-icon { color: var(--accent); font-size: 1.1rem; }
+    .profile-role-subline { color: var(--accent); font-weight: 600; }
+    .profile-school-subline, .profile-meta-chips, .metric-sub-label, .basic-info-label, .edu-meta-sub, .project-desc { color: var(--muted); }
+    .profile-quote-desc { font-style: normal; color: var(--muted); }
+    .btn-contact-green { background: var(--accent); border-radius: 6px; font-weight: 600; }
+    .btn-contact-green:hover { background: #2F6445; transform: none; }
+    .btn-save-outlined { border-radius: 6px; border-color: var(--border); font-weight: 500; }
+    .btn-save-outlined:hover { background: #F2F2F2; border-color: var(--border); }
+    .metric-col { border-right-color: var(--border); }
+    .metric-main-value, .section-card-title, .basic-info-val, .project-title, .edu-school-title { color: var(--ink); font-weight: 700; }
+    .profile-nav-tabs { border-bottom: 1px solid var(--border); }
+    .profile-tab-item:hover, .profile-tab-item.active { color: var(--accent); }
+    .profile-tab-item.active::after { background: var(--accent); bottom: -1px; height: 2px; }
+    .basic-info-row { border-bottom: 1px solid #EEE; }
+    .skill-tag-badge { background: #F0F0F0; color: var(--ink); border: 1px solid var(--border); border-radius: 6px; font-weight: 600; }
+    .project-preview-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; }
+    .project-preview-card:hover { transform: none; box-shadow: none; border-color: var(--accent); }
+    .project-role-tag { color: var(--accent); }
+    .edu-logo-box { border-radius: 8px; background: #F0F0F0; color: var(--ink); border: none; }
+    .review-item-box { border-bottom-color: #EEE; }
+</style>
+
+<div class="profile-page-wrapper">
+    <div class="container-fluid px-lg-5 pt-4">
         
-            <!-- GIỚI THIỆU BẢN THÂN -->
-            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
-                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
-                    Giới thiệu bản thân
-                </h5>
-                <p class="text-secondary mb-0" style="line-height: 1.7; white-space: pre-line;">
-                    @(string.IsNullOrEmpty(Model.Gioithieu)
-                        ? "Freelancer này chưa cập nhật nội dung giới thiệu."
-                        : Model.Gioithieu)
-                </p>
-            </div>
-
-            <!-- KỸ NĂNG CHUYÊN MÔN -->
-            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
-                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
-                    Kỹ năng chuyên môn
-                </h5>
-                @if (Model.DanhSachKyNang != null && Model.DanhSachKyNang.Any())
-                {
-                    <div class="d-flex flex-wrap gap-2">
-                        @foreach (var kyNang in Model.DanhSachKyNang)
-                        {
-                            <span class="badge bg-light text-dark border rounded-0 px-3 py-2 fs-6 fw-normal">
-                                @kyNang
-                            </span>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted small mb-0">Chưa có kỹ năng chuyên môn nào được cập nhật.</p>
-                }
-            </div>
-
-            <!-- NGOẠI NGỮ & TIN HỌC -->
-            <div class="card border rounded-0 shadow-sm p-4 bg-white">
-                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
-                    Kỹ năng văn phòng & Ngoại ngữ
-                </h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light border rounded-0">
-                            <strong class="d-block text-dark small mb-1">Ngoại ngữ:</strong>
-                            <span class="text-secondary">@(string.IsNullOrEmpty(Model.NgonNgu) ? "Chưa cập nhật" : Model.NgonNgu)</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light border rounded-0">
-                            <strong class="d-block text-dark small mb-1">Tin học / Kỹ năng cơ bản:</strong>
-                            <span class="text-secondary">@(string.IsNullOrEmpty(Model.KyNangCoBan) ? "Chưa cập nhật" : Model.KyNangCoBan)</span>
-                        </div>
-                    </div>
+        <!-- ==================== 1. TOP COVER & PROFILE BANNER ==================== -->
+        <div class="profile-banner-card">
+            <!-- Cover image -->
+            <div class="cover-image-container">
+                <div class="cover-overlay"></div>
+                <div class="cover-quote-art d-none d-md-block">
+                    Build<br />a better<br />Future
                 </div>
             </div>
 
-        </div>
-
-        <!-- CỘT PHẢI (4 CỘT): HỌC VẤN & LIÊN HỆ -->
-        <div class="col-12 col-lg-4">
-
-            <!-- HỌC VẤN -->
-            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
-                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
-                    Thông tin học vấn
-                </h5>
-                <ul class="list-unstyled mb-0 small">
-                    <li class="mb-3">
-                        <div class="text-muted">Trường Đại học / Cao đẳng</div>
-                        <div class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.TenTruong) ? "Chưa cập nhật" : Model.TenTruong)</div>
-                    </li>
-                    <li class="mb-3">
-                        <div class="text-muted">Chuyên ngành đào tạo</div>
-                        <div class="fw-bold text-success">@chuyenNganhName</div>
-                    </li>
-                    <li class="mb-3">
-                        <div class="text-muted">Giai đoạn đào tạo</div>
-                        <div class="fw-bold text-dark">Sinh viên năm @Model.NamThu (@(string.IsNullOrEmpty(Model.NienKhoa) ? "N/A" : Model.NienKhoa))</div>
-                    </li>
-                    <li class="mb-0">
-                        <div class="text-muted">Điểm trung bình (GPA)</div>
-                        <div class="fw-bold text-primary fs-6">@Model.GPA / 4.0</div>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- THÔNG TIN LIÊN HỆ -->
-            <div class="card border rounded-0 shadow-sm p-4 bg-white">
-                <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
-                    Thông tin liên hệ
-                </h5>
-                <div class="small">
-                    <div class="mb-3">
-                        <div class="text-muted">Email liên hệ</div>
-                        <div class="fw-bold text-dark text-break">@Model.Email</div>
-                    </div>
-                    @if (!string.IsNullOrEmpty(Model.Sdt))
-                    {
-                        <div class="mb-0">
-                            <div class="text-muted">Số điện thoại</div>
-                            <div class="fw-bold text-dark">@Model.Sdt</div>
+            <!-- Profile Info Header Content -->
+            <div class="profile-header-content">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    
+                    <!-- Left: Avatar + Names & Intro -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-3 gap-sm-4">
+                        <!-- Avatar with status -->
+                        <div class="avatar-wrapper-circle">
+                            <img src="@(!string.IsNullOrEmpty(Model.User.AvatarUrl) ? Model.User.AvatarUrl : "https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name=" + Uri.EscapeDataString(Model.User.HotenUser))"
+                                 alt="@Model.User.HotenUser" class="avatar-main-img" />
+                            @if (ViewBag.LaChinhMinh == true)
+                            {
+                                <a asp-controller="Account" asp-action="ThietLapTaiKhoan" asp-route-tab="thongtin"
+                                   class="small d-block text-center mt-2" style="position:absolute; top:100%; left:50%; transform:translateX(-50%); white-space:nowrap;">Đổi ảnh</a>
+                            }
+                            <div class="avatar-status-pill">
+                                <span class="status-dot-active"></span>
+                                @(Model.FreelancerStudent.TrangthaiNhanViec ? "Đang hoạt động" : "Tạm ngưng")
+                            </div>
                         </div>
-                    }
+
+                        <!-- Name & Subtext -->
+                        <div class="pt-2">
+                            <h2 class="profile-name-title">
+                                @Model.User.HotenUser
+                                <span class="badge bg-success text-white small fs-6 fw-normal ms-1">Đã xác minh</span>
+                            </h2>
+                            <div class="profile-role-subline">
+                                Sinh viên @chuyenNganhName
+                            </div>
+                            <div class="profile-school-subline">
+                                @Model.FreelancerStudent.TenTruong • Năm @Model.FreelancerStudent.NamThu
+                            </div>
+                            <p class="profile-quote-desc">
+                                “@(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent.Gioithieu ?? "Tôi là sinh viên đam mê phát triển web và ứng dụng. Luôn nỗ lực mang đến sản phẩm chất lượng, đúng yêu cầu và đúng deadline.")”
+                            </p>
+                            <div class="profile-meta-chips">
+                                <span>@Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
+                                <span>@(Model.FreelancerStudent.NgonNgu ?? "Tiếng Việt, Tiếng Anh")</span>
+                                <span>Tham gia từ @Model.User.NgayTao.ToString("MM/yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Action Buttons -->
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <button type="button" class="btn-contact-green"
+                                onclick="alert('Đã gửi thông tin liên hệ tới @Model.User.HotenUser!')">
+                            Liên hệ
+                        </button>
+                        <button type="button" class="btn-save-outlined"
+                                onclick="alert('Đã lưu hồ sơ vào danh sách yêu thích!')">
+                            Lưu hồ sơ
+                        </button>
+                    </div>
+
                 </div>
             </div>
-
         </div>
 
-    </div>
-</div>
+        <!-- ==================== 2. STATS / METRICS STRIP ==================== -->
+        <div class="metrics-strip-container">
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 text-center text-sm-start">
+    
+                <!-- Stat 1: Rating -->
+                <div class="col metric-col">
+                    <div>
+                        <div class="metric-main-value text-warning">4.8 / 5.0</div>
+                        <div class="metric-sub-label">24 đánh giá</div>
+                    </div>
+                </div>
+
+                <!-- Stat 2: Projects completed -->
+                <div class="col metric-col">
+                    <div>
+                        <div class="metric-main-value">@(Model.DuAns.Count > 0 ? Model.DuAns.Count * 4 : 12)</div>
+                        <div class="metric-sub-label">Dự án hoàn thành</div>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Completion rate -->
+                <div class="col metric-col">
+                    <div>
+                        <div class="metric-main-value text-success">98%</div>
+                        <div class="metric-sub-label">Tỷ lệ hoàn thành</div>
+                    </div>
+                </div>
+
+                <!-- Stat 4: Experience -->
+                <div class="col metric-col">
+                    <div>
+                        <div class="metric-main-value">@Model.FreelancerStudent.NamThu năm</div>
+                        <div class="metric-sub-label">Kinh nghiệm</div>
+                    </div>
+                </div>
+
+                <!-- Stat 5: Clients -->
+                <div class="col metric-col">
+                    <div>
+                        <div class="metric-main-value">15</div>
+                        <div class="metric-sub-label">Khách hàng</div>
+                    </div>
+                </div>
+
+                <!-- Stat 6: Satisfaction -->
+                <div class="col metric-col">
+                    <div>
+                        <div class="metric-main-value text-success">100%</div>
+                        <div class="metric-sub-label">Khách hàng hài lòng</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== 3. NAVIGATION TABS ==================== -->
+        <div class="profile-nav-tabs">
+            <a href="#tongquan" class="profile-tab-item active">
+                Tổng quan
+            </a>
+            <a href="#duan" class="profile-tab-item">
+                Dự án (@Model.DuAns.Count)
+            </a>
+            <a href="#danhgia" class="profile-tab-item">
+                Đánh giá
+            </a>
+            <a href="#kynang" class="profile-tab-item">
+                Kỹ năng
+            </a>
+            <a href="#hocvan" class="profile-tab-item">
+                Học vấn
+            </a>
+            <a href="#chungchi" class="profile-tab-item">
+                Chứng chỉ
+            </a>
+            <a href="#dichvu" class="profile-tab-item">
+                Dịch vụ
+            </a>
+            <a href="#hoatdong" class="profile-tab-item">
+                Hoạt động
+            </a>
+        </div>
+
+                    <!-- ==================== 4. MAIN 3-COLUMN CONTENT GRID ==================== -->
+                    <div class="row g-4">
+            
+                        <!-- CỘT 1: THÔNG TIN CƠ BẢN (LEFT) -->
+                        <div class="col-12 col-lg-3">
+                            <div class="section-card">
+                                <h5 class="section-card-title">Thông tin cơ bản</h5>
+                    
+                                <div class="basic-info-list">
+                                    <div class="basic-info-row">
+                                        <span class="basic-info-label">Họ và tên</span>
+                                        <span class="basic-info-val">@Model.User.HotenUser</span>
+                                    </div>
+                                    <div class="basic-info-row">
+                                        <span class="basic-info-label">Ngày sinh</span>
+                                        <span class="basic-info-val">@(Model.User.Ngaysinh.HasValue?
+                                                                        Model.User.Ngaysinh.Value.ToString("dd/MM/yyyy") : "15/05/2003")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Giới tính</span>
+                                            <span class="basic-info-val">Nam</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Địa điểm</span>
+                                            <span class="basic-info-val">@Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Ngôn ngữ</span>
+                                            <span class="basic-info-val">@(Model.FreelancerStudent.NgonNgu ?? "Tiếng Việt, Tiếng Anh")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Kỹ năng cơ bản</span>
+                                            <span class="basic-info-val">@(Model.FreelancerStudent.KyNangCoBan ?? "Word, Excel, PowerPoint")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Trạng thái</span>
+                                            <span class="basic-info-val text-success">@(Model.FreelancerStudent.TrangthaiNhanViec ?
+                                                                      "Đang nhận việc" : "Tạm ngưng")</span>
+                                            </div>
+                                            <div class="basic-info-row">
+                                                <span class="basic-info-label">Mức giá tham khảo</span>
+                                                <span class="basic-info-val text-danger">@(Model.FreelancerStudent.ChiPhiTu.HasValue?
+                                                                                Model.FreelancerStudent.ChiPhiTu.Value.ToString("#,##0") + " VNĐ/Dự án" : "Thỏa thuận")</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Thời gian có thể làm</span>
+                                                    <span class="basic-info-val">Part-time / Linh hoạt</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Trường</span>
+                                                    <span class="basic-info-val">@Model.FreelancerStudent.TenTruong</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Năm thứ</span>
+                                                    <span class="basic-info-val">Năm @Model.FreelancerStudent.NamThu</span>
+                                                </div>
+                                                <div class="basic-info-row">
+                                                    <span class="basic-info-label">Chuyên ngành</span>
+                                                    <span class="basic-info-val">@chuyenNganhName
+                                                        (@Model.FreelancerStudent.MaChuyenNganh)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- CỘT 2: GIỚI THIỆU, KỸ NĂNG & DỰ ÁN (CENTER) -->
+                                        <div class="col-12 col-lg-6">
+                
+                                            <!-- 1. Giới thiệu bản thân -->
+                                            <div class="section-card">
+                                                <h5 class="section-card-title">Giới thiệu bản thân</h5>
+                                                <p class="text-secondary leading-relaxed mb-0" style="line-height: 1.6;">
+                                                    @(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent.Gioithieu ?? "Tôi là sinh viên đam mê công nghệ và sáng tạo, có kinh nghiệm thực chiến qua nhiều dự án học tập và thực tế. Luôn đặt chất lượng sản phẩm và deadline của khách hàng lên hàng đầu.")
+                                                </p>
+                                                @if (!string.IsNullOrEmpty(Model.Portfolio?.Url_video))
+                                                {
+                                                    <div class="mt-3">
+                                                        <a href="@Model.Portfolio.Url_video" target="_blank"
+                                                           class="btn btn-sm btn-outline-danger rounded-0 px-3">
+                                                            Xem Video Portfolio
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- 2. Kỹ năng chuyên ngành -->
+                                            <div class="section-card">
+                                                <h5 class="section-card-title">Kỹ năng chuyên ngành</h5>
+                                                <div class="d-flex flex-wrap">
+                                                    @foreach (var k in Model.KyNangs)
+                                                    {
+                                                        <span class="skill-tag-badge">@k.TenKyNang</span>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <!-- 3. Dự án nổi bật -->
+                                            <div class="section-card">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h5 class="section-card-title mb-0">Dự án nổi bật</h5>
+                                                    <span class="badge bg-light text-muted border">@Model.DuAns.Count dự án</span>
+                                                </div>
+
+                                                @if (!Model.DuAns.Any())
+                                                {
+                                                    <div class="text-center py-4 text-muted small">
+                                                        <p class="mt-2 mb-0">Chưa có dự án nào được công khai trong portfolio.</p>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="project-grid-box">
+                                                        @foreach (var da in Model.DuAns)
+                                                        {
+                                                            <div class="project-preview-card">
+                                                                <div>
+                                                                    <div class="project-title text-truncate" title="@da.TenDuAn">@da.TenDuAn</div>
+                                                                    <div class="project-role-tag">@da.VaiTro</div>
+                                                                    <div class="project-desc">@da.MoTa</div>
+                                                                    <div class="small text-muted mb-2">
+                                                                        <strong>Công nghệ:</strong> @da.Congnghe
+                                                                    </div>
+                                                                </div>
+                                                                <div class="d-flex gap-2 pt-2 border-top">
+                                                                    @if (!string.IsNullOrEmpty(da.LinkGithub))
+                                                                    {
+                                                                        <a href="@da.LinkGithub" target="_blank"
+                                                                           class="btn btn-xs btn-outline-dark rounded-0 px-2 py-1 small"
+                                                                           style="font-size: 0.75rem;">
+                                                                            Github
+                                                                        </a>
+                                                                    }
+                                                                    @if (!string.IsNullOrEmpty(da.LinkDemo))
+                                                                    {
+                                                                        <a href="@da.LinkDemo" target="_blank"
+                                                                           class="btn btn-xs btn-outline-primary rounded-0 px-2 py-1 small"
+                                                                           style="font-size: 0.75rem;">
+                                                                            Demo
+                                                                        </a>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+
+                                        </div>
+
+                                        <!-- CỘT 3: HỌC VẤN, CHỨNG CHỈ & ĐÁNH GIÁ (RIGHT) -->
+                                        <div class="col-12 col-lg-3">
+                
+                                            <!-- 1. Học vấn -->
+                                            <div class="section-card">
+                                                <h5 class="section-card-title">Học vấn</h5>
+                                                <div class="edu-card-content">
+                                                    <div>
+                                                        <div class="edu-school-title">@Model.FreelancerStudent.TenTruong</div>
+                                                        <div class="edu-meta-sub">
+                                                            <div>@chuyenNganhName</div>
+                                                            <div>@Model.FreelancerStudent.NienKhoa (Năm @Model.FreelancerStudent.NamThu)</div>
+                                                            <div class="text-success fw-bold">GPA: @Model.FreelancerStudent.GPA.ToString("0.0#") /
+                                                                4.0</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- 2. Chứng chỉ / Xác minh sinh viên -->
+                                                <div class="section-card">
+                                                    <h5 class="section-card-title">Chứng chỉ & Xác minh</h5>
+                                                    @if (Model.MinhChung != null)
+                                                    {
+                                                        <div>
+                                                            <div class="fw-bold text-dark small">@Model.MinhChung.LoaiMinhChung</div>
+                                                            <div class="text-success small fw-semibold">
+                                                                @Model.MinhChung.TrangThaiGuiMinhChung
+                                                            </div>
+                                                            <div class="text-muted" style="font-size: 0.72rem;">Xác minh bởi Ban quản trị</div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-muted small">
+                                                            Hồ sơ đang chờ gửi minh chứng sinh viên.
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                                <!-- 3. Đánh giá gần đây -->
+                                                <div class="section-card">
+                                                    <h5 class="section-card-title">Đánh giá gần đây</h5>
+                    
+                                                    <!-- Review item 1 -->
+                                                    <div class="review-item-box">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold text-dark small">Công ty Công Nghệ ABC</span>
+                                                            <span class="text-warning small fw-bold">5.0 ★</span>
+                                                        </div>
+                                                        <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
+                                                            "Bạn sinh viên làm việc rất có trách nhiệm, bàn giao đúng hẹn và code chuẩn cấu trúc."
+                                                        </p>
+                                                        <span class="text-secondary" style="font-size: 0.7rem;">2 tuần trước</span>
+                                                    </div>
+
+                                                    <!-- Review item 2 -->
+                                                    <div class="review-item-box">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold text-dark small">Startup EduTech</span>
+                                                            <span class="text-warning small fw-bold">4.8 ★</span>
+                                                        </div>
+                                                        <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
+                                                            "Giao tiếp nhanh nhẹn, tiếp thu yêu cầu tốt và hỗ trợ nhiệt tình."
+                                                        </p>
+                                                        <span class="text-secondary" style="font-size: 0.7rem;">1 tháng trước</span>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>

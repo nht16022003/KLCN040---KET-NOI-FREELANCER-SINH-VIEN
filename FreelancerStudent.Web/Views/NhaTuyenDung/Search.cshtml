@@ -58,8 +58,8 @@
                 @foreach (var ntd in Model)
                 {
                     var tenHienThi = !string.IsNullOrWhiteSpace(ntd.tencongty) ? ntd.tencongty : ntd.hotenUser;
-                    var hinhAnh = !string.IsNullOrEmpty(ntd.logo) ? ntd.logo : (!string.IsNullOrEmpty(ntd.avatar) ? ntd.avatar :
-                        "");
+                    var hinhAnh = !string.IsNullOrEmpty(ntd.avatar) ? ntd.avatar : (!string.IsNullOrEmpty(ntd.logo) ? ntd.logo :
+                        $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenHienThi ?? "NTD")}&background=E8F5E9&color=1B5E36");
 
                     <div class="col-md-6 col-lg-4 ntd-card-wrapper" data-company="@((ntd.tencongty ?? "").ToLower())"
                          data-name="@((ntd.hotenUser ?? "").ToLower())" data-address="@((ntd.diachi ?? "").ToLower())"

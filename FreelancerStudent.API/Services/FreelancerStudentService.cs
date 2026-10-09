@@ -76,7 +76,7 @@ namespace FreelancerStudent.API.Services
                 GPA = free.GPA,
                 nienKhoa = free.nienKhoa,
                 gioithieu = free.gioithieu,
-                avatar = free.User.avatarUrl,
+                avatar = free.User?.avatarUrl,
                 trangthaiNhanViec = free.trangthaiNhanViec,
                 chiPhiTu = free.chiPhiTu
             }).ToList();
@@ -88,7 +88,7 @@ namespace FreelancerStudent.API.Services
         {
             var re = await _freelancerStudentRepository.layFreelancerStudent_TheoMaUser(maUser);
 
-            if (re == null) return null;
+            if (re == null) return null!;
 
             return new FreelancerStudent_ReponseDTO
             {
@@ -136,6 +136,52 @@ namespace FreelancerStudent.API.Services
         {
             // thực thi việc lưu
             return await _freelancerStudentRepository.capNhatHoSoAsync(dto);
+        }
+
+        public async Task<FreelancerStudentProfile_ReponseDTO?> layProfileFreelancerStudent(int maFreelancerStudents)
+        {
+            if (maFreelancerStudents <= 0)
+            {
+                return null;
+            }
+
+            var freelancer = (await _freelancerStudentRepository.layTheoMaFreelancerStudents(maFreelancerStudents));
+
+            if (freelancer == null)
+            {
+                return null;
+            }
+
+            return new FreelancerStudentProfile_ReponseDTO
+            {
+                User = new ProfileUserResponse
+                {
+                    TenTaiKhoanUser = freelancer.User?.tenTaiKhoanUser ?? string.Empty,
+                    HotenUser = freelancer.User?.hotenUser ?? string.Empty,
+                    AvatarUrl = freelancer.User?.avatarUrl,
+                    Ngaysinh = freelancer.User?.ngaysinh,
+                    NgayTao = freelancer.User?.ngayTao ?? DateTime.UtcNow
+                },
+                FreelancerStudent = new ProfileFreelancerResponse
+                {
+                    MaChuyenNganh = freelancer.maChuyenNganh,
+                    TenTruong = freelancer.tenTruong,
+                    MaTruong = freelancer.maTruong,
+                    DiaDiemFreelancerStudent = freelancer.diaDiemFreelancerStudent,
+                    NgonNgu = freelancer.ngonNgu,
+                    KyNangCoBan = freelancer.kyNangCoBan,
+                    NamThu = freelancer.namThu,
+                    GPA = freelancer.GPA,
+                    NienKhoa = freelancer.nienKhoa,
+                    Gioithieu = freelancer.gioithieu,
+                    TrangthaiNhanViec = freelancer.trangthaiNhanViec,
+                    ChiPhiTu = freelancer.chiPhiTu
+                },
+                ChuyenNganh = freelancer.ChuyenNganh == null ? null : new ProfileMajorResponse
+                {
+                    TenChuyenNganh = freelancer.ChuyenNganh.tenChuyenNganh
+                }
+            };
         }
 
 

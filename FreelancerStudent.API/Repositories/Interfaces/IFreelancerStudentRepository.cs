@@ -24,6 +24,8 @@ namespace FreelancerStudent.API.Repositories.Interfaces
 
         //Tuấn
         Task<bool> capNhatHoSoAsync(ChiTietHoSoFreelancer_ReponseDTO dto);
+        //XS
+        Task<FreelancerStudents?> layTheoMaFreelancerStudents(int maFreelancerStudents);
 
     }
 }

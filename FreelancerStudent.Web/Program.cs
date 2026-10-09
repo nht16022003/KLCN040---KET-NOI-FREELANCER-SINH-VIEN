@@ -2,8 +2,14 @@
 using FreelancerStudent.Web.Services;
 using FreelancerStudent.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Cấu hình Data Protection lưu key cố định vào thư mục temp-keys (tránh lỗi HTTP 400 Antiforgery khi dotnet watch restart)
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "temp-keys")))
+    .SetApplicationName("FreelancerStudentApp");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -28,8 +34,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 .AddCookie(options =>
 {
     options.Cookie.Name = "FreelancerStudent.Cookie";
-    options.LoginPath = "/Account/Login"; //Chưa đăng nhập thì chuyển về đây
-    options.AccessDeniedPath = "/Account/Denied"; //Sai quyền thì chuyển về đây
+    options.LoginPath = "/Account/DangNhap"; //Chưa đăng nhập thì chuyển về đây
+    options.AccessDeniedPath = "/Account/DangNhap";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
 
@@ -41,6 +47,8 @@ builder.Services.AddScoped<IJobPostWebService, JobPostWebService>();
 builder.Services.AddScoped<IFreelancerStudentWebService, FreelancerStudentWebService>();
 builder.Services.AddScoped<IBaiDangTimViecWebService, BaiDangTimViecWebService>();
 builder.Services.AddScoped<IChatWebService, ChatWebService>();
+builder.Services.AddScoped<IWalletWebService, WalletWebService>();
+builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
 
 
 var app = builder.Build();

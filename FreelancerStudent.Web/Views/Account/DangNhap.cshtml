@@ -59,34 +59,25 @@
                 <div class="features-list mt-4">
                     <!-- Feature 1 -->
                     <div class="feature-item">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
                         <div>
-                            <div class="feature-title">Cơ hội thực tế</div>
-                            <div class="feature-desc">Tìm công việc phù hợp, phát triển kỹ năng</div>
+                            <div class="feature-title fw-bold">Cơ hội thực tế</div>
+                            <div class="feature-desc text-muted small">Tìm công việc phù hợp, phát triển kỹ năng</div>
                         </div>
                     </div>
 
                     <!-- Feature 2 -->
-                    <div class="feature-item">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-mortarboard"></i>
-                        </div>
+                    <div class="feature-item mt-3">
                         <div>
-                            <div class="feature-title">Thu nhập linh hoạt</div>
-                            <div class="feature-desc">Làm chủ thời gian, tăng thu nhập</div>
+                            <div class="feature-title fw-bold">Thu nhập linh hoạt</div>
+                            <div class="feature-desc text-muted small">Làm chủ thời gian, tăng thu nhập</div>
                         </div>
                     </div>
 
                     <!-- Feature 3 -->
-                    <div class="feature-item">
-                        <div class="feature-icon-box">
-                            <i class="bi bi-graph-up-arrow"></i>
-                        </div>
+                    <div class="feature-item mt-3">
                         <div>
-                            <div class="feature-title">Xây dựng tương lai</div>
-                            <div class="feature-desc">Tạo portfolio, tích lũy kinh nghiệm</div>
+                            <div class="feature-title fw-bold">Xây dựng tương lai</div>
+                            <div class="feature-desc text-muted small">Tạo portfolio, tích lũy kinh nghiệm</div>
                         </div>
                     </div>
                 </div>
@@ -107,9 +98,9 @@
                     <div class="card-body">
                         <h5 class="card-title">Đăng Nhập <span style="color:white">Tài Khoản</span></h5>
                        
-                        <form asp-action="DangNhap" method="post">
+                        <form asp-controller="Account" asp-action="DangNhap" method="post">
                             @* Sửa thành asp-validation-summary="All" để hiện TẤT CẢ mọi lỗi lên màn hình *@
-                            <div asp-validation-summary="All" class="alert alert-danger mb-3" style="display:none;">
+                            <div asp-validation-summary="All" class="alert alert-danger mb-3">
                             </div>
 
                            

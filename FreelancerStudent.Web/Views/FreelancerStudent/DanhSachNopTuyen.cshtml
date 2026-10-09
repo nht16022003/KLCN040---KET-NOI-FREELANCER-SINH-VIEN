@@ -11,14 +11,14 @@
             Danh sách công việc bạn đã ứng tuyển
         </h5>
         <a asp-controller="JobPost" asp-action="Index" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-search me-1"></i>Tìm thêm Job mới
+            Tìm thêm Job mới
         </a>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show p-2 small mb-3">
-            <i class="bi bi-check-circle me-1"></i>@TempData["SuccessMessage"]
+            @TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -27,7 +27,6 @@
     @if (Model == null || !Model.Any())
     {
         <div class="card border-0 shadow-sm text-center py-5 bg-white rounded-3">
-            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
             <p class="text-muted mt-2 mb-3">Bạn chưa nộp đơn ứng tuyển cho công việc nào.</p>
             <div>
                 <a asp-controller="JobPost" asp-action="Index" class="btn btn-success">
@@ -45,8 +44,13 @@
                 
                 <!-- Cột 1: Thông tin Bài đăng & Nhà tuyển dụng -->
                 <div class="col-md-5 d-flex align-items-center">
-                    <img src="@(string.IsNullOrEmpty(item.avatarNhaTuyenDung) ? "https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=100" : item.avatarNhaTuyenDung)"
-                         alt="Avatar" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;" />
+                    @{
+                        var avatarNTD = !string.IsNullOrEmpty(item.avatarNhaTuyenDung)
+                            ? item.avatarNhaTuyenDung
+                            : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenCongTy ?? "NTD")}&background=E8F5E9&color=1B5E36";
+                    }
+                    <img src="@avatarNTD"
+                         alt="@item.tenCongTy" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;" />
 
                     <div style="margin-left: 12px;">
                         <h6 class="mb-1 fw-bold text-dark">
@@ -54,7 +58,6 @@
                         </h6>
                         
                         <p class="mb-1 text-muted small">
-                            <i class="bi bi-building text-success"></i>
                             @(string.IsNullOrEmpty(item.tenCongTy) ? "Nhà tuyển dụng cá nhân" : item.tenCongTy)
                         </p>
 
@@ -77,7 +80,7 @@
                     </div>
 
                     <div class="text-muted small mt-1" style="font-size: 0.78rem;">
-                        <i class="bi bi-calendar-event me-1"></i>Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
+                        Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
                     </div>
                 </div>
 
@@ -87,19 +90,19 @@
                         @if (item.trangThaiUngTuyen == "ChoDuyet")
                         {
                             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3 py-2">
-                                <i class="bi bi-hourglass-split me-1"></i>Chờ NTD duyệt
+                                Chờ NTD duyệt
                             </span>
                         }
                         else if (item.trangThaiUngTuyen == "ChapNhan")
                         {
                             <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
-                                <i class="bi bi-check-circle-fill me-1"></i>Đã được chấp nhận
+                                Đã được chấp nhận
                             </span>
                         }
                         else if (item.trangThaiUngTuyen == "TuChoi")
                         {
                             <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">
-                                <i class="bi bi-x-circle-fill me-1"></i>Bị từ chối
+                                Bị từ chối
                             </span>
                         }
                         else

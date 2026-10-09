@@ -15,6 +15,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
     {
         public string TenTaiKhoanUser { get; set; } = string.Empty;
         public string HotenUser { get; set; } = string.Empty;
+        public string? AvatarUrl { get; set; }
         public DateTime? Ngaysinh { get; set; }
         public DateTime NgayTao { get; set; }
     }

@@ -11,8 +11,8 @@
     <div class="card border rounded-0 shadow-sm bg-white overflow-hidden" style="height: calc(100vh - 140px); min-height: 600px;">
         <div class="row g-0 h-100">
 
-            <!-- CỘT TRÁI: DANH SÁCH HỘI THOẠI (COL-MD-4) -->
-            <div class="col-12 col-md-4 col-lg-3 border-end d-flex flex-column h-100 bg-light">
+            <!-- CỘT TRÁI: DANH SÁCH HỘI THOẠI -->
+            <div class="col-12 col-lg-4 col-xl-3 border-end d-flex flex-column h-100 bg-light @(activeRoom != null ? "d-none d-lg-flex" : "")">
                 <!-- Header danh sách -->
                 <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold text-success mb-0">
@@ -89,8 +89,8 @@
                 </div>
             </div>
 
-            <!-- CỘT PHẢI: KHUNG CHAT CHI TIẾT (COL-MD-8) -->
-            <div class="col-12 col-md-8 col-lg-9 d-flex flex-column h-100 bg-white">
+            <!-- CỘT PHẢI: KHUNG CHAT CHI TIẾT -->
+            <div class="col-12 col-lg-8 col-xl-9 d-flex flex-column h-100 bg-white @(activeRoom == null ? "d-none d-lg-flex" : "")">
                 @if (activeRoom != null)
                 {
                     bool isMeClientActive = Model.CurrentUserId == activeRoom.maUserClient;
@@ -100,7 +100,11 @@
 
                     <!-- 1. Header Khung Chat -->
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2 gap-lg-3">
+                            <!-- Nút quay lại danh sách trên màn hình nhỏ/thu gọn -->
+                            <a href="/Chat" class="btn btn-sm btn-light border d-lg-none rounded-0 px-2 py-1 text-decoration-none text-dark small fw-bold" title="Quay lại danh sách">
+                                &larr; Danh sách
+                            </a>
                             <img src="@partnerAvatarActive" alt="@partnerNameActive" 
                                  class="border rounded-0" style="width: 48px; height: 48px; object-fit: cover;" />
                             <div>
@@ -263,6 +267,8 @@
 </style>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
     <script>
         const currentUserId = @Model.CurrentUserId;
         const currentRoomId = document.getElementById("currentRoomId") ? parseInt(document.getElementById("currentRoomId").value) : 0;
@@ -278,11 +284,54 @@
                 messageContainer.scrollTop = messageContainer.scrollHeight;
             }
         }
-
-        // Khởi động cuộn xuống dưới cùng khi mới load trang
         scrollToBottom();
 
-        // Gửi tin nhắn qua AJAX
+        // 1. KHỞI TẠO KẾT NỐI SIGNALR TỚI API CHATHUB
+        const API_URL = "http://localhost:5152"; // Cổng API
+        const ketNoiChat = new signalR.HubConnectionBuilder()
+            .withUrl(`${API_URL}/chatHub`)
+            .withAutomaticReconnect([0, 2000, 5000, 10000])
+            .build();
+
+        // 2. LẮNG NGHE SỰ KIỆN TỪ SERVER (TIẾNG VIỆT)
+        // Khi nhận được tin nhắn mới từ Hub
+        ketNoiChat.on("NhanTinNhanMoi", function (msg) {
+            console.log("Đã nhận tin nhắn mới từ SignalR:", msg);
+            if (parseInt(msg.maPhongChat) === currentRoomId) {
+                const isMyMsg = parseInt(msg.maNguoiGui) === currentUserId;
+                appendMessage(msg, isMyMsg);
+                scrollToBottom();
+            }
+        });
+
+        // Tự động tham gia lại phòng khi kết nối lại thành công
+        ketNoiChat.onreconnected(async () => {
+            console.log("Đã kết nối lại SignalR!");
+            if (currentRoomId > 0) {
+                await ketNoiChat.invoke("ThamGiaPhongChat", currentRoomId);
+            }
+        });
+
+        // 3. BẮT ĐẦU KẾT NỐI VÀ THAM GIA PHÒNG CHAT
+        async function batDauKetNoi() {
+            try {
+                if (ketNoiChat.state === signalR.HubConnectionState.Disconnected) {
+                    await ketNoiChat.start();
+                    console.log("Đã kết nối SignalR ChatHub thành công!");
+                }
+
+                if (currentRoomId > 0) {
+                    await ketNoiChat.invoke("ThamGiaPhongChat", currentRoomId);
+                    await ketNoiChat.invoke("DanhDauDaDoc", currentRoomId, currentUserId);
+                }
+            } catch (err) {
+                console.error("Lỗi kết nối SignalR:", err);
+                setTimeout(batDauKetNoi, 3000);
+            }
+        }
+        batDauKetNoi();
+
+        // 4. GỬI TIN NHẮN QUA SIGNALR
         if (chatForm) {
             chatForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
@@ -293,27 +342,28 @@
                 messageInput.value = "";
 
                 try {
-                    const response = await fetch("/Chat/GuiTinNhan", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            maPhongChat: currentRoomId,
-                            noiDung: text,
-                            fileDinhKem: null
-                        })
-                    });
-
-                    const res = await response.json();
-                    if (res.success && res.data) {
-                        appendMessage(res.data, true);
-                        scrollToBottom();
-                    } else {
-                        alert(res.message || "Không thể gửi tin nhắn");
+                    if (ketNoiChat.state !== signalR.HubConnectionState.Connected) {
+                        await batDauKetNoi();
                     }
+                    // Gọi trực tiếp hàm GuiTinNhan trên ChatHub.cs
+                    await ketNoiChat.invoke("GuiTinNhan", currentRoomId, currentUserId, text, null);
                 } catch (err) {
-                    console.error("Lỗi khi gửi tin nhắn:", err);
+                    console.error("Lỗi gửi tin nhắn qua SignalR:", err);
+                    // Dự phòng gửi qua AJAX nếu Hub bị ngắt quãng
+                    try {
+                        const response = await fetch("/Chat/GuiTinNhan", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ maPhongChat: currentRoomId, noiDung: text, fileDinhKem: null })
+                        });
+                        const res = await response.json();
+                        if (res.success && res.data) {
+                            appendMessage(res.data, true);
+                            scrollToBottom();
+                        }
+                    } catch (ajaxErr) {
+                        alert("Không thể gửi tin nhắn. Vui lòng thử lại!");
+                    }
                 } finally {
                     btnSend.disabled = false;
                     messageInput.focus();
@@ -321,7 +371,7 @@
             });
         }
 
-        // Hàm render thêm 1 tin nhắn vào DOM
+        // 5. Hàm render thêm 1 tin nhắn vào DOM
         function appendMessage(msg, isMyMsg) {
             const emptyNotice = document.querySelector(".empty-chat");
             if (emptyNotice) emptyNotice.remove();
@@ -329,7 +379,18 @@
             // Kiểm tra xem tin nhắn đã có trên màn hình chưa để tránh trùng lặp
             if (document.querySelector(`.message-item[data-id="${msg.maTinNhan}"]`)) return;
 
-            const timeStr = new Date(msg.ngayGui).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(msg.ngayGui).toLocaleDateString();
+            let timeStr = "";
+            if (msg.ngayGui) {
+                const d = new Date(msg.ngayGui);
+                if (!isNaN(d.getTime())) {
+                    timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' - ' + d.toLocaleDateString();
+                } else {
+                    timeStr = msg.ngayGui;
+                }
+            } else {
+                timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString();
+            }
+
             const avatarUrl = msg.avatarNguoiGui || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.tenNguoiGui || 'User')}&background=E8F5E9&color=1B5E36`;
 
             const wrapper = document.createElement("div");
@@ -355,32 +416,7 @@
             messagesList.appendChild(wrapper);
         }
 
-        // Tự động Polling cập nhật tin nhắn mới mỗi 3 giây
-        if (currentRoomId > 0) {
-            setInterval(async () => {
-                try {
-                    const response = await fetch(`/Chat/LayTinNhan?maPhongChat=${currentRoomId}`);
-                    const res = await response.json();
-                    if (res.success && res.data && res.data.length > 0) {
-                        let hasNew = false;
-                        res.data.forEach(msg => {
-                            if (!document.querySelector(`.message-item[data-id="${msg.maTinNhan}"]`)) {
-                                const isMyMsg = msg.maNguoiGui === currentUserId;
-                                appendMessage(msg, isMyMsg);
-                                hasNew = true;
-                            }
-                        });
-                        if (hasNew) {
-                            scrollToBottom();
-                        }
-                    }
-                } catch (e) {
-                    console.log("Polling error:", e);
-                }
-            }, 3000);
-        }
-
-        // Lọc danh sách hội thoại bên trái
+        // 6. Lọc danh sách hội thoại bên trái
         const searchInput = document.getElementById("searchConversation");
         if (searchInput) {
             searchInput.addEventListener("input", function (e) {

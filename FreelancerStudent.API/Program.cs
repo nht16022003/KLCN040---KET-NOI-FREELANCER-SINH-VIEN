@@ -4,6 +4,7 @@ using FreelancerStudent.API.Repositories;
 using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
 using FreelancerStudent.API.Services;
+using FreelancerStudent.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,24 @@ builder.Services.AddScoped<IBaiDangTimViecRepository, BaiDangTimViecRepository>(
 builder.Services.AddScoped<IBaiDangTimViecService, BaiDangTimViecService>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IGiaoDichNapTienRepository, GiaoDichNapTienRepository>();
+builder.Services.AddScoped<IGiaoDichNapTienService, GiaoDichNapTienService>();
+
+
+
+
+//  ĐĂNG KÝ SIGNALR VÀ CẤU HÌNH CORS CHO WEB GỌI SANG
+builder.Services.AddSignalR();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWebClient", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true) // Cho phép Web MVC gọi sang
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Bắt buộc bật dòng này cho kết nối WebSocket SignalR
+    });
+});
 
 
 // 2. Đăng ký Controllers
@@ -48,8 +67,16 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// 1. BẬT CORS CHO PHÉP WEB MVC GỌI SANG VÀ KẾT NỐI SIGNALR
+app.UseCors("AllowWebClient");
+
+// app.UseHttpsRedirection(); // Bỏ qua HTTPS redirect trong local dev để tránh lỗi 307 cho kết nối SignalR
+
 app.UseAuthorization();
 app.MapControllers();
+
+
+// Endpoint WebSocket để Client kết nối vào
+app.MapHub<ChatHub>("/chatHub"); //  Đường dẫn: https://localhost:PORT/chatHub
 
 app.Run();

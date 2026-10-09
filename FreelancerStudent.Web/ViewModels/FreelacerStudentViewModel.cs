@@ -14,7 +14,7 @@ namespace FreelancerStudent.Web.ViewModels
 
         public int maUser { get; set; }
 
-        public string tenUser { get; set; }
+        public string? tenUser { get; set; }
 
         public string maTruong { get; set; } = string.Empty;
 

@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\KLTN\\Improve\\FreelancerStudent.Web\\FreelancerStudent.Web.csproj",
+      "projectUniqueName": "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.Web\\FreelancerStudent.Web.csproj",
       "projectName": "FreelancerStudent.Web",
-      "projectPath": "D:\\KLTN\\Improve\\FreelancerStudent.Web\\FreelancerStudent.Web.csproj",
+      "projectPath": "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.Web\\FreelancerStudent.Web.csproj",
       "packagesPath": "C:\\Users\\HTuan\\.nuget\\packages\\",
-      "outputPath": "D:\\KLTN\\Improve\\FreelancerStudent.Web\\obj\\",
+      "outputPath": "D:\\KLTN\\KLTN\\Improve\\FreelancerStudent.Web\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

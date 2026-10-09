@@ -31,6 +31,38 @@ namespace FreelancerStudent.Web.Controllers
             return View(dsFree);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Profile(int maUser)
+        {
+            if (maUser <= 0)
+            {
+                return NotFound();
+            }
+
+            var listResult = await _freelancerStudentWebService
+                .layDanhSachFreelancerStudentAsync();
+            var freelancer = listResult.data?.FirstOrDefault(x => x.maUser == maUser);
+
+            if (freelancer == null)
+            {
+                TempData["Error"] = "Không tìm thấy hồ sơ freelancer của tài khoản đang đăng nhập.";
+                return NotFound();
+            }
+
+            var result = await _freelancerStudentWebService
+                .layProfileFreelancerStudentAsync(freelancer.maFreelancerStudents);
+
+            if (!result.success || result.data == null)
+            {
+                TempData["Error"] = result.message;
+                return NotFound();
+            }
+
+            ViewBag.LaChinhMinh = HttpContext.Session.GetInt32("maUser") == maUser;
+
+            return View(result.data);
+        }
+
 
         //Tuấn
         [HttpGet]
@@ -216,41 +248,6 @@ namespace FreelancerStudent.Web.Controllers
             return View(model);
         }
 
-
-        //Tuấn
-
-        // XEM HỒ SƠ PROFILE (GIAO DIỆN CÔNG KHAI)
-
-        [HttpGet]
-        public async Task<IActionResult> Profile(int? id)
-        {
-            var sessionUser = HttpContext.Session.GetInt32("maUser");
-
-            // Nếu không truyền id thì lấy hồ sơ của chính user đang đăng nhập
-            int targetId = id ?? sessionUser ?? 0;
-
-            if (targetId == 0)
-            {
-                return RedirectToAction("DangNhap", "Account");
-            }
-
-            var res = await _freelancerStudentWebService.layChiTietHoSoAsync(targetId);
-
-            // Nếu chưa có thông tin hồ sơ thì điều hướng sang trang điền hồ sơ (HoSo)
-            if (res == null || !res.success || res.data == null)
-            {
-                if (sessionUser == targetId)
-                {
-                    TempData["SuccessMessage"] = "Vui lòng cập nhật thông tin hồ sơ của bạn.";
-                    return RedirectToAction("HoSo");
-                }
-
-                TempData["ErrorMessage"] = "Không tìm thấy hồ sơ Freelancer này.";
-                return RedirectToAction("Index");
-            }
-
-            return View(res.data);
-        }
 
 
 

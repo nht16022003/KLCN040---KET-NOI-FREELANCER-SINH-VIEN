@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\KLTN\\Improve\\MOCK\\MOCK.csproj": {}
+    "D:\\KLTN\\KLTN\\Improve\\MOCK\\MOCK.csproj": {}
   },
   "projects": {
-    "D:\\KLTN\\Improve\\MOCK\\MOCK.csproj": {
+    "D:\\KLTN\\KLTN\\Improve\\MOCK\\MOCK.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\KLTN\\Improve\\MOCK\\MOCK.csproj",
+        "projectUniqueName": "D:\\KLTN\\KLTN\\Improve\\MOCK\\MOCK.csproj",
         "projectName": "MOCK",
-        "projectPath": "D:\\KLTN\\Improve\\MOCK\\MOCK.csproj",
+        "projectPath": "D:\\KLTN\\KLTN\\Improve\\MOCK\\MOCK.csproj",
         "packagesPath": "C:\\Users\\HTuan\\.nuget\\packages\\",
-        "outputPath": "D:\\KLTN\\Improve\\MOCK\\obj\\",
+        "outputPath": "D:\\KLTN\\KLTN\\Improve\\MOCK\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -33,6 +33,10 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string? status { get; set; } = "DangTuyen";
 
         public int? soluongtuyen { get; set; }
+        public int soLuongUngTuyen { get; set; }
+
+        public string? tenCongTy { get; set; }
+        public string? avatarNhaTuyenDung { get; set; }
 
 
     }

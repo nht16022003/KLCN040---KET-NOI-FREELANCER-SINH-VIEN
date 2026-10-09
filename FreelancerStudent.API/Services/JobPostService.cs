@@ -1,4 +1,5 @@
 using System.Reflection.Metadata.Ecma335;
+using FreelancerStudent.API.DTOs.ReponseDTO;
 using FreelancerStudent.API.DTOs.ReponsesDTO;
 using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
@@ -45,10 +46,88 @@ namespace FreelancerStudent.API.Services
                 thoigiandangtuyen = job.thoigiandangtuyen,
                 thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
                 status = job.status,
-                soluongtuyen = job.soluongtuyen
+                soluongtuyen = job.soluongtuyen,
+                tenCongTy = job.NhaTuyenDung?.tencongty ?? job.NhaTuyenDung?.User?.hotenUser ?? string.Empty,
+                avatarNhaTuyenDung = job.NhaTuyenDung?.User?.avatarUrl ?? job.NhaTuyenDung?.logo ?? string.Empty
             }).ToList();
 
             return dsResult;
+        }
+
+        //XS
+        public async Task<JobPostDetail_ReponsesDTO?> layChiTietJobPostAsync(string maJob)
+        {
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                throw new ArgumentException("Mã công việc không được để trống!", nameof(maJob));
+            }
+
+            var job = await _jopPostRepository.layJobPostTheoMaAsync(maJob.Trim());
+            if (job == null)
+            {
+                return null;
+            }
+
+            var jobs = await _jopPostRepository.layTatCaJobPostAsync();
+            var employers = await _ntd.layTatCaNhaTuyenDungAsync();
+            var employer = employers.FirstOrDefault(x => x.maNhaTuyenDung == job.maNhaTuyenDung);
+
+            var jobDto = new JobPost_ReponseDTO
+            {
+                maJob = job.maJob,
+                maNhaTuyenDung = job.maNhaTuyenDung,
+                tieude = job.tieude,
+                mota = job.mota,
+                kynangyeucau = job.kynangyeucau,
+                thulao = job.thulao,
+                fileDinhKem = job.fileDinhKem,
+                phiDangBai = job.phiDangBai,
+                thoigiandangtuyen = job.thoigiandangtuyen,
+                thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                status = job.status,
+                soluongtuyen = job.soluongtuyen,
+                tenCongTy = employer?.tencongty ?? employer?.User?.hotenUser ?? string.Empty,
+                avatarNhaTuyenDung = employer?.User?.avatarUrl ?? employer?.logo ?? string.Empty
+            };
+
+            return new JobPostDetail_ReponsesDTO
+            {
+                Job = jobDto,
+                Employer = employer == null ? null : new NhaTuyenDung_ResponseDTO
+                {
+                    maNhaTuyenDung = employer.maNhaTuyenDung,
+                    maUser = employer.maUser,
+                    hotenUser = employer.User?.hotenUser,
+                    emailUser = employer.User?.emailUser,
+                    sdtUser = employer.User?.sdtUser,
+                    tencongty = employer.tencongty,
+                    linhvuc = employer.linhvuc,
+                    diachi = employer.diachi,
+                    gioithieu = employer.gioithieu,
+                    avatar = employer.User?.avatarUrl,
+                    logo = employer.logo,
+                    sosaodanhgia = employer.sosaodanhgia,
+                    trangthai = employer.trangthai,
+                    ngayDangKy = employer.ngayDangKy
+                },
+                RelatedJobs = jobs
+                    .Where(x => x.maNhaTuyenDung == job.maNhaTuyenDung && x.maJob != job.maJob)
+                    .Select(x => new JobPost_ReponseDTO
+                    {
+                        maJob = x.maJob,
+                        maNhaTuyenDung = x.maNhaTuyenDung,
+                        tieude = x.tieude,
+                        mota = x.mota,
+                        kynangyeucau = x.kynangyeucau,
+                        thulao = x.thulao,
+                        fileDinhKem = x.fileDinhKem,
+                        phiDangBai = x.phiDangBai,
+                        thoigiandangtuyen = x.thoigiandangtuyen,
+                        thoigiandukienhoanthanh = x.thoigiandukienhoanthanh,
+                        status = x.status,
+                        soluongtuyen = x.soluongtuyen
+                    }).ToList()
+            };
         }
 
 
@@ -266,7 +345,8 @@ namespace FreelancerStudent.API.Services
                 soluongtuyen = job.soluongtuyen,
                 thoigiandangtuyen = job.thoigiandangtuyen,
                 thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
-                status = job.status
+                status = job.status,
+                soLuongUngTuyen = job.UngTuyens?.Count ?? 0
             }).ToList();
         }
 
@@ -277,11 +357,15 @@ namespace FreelancerStudent.API.Services
             var job = await _jopPostRepository.layJobPostTheoMaAsync(reqeuest.maJob);
             if (job == null) throw new Exception("Không tìm thấy bài tuyển dụng!");
             job.tieude = reqeuest.tieude.Trim();
-            job.mota = reqeuest.mota.Trim();
+            job.mota = reqeuest.mota?.Trim();
             job.kynangyeucau = reqeuest.kynangyeucau?.Trim();
             job.thulao = reqeuest.thulao;
             job.soluongtuyen = reqeuest.soluongtuyen;
             job.thoigiandukienhoanthanh = reqeuest.thoigiandukienhoanthanh;
+            if (!string.IsNullOrWhiteSpace(reqeuest.status))
+            {
+                job.status = reqeuest.status;
+            }
             return await _jopPostRepository.capNhatJobPostAsync(job);
         }
 

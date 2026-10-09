@@ -33,7 +33,7 @@ namespace FreelancerStudent.API.Services
                 linhvuc = ntd.linhvuc,
                 diachi = ntd.diachi,
                 gioithieu = ntd.gioithieu,
-
+                avatar = ntd.User?.avatarUrl,
                 logo = ntd.logo,
                 sosaodanhgia = ntd.sosaodanhgia,
                 trangthai = ntd.trangthai,

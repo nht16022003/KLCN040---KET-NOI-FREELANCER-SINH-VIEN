@@ -144,5 +144,13 @@ namespace FreelancerStudent.API.Repositories
         }
 
 
+
+
+        //XS
+        public async Task<FreelancerStudents?> layTheoMaFreelancerStudents(int maFreelancerStudents)
+        {
+            var freelancerStudent = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudents);
+            return freelancerStudent;
+        }
     }
 }

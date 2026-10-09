@@ -1,3 +1,4 @@
+using FreelancerStudent.API.DTOs.ReponseDTO;
 using FreelancerStudent.API.DTOs.ReponsesDTO;
 using FreelancerStudent.API.Models;
 
@@ -7,6 +8,9 @@ namespace FreelancerStudent.API.Services.Interfaces
     {
         //Lấy danh sách JobPost
         Task<List<JobPost_ReponseDTO>> layDanhSachJobPostAsync();
+
+        //XS
+        Task<JobPostDetail_ReponsesDTO?> layChiTietJobPostAsync(string maJob);
 
         Task<JobPost_ReponseDTO> taoJobPostAsync(JobPost_RequestDTO request);
 

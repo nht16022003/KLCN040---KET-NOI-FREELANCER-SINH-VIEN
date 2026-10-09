@@ -1,11 +1,31 @@
-﻿@using Microsoft.AspNetCore.Http
+@using FreelancerStudent.Web.Services.Interfaces
+@inject IWalletWebService WalletWebService
+@using Microsoft.AspNetCore.Http
 @{
     var role = Context.Session.GetString("tenRole");
     var userName = Context.Session.GetString("hovaten") ?? (role == "NhaTuyenDung" ? "tuan_depzai" : "Son_ko_thogminh");
     var userRoleTitle = Context.Session.GetString("tenRole") ?? (role == "NhaTuyenDung" ? "Nhà tuyển dụng" :
 "Freelancer Student");
-    var userAvatar = Context.Session.GetString("UserAvatar") ??
-"";
+    var userAvatar = Context.Session.GetString("UserAvatar");
+    if (string.IsNullOrWhiteSpace(userAvatar))
+    {
+        userAvatar = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(userName)}&background=E8F5E9&color=1B5E36";
+    }
+    var maUserDangNhap = Context.Session.GetInt32("maUser");
+
+    decimal soDuKhaDung = 0;
+
+    var maUser = Context.Session.GetInt32("maUser");
+
+    if (maUser.HasValue && role == "NhaTuyenDung")
+    {
+        var ketQuaVi = await WalletWebService.layViTheoUser(maUser.Value);
+
+        if (ketQuaVi.success && ketQuaVi.data != null)
+        {
+            soDuKhaDung = ketQuaVi.data.soDuKhaDung;
+        }
+    }
 }
 
 <!DOCTYPE html>
@@ -724,31 +744,25 @@
                     <!-- Cột Trái: Logo + Khám phá + Navigation chính -->
                     <div class="d-flex align-items-center gap-3 gap-lg-4">
                         <!-- Logo -->
-                        <a href="/" class="brand-logo me-2">
+                        <a href="/FreelancerStudent/Search" class="brand-logo me-2">
                             Freelancer <span>Students</span>
                         </a>
 
                         <!-- Nút Khám phá Freelancer -->
-                        <a asp-controller="FreelancerStudent" asp-action="Search" class="search-pill-btn">
-                            <i class="bi bi-search"></i>
+                        <a href="/FreelancerStudent/Search" class="search-pill-btn">
                             <span>Khám phá Freelancer</span>
                         </a>
 
-
                         <!-- Navigation chính -->
                         <nav class="d-none d-md-flex align-items-center gap-2">
-                            <a asp-controller="JobPost" asp-action="QuanLyTinTuyenDung" class="portal-nav-link">
-                                <i class="bi bi-briefcase"></i>
+                            <a href="/JobPost/QuanLyTinTuyenDung" class="portal-nav-link">
                                 <span>Quản lý tuyển dụng</span>
                             </a>
-
                             <a href="/HopDong" class="portal-nav-link">
-                                <i class="bi bi-file-earmark-text"></i>
                                 <span>Hợp đồng</span>
                             </a>
                             <a href="/Wallet" class="portal-nav-link">
-                                <i class="bi bi-wallet2"></i>
-                                <span>Ví & Thanh toán</span>
+                                <span>Nạp tiền</span>
                             </a>
                         </nav>
                     </div>
@@ -756,19 +770,13 @@
                     <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài + Profile User -->
                     <div class="d-flex align-items-center gap-3">
                         <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
-                        <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo">
-                            <i class="bi bi-bell"></i>
-                            <span
-                            class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                            style="width: 8px; height: 8px;"></span>
+                        <a href="/ThongBao" class="portal-nav-link" title="Thông báo">
+                            <span>Thông báo</span>
                         </a>
 
                         <!-- Nút Tin Nhắn (FRL-UC-07) -->
-                        <a href="/Chat" class="portal-icon-btn position-relative" title="Tin nhắn trao đổi">
-                            <i class="bi bi-chat-dots"></i>
-                            <span
-                            class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                            style="width: 9px; height: 9px;"></span>
+                        <a href="/Chat" class="portal-nav-link" title="Tin nhắn trao đổi">
+                            <span>Tin nhắn</span>
                         </a>
 
                         <!-- Nút Đăng bài tuyển dụng -->
@@ -780,471 +788,422 @@
                         <div class="dropdown">
                             <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="#" alt="@userName" class="portal-user-avatar" />
-                                <div class="portal-user-info d-none d-lg-block">
+                                <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
+                                <div class="portal-user-info d-none d-lg-flex">
                                     <span class="portal-user-name">@userName</span>
                                     <span class="portal-user-tag">@userRoleTitle</span>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
-                                       asp-route-tab="thongtin">
-                                        <i class="bi bi-person-gear me-2"></i>
-                                        Thiết lập tài khoản
-                                    </a>
-                                </li>
-                                <li><a class="dropdown-item" href="/Account/Profile?tab=security"><i
-                                    class="bi bi-shield-lock me-2"></i> Thiết lập bảo mật</a></li>
+                                    <span class="portal-user-tag">Số dư: @soDuKhaDung.ToString("N0", new
+                                                                                                                    System.Globalization.CultureInfo("vi-VN"))đ</span>
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                                     <li>
-                                        <hr class="dropdown-divider">
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                           asp-route-tab="thongtin">
+                                            Thiết lập tài khoản
+                                        </a>
                                     </li>
-                                    <li><a class="dropdown-item" href="/Wallet"><i class="bi bi-wallet2 text-success me-2"></i>
-                                        Ví tài chính & Nạp tiền</a></li>
-                                        <li><a class="dropdown-item" href="/Employer/Profile/1"><i class="bi bi-building me-2"></i>
-                                            Hồ sơ công ty</a></li>
-                                            <li><a class="dropdown-item" href="/Employer/ManageJobs"><i
-                                                class="bi bi-briefcase me-2"></i> Quản lý tin tuyển dụng</a></li>
-                                                <li><a class="dropdown-item" href="/Employer/FreelancerYeuThich"><i
-                                                    class="bi bi-bookmark-heart text-danger me-2"></i> Freelancer quan tâm</a></li>
-                                                    <li><a class="dropdown-item" href="/HopDong"><i class="bi bi-file-earmark-text me-2"></i>
-                                                        Quản lý hợp đồng</a></li>
-                                                        <li><a class="dropdown-item" href="/TranhChap"><i
-                                                            class="bi bi-shield-shaded text-danger me-2"></i> Tranh chấp & Khiếu nại</a>
-                                                        </li>
-                                                        <li>
-                                                            <hr class="dropdown-divider">
-                                                        </li>
-                                                        <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
-                                                            class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </header>
-
-                                    <!-- SUBNAVBAR CHO NHÀ TUYỂN DỤNG -->
-                                    <nav class="portal-subnav">
-                                        <div class="container-fluid px-lg-5">
-                                            <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
-                                                <a href="/Employer/ManageJobs" class="subnav-link">Quản lý tin tuyển dụng</a>
-                                                <a href="/NhaTuyenDung/DanhSachUngVien" class="subnav-link">Danh sách ứng viên</a>
-                                                <a href="/Employer/FreelancerYeuThich" class="subnav-link"><i
-                                                    class="bi bi-bookmark-heart me-1"></i>Freelancer quan tâm</a>
-                                                    <a href="/Wallet" class="subnav-link"><i class="bi bi-wallet2 me-1"></i>Ví điện tử</a>
-                                                    <a href="/JobPost/Create" class="subnav-link text-success fw-bold"><i
-                                                        class="bi bi-plus-circle me-1"></i>Đăng tin mới</a>
-                                                        <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
-                                                        <a href="/Employer/Profile/1" class="subnav-link">Hồ sơ công ty</a>
-                                                    </div>
-                                                </div>
-                                            </nav>
-                                        }
-    else if (role == "FreelancerStudent")
-                                        {
-                                            <!-- ==================== HEADER FREELANCER STUDENT ==================== -->
-                                            <header class="portal-header">
-                                                <div class="container-fluid px-lg-5">
-                                                    <div class="d-flex align-items-center justify-content-between">
-                    
-                                                        <!-- Cột Trái: Logo + Khám phá nhà tuyển dụng + Navigation chính -->
-                                                        <div class="d-flex align-items-center gap-3 gap-lg-4">
-                                                            <!-- Logo -->
-                                                            <a href="/" class="brand-logo me-2">
-                                                                Freelancer <span>Students</span>
-                                                            </a>
-
-                                                            <!-- Nút Khám phá nhà tuyển dụng -->
-                                                            <a href="/NhaTuyenDung/Search" class="search-pill-btn">
-                                                                <i class="bi bi-search"></i>
-                                                                <span>Khám phá nhà tuyển dụng</span>
-                                                            </a>
-
-                                                            <!-- Navigation chính -->
-                                                            <nav class="d-none d-md-flex align-items-center gap-2">
-                                                                <a href="/FreelancerStudent/QuanLyTimViec" class="portal-nav-link">
-                                                                    <i class="bi bi-briefcase"></i>
-                                                                    <span>Quản lý tìm việc</span>
-                                                                </a>
-                                                                <a href="/HopDong" class="portal-nav-link">
-                                                                    <i class="bi bi-file-earmark-text"></i>
-                                                                    <span>Hợp đồng</span>
-                                                                </a>
-                                                                <a href="/Wallet" class="portal-nav-link">
-                                                                    <i class="bi bi-wallet2"></i>
-                                                                    <span>Ví & Thu nhập</span>
-                                                                </a>
-                                                            </nav>
+                                    <li><a class="dropdown-item" href="/Account/Profile?tab=security">Thiết lập bảo mật</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
+                                            <li><a class="dropdown-item" href="/Employer/Profile/1">Hồ sơ công ty</a></li>
+                                                <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a></li>
+                                                    <li><a class="dropdown-item" href="/Employer/FreelancerYeuThich">Freelancer quan tâm</a></li>
+                                                        <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
+                                                            <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
+                                                            </li>
+                                                            <li>
+                                                                <hr class="dropdown-divider">
+                                                            </li>
+                                                            <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                                            </ul>
                                                         </div>
+                                                    </div>
 
-                                                        <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài tìm việc + Profile User -->
-                                                        <div class="d-flex align-items-center gap-3">
-                                                            <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
-                                                            <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo">
-                                                                <i class="bi bi-bell"></i>
-                                                                <span
-                                                                class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                                                                style="width: 8px; height: 8px;"></span>
-                                                            </a>
+                                                </div>
+                                            </div>
+                                        </header>
 
-                                                            <!-- Nút Tin Nhắn (FRL-UC-07) -->
-                                                            <a href="/Chat" class="portal-icon-btn position-relative" title="Tin nhắn trao đổi">
-                                                                <i class="bi bi-chat-dots"></i>
-                                                                <span
-                                                                class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                                                                style="width: 9px; height: 9px;"></span>
-                                                            </a>
-
-                                                            <!-- Nút Đăng bài tìm việc -->
-                                                            <a href="/FreelancerStudent/DangTinTimViec" class="btn-portal-action-green">
-                                                                Đăng bài tìm việc
-                                                            </a>
-
-                                                            <!-- User Profile Dropdown -->
-                                                            <div class="dropdown">
-                                                                <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
-                                                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                                                    <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
-                                                                    <div class="portal-user-info d-none d-lg-block">
-                                                                        <span class="portal-user-name">@userName</span>
-                                                                        <span class="portal-user-tag">@userRoleTitle</span>
-                                                                    </div>
+                                        <!-- SUBNAVBAR CHO NHÀ TUYỂN DỤNG -->
+                                        <nav class="portal-subnav">
+                                            <div class="container-fluid px-lg-5">
+                                                <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                    <a href="/JobPost/QuanLyTinTuyenDung" class="subnav-link">Quản lý tin tuyển dụng</a>
+                                                    <a href="/NhaTuyenDung/DanhSachUngVien" class="subnav-link">Danh sách ứng viên</a>
+                                                    <a href="/Employer/FreelancerYeuThich" class="subnav-link">Freelancer quan tâm</a>
+                                                        <a href="/Wallet" class="subnav-link">Ví điện tử</a>
+                                                        <a href="/JobPost/Create" class="subnav-link text-success fw-bold">Đăng tin mới</a>
+                                                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                                            <a href="/Employer/Profile/1" class="subnav-link">Hồ sơ công ty</a>
+                                                        </div>
+                                                    </div>
+                                                </nav>
+                                            }
+    else if (role == "FreelancerStudent")
+                                            {
+                                                <!-- ==================== HEADER FREELANCER STUDENT ==================== -->
+                                                <header class="portal-header">
+                                                    <div class="container-fluid px-lg-5">
+                                                        <div class="d-flex align-items-center justify-content-between">
+                    
+                                                            <!-- Cột Trái: Logo + Khám phá nhà tuyển dụng + Navigation chính -->
+                                                            <div class="d-flex align-items-center gap-3 gap-lg-4">
+                                                                <!-- Logo -->
+                                                                <a href="/JobPost" class="brand-logo me-2">
+                                                                    Freelancer <span>Students</span>
                                                                 </a>
-                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                                                                    <li>
-                                                                        <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
-                                                                           asp-route-tab="thongtin">
-                                                                            <i class="bi bi-person-gear me-2"></i>
-                                                                            Thiết lập tài khoản
-                                                                        </a>
-                                                                    </li>
-                                                                    <li><a class="dropdown-item" href="/Account/Profile?tab=security"><i
-                                                                        class="bi bi-shield-lock me-2"></i> Thiết lập bảo mật</a></li>
-                                                                        <li>
-                                                                            <hr class="dropdown-divider">
-                                                                        </li>
-                                                                        <li><a class="dropdown-item" href="/Wallet"><i class="bi bi-wallet2 text-success me-2"></i>
-                                                                            Ví tài chính & Nạp tiền</a></li>
-                                                                            <li><a class="dropdown-item" href="/Account/MinhChung"><i
-                                                                                class="bi bi-patch-check-fill text-success me-2"></i> Minh chứng sinh viên</a>
-                                                                            </li>
-                                                                            <li>
-                                                                                <a class="dropdown-item"
-                                                                                   href="/FreelancerStudent/Profile/@Context.Session.GetInt32("maUser")">
-                                                                                    <i class="bi bi-person-vcard me-2"></i> Hồ sơ năng lực sinh viên
-                                                                                </a>
-                                                                            </li>
 
-                                                                            <li><a class="dropdown-item" href="/Freelancer/Portfolio"><i
-                                                                                class="bi bi-collection-play me-2"></i> Portfolio cá nhân</a></li>
-                                                                                <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich"><i
-                                                                                    class="bi bi-building-check text-primary me-2"></i> NTD quan tâm (Đã lưu)</a>
-                                                                                </li>
-                                                                                <li><a class="dropdown-item" href="/TranhChap"><i
-                                                                                    class="bi bi-shield-shaded text-danger me-2"></i> Tranh chấp & Khiếu nại</a>
-                                                                                </li>
-                                                                                <li>
-                                                                                    <hr class="dropdown-divider">
-                                                                                </li>
-                                                                                <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
-                                                                                    class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
-                                                                                </ul>
-                                                                            </div>
+                                                                <!-- Nút Khám phá nhà tuyển dụng -->
+                                                                <a href="/NhaTuyenDung/Search" class="search-pill-btn">
+                                                                    <span>Khám phá nhà tuyển dụng</span>
+                                                                </a>
+
+                                                                <!-- Navigation chính -->
+                                                                <nav class="d-none d-md-flex align-items-center gap-2">
+                                                                    <a href="/FreelancerStudent/QuanLyTimViec" class="portal-nav-link">
+                                                                        <span>Quản lý tìm việc</span>
+                                                                    </a>
+                                                                    <a href="/HopDong" class="portal-nav-link">
+                                                                        <span>Hợp đồng</span>
+                                                                    </a>
+                                                                    <a href="/Wallet" class="portal-nav-link">
+                                                                        <span>Ví & Thu nhập</span>
+                                                                    </a>
+                                                                </nav>
+                                                            </div>
+
+                                                            <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài tìm việc + Profile User -->
+                                                            <div class="d-flex align-items-center gap-3">
+                                                                <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
+                                                                <a href="/ThongBao" class="portal-nav-link" title="Thông báo">
+                                                                    <span>Thông báo</span>
+                                                                </a>
+
+                                                                <!-- Nút Tin Nhắn (FRL-UC-07) -->
+                                                                <a href="/Chat" class="portal-nav-link" title="Tin nhắn trao đổi">
+                                                                    <span>Tin nhắn</span>
+                                                                </a>
+
+                                                                <!-- Nút Đăng bài tìm việc -->
+                                                                <a href="/FreelancerStudent/DangTinTimViec" class="btn-portal-action-green">
+                                                                    Đăng bài tìm việc
+                                                                </a>
+
+                                                                <!-- User Profile Dropdown -->
+                                                                <div class="dropdown">
+                                                                    <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                                                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
+                                                                        <div class="portal-user-info d-none d-lg-block">
+                                                                            <span class="portal-user-name">@userName</span>
+                                                                            <span class="portal-user-tag">@userRoleTitle</span>
                                                                         </div>
-
-                                                                    </div>
-                                                                </div>
-                                                            </header>
-
-                                                            <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
-                                                            <nav class="portal-subnav">
-                                                                <div class="container-fluid px-lg-5">
-                                                                    <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
-                                                                        <a href="/Freelancer/QuanLyTimViec" class="subnav-link"><i class="bi bi-briefcase me-1"></i>Quản lý tìm
-                                                                            việc</a>
-                                                                            <a href="/Freelancer/DangTinTimViec" class="subnav-link"><i class="bi bi-pencil-square me-1"></i>Đăng
-                                                                                tin tìm việc</a>
-                                                                                <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
-                                                                                <a href="/Freelancer/LoiMoiNhanViec" class="subnav-link">Lời mời nhận việc</a>
-                                                                                <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link"><i
-                                                                                    class="bi bi-building-check me-1"></i>NTD quan tâm</a>
-                                                                                    <a href="/Wallet" class="subnav-link"><i class="bi bi-wallet2 me-1"></i>Ví & Thu nhập</a>
-                                                                                    <a href="/Freelancer/Portfolio" class="subnav-link">Portfolio cá nhân</a>
-                                                                                    <a href="/Account/MinhChung" class="subnav-link text-success fw-bold"><i
-                                                                                        class="bi bi-shield-check me-1"></i>Minh chứng sinh viên</a>
-                                                                                        <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
-                                                                                        <a href="/Freelancer/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
+                                                                    </a>
+                                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                                                        <li>
+                                                                            <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                                                               asp-route-tab="thongtin">
+                                                                                Thiết lập tài khoản
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><a class="dropdown-item" href="/Account/Profile?tab=security">Thiết lập bảo mật</a></li>
+                                                                            <li>
+                                                                                <hr class="dropdown-divider">
+                                                                            </li>
+                                                                            <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
+                                                                                <li><a class="dropdown-item" href="/Account/MinhChung">Minh chứng sinh viên</a>
+                                                                                </li>
+                                                                                @if (maUserDangNhap.HasValue)
+                                                                                {
+                                                                                    <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Profile"
+                                                                                           asp-route-maUser="@maUserDangNhap.Value">Hồ sơ năng lực sinh viên</a></li>
+                                                                                    }
+                                                                                    <li><a class="dropdown-item" href="/Freelancer/Portfolio">Portfolio cá nhân</a></li>
+                                                                                        <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich">NTD quan tâm (Đã lưu)</a>
+                                                                                        </li>
+                                                                                        <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
+                                                                                        </li>
+                                                                                        <li>
+                                                                                            <hr class="dropdown-divider">
+                                                                                        </li>
+                                                                                        <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                                                                        </ul>
                                                                                     </div>
                                                                                 </div>
-                                                                            </nav>
-                                                                        }
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </header>
+
+                                                                    <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
+                                                                    <nav class="portal-subnav">
+                                                                        <div class="container-fluid px-lg-5">
+                                                                            <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                                                <a href="/FreelancerStudent/QuanLyTimViec" class="subnav-link">Quản lý tìm việc</a>
+                                                                                    <a href="/FreelancerStudent/DangTinTimViec" class="subnav-link">Đăng tin tìm việc</a>
+                                                                                        <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
+                                                                                        <a href="/Freelancer/LoiMoiNhanViec" class="subnav-link">Lời mời nhận việc</a>
+                                                                                        <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link">NTD quan tâm</a>
+                                                                                            <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
+                                                                                            <a href="/Freelancer/Portfolio" class="subnav-link">Portfolio cá nhân</a>
+                                                                                            <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
+                                                                                                <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                                                                                <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </nav>
+                                                                                }
     else if (role == "Admin" || (Context.Request.Path.Value != null && Context.Request.Path.Value.StartsWith("/Admin",
     StringComparison.OrdinalIgnoreCase)))
-                                                                        {
-                                                                            <!-- ==================== HEADER QUẢN TRỊ VIÊN (ADMIN) ==================== -->
-                                                                            <header class="portal-header">
-                                                                                <div class="container-fluid px-lg-5">
-                                                                                    <div class="d-flex align-items-center justify-content-between">
-                                                                                        <!-- Cột Trái: Brand Admin + Tra cứu nhanh + Navigation chính -->
-                                                                                        <div class="d-flex align-items-center gap-3 gap-lg-4">
-                                                                                            <a href="/Admin" class="brand-logo me-2">
-                                                                                                Freelancer <span
-                                                                                                class="badge bg-success-subtle text-success fs-6 fw-bold px-2 py-1 ms-1 border border-success-subtle">Admin</span>
-                                                                                            </a>
+                                                                                {
+                                                                                    <!-- ==================== HEADER QUẢN TRỊ VIÊN (ADMIN) ==================== -->
+                                                                                    <header class="portal-header">
+                                                                                        <div class="container-fluid px-lg-5">
+                                                                                            <div class="d-flex align-items-center justify-content-between">
+                                                                                                <!-- Cột Trái: Brand Admin + Tra cứu nhanh + Navigation chính -->
+                                                                                                <div class="d-flex align-items-center gap-3 gap-lg-4">
+                                                                                                    <a href="/Admin" class="brand-logo me-2">
+                                                                                                        Freelancer <span
+                                                                                                        class="badge bg-success-subtle text-success fs-6 fw-bold px-2 py-1 ms-1 border border-success-subtle">Admin</span>
+                                                                                                    </a>
 
-                                                                                            <!-- Nút Tra cứu nhanh người dùng -->
-                                                                                            <a href="/Admin/DanhSachNguoiDung" class="search-pill-btn">
-                                                                                                <i class="bi bi-search"></i>
-                                                                                                <span>Tra cứu người dùng & hệ thống</span>
-                                                                                            </a>
+                                                                                                    <!-- Nút Tra cứu nhanh người dùng -->
+                                                                                                    <a href="/Admin/DanhSachNguoiDung" class="search-pill-btn">
+                                                                                                        <span>Tra cứu người dùng & hệ thống</span>
+                                                                                                    </a>
 
-                                                                                            <!-- Navigation chính -->
-                                                                                            <nav class="d-none d-md-flex align-items-center gap-2">
-                                                                                                <a href="/Admin" class="portal-nav-link">
-                                                                                                    <i class="bi bi-speedometer2"></i>
-                                                                                                    <span>Tổng quan</span>
-                                                                                                </a>
-                                                                                                <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link">
-                                                                                                    <i class="bi bi-people"></i>
-                                                                                                    <span>Người dùng</span>
-                                                                                                </a>
-                                                                                                <a href="/Admin/QuanLyGiaoDich" class="portal-nav-link">
-                                                                                                    <i class="bi bi-shield-check"></i>
-                                                                                                    <span>Giao dịch & Ký quỹ</span>
-                                                                                                </a>
-                                                                                                <a href="/Admin/XuLyTranhChap" class="portal-nav-link">
-                                                                                                    <i class="bi bi-exclamation-triangle"></i>
-                                                                                                    <span>Tranh chấp</span>
-                                                                                                </a>
-                                                                                            </nav>
-                                                                                        </div>
+                                                                                                    <!-- Navigation chính -->
+                                                                                                    <nav class="d-none d-md-flex align-items-center gap-2">
+                                                                                                        <a href="/Admin" class="portal-nav-link">
+                                                                                                            <span>Tổng quan</span>
+                                                                                                        </a>
+                                                                                                        <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link">
+                                                                                                            <span>Người dùng</span>
+                                                                                                        </a>
+                                                                                                        <a href="/Admin/QuanLyGiaoDich" class="portal-nav-link">
+                                                                                                            <span>Giao dịch & Ký quỹ</span>
+                                                                                                        </a>
+                                                                                                        <a href="/Admin/XuLyTranhChap" class="portal-nav-link">
+                                                                                                            <span>Tranh chấp</span>
+                                                                                                        </a>
+                                                                                                    </nav>
+                                                                                                </div>
 
-                                                                                        <!-- Cột Phải: Thông báo + Nút Giám sát Live + Profile Admin -->
-                                                                                        <div class="d-flex align-items-center gap-3">
-                                                                                            <!-- Nút Chuông Thông Báo -->
-                                                                                            <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo hệ thống">
-                                                                                                <i class="bi bi-bell"></i>
-                                                                                                <span
-                                                                                                class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                                                                                                style="width: 8px; height: 8px;"></span>
-                                                                                            </a>
+                                                                                                <!-- Cột Phải: Thông báo + Nút Giám sát Live + Profile Admin -->
+                                                                                                <div class="d-flex align-items-center gap-3">
+                                                                                                    <!-- Nút Chuông Thông Báo -->
+                                                                                                    <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo hệ thống">
+                                                                                                        <span
+                                                                                                        class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                                                                                                        style="width: 8px; height: 8px;"></span>
+                                                                                                    </a>
 
-                                                                                            <!-- Nút Giám sát Live -->
-                                                                                            <a href="/Admin/GiamSatHeThong" class="btn-portal-action-green">
-                                                                                                <i class="bi bi-activity"></i> Giám sát Live
-                                                                                            </a>
+                                                                                                    <!-- Nút Giám sát Live -->
+                                                                                                    <a href="/Admin/GiamSatHeThong" class="btn-portal-action-green">
+                                                                                                        Giám sát Live
+                                                                                                    </a>
 
-                                                                                            <!-- User Profile Dropdown -->
-                                                                                            <div class="dropdown">
-                                                                                                <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
-                                                                                                   data-bs-toggle="dropdown" aria-expanded="false">
-                                                                                                    <img src="@userAvatar" alt="@userName"
-                                                                                                         class="portal-user-avatar border border-2 border-success" />
-                                                                                                    <div class="portal-user-info d-none d-lg-block">
-                                                                                                        <span class="portal-user-name">@userName</span>
-                                                                                                        <span class="portal-user-tag text-success fw-bold">Quản trị viên</span>
-                                                                                                    </div>
-                                                                                                </a>
-                                                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                                                                                                    <li><a class="dropdown-item" href="/Admin"><i
-                                                                                                        class="bi bi-speedometer2 text-success me-2"></i> Bảng điều khiển Quản trị</a>
-                                                                                                    </li>
-                                                                                                    <li><a class="dropdown-item" href="/Admin/CauHinhPhi"><i
-                                                                                                        class="bi bi-sliders text-primary me-2"></i> Cấu hình phí & Doanh thu</a></li>
-                                                                                                        <li><a class="dropdown-item" href="/Admin/QuanLyHopDong"><i
-                                                                                                            class="bi bi-file-earmark-code text-warning me-2"></i> Cấu hình Mẫu hợp đồng</a>
-                                                                                                        </li>
-                                                                                                        <li><a class="dropdown-item" href="/Admin/QuanLyPhiDangBai"><i
-                                                                                                            class="bi bi-tags text-info me-2"></i> Cấu hình Phí đăng bài</a></li>
-                                                                                                            <li><a class="dropdown-item" href="/Admin/GiamSatHeThong"><i
-                                                                                                                class="bi bi-activity text-danger me-2"></i> Giám sát thời gian thực</a></li>
-                                                                                                                <li>
-                                                                                                                    <hr class="dropdown-divider">
+                                                                                                    <!-- User Profile Dropdown -->
+                                                                                                    <div class="dropdown">
+                                                                                                        <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                                                                                                           data-bs-toggle="dropdown" aria-expanded="false">
+                                                                                                            <img src="@userAvatar" alt="@userName"
+                                                                                                                 class="portal-user-avatar border border-2 border-success" />
+                                                                                                            <div class="portal-user-info d-none d-lg-block">
+                                                                                                                <span class="portal-user-name">@userName</span>
+                                                                                                                <span class="portal-user-tag text-success fw-bold">Quản trị viên</span>
+                                                                                                            </div>
+                                                                                                        </a>
+                                                                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                                                                                            <li><a class="dropdown-item" href="/Admin">Bảng điều khiển Quản trị</a>
+                                                                                                            </li>
+                                                                                                            <li><a class="dropdown-item" href="/Admin/CauHinhPhi">Cấu hình phí & Doanh thu</a></li>
+                                                                                                                <li><a class="dropdown-item" href="/Admin/QuanLyHopDong">Cấu hình Mẫu hợp đồng</a>
                                                                                                                 </li>
-                                                                                                                <li><a class="dropdown-item text-primary" href="/Employer/ManageJobs"><i
-                                                                                                                    class="bi bi-arrow-repeat me-2"></i> Chuyển sang giao diện Tuyển dụng</a></li>
-                                                                                                                    <li><a class="dropdown-item text-success" href="/Freelancer/QuanLyTimViec"><i
-                                                                                                                        class="bi bi-arrow-repeat me-2"></i> Chuyển sang giao diện Freelancer</a></li>
+                                                                                                                <li><a class="dropdown-item" href="/Admin/QuanLyPhiDangBai">Cấu hình Phí đăng bài</a></li>
+                                                                                                                    <li><a class="dropdown-item" href="/Admin/GiamSatHeThong">Giám sát thời gian thực</a></li>
                                                                                                                         <li>
                                                                                                                             <hr class="dropdown-divider">
                                                                                                                         </li>
-                                                                                                                        <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
-                                                                                                                            class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
-                                                                                                                        </ul>
+                                                                                                                        <li><a class="dropdown-item text-primary" href="/JobPost/QuanLyTinTuyenDung">Chuyển sang giao diện Tuyển dụng</a></li>
+                                                                                                                            <li><a class="dropdown-item text-success" href="/Freelancer/QuanLyTimViec">Chuyển sang giao diện Freelancer</a></li>
+                                                                                                                                <li>
+                                                                                                                                    <hr class="dropdown-divider">
+                                                                                                                                </li>
+                                                                                                                                <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                                                                                                                </ul>
+                                                                                                                            </div>
+                                                                                                                        </div>
                                                                                                                     </div>
                                                                                                                 </div>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </header>
+                                                                                                            </header>
 
-                                                                                                    <!-- SUBNAVBAR CHO ADMIN (Đồng bộ styling với toàn bộ hệ thống) -->
-                                                                                                    <nav class="portal-subnav">
-                                                                                                        <div class="container-fluid px-lg-5">
-                                                                                                            <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
-                                                                                                                <a href="/Admin" class="subnav-link"><i class="bi bi-speedometer2 me-1"></i>Tổng quan</a>
-                                                                                                                <a href="/Admin/DanhSachNguoiDung" class="subnav-link"><i class="bi bi-people me-1"></i>QL Người
-                                                                                                                    dùng</a>
-                                                                                                                    <a href="/Admin/XuLyTaiKhoan" class="subnav-link"><i class="bi bi-person-lock me-1"></i>Khóa/Mở TK</a>
-                                                                                                                    <a href="/Admin/YeuCauNapTien" class="subnav-link"><i class="bi bi-cash-stack me-1"></i>Duyệt nạp
-                                                                                                                        tiền</a>
-                                                                                                                        <a href="/Admin/DieuChinhSoDu" class="subnav-link"><i class="bi bi-sliders2-vertical me-1"></i>Điều
-                                                                                                                            chỉnh số dư</a>
-                                                                                                                            <a href="/Admin/QuanLyGiaoDich" class="subnav-link"><i class="bi bi-safe me-1"></i>Ký quỹ & Giao
-                                                                                                                                dịch</a>
-                                                                                                                                <a href="/Admin/CauHinhPhi" class="subnav-link"><i class="bi bi-percent me-1"></i>Cấu hình phí</a>
-                                                                                                                                <a href="/Admin/XuLyTranhChap" class="subnav-link"><i class="bi bi-shield-slash me-1"></i>Xử lý tranh
-                                                                                                                                    chấp</a>
-                                                                                                                                    <a href="/Admin/XuLyHoTro" class="subnav-link"><i class="bi bi-headset me-1"></i>Xử lý hỗ trợ</a>
-                                                                                                                                    <a href="/Admin/GiamSatHeThong" class="subnav-link"><i class="bi bi-cpu me-1"></i>Giám sát hệ thống</a>
-                                                                                                                                    <a href="/Admin/QuanLyHopDong" class="subnav-link"><i class="bi bi-file-earmark-ruled me-1"></i>Mẫu hợp
-                                                                                                                                        đồng</a>
-                                                                                                                                        <a href="/Admin/QuanLyPhiDangBai" class="subnav-link"><i class="bi bi-tags-fill me-1"></i>Phí đăng
-                                                                                                                                            bài</a>
-                                                                                                                                        </div>
-                                                                                                                                    </div>
-                                                                                                                                </nav>
-                                                                                                                            }
+                                                                                                            <!-- SUBNAVBAR CHO ADMIN (Đồng bộ styling với toàn bộ hệ thống) -->
+                                                                                                            <nav class="portal-subnav">
+                                                                                                                <div class="container-fluid px-lg-5">
+                                                                                                                    <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                                                                                        <a href="/Admin" class="subnav-link">Tổng quan</a>
+                                                                                                                        <a href="/Admin/DanhSachNguoiDung" class="subnav-link">QL Người
+                                                                                                                            dùng</a>
+                                                                                                                            <a href="/Admin/XuLyTaiKhoan" class="subnav-link">Khóa/Mở TK</a>
+                                                                                                                            <a href="/Admin/YeuCauNapTien" class="subnav-link">Duyệt nạp
+                                                                                                                                tiền</a>
+                                                                                                                                <a href="/Admin/DieuChinhSoDu" class="subnav-link">Điều
+                                                                                                                                    chỉnh số dư</a>
+                                                                                                                                    <a href="/Admin/QuanLyGiaoDich" class="subnav-link">Ký quỹ & Giao
+                                                                                                                                        dịch</a>
+                                                                                                                                        <a href="/Admin/CauHinhPhi" class="subnav-link">Cấu hình phí</a>
+                                                                                                                                        <a href="/Admin/XuLyTranhChap" class="subnav-link">Xử lý tranh
+                                                                                                                                            chấp</a>
+                                                                                                                                            <a href="/Admin/XuLyHoTro" class="subnav-link">Xử lý hỗ trợ</a>
+                                                                                                                                            <a href="/Admin/GiamSatHeThong" class="subnav-link">Giám sát hệ thống</a>
+                                                                                                                                            <a href="/Admin/QuanLyHopDong" class="subnav-link">Mẫu hợp
+                                                                                                                                                đồng</a>
+                                                                                                                                                <a href="/Admin/QuanLyPhiDangBai" class="subnav-link">Phí đăng
+                                                                                                                                                    bài</a>
+                                                                                                                                                </div>
+                                                                                                                                            </div>
+                                                                                                                                        </nav>
+                                                                                                                                    }
     else
-                                                                                                                            {
-                                                                                                                                <!-- ==================== HEADER DEFAULT / GUEST ==================== -->
-                                                                                                                                <header class="auth-header">
-                                                                                                                                    <div class="container">
-                                                                                                                                        <div class="d-flex align-items-center justify-content-between">
+                                                                                                                                    {
+                                                                                                                                        <!-- ==================== HEADER DEFAULT / GUEST ==================== -->
+                                                                                                                                        <header class="auth-header">
+                                                                                                                                            <div class="container">
+                                                                                                                                                <div class="d-flex align-items-center justify-content-between">
 
-                                                                                                                                            <!-- Logo -->
-                                                                                                                                            <a href="/" class="brand-logo">
-                                                                                                                                                <i class="bi bi-mortarboard-fill text-success"></i>
-                                                                                                                                                Freelancer <span>Students</span>
-                                                                                                                                            </a>
+                                                                                                                                                    <!-- Logo -->
+                                                                                                                                                    <a href="/" class="brand-logo">
+                                                                                                                                                        Freelancer <span>Students</span>
+                                                                                                                                                    </a>
 
-                                                                                                                                            <!-- Nav Links -->
-                                                                                                                                            <nav class="d-none d-lg-flex align-items-center gap-2">
-                                                                                                                                                <a href="#" class="nav-link-custom">Tìm công việc</a>
-                                                                                                                                                <a href="#" class="nav-link-custom">Tìm Freelancer</a>
-                                                                                                                                                <a href="#" class="nav-link-custom">Về chúng tôi</a>
-                                                                                                                                                <a href="#" class="nav-link-custom">Hỗ trợ</a>
-                                                                                                                                            </nav>
+                                                                                                                                                    <!-- Nav Links -->
+                                                                                                                                                    <nav class="d-none d-lg-flex align-items-center gap-2">
+                                                                                                                                                        <a href="#" class="nav-link-custom">Tìm công việc</a>
+                                                                                                                                                        <a href="#" class="nav-link-custom">Tìm Freelancer</a>
+                                                                                                                                                        <a href="#" class="nav-link-custom">Về chúng tôi</a>
+                                                                                                                                                        <a href="#" class="nav-link-custom">Hỗ trợ</a>
+                                                                                                                                                    </nav>
 
-                                                                                                                                            <!-- Right -->
-                                                                                                                                            <div class="d-flex align-items-center gap-3">
+                                                                                                                                                    <!-- Right -->
+                                                                                                                                                    <div class="d-flex align-items-center gap-3">
 
-                                                                                                                                                <div class="dropdown d-none d-sm-block">
-                                                                                                                                                    <button class="btn btn-sm btn-link text-decoration-none text-secondary dropdown-toggle p-0"
-                                                                                                                                                            type="button" data-bs-toggle="dropdown">
-                                                                                                                                                        <i class="bi bi-globe me-1"></i> VI
-                                                                                                                                                    </button>
+                                                                                                                                                        <div class="dropdown d-none d-sm-block">
+                                                                                                                                                            <button class="btn btn-sm btn-link text-decoration-none text-secondary dropdown-toggle p-0"
+                                                                                                                                                                    type="button" data-bs-toggle="dropdown">
+                                                                                                                                                                VI
+                                                                                                                                                            </button>
 
-                                                                                                                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                                                                                                                                        <li>
-                                                                                                                                                            <a class="dropdown-item active" href="#">
-                                                                                                                                                                Tiếng Việt (VI)
-                                                                                                                                                            </a>
-                                                                                                                                                        </li>
-                                                                                                                                                        <li>
-                                                                                                                                                            <a class="dropdown-item" href="#">
-                                                                                                                                                                English (EN)
-                                                                                                                                                            </a>
-                                                                                                                                                        </li>
+                                                                                                                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                                                                                                                                                <li>
+                                                                                                                                                                    <a class="dropdown-item active" href="#">
+                                                                                                                                                                        Tiếng Việt (VI)
+                                                                                                                                                                    </a>
+                                                                                                                                                                </li>
+                                                                                                                                                                <li>
+                                                                                                                                                                    <a class="dropdown-item" href="#">
+                                                                                                                                                                        English (EN)
+                                                                                                                                                                    </a>
+                                                                                                                                                                </li>
+                                                                                                                                                            </ul>
+                                                                                                                                                        </div>
+
+                                                                                                                                                        <a asp-controller="Account" asp-action="DangNhap" class="btn-header-login">
+                                                                                                                                                            Đăng nhập
+                                                                                                                                                        </a>
+
+                                                                                                                                                        <a asp-controller="Account" asp-action="DangKy" class="btn-header-register">
+                                                                                                                                                            Đăng ký
+                                                                                                                                                        </a>
+
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+                                                                                                                                            </div>
+                                                                                                                                        </header>
+                                                                                                                                    }
+
+                                                                                                                                    <!-- NỘI DUNG CỦA TỪNG VIEW -->
+                                                                                                                                    <main>
+                                                                                                                                        @RenderBody()
+                                                                                                                                    </main>
+
+                                                                                                                                    <!-- FOOTER CHUNG -->
+                                                                                                                                    <footer class="main-footer">
+                                                                                                                                        <div class="container">
+                                                                                                                                            <div class="row g-4">
+                                                                                                                                                <!-- Col 1: Brand & Slogan -->
+                                                                                                                                                <div class="col-12 col-md-4">
+                                                                                                                                                    <div class="footer-brand">
+                                                                                                                                                        Freelancer <span>Students</span>
+                                                                                                                                                    </div>
+                                                                                                                                                    <p class="footer-desc">
+                                                                                                                                                        Kết nối sinh viên tài năng với cơ hội thực tế
+                                                                                                                                                    </p>
+                                                                                                                                                    <div class="footer-social-links">
+                                                                                                                                                        <a href="#"></a>
+                                                                                                                                                        <a href="#"></a>
+                                                                                                                                                        <a href="#"></a>
+                                                                                                                                                        <a href="#"></a>
+                                                                                                                                                    </div>
+                                                                                                                                                </div>
+
+                                                                                                                                                <!-- Col 2: About Us -->
+                                                                                                                                                <div class="col-6 col-md-2">
+                                                                                                                                                    <h5 class="footer-heading">Về chúng tôi</h5>
+                                                                                                                                                    <ul class="footer-links">
+                                                                                                                                                        <li><a href="#">Giới thiệu</a></li>
+                                                                                                                                                        <li><a href="#">Điều khoản sử dụng</a></li>
+                                                                                                                                                        <li><a href="#">Chính sách bảo mật</a></li>
+                                                                                                                                                        <li><a href="#">Liên hệ</a></li>
                                                                                                                                                     </ul>
                                                                                                                                                 </div>
 
-                                                                                                                                                <a asp-controller="Account" asp-action="DangNhap" class="btn-header-login">
-                                                                                                                                                    Đăng nhập
-                                                                                                                                                </a>
+                                                                                                                                                <!-- Col 3: Support -->
+                                                                                                                                                <div class="col-6 col-md-2">
+                                                                                                                                                    <h5 class="footer-heading">Hỗ trợ</h5>
+                                                                                                                                                    <ul class="footer-links">
+                                                                                                                                                        <li><a href="#">Trung tâm trợ giúp</a></li>
+                                                                                                                                                        <li><a href="#">Hướng dẫn sử dụng</a></li>
+                                                                                                                                                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                                                                                                                                                    </ul>
+                                                                                                                                                </div>
 
-                                                                                                                                                <a asp-controller="Account" asp-action="DangKy" class="btn-header-register">
-                                                                                                                                                    Đăng ký
-                                                                                                                                                </a>
+                                                                                                                                                <!-- Col 4: Newsletter -->
+                                                                                                                                                <div class="col-12 col-md-4">
+                                                                                                                                                    <h5 class="footer-heading">Kết nối với chúng tôi</h5>
+                                                                                                                                                    <p class="footer-desc">
+                                                                                                                                                        Cập nhật những cơ hội việc làm mới nhất dành cho sinh viên.
+                                                                                                                                                    </p>
+                                                                                                                                                    <form class="subscribe-form" onsubmit="event.preventDefault();">
+                                                                                                                                                        <input type="email" class="subscribe-input" placeholder="Nhập email của bạn" />
+                                                                                                                                                        <button type="submit" class="subscribe-btn">
+                                                                                                                                                            </button>
+                                                                                                                                                    </form>
+                                                                                                                                                </div>
+                                                                                                                                            </div>
 
+                                                                                                                                            <!-- Bottom sublinks -->
+                                                                                                                                            <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                                                                                                                                                <div>
+                                                                                                                                                    &copy; 2026 Freelancer Students. All rights reserved.
+                                                                                                                                                </div>
+                                                                                                                                                <div class="d-flex gap-3">
+                                                                                                                                                    <a href="#" class="text-decoration-none text-muted">Điều khoản</a>
+                                                                                                                                                    <span>|</span>
+                                                                                                                                                    <a href="#" class="text-decoration-none text-muted">Bảo mật</a>
+                                                                                                                                                    <span>|</span>
+                                                                                                                                                    <a href="#" class="text-decoration-none text-muted">Liên hệ</a>
+                                                                                                                                                </div>
                                                                                                                                             </div>
                                                                                                                                         </div>
-                                                                                                                                    </div>
-                                                                                                                                </header>
-                                                                                                                            }
+                                                                                                                                    </footer>
 
-                                                                                                                            <!-- NỘI DUNG CỦA TỪNG VIEW -->
-                                                                                                                            <main>
-                                                                                                                                @RenderBody()
-                                                                                                                            </main>
+                                                                                                                                    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-                                                                                                                            <!-- FOOTER CHUNG -->
-                                                                                                                            <footer class="main-footer">
-                                                                                                                                <div class="container">
-                                                                                                                                    <div class="row g-4">
-                                                                                                                                        <!-- Col 1: Brand & Slogan -->
-                                                                                                                                        <div class="col-12 col-md-4">
-                                                                                                                                            <div class="footer-brand">
-                                                                                                                                                <i class="bi bi-mortarboard-fill text-success"></i> Freelancer <span>Students</span>
-                                                                                                                                            </div>
-                                                                                                                                            <p class="footer-desc">
-                                                                                                                                                Kết nối sinh viên tài năng với cơ hội thực tế
-                                                                                                                                            </p>
-                                                                                                                                            <div class="footer-social-links">
-                                                                                                                                                <a href="#"><i class="bi bi-facebook"></i></a>
-                                                                                                                                                <a href="#"><i class="bi bi-instagram"></i></a>
-                                                                                                                                                <a href="#"><i class="bi bi-youtube"></i></a>
-                                                                                                                                                <a href="#"><i class="bi bi-linkedin"></i></a>
-                                                                                                                                            </div>
-                                                                                                                                        </div>
+                                                                                                                                    @await RenderSectionAsync("Scripts", required: false)
 
-                                                                                                                                        <!-- Col 2: About Us -->
-                                                                                                                                        <div class="col-6 col-md-2">
-                                                                                                                                            <h5 class="footer-heading">Về chúng tôi</h5>
-                                                                                                                                            <ul class="footer-links">
-                                                                                                                                                <li><a href="#">Giới thiệu</a></li>
-                                                                                                                                                <li><a href="#">Điều khoản sử dụng</a></li>
-                                                                                                                                                <li><a href="#">Chính sách bảo mật</a></li>
-                                                                                                                                                <li><a href="#">Liên hệ</a></li>
-                                                                                                                                            </ul>
-                                                                                                                                        </div>
+                                                                                                                                </body>
 
-                                                                                                                                        <!-- Col 3: Support -->
-                                                                                                                                        <div class="col-6 col-md-2">
-                                                                                                                                            <h5 class="footer-heading">Hỗ trợ</h5>
-                                                                                                                                            <ul class="footer-links">
-                                                                                                                                                <li><a href="#">Trung tâm trợ giúp</a></li>
-                                                                                                                                                <li><a href="#">Hướng dẫn sử dụng</a></li>
-                                                                                                                                                <li><a href="#">Câu hỏi thường gặp</a></li>
-                                                                                                                                            </ul>
-                                                                                                                                        </div>
-
-                                                                                                                                        <!-- Col 4: Newsletter -->
-                                                                                                                                        <div class="col-12 col-md-4">
-                                                                                                                                            <h5 class="footer-heading">Kết nối với chúng tôi</h5>
-                                                                                                                                            <p class="footer-desc">
-                                                                                                                                                Cập nhật những cơ hội việc làm mới nhất dành cho sinh viên.
-                                                                                                                                            </p>
-                                                                                                                                            <form class="subscribe-form" onsubmit="event.preventDefault();">
-                                                                                                                                                <input type="email" class="subscribe-input" placeholder="Nhập email của bạn" />
-                                                                                                                                                <button type="submit" class="subscribe-btn">
-                                                                                                                                                    <i class="bi bi-send-fill"></i>
-                                                                                                                                                </button>
-                                                                                                                                            </form>
-                                                                                                                                        </div>
-                                                                                                                                    </div>
-
-                                                                                                                                    <!-- Bottom sublinks -->
-                                                                                                                                    <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-                                                                                                                                        <div>
-                                                                                                                                            &copy; 2026 Freelancer Students. All rights reserved.
-                                                                                                                                        </div>
-                                                                                                                                        <div class="d-flex gap-3">
-                                                                                                                                            <a href="#" class="text-decoration-none text-muted">Điều khoản</a>
-                                                                                                                                            <span>|</span>
-                                                                                                                                            <a href="#" class="text-decoration-none text-muted">Bảo mật</a>
-                                                                                                                                            <span>|</span>
-                                                                                                                                            <a href="#" class="text-decoration-none text-muted">Liên hệ</a>
-                                                                                                                                        </div>
-                                                                                                                                    </div>
-                                                                                                                                </div>
-                                                                                                                            </footer>
-
-                                                                                                                            <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-                                                                                                                            @await RenderSectionAsync("Scripts", required: false)
-
-                                                                                                                        </body>
-
-                                                                                                                    </html>
+                                                                                                                            </html>

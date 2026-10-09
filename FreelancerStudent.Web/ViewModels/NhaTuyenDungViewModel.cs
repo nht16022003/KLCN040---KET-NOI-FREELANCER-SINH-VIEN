@@ -16,5 +16,32 @@ namespace FreelancerStudent.Web.ViewModels
         public double? sosaodanhgia { get; set; }
         public string trangthai { get; set; } = string.Empty;
         public DateTime ngayDangKy { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public int MaNhaTuyenDung => maNhaTuyenDung;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? HotenUser => hotenUser;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? Tencongty => tencongty;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? Linhvuc => linhvuc;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? Diachi => diachi;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public double? Sosaodanhgia => sosaodanhgia;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public DateTime NgayDangKy => ngayDangKy;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? Avatar => avatar;
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? Logo => logo;
     }
 }
