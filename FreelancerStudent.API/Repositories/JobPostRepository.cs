@@ -43,10 +43,15 @@ namespace FreelancerStudent.API.Repositories
         //Tuấn
         public async Task<List<UngTuyen>> layTatCaDanhSachUngTuyenVaoJobPost_TheoNTD(int maNhaTuyenDung)
         {
-            var dsUTuyen = await _context.UngTuyens.Include(u => u.JobPosts).
-            Include(u => u.FreelamcerStudents).ThenInclude(f => f!.User).
-            Where(u => u.JobPosts != null && u.JobPosts.maNhaTuyenDung == maNhaTuyenDung)
-            .OrderByDescending(u => u.ngayUngTuyen).ToListAsync();
+            var dsUTuyen = await _context.UngTuyens
+                .Include(u => u.JobPosts)
+                .Include(u => u.FreelamcerStudents)
+                    .ThenInclude(f => f!.User)
+                .Include(u => u.FreelamcerStudents)
+                    .ThenInclude(f => f!.ChuyenNganh)
+                .Where(u => u.JobPosts != null && u.JobPosts.maNhaTuyenDung == maNhaTuyenDung)
+                .OrderByDescending(u => u.ngayUngTuyen)
+                .ToListAsync();
             return dsUTuyen;
         }
 

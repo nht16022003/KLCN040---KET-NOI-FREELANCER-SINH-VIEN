@@ -83,9 +83,10 @@
 
                     <!-- Thời gian cam kết -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Thời gian hoàn thành cam kết:</label>
-                        <input asp-for="thoiGianHoanThanhDeXuat" type="text" class="form-control rounded-0"
-                               placeholder="Ví dụ: 3 ngày, 1 tuần, 15 ngày..." required />
+                        <label class="form-label fw-bold small">Thời gian hoàn thành cam kết (Cố định):</label>
+                        <input asp-for="thoiGianHoanThanhDeXuat" type="text" class="form-control rounded-0 bg-light"
+                               readonly style="cursor: not-allowed; background-color: #f8f9fa;" />
+                        <small class="text-muted" style="font-size: 0.75rem;">Thời gian hoàn thành được cố định theo hạn của Nhà tuyển dụng.</small>
                     </div>
 
                     <!-- Thư giới thiệu -->

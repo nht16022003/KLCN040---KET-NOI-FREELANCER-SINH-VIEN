@@ -149,8 +149,21 @@ namespace FreelancerStudent.API.Repositories
         //XS
         public async Task<FreelancerStudents?> layTheoMaFreelancerStudents(int maFreelancerStudents)
         {
-            var freelancerStudent = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudents);
+            var freelancerStudent = await _context.FreelancerStudents
+                .Include(f => f.User)
+                .Include(f => f.ChuyenNganh)
+                .Include(f => f.FreelancerStudent_KyNangs)
+                    .ThenInclude(k => k.KyNang)
+                .FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudents);
             return freelancerStudent;
+        }
+
+        public async Task<List<string>> layTatCaKyNangAsync()
+        {
+            return await _context.KyNangs
+                .OrderBy(k => k.maKyNang)
+                .Select(k => k.tenKyNang)
+                .ToListAsync();
         }
     }
 }

@@ -27,5 +27,7 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //XS
         Task<FreelancerStudents?> layTheoMaFreelancerStudents(int maFreelancerStudents);
 
+        // Lấy tất cả tên kỹ năng từ bảng KyNang trong database
+        Task<List<string>> layTatCaKyNangAsync();
     }
 }

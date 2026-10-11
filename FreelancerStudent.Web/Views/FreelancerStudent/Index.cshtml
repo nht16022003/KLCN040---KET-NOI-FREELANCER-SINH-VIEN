@@ -67,9 +67,10 @@
             {
                 @foreach (var sv in Model)
                 {
-                    var avatarUrl = !string.IsNullOrEmpty(sv.avatar)
-                        ? sv.avatar
-                        : "./assets/image/Trong_NTD.jpg";
+                    var rawAvt = sv.avatar;
+                    var avatarUrl = !string.IsNullOrEmpty(rawAvt)
+                        ? (rawAvt.StartsWith("http", StringComparison.OrdinalIgnoreCase) || rawAvt.StartsWith("/") ? rawAvt : "/" + rawAvt)
+                        : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(sv.tenUser ?? "Freelancer")}&background=E8F5E9&color=1B5E36";
 
                     <div class="col-md-6 col-lg-4 freelancer-card-wrapper" data-name="@((sv.tenUser ?? "").ToLower())"
                          data-school="@((sv.tenTruong ?? "").ToLower())" data-skills="@((sv.kyNangCoBan ?? "").ToLower())"
@@ -78,8 +79,11 @@
                         
                             <!-- Header Card: Avatar vuông + Tên + Năm học -->
                             <div class="d-flex align-items-center gap-3 mb-3">
-                                <img src="@avatarUrl" alt="@sv.tenUser" class="border rounded-0"
-                                     style="width: 55px; height: 55px; object-fit: cover; flex-shrink: 0;" />
+                                <a asp-controller="FreelancerStudent" asp-action="Profile" asp-route-maUser="@sv.maUser" title="Xem hồ sơ @sv.tenUser">
+                                    <img src="@avatarUrl" alt="@sv.tenUser" class="border rounded-0"
+                                         style="width: 55px; height: 55px; object-fit: cover; flex-shrink: 0;"
+                                         onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(sv.tenUser ?? "Freelancer")&background=E8F5E9&color=1B5E36';" />
+                                </a>
                             
                                 <div class="overflow-hidden">
                                     <h6 class="fw-bold text-dark mb-0 text-truncate" title="@sv.tenUser">

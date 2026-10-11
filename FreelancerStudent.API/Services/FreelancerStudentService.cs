@@ -13,9 +13,12 @@ namespace FreelancerStudent.API.Services
     {
         private readonly IFreelancerStudentRepository _freelancerStudentRepository; //Sử dụng để gọi các dữ liệu đucợ laays từ database để service xử lý
 
-        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository)
+        private readonly IPortfolioService _portfolioService;
+
+        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository, IPortfolioService portfolioService)
         {
             _freelancerStudentRepository = freelancerStudentRepository;
+            _portfolioService = portfolioService;
         }
 
 
@@ -90,6 +93,8 @@ namespace FreelancerStudent.API.Services
 
             if (re == null) return null!;
 
+
+
             return new FreelancerStudent_ReponseDTO
             {
                 maUser = re.maUser,
@@ -152,6 +157,9 @@ namespace FreelancerStudent.API.Services
                 return null;
             }
 
+            var portfolio = await _portfolioService.layPortfolioAsync(maFreelancerStudents);
+            var tatCaKyNang = await _freelancerStudentRepository.layTatCaKyNangAsync();
+
             return new FreelancerStudentProfile_ReponseDTO
             {
                 User = new ProfileUserResponse
@@ -164,6 +172,7 @@ namespace FreelancerStudent.API.Services
                 },
                 FreelancerStudent = new ProfileFreelancerResponse
                 {
+                    MaFreelancerStudents = freelancer.maFreelancerStudents,
                     MaChuyenNganh = freelancer.maChuyenNganh,
                     TenTruong = freelancer.tenTruong,
                     MaTruong = freelancer.maTruong,
@@ -180,7 +189,31 @@ namespace FreelancerStudent.API.Services
                 ChuyenNganh = freelancer.ChuyenNganh == null ? null : new ProfileMajorResponse
                 {
                     TenChuyenNganh = freelancer.ChuyenNganh.tenChuyenNganh
-                }
+                },
+                Portfolio = portfolio == null ? null : new ProfilePortfolioResponse
+                {
+                    MoTaBanThan = portfolio.moTaBanThan,
+                    Url_video = portfolio.url_video
+                },
+                KyNangs = freelancer.FreelancerStudent_KyNangs?
+                    .Where(k => k.KyNang != null)
+                    .Select(k => new ProfileSkillResponse
+                    {
+                        TenKyNang = k.KyNang!.tenKyNang
+                    }).ToList() ?? new List<ProfileSkillResponse>(),
+                DuAns = portfolio?.projects.Select(project => new ProfileProjectResponse
+                {
+                    MaDA = project.maDA,
+                    LaDuAnNoiBat = project.laDuAnNoiBat,
+                    TenDuAn = project.tenDuAn,
+                    VaiTro = project.vaiTro ?? string.Empty,
+                    MoTa = project.moTa ?? string.Empty,
+                    Congnghe = project.congnghe ?? string.Empty,
+                    LinkGithub = project.linkGithub,
+                    LinkDemo = project.linkDemo,
+                    Link_file = project.link_file
+                }).ToList() ?? new List<ProfileProjectResponse>(),
+                TatCaKyNangGoiY = tatCaKyNang
             };
         }
 

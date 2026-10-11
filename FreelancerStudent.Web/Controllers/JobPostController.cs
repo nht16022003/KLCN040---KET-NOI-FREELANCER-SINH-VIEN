@@ -220,6 +220,7 @@ namespace FreelancerStudent.Web.Controllers
 
                 // Điền sẵn giá gốc của bài Job vào ô đề xuất
                 thulaoDeXuat = job.thulao,
+                thoiGianHoanThanhDeXuat = job.thoigiandukienhoanthanh.ToString("dd/MM/yyyy"),
                 // Thông tin Nhà tuyển dụng
                 maNhaTuyenDung = job.maNhaTuyenDung,
                 tenCongTy = !string.IsNullOrWhiteSpace(ntd?.tencongty) ? ntd.tencongty : ntd?.hotenUser,

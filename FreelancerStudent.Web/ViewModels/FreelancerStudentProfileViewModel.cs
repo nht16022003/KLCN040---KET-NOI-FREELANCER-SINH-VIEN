@@ -9,6 +9,7 @@ namespace FreelancerStudent.Web.ViewModels
         public List<ProfileSkillViewModel> KyNangs { get; set; } = new();
         public List<ProfileProjectViewModel> DuAns { get; set; } = new();
         public ProfileEvidenceViewModel? MinhChung { get; set; }
+        public List<string> TatCaKyNangGoiY { get; set; } = new();
 
         public string tenUser => User.HotenUser;
         public string MaChuyenNganh => FreelancerStudent.MaChuyenNganh;
@@ -25,6 +26,7 @@ namespace FreelancerStudent.Web.ViewModels
 
     public class ProfileFreelancerViewModel
     {
+        public int MaFreelancerStudents { get; set; }
         public string MaChuyenNganh { get; set; } = string.Empty;
         public string TenTruong { get; set; } = string.Empty;
         public string MaTruong { get; set; } = string.Empty;
@@ -57,12 +59,16 @@ namespace FreelancerStudent.Web.ViewModels
 
     public class ProfileProjectViewModel
     {
+        public string MaDA { get; set; } = string.Empty;
+        public bool LaDuAnNoiBat { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public string VaiTro { get; set; } = string.Empty;
         public string MoTa { get; set; } = string.Empty;
         public string Congnghe { get; set; } = string.Empty;
         public string? LinkGithub { get; set; }
         public string? LinkDemo { get; set; }
+
+        public string? Link_file { get; set; }
     }
 
     public class ProfileEvidenceViewModel

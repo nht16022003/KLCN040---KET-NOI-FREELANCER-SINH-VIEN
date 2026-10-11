@@ -225,7 +225,7 @@ namespace FreelancerStudent.API.Services
                 var freelacerstudent = await _free.layFreelancerStudent_TheoMaUser(maUser);
                 if (freelacerstudent == null)
                 {
-                    throw new Exception("Chưa tìm thấy hồ sơ FreelancerStudent của tài khoản này!");
+                    return new List<UngTuyen_ReponseDTO>();
                 }
 
                 dsUngTuyen = await _jopPostRepository.layTatCaDanhSachUngTuyenVaoJobPost_TheoFreelancerStudents(freelacerstudent.maFreelancerStudents);
@@ -307,7 +307,16 @@ namespace FreelancerStudent.API.Services
             var sinhvien = await _free.layFreelancerStudent_TheoMaUser(requets.maUser);
             if (sinhvien == null)
             {
-                throw new Exception("Chưa tìm thấy hồ sơ Sinh viên của bạn để ứng tuyển!");
+                var user = await _user.timUserTheoMaUserAsync(requets.maUser);
+                if (user != null && user.maRole == 1)
+                {
+                    sinhvien = await _free.themFreelancerStudent_DuaVaoMaRoleCuaUsers(user, user.maRole);
+                }
+
+                if (sinhvien == null)
+                {
+                    throw new Exception("Chưa tìm thấy hồ sơ Sinh viên của bạn để ứng tuyển!");
+                }
             }
 
 
@@ -315,7 +324,7 @@ namespace FreelancerStudent.API.Services
             {
                 maJob = requets.maJob,
                 maFreelancerStudent = sinhvien.maFreelancerStudents,
-                thuGioiThieu = requets.thuGioiThieu.Trim(),
+                thuGioiThieu = (requets.thuGioiThieu ?? string.Empty).Trim(),
                 thulaoDeXuat = requets.thulaoDeXuat,
                 thoiGianHoanThanhDeXuat = requets.thoiGianHoanThanhDeXuat,
                 fileCV = requets.fileCV,

@@ -16,22 +16,29 @@
     {
         @foreach (var item in Model)
         {
-            var avatarSinhVien = !string.IsNullOrEmpty(item.avatar)
-                                ? item.avatar
-                                : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenUser ?? "Student")}&background=E8F5E9&color=2E7D32";
+            var rawAvt = item.avatar;
+            var avatarSinhVien = !string.IsNullOrEmpty(rawAvt)
+                ? (rawAvt.StartsWith("http", StringComparison.OrdinalIgnoreCase) || rawAvt.StartsWith("/") ? rawAvt : "/" + rawAvt)
+                : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenUser ?? "Student")}&background=E8F5E9&color=2E7D32";
 
             <!-- Mỗi ứng viên là một hàng (row) -->
             <div class="row align-items-center p-3 mb-2 border rounded-0 bg-white shadow-sm">
                 
                 <!-- Cột 1: Thông tin sinh viên ứng tuyển -->
-                <div class="col-md-5 d-flex">
-                    <!-- Ảnh đại diện sinh viên -->
-                    <img src="@avatarSinhVien" alt="@item.tenUser" class="rounded-0 border"
-                         style="width: 50px; height: 50px; object-fit: cover;" />
+                <div class="col-md-5 d-flex align-items-center">
+                    <!-- Ảnh đại diện sinh viên (click xem hồ sơ) -->
+                    <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" target="_blank" title="Xem hồ sơ @item.tenUser">
+                        <img src="@avatarSinhVien" alt="@item.tenUser" class="rounded-0 border"
+                             style="width: 50px; height: 50px; object-fit: cover;"
+                             onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(item.tenUser ?? "Student")&background=E8F5E9&color=2E7D32';" />
+                    </a>
 
                     <div style="margin-left: 12px;">
                         <div class="d-flex align-items-center gap-2">
-                            <h6 class="mb-0" style="font-weight: bold;">@(item.tenUser ?? "Sinh viên ẩn danh")</h6>
+                            <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" target="_blank"
+                               class="text-decoration-none text-dark" title="Xem hồ sơ @item.tenUser">
+                                <h6 class="mb-0 text-success fw-bold">@(item.tenUser ?? "Sinh viên ẩn danh")</h6>
+                            </a>
                             <span class="text-muted" style="font-size: 0.8rem;">(Năm thứ @item.namThu)</span>
                         </div>
                         

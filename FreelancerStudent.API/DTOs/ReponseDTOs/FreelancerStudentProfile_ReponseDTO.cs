@@ -9,6 +9,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public List<ProfileSkillResponse> KyNangs { get; set; } = new();
         public List<ProfileProjectResponse> DuAns { get; set; } = new();
         public ProfileEvidenceResponse? MinhChung { get; set; }
+        public List<string> TatCaKyNangGoiY { get; set; } = new();
     }
 
     public class ProfileUserResponse
@@ -22,6 +23,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
     public class ProfileFreelancerResponse
     {
+        public int MaFreelancerStudents { get; set; }
         public string MaChuyenNganh { get; set; } = string.Empty;
         public string TenTruong { get; set; } = string.Empty;
         public string MaTruong { get; set; } = string.Empty;
@@ -54,12 +56,16 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
     public class ProfileProjectResponse
     {
+        public string MaDA { get; set; } = string.Empty;
+        public bool LaDuAnNoiBat { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public string VaiTro { get; set; } = string.Empty;
         public string MoTa { get; set; } = string.Empty;
         public string Congnghe { get; set; } = string.Empty;
         public string? LinkGithub { get; set; }
         public string? LinkDemo { get; set; }
+
+        public string? Link_file { get; set; }
     }
 
     public class ProfileEvidenceResponse
