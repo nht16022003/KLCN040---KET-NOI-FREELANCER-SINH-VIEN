@@ -17,5 +17,6 @@ namespace FreelancerStudent.Web.ViewModels.Account
         public string tenrole { get; set; } = string.Empty;
 
         public string status { get; set; } = string.Empty;
+        public string? avatarUrl { get; set; }
     }
 }

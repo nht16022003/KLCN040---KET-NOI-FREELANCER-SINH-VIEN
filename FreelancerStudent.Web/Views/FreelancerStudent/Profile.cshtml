@@ -1,0 +1,1389 @@
+@model FreelancerStudent.Web.ViewModels.FreelancerStudentProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ của " + Model.tenUser;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var isProfileOwner = (ViewData["IsProfileOwner"] as bool? == true) || (ViewBag.LaChinhMinh as bool? == true);
+    var chuyenNganhName = Model.ChuyenNganh?.TenChuyenNganh ??
+                          (Model.MaChuyenNganh == "KTPM" ? "Kỹ thuật phần mềm" :
+                          Model.MaChuyenNganh == "TKDH" ? "Thiết kế đồ họa" :
+                          "Công nghệ thông tin");
+
+    var avatarUrl = !string.IsNullOrEmpty(Model.User?.AvatarUrl)
+        ? (Model.User.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) || Model.User.AvatarUrl.StartsWith("/")
+            ? Model.User.AvatarUrl
+            : "/" + Model.User.AvatarUrl)
+        : (isProfileOwner && !string.IsNullOrEmpty(Context.Session.GetString("UserAvatar"))
+            ? Context.Session.GetString("UserAvatar")
+            : $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.EscapeDataString(!string.IsNullOrWhiteSpace(Model.User?.HotenUser) ? Model.User.HotenUser : "User")}");
+}
+
+<style>
+    .profile-page-wrapper {
+        background-color: #F8FAF9;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    /* ============================================================ */
+    /* COVER & PROFILE BANNER                                       */
+    /* ============================================================ */
+    .profile-banner-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid #E5ECE7;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .cover-image-container {
+        height: 180px;
+        background: linear-gradient(135deg, #CFE0D6 0%, #E8F1EC 50%, #BBD6C7 100%);
+        position: relative;
+        background-image: url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center 35%;
+    }
+
+    .cover-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.2) 60%, rgba(255, 255, 255, 0.7) 100%);
+    }
+
+    .cover-quote-art {
+        position: absolute;
+        right: 36px;
+        top: 24px;
+        font-family: 'Caveat', cursive;
+        font-size: 2.2rem;
+        color: #2D6346;
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: right;
+        transform: rotate(-3deg);
+    }
+
+    .profile-header-content {
+        padding: 0 32px 24px;
+        position: relative;
+    }
+
+    .avatar-wrapper-circle {
+        position: relative;
+        margin-top: -65px;
+        width: 124px;
+        height: 124px;
+        flex-shrink: 0;
+    }
+
+    .avatar-main-img {
+        width: 124px;
+        height: 124px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #FFFFFF;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        background-color: #FFFFFF;
+    }
+
+    .avatar-status-pill {
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #D4E8DC;
+        color: #1E5C38;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        border: 1px solid #B8D6C4;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-dot-active {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #22C55E;
+    }
+
+    .profile-name-title {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #0F172A;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 2px;
+    }
+
+    .verified-badge-icon {
+        color: #1D9BF0;
+        font-size: 1.3rem;
+    }
+
+    .profile-role-subline {
+        color: #1E6E38;
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+
+    .profile-school-subline {
+        color: #64748B;
+        font-size: 0.88rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .profile-quote-desc {
+        color: #475569;
+        font-size: 0.9rem;
+        font-style: italic;
+        line-height: 1.45;
+        max-width: 800px;
+        margin-bottom: 12px;
+    }
+
+    .profile-meta-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 0.82rem;
+        color: #64748B;
+    }
+
+    .profile-meta-chips span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-contact-green {
+        background-color: #1B5E36;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 8px 24px;
+        border-radius: 24px;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s;
+    }
+
+    .btn-contact-green:hover {
+        background-color: #15492A;
+        transform: translateY(-1px);
+    }
+
+    .btn-save-outlined {
+        background-color: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 8px 18px;
+        border-radius: 24px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-save-outlined:hover {
+        border-color: #94A3B8;
+        background-color: #F8FAFC;
+    }
+
+    /* ============================================================ */
+    /* STATS METRICS STRIP                                          */
+    /* ============================================================ */
+    .metrics-strip-container {
+        background: #FFFFFF;
+        border-radius: 18px;
+        border: 1px solid #E5ECE7;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .metric-col {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 4px 12px;
+        border-right: 1px solid #EEF2F6;
+    }
+
+    .metric-col:last-child {
+        border-right: none;
+    }
+
+    .metric-icon-box {
+        font-size: 1.5rem;
+    }
+
+    .metric-main-value {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.1;
+    }
+
+    .metric-sub-label {
+        font-size: 0.74rem;
+        color: #64748B;
+        font-weight: 500;
+    }
+
+    /* ============================================================ */
+    /* PROFILE NAVIGATION TABS                                      */
+    /* ============================================================ */
+    .profile-nav-tabs {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        border-bottom: 2px solid #E2E8F0;
+        margin-bottom: 24px;
+        padding-bottom: 2px;
+        overflow-x: auto;
+    }
+
+    .profile-tab-item {
+        color: #64748B;
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        padding: 8px 4px 12px;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: color 0.2s;
+    }
+
+    .profile-tab-item:hover {
+        color: #1E6E38;
+    }
+
+    .profile-tab-item.active {
+        color: #1E6E38;
+        font-weight: 700;
+    }
+
+    .profile-tab-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #1E6E38;
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* ============================================================ */
+    /* CONTENT CARDS                                                */
+    /* ============================================================ */
+    .section-card {
+        background: #FFFFFF;
+        border: 1px solid #E5ECE7;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .section-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0F172A;
+        margin-bottom: 18px;
+    }
+
+    /* Thông tin cơ bản Table */
+    .basic-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        font-size: 0.88rem;
+    }
+
+    .basic-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px dashed #F1F5F9;
+        padding-bottom: 8px;
+    }
+
+    .basic-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .basic-info-label {
+        color: #64748B;
+        font-weight: 500;
+        width: 45%;
+    }
+
+    .basic-info-val {
+        color: #0F172A;
+        font-weight: 600;
+        width: 55%;
+        text-align: right;
+    }
+
+    /* Badges & Projects */
+    .skill-tag-badge {
+        background: #EEF6F1;
+        color: #1C5F37;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid #D2E7DC;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 8px;
+    }
+
+    .project-grid-box {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 16px;
+    }
+
+    .project-preview-card {
+        background: #FAFDFB;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .project-preview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        border-color: #BBD9C7;
+    }
+
+    .project-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 4px;
+    }
+
+    .project-role-tag {
+        font-size: 0.72rem;
+        color: #1E6E38;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .project-desc {
+        font-size: 0.78rem;
+        color: #64748B;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    /* Education card right */
+    .edu-card-content {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .edu-logo-box {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: #EBF4F0;
+        color: #1E6E38;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        border: 1px solid #CBE2D4;
+    }
+
+    .edu-school-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+    }
+
+    .edu-meta-sub {
+        font-size: 0.78rem;
+        color: #64748B;
+        line-height: 1.35;
+    }
+
+    .review-item-box {
+        border-bottom: 1px solid #F1F5F9;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .review-item-box:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+</style>
+
+<style>
+    /* ===== Giao diện mộc mạc, đơn giản (ghi đè style phía trên) ===== */
+    .profile-page-wrapper {
+        --accent: #3E7D56;
+        --ink: #2B2B2B;
+        --muted: #707070;
+        --border: #E3E3E3;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: var(--ink);
+        background-color: #F7F7F7;
+    }
+
+    .profile-banner-card,
+    .metrics-strip-container,
+    .section-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .cover-image-container {
+        height: 56px;
+        background: #E8EEE9;
+    }
+
+    .cover-overlay,
+    .cover-quote-art {
+        display: none;
+    }
+
+    .avatar-wrapper-circle {
+        margin-top: -44px;
+        width: 88px;
+        height: 88px;
+    }
+
+    .avatar-main-img {
+        width: 88px;
+        height: 88px;
+        border: 3px solid #fff;
+        box-shadow: none;
+    }
+
+    .avatar-status-pill {
+        background: #F0F0F0;
+        color: var(--ink);
+        border: 1px solid var(--border);
+        bottom: -10px;
+    }
+
+    .profile-name-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .verified-badge-icon {
+        color: var(--accent);
+        font-size: 1.1rem;
+    }
+
+    .profile-role-subline {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .profile-school-subline,
+    .profile-meta-chips,
+    .metric-sub-label,
+    .basic-info-label,
+    .edu-meta-sub,
+    .project-desc {
+        color: var(--muted);
+    }
+
+    .profile-quote-desc {
+        font-style: normal;
+        color: var(--muted);
+    }
+
+    .btn-contact-green {
+        background: var(--accent);
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .btn-contact-green:hover {
+        background: #2F6445;
+        transform: none;
+    }
+
+    .btn-save-outlined {
+        border-radius: 6px;
+        border-color: var(--border);
+        font-weight: 500;
+    }
+
+    .btn-save-outlined:hover {
+        background: #F2F2F2;
+        border-color: var(--border);
+    }
+
+    .metric-col {
+        border-right-color: var(--border);
+    }
+
+    .metric-main-value,
+    .section-card-title,
+    .basic-info-val,
+    .project-title,
+    .edu-school-title {
+        color: var(--ink);
+        font-weight: 700;
+    }
+
+    .profile-nav-tabs {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .profile-tab-item:hover,
+    .profile-tab-item.active {
+        color: var(--accent);
+    }
+
+    .profile-tab-item.active::after {
+        background: var(--accent);
+        bottom: -1px;
+        height: 2px;
+    }
+
+    .basic-info-row {
+        border-bottom: 1px solid #EEE;
+    }
+
+    .skill-tag-badge {
+        background: #F0F0F0;
+        color: var(--ink);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .project-preview-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+    }
+
+    .project-preview-card:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: var(--accent);
+    }
+
+    .project-role-tag {
+        color: var(--accent);
+    }
+
+    .edu-logo-box {
+        border-radius: 8px;
+        background: #F0F0F0;
+        color: var(--ink);
+        border: none;
+    }
+
+    .review-item-box {
+        border-bottom-color: #EEE;
+    }
+</style>
+
+<div class="profile-page-wrapper">
+    <div class="container-fluid px-lg-5 pt-4">
+
+        @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-3 shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@(TempData["SuccessMessage"] ?? TempData["Success"])
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null || TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-3 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@(TempData["ErrorMessage"] ?? TempData["Error"])
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        
+        <!-- ==================== 1. TOP COVER & PROFILE BANNER ==================== -->
+        <div class="profile-banner-card">
+            <!-- Cover image -->
+            <div class="cover-image-container">
+                <div class="cover-overlay"></div>
+                <div class="cover-quote-art d-none d-md-block">
+                    Build<br />a better<br />Future
+                </div>
+            </div>
+
+            @if (isProfileOwner)
+            {
+                <div class="modal fade" id="featuredProjectsModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content rounded-4 border-0">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-bold">Chọn dự án nổi bật</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                            </div>
+                            <form asp-controller="FreelancerStudent" asp-action="UpdateFeaturedProjects" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="modal-body">
+                                    @foreach (var project in Model.DuAns)
+                                    {
+                                        <label class="d-flex align-items-start gap-2 border rounded-3 p-3 mb-2">
+                                            <input class="form-check-input mt-1" type="checkbox" name="maDAs"
+                                                   value="@project.MaDA" @(project.LaDuAnNoiBat ? "checked" : null) />
+                                            <span>
+                                                <strong>@project.TenDuAn</strong>
+                                                <small class="d-block text-muted">@project.MoTa</small>
+                                            </span>
+                                        </label>
+                                    }
+                                    @if (!Model.DuAns.Any())
+                                    {
+                                        <p class="text-muted mb-0">Bạn chưa có dự án để chọn.</p>
+                                    }
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light rounded-pill"
+                                            data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-success rounded-pill">Lưu lựa chọn</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL QUẢN LÝ KỸ NĂNG CHUYÊN NGÀNH -->
+                <div class="modal fade" id="manageSkillsModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-bottom pb-3">
+                                <div>
+                                    <h5 class="modal-title fw-bold text-success mb-1">
+                                        <i class="bi bi-tools me-2"></i>Quản lý kỹ năng chuyên ngành
+                                    </h5>
+                                    <p class="text-muted small mb-0">Thêm, xóa hoặc chỉnh sửa kỹ năng chuyên môn của bạn</p>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                            </div>
+                            <form asp-controller="FreelancerStudent" asp-action="CapNhatKyNang" method="post" id="formCapNhatKyNang">
+                                @Html.AntiForgeryToken()
+                                <div class="modal-body p-4">
+                                    <!-- Danh sách kỹ năng hiện tại -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold small text-dark d-flex justify-content-between">
+                                            <span>Kỹ năng hiện tại của bạn:</span>
+                                            <span class="text-muted fw-normal" id="skillsCountText">0 kỹ năng</span>
+                                        </label>
+                                        <div id="skillsBadgesContainer" class="d-flex flex-wrap gap-2 p-3 bg-light rounded-3 border" style="min-height: 65px;">
+                                            <!-- Render động bằng JavaScript -->
+                                        </div>
+                                        <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">
+                                            Nhấn vào nút <strong class="text-danger">&times;</strong> trên mỗi thẻ để xóa kỹ năng.
+                                        </small>
+                                    </div>
+
+                                    <!-- Ô thêm kỹ năng mới -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold small text-dark">Thêm kỹ năng mới:</label>
+                                        <div class="input-group">
+                                            <input type="text" id="inputNewSkill" class="form-control"
+                                                   placeholder="Nhập tên kỹ năng (VD: C#, ReactJS, Flutter, Figma...)" />
+                                            <button type="button" class="btn btn-success px-4 fw-semibold" id="btnAddSkill">
+                                                <i class="bi bi-plus-lg me-1"></i>Thêm
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Kỹ năng gợi ý từ database theo bảng KyNang -->
+                                    <div>
+                                        <label class="form-label fw-bold small text-muted mb-2">Gợi ý kỹ năng từ hệ thống (Nhấn để thêm nhanh):</label>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @{
+                                                var goiYKyNangs = Model.TatCaKyNangGoiY != null && Model.TatCaKyNangGoiY.Any()
+                                                    ? Model.TatCaKyNangGoiY
+                                                    : new List<string>();
+                                            }
+                                            @if (goiYKyNangs.Any())
+                                            {
+                                                @foreach (var sk in goiYKyNangs)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill btn-suggest-skill"
+                                                            data-skill="@sk" style="font-size: 0.8rem;">
+                                                        + @sk
+                                                    </button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">Chưa có kỹ năng mẫu nào trong hệ thống.</small>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Container chứa các input hidden để submit -->
+                                    <div id="skillsHiddenInputs"></div>
+                                </div>
+                                <div class="modal-footer border-top px-4 py-3">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                                        <i class="bi bi-check2-circle me-1"></i>Lưu thay đổi kỹ năng
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL CẬP NHẬT GIỚI THIỆU BẢN THÂN -->
+                <div class="modal fade" id="editBioModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <div class="modal-header border-bottom pb-3">
+                                <div>
+                                    <h5 class="modal-title fw-bold text-success mb-1">
+                                        <i class="bi bi-person-lines-fill me-2"></i>Cập nhật giới thiệu bản thân
+                                    </h5>
+                                    <p class="text-muted small mb-0">Viết lời giới thiệu ấn tượng giúp bạn nổi bật trong mắt nhà tuyển dụng</p>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                            </div>
+                            <form asp-controller="FreelancerStudent" asp-action="CapNhatGioiThieu" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="modal-body p-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-dark">
+                                            Lời giới thiệu / Tiểu sử cá nhân: <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea name="gioiThieu" class="form-control" rows="5" required
+                                                  placeholder="Chia sẻ về đam mê, kinh nghiệm, thế mạnh và định hướng công việc của bạn...">@(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent?.Gioithieu ?? "")</textarea>
+                                        <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">
+                                            Lời giới thiệu sẽ xuất hiện trên trang hồ sơ và card tìm kiếm freelancer của bạn.
+                                        </small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-dark">Link Video giới thiệu / Demo sản phẩm (Tùy chọn):</label>
+                                        <input type="text" name="urlVideo" class="form-control"
+                                               value="@(Model.Portfolio?.Url_video ?? "")"
+                                               placeholder="https://youtube.com/... hoặc https://loom.com/..." />
+                                        <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">
+                                            Dán link YouTube, Loom hoặc Vimeo nếu bạn có video giới thiệu.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-top px-4 py-3">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                                        <i class="bi bi-check2-circle me-1"></i>Lưu giới thiệu
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Profile Info Header Content -->
+            <div class="profile-header-content">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    
+                    <!-- Left: Avatar + Names & Intro -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-3 gap-sm-4">
+                        <!-- Avatar with status -->
+                        <div class="avatar-wrapper-circle">
+                            <img src="@avatarUrl"
+                                 alt="@Model.User.HotenUser" class="avatar-main-img"
+                                 onerror="this.src='https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name=@Uri.EscapeDataString(!string.IsNullOrWhiteSpace(Model.User?.HotenUser) ? Model.User.HotenUser : "User")';" />
+                            @if (isProfileOwner)
+                            {
+                                <a asp-controller="Account" asp-action="ThietLapTaiKhoan" asp-route-tab="thongtin"
+                                   class="small d-block text-center mt-2"
+                                   style="position:absolute; top:100%; left:50%; transform:translateX(-50%); white-space:nowrap;">Đổi ảnh</a>
+                            }
+                            <div class="avatar-status-pill">
+                                <span class="status-dot-active"></span>
+                                @(Model.FreelancerStudent.TrangthaiNhanViec ? "Đang hoạt động" : "Tạm ngưng")
+                            </div>
+                        </div>
+
+                            <!-- Name & Subtext -->
+                            <div class="pt-2">
+                                <h2 class="profile-name-title">
+                                    @Model.User.HotenUser
+                                    <span class="badge bg-success text-white small fs-6 fw-normal ms-1">Đã xác minh</span>
+                                </h2>
+                                <div class="profile-role-subline">
+                                    Sinh viên @chuyenNganhName
+                                </div>
+                                <div class="profile-school-subline">
+                                    @Model.FreelancerStudent.TenTruong • Năm @Model.FreelancerStudent.NamThu
+                                </div>
+                                <p class="profile-quote-desc">
+                                    “@(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent.Gioithieu ?? "Tôi là sinh viên đam mê phát triển web và ứng dụng. Luôn nỗ lực mang đến sản phẩm chất lượng, đúng yêu cầu và đúng deadline.")”
+                                </p>
+                                <div class="profile-meta-chips">
+                                    <span>@Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
+                                    <span>@(Model.FreelancerStudent.NgonNgu ?? "Tiếng Việt, Tiếng Anh")</span>
+                                    <span>Tham gia từ @Model.User.NgayTao.ToString("MM/yyyy")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Action Buttons -->
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <button type="button" class="btn-contact-green"
+                                    onclick="alert('Đã gửi thông tin liên hệ tới @Model.User.HotenUser!')">
+                                Liên hệ
+                            </button>
+                            <button type="button" class="btn-save-outlined"
+                                    onclick="alert('Đã lưu hồ sơ vào danh sách yêu thích!')">
+                                Lưu hồ sơ
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 2. STATS / METRICS STRIP ==================== -->
+            <div class="metrics-strip-container">
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 text-center text-sm-start">
+    
+                    <!-- Stat 1: Rating -->
+                    <div class="col metric-col">
+                        <div>
+                            <div class="metric-main-value text-warning">4.8 / 5.0</div>
+                            <div class="metric-sub-label">24 đánh giá</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2: Projects completed -->
+                    <div class="col metric-col">
+                        <div>
+                            <div class="metric-main-value">@(Model.DuAns.Count > 0 ? Model.DuAns.Count * 4 : 12)</div>
+                            <div class="metric-sub-label">Dự án hoàn thành</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 3: Completion rate -->
+                    <div class="col metric-col">
+                        <div>
+                            <div class="metric-main-value text-success">98%</div>
+                            <div class="metric-sub-label">Tỷ lệ hoàn thành</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 4: Experience -->
+                    <div class="col metric-col">
+                        <div>
+                            <div class="metric-main-value">@Model.FreelancerStudent.NamThu năm</div>
+                            <div class="metric-sub-label">Kinh nghiệm</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 5: Clients -->
+                    <div class="col metric-col">
+                        <div>
+                            <div class="metric-main-value">15</div>
+                            <div class="metric-sub-label">Khách hàng</div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 6: Satisfaction -->
+                    <div class="col metric-col">
+                        <div>
+                            <div class="metric-main-value text-success">100%</div>
+                            <div class="metric-sub-label">Khách hàng hài lòng</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ==================== 3. NAVIGATION TABS ==================== -->
+            <div class="profile-nav-tabs">
+                <a href="#tongquan" class="profile-tab-item active">
+                    Tổng quan
+                </a>
+                <a href="#portfolio-content" class="profile-tab-item" data-profile-tab="portfolio">
+                    <i class="bi bi-folder"></i> Dự án (@Model.DuAns.Count)
+                </a>
+                <a href="#danhgia" class="profile-tab-item">
+                    Đánh giá
+                </a>
+                <a href="#kynang" class="profile-tab-item">
+                    Kỹ năng
+                </a>
+                <a href="#hocvan" class="profile-tab-item">
+                    Học vấn
+                </a>
+                <a href="#chungchi" class="profile-tab-item">
+                    Chứng chỉ
+                </a>
+                <a href="#dichvu" class="profile-tab-item">
+                    Dịch vụ
+                </a>
+                <a href="#hoatdong" class="profile-tab-item">
+                    Hoạt động
+                </a>
+            </div>
+
+            <!-- ==================== PORTFOLIO CONTENT ==================== -->
+            <div id="portfolio-content" class="d-none mb-4">
+                <partial name="_portfolio" model="Model" view-data="ViewData" />
+            </div>
+
+            <!-- ==================== 4. MAIN 3-COLUMN CONTENT GRID ==================== -->
+            <div id="profile-overview-content" class="row g-4">
+            
+                <!-- CỘT 1: THÔNG TIN CƠ BẢN (LEFT) -->
+                <div class="col-12 col-lg-3">
+                    <div class="section-card">
+                        <h5 class="section-card-title">Thông tin cơ bản</h5>
+                    
+                        <div class="basic-info-list">
+                            <div class="basic-info-row">
+                                <span class="basic-info-label">Họ và tên</span>
+                                <span class="basic-info-val">@Model.User.HotenUser</span>
+                            </div>
+                            <div class="basic-info-row">
+                                <span class="basic-info-label">Ngày sinh</span>
+                                <span class="basic-info-val">@(Model.User.Ngaysinh.HasValue?
+                                                                                                                                                                                                                                                                                                                                        Model.User.Ngaysinh.Value.ToString("dd/MM/yyyy") : "15/05/2003")</span>
+                                </div>
+                                <div class="basic-info-row">
+                                    <span class="basic-info-label">Giới tính</span>
+                                    <span class="basic-info-val">Nam</span>
+                                </div>
+                                <div class="basic-info-row">
+                                    <span class="basic-info-label">Địa điểm</span>
+                                    <span class="basic-info-val">@Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
+                                </div>
+                                <div class="basic-info-row">
+                                    <span class="basic-info-label">Ngôn ngữ</span>
+                                    <span class="basic-info-val">@(Model.FreelancerStudent.NgonNgu ?? "Tiếng Việt, Tiếng Anh")</span>
+                                </div>
+                                <div class="basic-info-row">
+                                    <span class="basic-info-label">Kỹ năng cơ bản</span>
+                                    <span class="basic-info-val">@(Model.FreelancerStudent.KyNangCoBan ?? "Word, Excel, PowerPoint")</span>
+                                </div>
+                                <div class="basic-info-row">
+                                    <span class="basic-info-label">Trạng thái</span>
+                                    <span class="basic-info-val text-success">@(Model.FreelancerStudent.TrangthaiNhanViec ?
+                                                                                                                                                                                                                                                                                                                                                                                                      "Đang nhận việc" : "Tạm ngưng")</span>
+                                    </div>
+                                    <div class="basic-info-row">
+                                        <span class="basic-info-label">Mức giá tham khảo</span>
+                                        <span class="basic-info-val text-danger">@(Model.FreelancerStudent.ChiPhiTu.HasValue?
+                                                                                                                                                                                                                                                                                                                                                                                                                Model.FreelancerStudent.ChiPhiTu.Value.ToString("#,##0") + " VNĐ/Dự án" : "Thỏa thuận")</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Thời gian có thể làm</span>
+                                            <span class="basic-info-val">Part-time / Linh hoạt</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Trường</span>
+                                            <span class="basic-info-val">@Model.FreelancerStudent.TenTruong</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Năm thứ</span>
+                                            <span class="basic-info-val">Năm @Model.FreelancerStudent.NamThu</span>
+                                        </div>
+                                        <div class="basic-info-row">
+                                            <span class="basic-info-label">Chuyên ngành</span>
+                                            <span class="basic-info-val">@chuyenNganhName
+                                                (@Model.FreelancerStudent.MaChuyenNganh)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CỘT 2: GIỚI THIỆU, KỸ NĂNG & DỰ ÁN (CENTER) -->
+                                <div class="col-12 col-lg-6">
+                
+                                    <!-- 1. Giới thiệu bản thân -->
+                                    <div class="section-card">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="section-card-title mb-0">Giới thiệu bản thân</h5>
+                                            @if (isProfileOwner)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal"
+                                                        data-bs-target="#editBioModal">
+                                                    <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa
+                                                </button>
+                                            }
+                                        </div>
+                                        <p class="text-secondary leading-relaxed mb-0" style="line-height: 1.6;">
+                                            @(Model.Portfolio?.MoTaBanThan ?? Model.FreelancerStudent.Gioithieu ?? "Tôi là sinh viên đam mê công nghệ và sáng tạo, có kinh nghiệm thực chiến qua nhiều dự án học tập và thực tế. Luôn đặt chất lượng sản phẩm và deadline của khách hàng lên hàng đầu.")
+                                        </p>
+                                        @if (!string.IsNullOrEmpty(Model.Portfolio?.Url_video))
+                                        {
+                                            <div class="mt-3">
+                                                <a href="@Model.Portfolio.Url_video" target="_blank"
+                                                   class="btn btn-sm btn-outline-danger rounded-0 px-3">
+                                                    Xem Video Portfolio
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- 2. Kỹ năng chuyên ngành -->
+                                    <div class="section-card">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <h5 class="section-card-title mb-0">Kỹ năng chuyên ngành</h5>
+                                                <span class="badge bg-light text-muted border">
+                                                    @(Model.KyNangs?.Count ?? 0) kỹ năng
+                                                </span>
+                                            </div>
+                                            @if (isProfileOwner)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal"
+                                                        data-bs-target="#manageSkillsModal">
+                                                    <i class="bi bi-pencil-square me-1"></i>Chỉnh sửa kỹ năng
+                                                </button>
+                                            }
+                                        </div>
+
+                                        @if (Model.KyNangs != null && Model.KyNangs.Any())
+                                        {
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach (var kn in Model.KyNangs)
+                                                {
+                                                    <span class="skill-tag-badge">@kn.TenKyNang</span>
+                                                }
+                                            </div>
+                                        }
+                                        else if (!string.IsNullOrEmpty(Model.FreelancerStudent?.KyNangCoBan))
+                                        {
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach (var kn in Model.FreelancerStudent.KyNangCoBan.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                                {
+                                                    <span class="skill-tag-badge">@kn.Trim()</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center py-3 text-muted small border rounded-3 bg-light-subtle">
+                                                <p class="mb-1">Chưa cập nhật kỹ năng chuyên ngành.</p>
+                                                @if (isProfileOwner)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill mt-1" data-bs-toggle="modal"
+                                                            data-bs-target="#manageSkillsModal">
+                                                        <i class="bi bi-plus-lg me-1"></i>Thêm kỹ năng ngay
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- 3. Dự án nổi bật -->
+                                    <div class="section-card">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <h5 class="section-card-title mb-0">Dự án nổi bật</h5>
+                                                <span class="badge bg-light text-muted border">@Model.DuAns.Count(x => x.LaDuAnNoiBat) dự án nổi bật</span>
+                                            </div>
+                                            @if (isProfileOwner)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal"
+                                                        data-bs-target="#featuredProjectsModal">
+                                                    <i class="bi bi-star me-1"></i>Thêm dự án nổi bật
+                                                </button>
+                                            }
+                                        </div>
+
+                                        @{
+                                            var duAnNoiBats = Model.DuAns.Where(x => x.LaDuAnNoiBat).ToList();
+                                        }
+
+                                        @if (!duAnNoiBats.Any())
+                                        {
+                                            <div class="text-center py-4 text-muted small border rounded-3 bg-light-subtle">
+                                                <p class="mt-2 mb-1">Chưa có dự án nào được chọn làm dự án nổi bật.</p>
+                                                @if (isProfileOwner && Model.DuAns.Any())
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill mt-2" data-bs-toggle="modal"
+                                                            data-bs-target="#featuredProjectsModal">
+                                                        <i class="bi bi-star me-1"></i>Chọn dự án nổi bật ngay
+                                                    </button>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="project-grid-box">
+                                                @foreach (var da in duAnNoiBats)
+                                                {
+                                                    <div class="project-preview-card">
+                                                        <span class="badge text-bg-warning mb-2"><i class="bi bi-star-fill me-1"></i>Dự án nổi bật</span>
+                                                        <div>
+                                                            <div class="project-title text-truncate" title="@da.TenDuAn">@da.TenDuAn</div>
+                                                            <div class="project-role-tag">@da.VaiTro</div>
+                                                            <div class="project-desc">@da.MoTa</div>
+                                                            <div class="small text-muted mb-2">
+                                                                <strong>Công nghệ:</strong> @da.Congnghe
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-2 pt-2 border-top">
+                                                            @if (!string.IsNullOrEmpty(da.LinkGithub))
+                                                            {
+                                                                <a href="@da.LinkGithub" target="_blank"
+                                                                   class="btn btn-xs btn-outline-dark rounded-0 px-2 py-1 small"
+                                                                   style="font-size: 0.75rem;">
+                                                                    Github
+                                                                </a>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(da.LinkDemo))
+                                                            {
+                                                                <a href="@da.LinkDemo" target="_blank"
+                                                                   class="btn btn-xs btn-outline-primary rounded-0 px-2 py-1 small"
+                                                                   style="font-size: 0.75rem;">
+                                                                    Demo
+                                                                </a>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+
+                                </div>
+
+                                <!-- CỘT 3: HỌC VẤN, CHỨNG CHỈ & ĐÁNH GIÁ (RIGHT) -->
+                                <div class="col-12 col-lg-3">
+                
+                                    <!-- 1. Học vấn -->
+                                    <div class="section-card">
+                                        <h5 class="section-card-title">Học vấn</h5>
+                                        <div class="edu-card-content">
+                                            <div>
+                                                <div class="edu-school-title">@Model.FreelancerStudent.TenTruong</div>
+                                                <div class="edu-meta-sub">
+                                                    <div>@chuyenNganhName</div>
+                                                    <div>@Model.FreelancerStudent.NienKhoa (Năm @Model.FreelancerStudent.NamThu)</div>
+                                                    <div class="text-success fw-bold">GPA: @Model.FreelancerStudent.GPA.ToString("0.0#") /
+                                                        4.0</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. Chứng chỉ / Xác minh sinh viên -->
+                                        <div class="section-card">
+                                            <h5 class="section-card-title">Chứng chỉ & Xác minh</h5>
+                                            @if (Model.MinhChung != null)
+                                            {
+                                                <div>
+                                                    <div class="fw-bold text-dark small">@Model.MinhChung.LoaiMinhChung</div>
+                                                    <div class="text-success small fw-semibold">
+                                                        @Model.MinhChung.TrangThaiGuiMinhChung
+                                                    </div>
+                                                    <div class="text-muted" style="font-size: 0.72rem;">Xác minh bởi Ban quản trị</div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-muted small">
+                                                    Hồ sơ đang chờ gửi minh chứng sinh viên.
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <!-- 3. Đánh giá gần đây -->
+                                        <div class="section-card">
+                                            <h5 class="section-card-title">Đánh giá gần đây</h5>
+                    
+                                            <!-- Review item 1 -->
+                                            <div class="review-item-box">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <span class="fw-bold text-dark small">Công ty Công Nghệ ABC</span>
+                                                    <span class="text-warning small fw-bold">5.0 ★</span>
+                                                </div>
+                                                <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
+                                                    "Bạn sinh viên làm việc rất có trách nhiệm, bàn giao đúng hẹn và code chuẩn cấu trúc."
+                                                </p>
+                                                <span class="text-secondary" style="font-size: 0.7rem;">2 tuần trước</span>
+                                            </div>
+
+                                            <!-- Review item 2 -->
+                                            <div class="review-item-box">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <span class="fw-bold text-dark small">Startup EduTech</span>
+                                                    <span class="text-warning small fw-bold">4.8 ★</span>
+                                                </div>
+                                                <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
+                                                    "Giao tiếp nhanh nhẹn, tiếp thu yêu cầu tốt và hỗ trợ nhiệt tình."
+                                                </p>
+                                                <span class="text-secondary" style="font-size: 0.7rem;">1 tháng trước</span>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const overviewContent = document.getElementById('profile-overview-content');
+                                const portfolioContent = document.getElementById('portfolio-content');
+                                const overviewTab = document.querySelector('.profile-tab-item[href="#tongquan"]');
+                                const portfolioTab = document.querySelector('[data-profile-tab="portfolio"]');
+                                if (overviewTab && overviewContent && portfolioContent) {
+                                    overviewTab.addEventListener('click', function (event) {
+                                        event.preventDefault();
+                                        overviewContent.classList.remove('d-none');
+                                        portfolioContent.classList.add('d-none');
+                                        overviewTab.classList.add('active');
+                                        if (portfolioTab) portfolioTab.classList.remove('active');
+                                    });
+                                }
+                                if (portfolioTab && overviewContent && portfolioContent) {
+                                    portfolioTab.addEventListener('click', function (event) {
+                                        event.preventDefault();
+                                        overviewContent.classList.add('d-none');
+                                        portfolioContent.classList.remove('d-none');
+                                        if (overviewTab) overviewTab.classList.remove('active');
+                                        portfolioTab.classList.add('active');
+                                    });
+                                }
+
+                                // Quản lý danh sách kỹ năng chuyên ngành trong Modal
+                                const initialSkills = [
+                                    @if (Model.KyNangs != null && Model.KyNangs.Any())
+                                    {
+                                        @Html.Raw(string.Join(",", Model.KyNangs.Select(k => $"\"{k.TenKyNang.Replace("\"", "\\\"")}\"")))
+                                    }
+                                    else if (!string.IsNullOrEmpty(Model.FreelancerStudent?.KyNangCoBan))
+                                    {
+                                        @Html.Raw(string.Join(",", Model.FreelancerStudent.KyNangCoBan.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(k => $"\"{k.Trim().Replace("\"", "\\\"")}\"")))
+                                    }
+                                ];
+
+                                let currentSkills = [...initialSkills];
+                                const container = document.getElementById('skillsBadgesContainer');
+                                const hiddenInputs = document.getElementById('skillsHiddenInputs');
+                                const countText = document.getElementById('skillsCountText');
+                                const inputNewSkill = document.getElementById('inputNewSkill');
+                                const btnAdd = document.getElementById('btnAddSkill');
+
+                                function renderSkills() {
+                                    if (!container || !hiddenInputs) return;
+                                    container.innerHTML = '';
+                                    hiddenInputs.innerHTML = '';
+
+                                    if (currentSkills.length === 0) {
+                                        container.innerHTML = '<span class="text-muted small fst-italic">Chưa có kỹ năng nào. Hãy thêm kỹ năng mới hoặc chọn từ gợi ý bên dưới.</span>';
+                                    } else {
+                                        currentSkills.forEach((skill, index) => {
+                                            const badge = document.createElement('span');
+                                            badge.className = 'badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill d-inline-flex align-items-center gap-2';
+                                            badge.style.fontSize = '0.85rem';
+                                            badge.innerHTML = `
+                                                <span>${skill}</span>
+                                                <button type="button" class="btn-close btn-close-sm" style="font-size: 0.65rem;" title="Xóa kỹ năng"></button>
+                                            `;
+                                            badge.querySelector('button').addEventListener('click', function () {
+                                                removeSkill(index);
+                                            });
+                                            container.appendChild(badge);
+
+                                            // Input ẩn để gửi lên controller
+                                            const input = document.createElement('input');
+                                            input.type = 'hidden';
+                                            input.name = 'danhSachKyNang';
+                                            input.value = skill;
+                                            hiddenInputs.appendChild(input);
+                                        });
+                                    }
+
+                                    if (countText) {
+                                        countText.textContent = `${currentSkills.length} kỹ năng`;
+                                    }
+                                }
+
+                                function addSkill(skillName) {
+                                    if (!skillName) return;
+                                    const trimmed = skillName.trim();
+                                    if (!trimmed) return;
+
+                                    const exists = currentSkills.some(s => s.toLowerCase() === trimmed.toLowerCase());
+                                    if (exists) {
+                                        alert(`Kỹ năng "${trimmed}" đã có trong danh sách!`);
+                                        return;
+                                    }
+
+                                    currentSkills.push(trimmed);
+                                    renderSkills();
+                                }
+
+                                function removeSkill(index) {
+                                    currentSkills.splice(index, 1);
+                                    renderSkills();
+                                }
+
+                                if (btnAdd && inputNewSkill) {
+                                    btnAdd.addEventListener('click', function () {
+                                        addSkill(inputNewSkill.value);
+                                        inputNewSkill.value = '';
+                                        inputNewSkill.focus();
+                                    });
+
+                                    inputNewSkill.addEventListener('keydown', function (e) {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            btnAdd.click();
+                                        }
+                                    });
+                                }
+
+                                document.querySelectorAll('.btn-suggest-skill').forEach(btn => {
+                                    btn.addEventListener('click', function () {
+                                        const skill = this.getAttribute('data-skill');
+                                        addSkill(skill);
+                                    });
+                                });
+
+                                renderSkills();
+                            });
+                        </script>

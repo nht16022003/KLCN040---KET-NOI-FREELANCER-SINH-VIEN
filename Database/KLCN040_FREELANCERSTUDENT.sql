@@ -30,8 +30,11 @@ CREATE TABLE Users
     CONSTRAINT FK_Users_Roles Foreign Key(maRole) References Roles(maRole)
 )
 GO
+
 ALTER TABLE Users
 ADD avatarUrl NVARCHAR(500) NULL;
+GO
+
 
 CREATE TABLE Admin
 (
@@ -121,6 +124,9 @@ CREATE TABLE FreelancerStudents
 )
 Go
 
+ALTER TABLE FreelancerStudents
+DROP COLUMN avatar;
+
 CREATE TABLE FreelancerStudent_KyNang
 (
     maFreelancerStudents INT NOT NULL,
@@ -166,6 +172,11 @@ CREATE TABLE NhaTuyenDung
 )
 Go
 
+ALTER TABLE NhaTuyenDung
+DROP COLUMN avatar;
+
+select * from users;
+
 
 CREATE TABLE FreelancerYeuThich
 (
@@ -178,6 +189,9 @@ CREATE TABLE FreelancerYeuThich
     CONSTRAINT FK_FreelancerYeuThich_FreelancerStudents Foreign Key (maFreelancerStudent) References FreelancerStudents(maFreelancerStudents)
 )
 Go
+
+SELECT * FROM NhaTuyenDung;
+SELECT * FROM Wallet;
 
 CREATE TABLE Wallet
 (
@@ -318,6 +332,18 @@ CREATE TABLE JobPost (
     CONSTRAINT FK_JobPost_NhaTuyenDung FOREIGN KEY (maNhaTuyenDung) REFERENCES NhaTuyenDung (maNhaTuyenDung)
 );
 
+SELECT * FROM Users;
+SELECT * FROM NhaTuyenDung;
+
+DELETE FROM Users
+Where maUser = 10
+
+SELECT * FROM Wallet;
+
+SELECT * FROM FreelancerStudents;
+
+SELECT * FROM NhaTuyenDung;
+
 CREATE TABLE UngTuyen (
     maUngTuyen INT IDENTITY(1,1) PRIMARY KEY,
     maJob VARCHAR(20) NOT NULL,               
@@ -332,6 +358,7 @@ CREATE TABLE UngTuyen (
     CONSTRAINT FK_UngTuyen_Job FOREIGN KEY (maJob) REFERENCES JobPost(maJob) ON DELETE CASCADE,
     CONSTRAINT FK_UngTuyen_Freelancer FOREIGN KEY (maFreelancerStudent) REFERENCES FreelancerStudents(maFreelancerStudents)
 );
+
 
 
 CREATE TABLE UngThue (
@@ -570,6 +597,7 @@ CREATE TABLE Task_CongViec
 
 )
 GO
+
 CREATE TABLE GiaoDichNapTien
 (
     maNapTien INT IDENTITY(1,1) PRIMARY KEY,
@@ -620,6 +648,9 @@ VALUES
 (N'Quản Trị Viên Hệ Thống', 'admin_sys', 'hash_pass_admin', 'admin@freelancego.vn', '0988888888', '1995-01-01', N'ACTIVE', GETDATE(), 3);
 GO
 
+SELECT * FROM USERS;
+SELECT * FROM FreelancerStudents;
+
 -- 2.1. ADMIN
 INSERT INTO Admin (hotenAdmin, maUser) VALUES (N'Quản Trị Viên Hệ Thống', 5);
 GO
@@ -632,6 +663,18 @@ VALUES
 (2, N'Giấy xác nhận sinh viên', 'uploads/minhchung/user2_giay_xac_nhan.pdf', GETDATE(), N'Đã xác minh', GETDATE(), NULL, 1),
 (3, N'Thẻ sinh viên', 'uploads/minhchung/user3_the_sinh_vien.jpg', GETDATE(), N'Đang gửi', NULL, NULL, NULL);
 GO
+
+-- 1. Xem mã Nhà tuyển dụng của Nguyễn Hoàng Tuấn
+SELECT u.maUser, u.hotenUser, u.maRole, ntd.maNhaTuyenDung 
+FROM Users u 
+LEFT JOIN NhaTuyenDung ntd ON u.maUser = ntd.maUser 
+WHERE u.hotenUser LIKE N'%Nguyễn Hoàng Tuấn%';
+
+-- 2. Xem các bài Job mà Nguyễn Hoàng Tuấn đã đăng
+SELECT maJob, tieude, maNhaTuyenDung FROM JobPost WHERE maNhaTuyenDung = 2;
+
+-- 3. Xem các đơn ứng tuyển đã nộp vào các bài Job trên
+SELECT * FROM UngTuyen WHERE maJob IN (SELECT maJob FROM JobPost WHERE maNhaTuyenDung = 2);
 
 
 -- 4. CHUYÊN NGÀNH
@@ -927,7 +970,9 @@ SELECT * FROM LichSu_XuLyTaiKhoan;
 SELECT * FROM MinhChung_FreelancerStudents;
 SELECT * FROM ChuyenNganh;
 SELECT * FROM FreelancerStudents;
+
 SELECT * FROM BaiDangTimViec_FreelancerStudent;
+SELECT * FROM FreelancerStudent_KyNang;
 SELECT * FROM NhaTuyenDung;
 SELECT * FROM FreelancerYeuThich;
 SELECT * FROM Wallet;
@@ -956,3 +1001,61 @@ SELECT * FROM ThongBao;
 SELECT * FROM GiaiDoan_HopDong;
 SELECT * FROM Task_CongViec;
 SELECT * FROM GiaoDichNapTien;
+
+
+
+
+SELECT * FROM JobPost T, UngTuyen J
+WHERE T.maJob = J.maJob
+
+
+DROP TABLE Task_CongViec;
+DROP TABLE GiaiDoan_HopDong;
+
+DROP TABLE ThongBao;
+DROP TABLE DanhGia_NhanXet;
+
+DROP TABLE FileGhimChat;
+DROP TABLE TinNhanChat;
+DROP TABLE PhongChat;
+
+DROP TABLE BANGCHUNG_TRANHCHAP;
+DROP TABLE TranhChap;
+
+DROP TABLE YeuCauGiaHanDeadline;
+DROP TABLE TaiKhoanNganHang;
+DROP TABLE YeuCauNapTien;
+
+DROP TABLE BanGiao_SanPham;
+DROP TABLE HopDong;
+
+DROP TABLE UngThue;
+DROP TABLE UngTuyen;
+DROP TABLE JobPost;
+
+DROP TABLE DuAn_Trong_Portfolio;
+DROP TABLE Portfolio;
+
+DROP TABLE YeuCauRutTien;
+DROP TABLE LichSuGiaoDich;
+DROP TABLE YeuCauHoTro;
+DROP TABLE CauHinhPhiHoaHong_PhiDangBai;
+DROP TABLE DieuChinhSoDu;
+
+DROP TABLE FreelancerYeuThich;
+DROP TABLE NhaTuyenDung;
+
+DROP TABLE BaiDangTimViec_FreelancerStudent;
+DROP TABLE KyNang;
+DROP TABLE FreelancerStudents;
+
+DROP TABLE ChuyenNganh;
+
+DROP TABLE MinhChung_FreelancerStudents;
+DROP TABLE LichSu_XuLyTaiKhoan;
+
+DROP TABLE Admin;
+DROP TABLE Wallet;
+
+DROP TABLE Users;
+DROP TABLE Roles;

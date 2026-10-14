@@ -42,5 +42,7 @@ namespace FreelancerStudent.API.Models
 
         [ForeignKey("maNhaTuyenDung")]
         public virtual NhaTuyenDung? NhaTuyenDung { get; set; } //1 JobPost thuộc về 1 nhà tuyển dụng
+
+        public virtual ICollection<UngTuyen>? UngTuyens { get; set; } = new List<UngTuyen>();
     }
 }

@@ -1,0 +1,2 @@
+Cần ngày hoàn thành bao nhiêu - khi free ggg tuyen se rang buoc ngay cam kết
+phong chat: tham khao cac ky thuat tao phong chat giua cac User với nhau, nếu lưu trong csdl thì rất chậm. [Cần xử lý lại để tối ưu].

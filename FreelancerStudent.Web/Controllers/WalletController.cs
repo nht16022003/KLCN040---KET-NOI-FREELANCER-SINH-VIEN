@@ -7,21 +7,33 @@ namespace FreelancerStudent.Web.Controllers
     public class WalletController : Controller
     {
         private readonly IGiaoDichNapTienWebService _giaoDichNapTienWebService;
+        private readonly IWalletWebService _walletWebService;
 
         public WalletController(
-            IGiaoDichNapTienWebService giaoDichNapTienWebService)
+            IGiaoDichNapTienWebService giaoDichNapTienWebService,
+            IWalletWebService walletWebService)
         {
             _giaoDichNapTienWebService = giaoDichNapTienWebService;
+            _walletWebService = walletWebService;
         }
 
 
         // =====================================================
-        // TRANG NẠP TIỀN
+        // TRANG VÍ & NẠP TIỀN
         // =====================================================
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var ketQua = await _walletWebService.layViTheoUser(maUser.Value);
+            var model = ketQua?.data ?? new WalletViewModel();
+
+            return View(model);
         }
 
 

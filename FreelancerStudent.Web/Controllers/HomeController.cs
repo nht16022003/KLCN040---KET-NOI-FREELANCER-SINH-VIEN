@@ -8,7 +8,24 @@ namespace FreelancerStudent.Web.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var tenRole = HttpContext.Session.GetString("tenRole");
+            switch (tenRole)
+            {
+                case "Admin":
+                    return RedirectToAction("Index", "Admin");
+                case "NhaTuyenDung":
+                    return RedirectToAction("Index", "FreelancerStudent");
+                case "FreelancerStudent":
+                    return RedirectToAction("Index", "JobPost");
+                default:
+                    return RedirectToAction("DangNhap", "Account");
+            }
         }
 
         public IActionResult Privacy()

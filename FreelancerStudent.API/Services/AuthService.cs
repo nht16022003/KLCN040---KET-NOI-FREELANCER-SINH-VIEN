@@ -3,7 +3,6 @@ using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
-using FreelancerStudent.API.DTOs.RequestDTOs;
 
 namespace FreelancerStudent.API.Services
 {
@@ -13,12 +12,15 @@ namespace FreelancerStudent.API.Services
         private readonly INhaTuyenDungRepository _nhaTuyenDungRepository;
         private readonly IWalletRepository _walletRepository;
 
+        private readonly IFreelancerStudentRepository _freelancerStudent;
+
         public AuthService(IUserRepository userRepository, INhaTuyenDungRepository nhaTuyenDungRepository,
-        IWalletRepository walletRepository)
+        IWalletRepository walletRepository, IFreelancerStudentRepository freelancerStudent)
         {
             _userRepository = userRepository;
             _nhaTuyenDungRepository = nhaTuyenDungRepository;
             _walletRepository = walletRepository;
+            _freelancerStudent = freelancerStudent;
         }
 
         public async Task<DangKy_ReponseDTO> DangKyTaiKhoanAsync(DangKy_RequestDTO request)
@@ -68,6 +70,11 @@ namespace FreelancerStudent.API.Services
             if (luuUser.maRole == 2)
             {
                 await _nhaTuyenDungRepository.themNhaTuyenDungDuaVaoMaRoleCuaUsers(luuUser, luuUser.maRole);
+                await _walletRepository.themViChoUserTheoMaUser(luuUser.maUser);
+            }
+            else if (luuUser.maRole == 1)
+            {
+                await _freelancerStudent.themFreelancerStudent_DuaVaoMaRoleCuaUsers(luuUser, luuUser.maRole);
                 await _walletRepository.themViChoUserTheoMaUser(luuUser.maUser);
             }
 
@@ -123,13 +130,18 @@ namespace FreelancerStudent.API.Services
                 sodienthoai = user.sdtUser,
                 marole = user.maRole,
                 tenrole = tenRole,
-                status = user.status
+                status = user.status,
+                avatarUrl = user.avatarUrl
             };
 
             return ketquadangnhap;
         }
+
+
+        //Tuấn Anh
+
         public async Task<ThongTinTaiKhoan_ReponseDTO>
-            layThongTinTaiKhoanAsync(int maUser)
+           layThongTinTaiKhoanAsync(int maUser)
         {
             var user =
                 await _userRepository.timUserTheoMaUserAsync(maUser);
@@ -162,8 +174,9 @@ namespace FreelancerStudent.API.Services
                 tenrole = user.Roles?.tenRole ?? ""
             };
         }
-        
-        public async Task<ThongTinTaiKhoan_ReponseDTO>capNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoan_RequestDTO request)
+
+        //Tuấn Anh
+        public async Task<ThongTinTaiKhoan_ReponseDTO> capNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoan_RequestDTO request)
         {
             var user =
                 await _userRepository.timUserTheoMaUserAsync(
@@ -208,6 +221,9 @@ namespace FreelancerStudent.API.Services
             };
         }
 
+
+        //Tuấn Anh
+
         public async Task<bool> capNhatAvatarAsync(CapNhatAvatar_RequestDTO request)
         {
             var user =
@@ -235,6 +251,9 @@ namespace FreelancerStudent.API.Services
 
             return true;
         }
+
+
+        //Tuấn Anh
 
         public async Task doiMatKhauAsync(DoiMatKhau_RequestDTO request)
         {
@@ -310,5 +329,6 @@ namespace FreelancerStudent.API.Services
             await _userRepository
                 .capNhatThongTinUserAsync(user);
         }
+
     }
 }

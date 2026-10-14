@@ -28,7 +28,7 @@ namespace FreelancerStudent.API.Models
 
         [MaxLength(500)]
         public string? avatarUrl { get; set; }
-        
+
         public DateTime? ngaysinh { get; set; }
 
         [Required]
@@ -45,7 +45,7 @@ namespace FreelancerStudent.API.Models
         public virtual Roles? Roles { get; set; }
 
         //Navigation Properties không phải là Foreign Key
-        public virtual FreelamcerStudents? FreelamcerStudents { get; set; } //cho phép đi từ User -> FreelancerStudents
+        public virtual FreelancerStudents? FreelancerStudents { get; set; } //cho phép đi từ User -> FreelancerStudents
 
         public virtual NhaTuyenDung? NhaTuyenDung { get; set; }
 

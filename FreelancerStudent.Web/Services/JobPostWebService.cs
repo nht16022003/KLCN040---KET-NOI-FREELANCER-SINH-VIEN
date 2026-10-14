@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using FreelancerStudent.Web.Models;
 using FreelancerStudent.Web.Services.Interfaces;
 using FreelancerStudent.Web.ViewModels;
 using FreelancerStudent.Web.ViewModels.Account;
@@ -58,6 +59,56 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+        //XS
+        public async Task<ApiReponse<JobDetailViewModel>> layChiTietJobPost(string maJob)
+        {
+            if (string.IsNullOrWhiteSpace(maJob))
+            {
+                return new ApiReponse<JobDetailViewModel>
+                {
+                    success = false,
+                    message = "Mã công việc không hợp lệ."
+                };
+            }
+
+            try
+            {
+                var response = await _guiRequest.GetAsync(
+                    $"api/JobPost/ChiTietJobPost/{Uri.EscapeDataString(maJob.Trim())}");
+                var noiDungJson = await response.Content.ReadAsStringAsync();
+
+                var ketQua = JsonSerializer.Deserialize<ApiReponse<JobDetailViewModel>>(
+                    noiDungJson,
+                    _jsonOptions);
+
+                if (ketQua == null)
+                {
+                    return new ApiReponse<JobDetailViewModel>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+                }
+
+                if (!response.IsSuccessStatusCode && string.IsNullOrWhiteSpace(ketQua.message))
+                {
+                    ketQua.message = "Không thể lấy chi tiết công việc từ API.";
+                }
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<JobDetailViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+
+        //Tuấn Anh
         public async Task<ApiReponse<JobPostViewModel>> taoJobPost(JobPostViewModel model)
         {
             try
@@ -116,5 +167,122 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+
+        //Tuấn
+        //Tuấn
+        public async Task<ApiReponse<List<UngTuyenViewModel>>> layDSUngTuyenTheoMaUser(int maUser)
+        {
+            try
+            {
+                var respnse = await _guiRequest.GetAsync($"api/JobPost/DanhSachUngTuyen/{maUser}");
+
+                var noiDungJson = await respnse.Content.ReadAsStringAsync();
+
+                var ketQua = JsonSerializer.Deserialize<ApiReponse<List<UngTuyenViewModel>>>(noiDungJson, _jsonOptions);
+                if (ketQua == null)
+                {
+                    return new ApiReponse<List<UngTuyenViewModel>>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu từ API."
+                    };
+                }
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<UngTuyenViewModel>>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API" + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> duyetUngTuyenAsync(int maUngTuyen, string trangThai)
+        {
+            try
+            {
+                var request = new
+                {
+                    maUngTuyen = maUngTuyen,
+                    trangThai = trangThai
+                };
+
+                var json = JsonSerializer.Serialize(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _guiRequest.PostAsync("api/JobPost/DuyetUngTuyen", content);
+                var noiDung = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(noiDung, _jsonOptions) ??
+                new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Không đọc được dữ liệu trả về."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> nopDonUngTuyenAsync(UngTuyenViewModel model)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(model);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _guiRequest.PostAsync("api/JobPost/UngTuyen", content);
+                var noiDung = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(noiDung, _jsonOptions)
+                    ?? new ApiReponse<bool> { success = false, message = "Lỗi đọc dữ liệu API." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool> { success = false, message = ex.Message };
+            }
+        }
+
+
+        //Tuấn
+        public async Task<ApiReponse<List<JobPostViewModel>>> layJobCuaToiAsync(int maUser)
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync($"api/JobPost/CuaToi/{maUser}");
+                var data = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<List<JobPostViewModel>>>(data, _jsonOptions)
+                    ?? new ApiReponse<List<JobPostViewModel>> { success = false, message = "Lỗi đọc dữ liệu." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<JobPostViewModel>> { success = false, message = ex.Message };
+            }
+        }
+
+
+        //Tuấn
+        public async Task<ApiReponse<bool>> capNhatJobPostAsync(JobPostViewModel model)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(model);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _guiRequest.PutAsync("api/JobPost/CapNhat", content);
+                var data = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(data, _jsonOptions)
+                    ?? new ApiReponse<bool> { success = false, message = "Lỗi đọc dữ liệu." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool> { success = false, message = ex.Message };
+            }
+        }
+
     }
 }

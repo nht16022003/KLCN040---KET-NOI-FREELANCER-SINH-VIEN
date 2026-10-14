@@ -79,12 +79,16 @@ namespace FreelancerStudent.API.Repositories
             return ketqua!;
         }
 
+
+        //Tuấn Anh
+
         public async Task<Users?> timUserTheoMaUserAsync(int maUser)
         {
             return await _context.Users
                 .Include(u => u.Roles)
                 .FirstOrDefaultAsync(u => u.maUser == maUser);
         }
+        //Tuấn Anh
 
         public async Task<Users> capNhatThongTinUserAsync(Users user)
         {

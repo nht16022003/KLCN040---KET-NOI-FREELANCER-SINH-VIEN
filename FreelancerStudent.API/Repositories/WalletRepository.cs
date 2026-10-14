@@ -7,13 +7,14 @@ namespace FreelancerStudent.API.Repositories
 {
     public class WalletRepository : IWalletRepository
     {
+
         private readonly ApplicationDBContext _context;
 
         public WalletRepository(ApplicationDBContext context)
         {
             _context = context;
-        }
 
+        }
 
         // Lấy ví theo mã user
         public async Task<Wallet> layViTheoMaUser(int maUser)
@@ -24,8 +25,6 @@ namespace FreelancerStudent.API.Repositories
 
             return ketqua!;
         }
-
-
         // Thêm ví cho User vừa được tạo theo mã user
         public async Task<Wallet> themViChoUserTheoMaUser(int maUser)
         {
@@ -41,8 +40,7 @@ namespace FreelancerStudent.API.Repositories
 
             var viMoi = new Wallet
             {
-                maUser = maUser,
-                soDuKhaDung = 0,
+
                 soDuDongBang = 0
             };
 
@@ -54,7 +52,6 @@ namespace FreelancerStudent.API.Repositories
             return viMoi;
         }
 
-
         // Cập nhật ví
         public async Task capNhatViAsync(Wallet wallet)
         {
@@ -62,7 +59,7 @@ namespace FreelancerStudent.API.Repositories
 
             await _context.SaveChangesAsync();
         }
-        
+
         public async Task<Wallet> layViTheoMaWallet(int maWallet)
         {
             var ketqua = await _context.Wallets

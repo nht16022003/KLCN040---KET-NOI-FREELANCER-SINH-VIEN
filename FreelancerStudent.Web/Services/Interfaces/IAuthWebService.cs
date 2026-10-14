@@ -10,13 +10,22 @@ namespace FreelancerStudent.Web.Services.Interfaces
 
         Task<ApiReponse<UserSessionViewModel>> DangNhapAsync(DangNhapViewModel model);
 
-        Task<ApiReponse<ThongTinTaiKhoanViewModel>>LayThongTinTaiKhoanAsync(int maUser);
 
-        Task<ApiReponse<ThongTinTaiKhoanViewModel>>CapNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoanViewModel model);
-    
-        Task<ApiReponse<object>> CapNhatAvatarAsync(int maUser,string avatarUrl);    
-    
-        Task<ApiReponse<object>> DoiMatKhauAsync(int maUser, DoiMatKhauViewModel model
-);
+
+        //Tuấn Anh
+        Task<ApiReponse<ThongTinTaiKhoanViewModel>> LayThongTinTaiKhoanAsync(int maUser);
+
+
+        //Tuấn Anh
+        Task<ApiReponse<ThongTinTaiKhoanViewModel>> CapNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoanViewModel model);
+
+
+        //Tuấn Anh
+        Task<ApiReponse<object>> CapNhatAvatarAsync(int maUser, string avatarUrl);
+
+
+        //Tuấn Anh
+
+        Task<ApiReponse<object>> DoiMatKhauAsync(int maUser, DoiMatKhauViewModel model);
     }
 }

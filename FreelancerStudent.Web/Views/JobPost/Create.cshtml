@@ -56,7 +56,7 @@
         box-shadow: 0 8px 30px rgba(21, 70, 44, 0.06);
     }
 
-    .form-section + .form-section {
+    .form-section+.form-section {
         margin-top: 38px;
     }
 
@@ -299,22 +299,16 @@
     <div class="create-job-container">
 
         <!-- Quay lại -->
-        <a asp-controller="JobPost"
-           asp-action="Index"
-           class="back-link">
+        <a asp-controller="JobPost" asp-action="Index" class="back-link">
             ← Quay lại
         </a>
 
         <!-- Banner -->
         <div class="recruitment-banner">
-            <img src="~/images/tuyendung.png"
-                 alt="Đăng tin tuyển dụng sinh viên" />
+            <img src="~/images/tuyendung.png" alt="Đăng tin tuyển dụng sinh viên" />
         </div>
 
-        <form asp-controller="JobPost"
-              asp-action="Create"
-              method="post"
-              class="job-form-card">
+        <form asp-controller="JobPost" asp-action="Create" method="post" class="job-form-card">
 
             @Html.AntiForgeryToken()
 
@@ -336,12 +330,10 @@
                         <span class="required">*</span>
                     </label>
 
-                    <input asp-for="tieude"
-                           class="form-control-custom"
+                    <input asp-for="tieude" class="form-control-custom"
                            placeholder="Ví dụ: Thiết kế website bán hàng bằng ASP.NET Core" />
 
-                    <span asp-validation-for="tieude"
-                          class="field-error"></span>
+                    <span asp-validation-for="tieude" class="field-error"></span>
                 </div>
 
                 <div class="form-group">
@@ -350,64 +342,46 @@
                         <span class="required">*</span>
                     </label>
 
-                    <textarea asp-for="mota"
-                              class="form-control-custom"
+                    <textarea asp-for="mota" class="form-control-custom"
                               placeholder="Mô tả phạm vi công việc, mục tiêu, yêu cầu kỹ thuật và sản phẩm cần bàn giao..."></textarea>
 
-                    <span asp-validation-for="mota"
-                          class="field-error"></span>
+                    <span asp-validation-for="mota" class="field-error"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="kynangyeucau"
-                           class="form-label">
+                    <label asp-for="kynangyeucau" class="form-label">
                         Kỹ năng yêu cầu
                     </label>
 
-                    <input asp-for="kynangyeucau"
-                           id="skillInput"
-                           class="form-control-custom"
+                    <input asp-for="kynangyeucau" id="skillInput" class="form-control-custom"
                            placeholder="Ví dụ: ASP.NET Core, SQL Server, HTML/CSS" />
 
-                    <span asp-validation-for="kynangyeucau"
-                          class="field-error"></span>
+                    <span asp-validation-for="kynangyeucau" class="field-error"></span>
 
                     <div class="skill-suggestions">
                         <span class="skill-label">Gợi ý:</span>
 
-                        <button type="button"
-                                class="skill-btn"
-                                data-skill="Photoshop">
+                        <button type="button" class="skill-btn" data-skill="Photoshop">
                             + Photoshop
                         </button>
 
-                        <button type="button"
-                                class="skill-btn"
-                                data-skill="Figma">
+                        <button type="button" class="skill-btn" data-skill="Figma">
                             + Figma
                         </button>
 
-                        <button type="button"
-                                class="skill-btn"
-                                data-skill="ASP.NET Core">
+                        <button type="button" class="skill-btn" data-skill="ASP.NET Core">
                             + ASP.NET Core
                         </button>
 
-                        <button type="button"
-                                class="skill-btn"
-                                data-skill="Flutter">
+                        <button type="button" class="skill-btn" data-skill="Flutter">
                             + Flutter
                         </button>
 
-                        <button type="button"
-                                class="skill-btn"
-                                data-skill="HTML/CSS">
+                        <button type="button" class="skill-btn" data-skill="HTML/CSS">
                             + HTML/CSS
                         </button>
 
-                        <button type="button"
-                                class="skill-btn"
-                                data-skill="SQL Server">
+                        <button type="button" class="skill-btn" data-skill="SQL Server">
                             + SQL Server
                         </button>
                     </div>
@@ -426,17 +400,13 @@
                 <div class="form-grid">
 
                     <div class="form-group">
-                        <label asp-for="thulao"
-                               class="form-label">
+                        <label asp-for="thulao" class="form-label">
                             Mức thù lao ngân sách (VNĐ)
                             <span class="required">*</span>
                         </label>
 
                         <div class="money-input">
-                            <input asp-for="thulao"
-                                   type="number"
-                                   min="50000"
-                                   class="form-control-custom"
+                            <input asp-for="thulao" type="number" min="50000" class="form-control-custom"
                                    placeholder="Ví dụ: 1500000" />
 
                             <span class="money-unit">
@@ -444,40 +414,29 @@
                             </span>
                         </div>
 
-                        <span asp-validation-for="thulao"
-                              class="field-error"></span>
+                        <span asp-validation-for="thulao" class="field-error"></span>
                     </div>
 
                     <div class="form-group">
-                        <label asp-for="soluongtuyen"
-                               class="form-label">
+                        <label asp-for="soluongtuyen" class="form-label">
                             Số lượng sinh viên cần tuyển
                             <span class="required">*</span>
                         </label>
 
-                        <input asp-for="soluongtuyen"
-                               type="number"
-                               min="1"
-                               max="50"
-                               class="form-control-custom" />
+                        <input asp-for="soluongtuyen" type="number" min="1" max="50" class="form-control-custom" />
 
-                        <span asp-validation-for="soluongtuyen"
-                              class="field-error"></span>
+                        <span asp-validation-for="soluongtuyen" class="field-error"></span>
                     </div>
 
                     <div class="form-group">
-                        <label asp-for="thoigiandukienhoanthanh"
-                               class="form-label">
+                        <label asp-for="thoigiandukienhoanthanh" class="form-label">
                             Hạn hoàn thành dự kiến
                             <span class="required">*</span>
                         </label>
 
-                        <input asp-for="thoigiandukienhoanthanh"
-                               type="date"
-                               class="form-control-custom" />
+                        <input asp-for="thoigiandukienhoanthanh" type="date" class="form-control-custom" />
 
-                        <span asp-validation-for="thoigiandukienhoanthanh"
-                              class="field-error"></span>
+                        <span asp-validation-for="thoigiandukienhoanthanh" class="field-error"></span>
                     </div>
 
                     <div class="form-group">
@@ -506,14 +465,11 @@
 
             <div class="form-actions">
 
-                <a asp-controller="JobPost"
-                   asp-action="Index"
-                   class="btn-cancel">
+                <a asp-controller="JobPost" asp-action="Index" class="btn-cancel">
                     Hủy bỏ
                 </a>
 
-                <button type="submit"
-                        class="btn-submit">
+                <button type="submit" class="btn-submit">
                     Đăng tin tuyển dụng ngay
                 </button>
 

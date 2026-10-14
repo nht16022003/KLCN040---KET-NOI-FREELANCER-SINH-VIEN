@@ -142,7 +142,10 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
-        public async Task<ApiReponse<ThongTinTaiKhoanViewModel>>LayThongTinTaiKhoanAsync(int maUser)
+
+
+        //Tuấn Anh
+        public async Task<ApiReponse<ThongTinTaiKhoanViewModel>> LayThongTinTaiKhoanAsync(int maUser)
         {
             try
             {
@@ -179,7 +182,8 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
-        public async Task<ApiReponse<ThongTinTaiKhoanViewModel>>CapNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoanViewModel model)
+        //Tuấn Anh
+        public async Task<ApiReponse<ThongTinTaiKhoanViewModel>> CapNhatThongTinTaiKhoanAsync(CapNhatThongTinTaiKhoanViewModel model)
         {
             try
             {
@@ -226,6 +230,7 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
+        //Tuấn Anh
         public async Task<ApiReponse<object>> CapNhatAvatarAsync(int maUser, string avatarUrl)
         {
             try
@@ -277,8 +282,10 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
-        
-        public async Task<ApiReponse<object>> DoiMatKhauAsync(int maUser,DoiMatKhauViewModel model)
+
+
+        //Tuấn Anh
+        public async Task<ApiReponse<object>> DoiMatKhauAsync(int maUser, DoiMatKhauViewModel model)
         {
             try
             {
@@ -330,5 +337,6 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
     }
 }

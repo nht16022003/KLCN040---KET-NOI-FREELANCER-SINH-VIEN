@@ -18,7 +18,9 @@ namespace FreelancerStudent.API.Repositories
 
         public async Task<List<NhaTuyenDung>> layTatCaNhaTuyenDungAsync()
         {
-            var dsNhaTuyenDung = await _context.NhaTuyenDungs.ToListAsync();
+            var dsNhaTuyenDung = await _context.NhaTuyenDungs
+                .Include(x => x.User)
+                .ToListAsync();
             return dsNhaTuyenDung;
         }
 
@@ -46,9 +48,11 @@ namespace FreelancerStudent.API.Repositories
             return ntdMoi;
         }
 
+        //Tuan Anh
         public async Task<NhaTuyenDung?> layNhaTuyenDungTheoMaUserAsync(int maUser)
         {
             return await _context.NhaTuyenDungs
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.maUser == maUser);
         }
     }

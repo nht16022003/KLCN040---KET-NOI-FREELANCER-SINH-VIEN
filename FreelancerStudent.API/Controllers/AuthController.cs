@@ -2,7 +2,6 @@ using FreelancerStudent.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using FreelancerStudent.API.DTOs.RequestDTOs;
 
 namespace FreelancerStudent.API.Controllers
 {
@@ -83,6 +82,10 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+
+
+        //Tuấn Anh
+
         [HttpGet("ThongTinTaiKhoan/{maUser}")]
         public async Task<IActionResult> ThongTinTaiKhoan(int maUser)
         {
@@ -108,6 +111,9 @@ namespace FreelancerStudent.API.Controllers
                 });
             }
         }
+
+
+        //Tuấn Anh
 
         [HttpPut("CapNhatThongTinTaiKhoan")]
         public async Task<IActionResult> CapNhatThongTinTaiKhoan([FromBody] CapNhatThongTinTaiKhoan_RequestDTO request)
@@ -135,6 +141,9 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+
+        //Tuấn Anh
+
         [HttpPut("CapNhatAvatar")]
         public async Task<IActionResult> CapNhatAvatar([FromBody] CapNhatAvatar_RequestDTO request)
         {
@@ -158,6 +167,8 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+
+        //Tuấn Anh
         [HttpPut("DoiMatKhau")]
         public async Task<IActionResult> DoiMatKhau([FromBody] DoiMatKhau_RequestDTO request)
         {
@@ -180,5 +191,8 @@ namespace FreelancerStudent.API.Controllers
                 });
             }
         }
+
+
+
     }
 }
