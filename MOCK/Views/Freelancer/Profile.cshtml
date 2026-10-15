@@ -488,7 +488,7 @@
                                 <span><i class="bi bi-geo-alt-fill text-secondary"></i>
                                     @Model.FreelancerStudent.DiaDiemFreelancerStudent</span>
                                     <span><i class="bi bi-globe text-secondary"></i> @(Model.FreelancerStudent.NgonNgu ??
-                                                 "Tiếng Việt, Tiếng Anh")</span>
+                                                                                                                                                                                                                                                         "Tiếng Việt, Tiếng Anh")</span>
                                         <span><i class="bi bi-calendar-event text-secondary"></i> Tham gia từ
                                             @Model.User.NgayTao.ToString("MM/yyyy")</span>
                                         </div>
@@ -628,7 +628,7 @@
                                     <div class="basic-info-row">
                                         <span class="basic-info-label">Ngày sinh</span>
                                         <span class="basic-info-val">@(Model.User.Ngaysinh.HasValue?
-                                                                        Model.User.Ngaysinh.Value.ToString("dd/MM/yyyy") : "15/05/2003")</span>
+                                                                                                                                                                                                                                                                                Model.User.Ngaysinh.Value.ToString("dd/MM/yyyy") : "15/05/2003")</span>
                                         </div>
                                         <div class="basic-info-row">
                                             <span class="basic-info-label">Giới tính</span>
@@ -649,12 +649,12 @@
                                         <div class="basic-info-row">
                                             <span class="basic-info-label">Trạng thái</span>
                                             <span class="basic-info-val text-success">@(Model.FreelancerStudent.TrangthaiNhanViec ?
-                                                                      "Đang nhận việc" : "Tạm ngưng")</span>
+                                                                                                                                                                                                                                                                                                                      "Đang nhận việc" : "Tạm ngưng")</span>
                                             </div>
                                             <div class="basic-info-row">
                                                 <span class="basic-info-label">Mức giá tham khảo</span>
                                                 <span class="basic-info-val text-danger">@(Model.FreelancerStudent.ChiPhiTu.HasValue?
-                                                                                Model.FreelancerStudent.ChiPhiTu.Value.ToString("#,##0") + " VNĐ/Dự án" : "Thỏa thuận")</span>
+                                                                                                                                                                                 Model.FreelancerStudent.ChiPhiTu.Value.ToString("#,##0") + " VNĐ/Dự án" : "Thỏa thuận")</span>
                                                 </div>
                                                 <div class="basic-info-row">
                                                     <span class="basic-info-label">Thời gian có thể làm</span>

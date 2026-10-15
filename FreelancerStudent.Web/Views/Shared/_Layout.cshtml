@@ -854,6 +854,50 @@
                                                                 <a href="/JobPost" class="brand-logo me-2">
                                                                     Freelancer <span>Students</span>
                                                                 </a>
+<<<<<<< HEAD
+=======
+                                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                                                    <li>
+                                                                        <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                                                           asp-route-tab="thongtin">
+                                                                            <i class="bi bi-person-gear me-2"></i>
+                                                                            Thiết lập tài khoản
+                                                                        </a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="/Account/Profile?tab=security"><i
+                                                                        class="bi bi-shield-lock me-2"></i> Thiết lập bảo mật</a></li>
+                                                                        <li>
+                                                                            <hr class="dropdown-divider">
+                                                                        </li>
+                                                                        <li><a class="dropdown-item" href="/Wallet"><i class="bi bi-wallet2 text-success me-2"></i>
+                                                                            Ví tài chính & Nạp tiền</a></li>
+                                                                            <li><a class="dropdown-item" href="/Account/MinhChung"><i
+                                                                                class="bi bi-patch-check-fill text-success me-2"></i> Minh chứng sinh viên</a>
+                                                                            </li>
+                                                                         @if (maUserDangNhap.HasValue)
+                                                                         {
+                                                                             <li><a class="dropdown-item" asp-controller="FreelancerStudent"
+                                                                                    asp-action="Profile"
+                                                                                    asp-route-maUser="@maUserDangNhap.Value"><i class="bi bi-person-vcard me-2"></i>
+                                                                                     Hồ sơ năng lực sinh viên</a></li>
+                                                                         }
+                                                                                     <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Portfolio"><i
+                                                                                    class="bi bi-collection-play me-2"></i> Portfolio cá nhân</a></li>
+                                                                                    <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich"><i
+                                                                                        class="bi bi-building-check text-primary me-2"></i> NTD quan tâm (Đã lưu)</a>
+                                                                                    </li>
+                                                                                    <li><a class="dropdown-item" href="/TranhChap"><i
+                                                                                        class="bi bi-shield-shaded text-danger me-2"></i> Tranh chấp & Khiếu nại</a>
+                                                                                    </li>
+                                                                                    <li>
+                                                                                        <hr class="dropdown-divider">
+                                                                                    </li>
+                                                                                    <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat"><i
+                                                                                        class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                            </div>
+>>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
 
                                                                 <!-- Nút Khám phá nhà tuyển dụng -->
                                                                 <a href="/NhaTuyenDung/Search" class="search-pill-btn">
@@ -900,6 +944,7 @@
                                                                             <span class="portal-user-name">@userName</span>
                                                                             <span class="portal-user-tag">@userRoleTitle</span>
                                                                         </div>
+<<<<<<< HEAD
                                                                     </a>
                                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                                                                         <li>
@@ -930,6 +975,30 @@
                                                                                         </li>
                                                                                         <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
                                                                                         </ul>
+=======
+                                                                    </div>
+                                                                </header>
+
+                                                                <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
+                                                                <nav class="portal-subnav">
+                                                                    <div class="container-fluid px-lg-5">
+                                                                        <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                                                            <a href="/Freelancer/QuanLyTimViec" class="subnav-link"><i class="bi bi-briefcase me-1"></i>Quản lý tìm
+                                                                                việc</a>
+                                                                                <a href="/Freelancer/DangTinTimViec" class="subnav-link"><i class="bi bi-pencil-square me-1"></i>Đăng
+                                                                                    tin tìm việc</a>
+                                                                                    <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
+                                                                                    <a href="/Freelancer/LoiMoiNhanViec" class="subnav-link">Lời mời nhận việc</a>
+                                                                                    <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link"><i
+                                                                                        class="bi bi-building-check me-1"></i>NTD quan tâm</a>
+                                                                                        <a href="/Wallet" class="subnav-link"><i class="bi bi-wallet2 me-1"></i>Ví & Thu nhập</a>
+                                                                                        <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
+                                                                                        <a href="/Account/MinhChung" class="subnav-link text-success fw-bold"><i
+                                                                                            class="bi bi-shield-check me-1"></i>Minh chứng sinh viên</a>
+                                                                                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                                                                            <a href="/Freelancer/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
+                                                                                        </div>
+>>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
                                                                                     </div>
                                                                                 </div>
 

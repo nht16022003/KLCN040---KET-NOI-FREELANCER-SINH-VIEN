@@ -1,8 +1,14 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "HQ2g+ljVwq4=",
   "success": true,
   "projectFilePath": "D:\\KLTN\\KLTN\\Improve\\MOCK\\MOCK.csproj",
+=======
+  "dgSpecHash": "sPIII1BzwL4=",
+  "success": true,
+  "projectFilePath": "D:\\DA\\nht16022003\\KLCN040---KET-NOI-FREELANCER-SINH-VIEN\\MOCK\\MOCK.csproj",
+>>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
   "expectedPackageFiles": [],
   "logs": []
 }

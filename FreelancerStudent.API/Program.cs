@@ -23,6 +23,7 @@ builder.Services.AddScoped<IJobPostRepository, JobPostRepository>();
 builder.Services.AddScoped<IJobPostService, JobPostService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+<<<<<<< HEAD
 builder.Services.AddScoped<IBaiDangTimViecRepository, BaiDangTimViecRepository>();
 builder.Services.AddScoped<IBaiDangTimViecService, BaiDangTimViecService>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
@@ -46,6 +47,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+=======
+builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+builder.Services.AddScoped<IPortfolioService, PortfolioService>();
+>>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
 
 // 2. Đăng ký Controllers
 builder.Services.AddControllers();
