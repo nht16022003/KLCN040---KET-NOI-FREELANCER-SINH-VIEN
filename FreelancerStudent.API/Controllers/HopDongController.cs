@@ -195,5 +195,43 @@ namespace FreelancerStudent.API.Controllers
                 return StatusCode(500, new { message = "Lỗi hệ thống khi xử lý hợp đồng: " + ex.Message });
             }
         }
+
+        // POST: api/HopDong/KyQuy
+        [HttpPost("KyQuy")]
+        public async Task<IActionResult> KyQuy(
+            [FromBody] KyQuyHopDong_RequestDTO request,
+            [FromQuery] int? maUserNhaTuyenDung)
+        {
+            if (!ModelState.IsValid || request == null || string.IsNullOrWhiteSpace(request.maHD))
+            {
+                return BadRequest(new { message = "Mã hợp đồng không hợp lệ." });
+            }
+
+            try
+            {
+                var ketQua = await _hopDongService.KyQuyHopDongAsync(request.maHD, maUserNhaTuyenDung);
+                return Ok(new
+                {
+                    success = ketQua,
+                    message = "Ký quỹ hợp đồng thành công! Hợp đồng đã chuyển sang trạng thái Đang thực hiện."
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi hệ thống khi ký quỹ hợp đồng: " + ex.Message });
+            }
+        }
     }
 }

@@ -126,6 +126,79 @@
         </div>
     }
 
+    <!-- BANNER HÀNH ĐỘNG CHO NHÀ TUYỂN DỤNG (KHI HỢP ĐỒNG ĐANG Ở TRẠNG THÁI CHỜ KÝ QUỸ) -->
+    @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
+    {
+        <div class="card border-primary bg-primary bg-opacity-10 rounded-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary text-white px-2 py-1 fs-6">
+                                <i class="bi bi-wallet2 me-1"></i> Hợp đồng đang chờ bạn ký quỹ
+                            </span>
+                        </div>
+                        <h5 class="fw-bold text-primary mb-1 mt-2">
+                            Freelancer đã đồng ý nhận việc! Vui lòng tiến hành ký quỹ để kích hoạt hợp đồng.
+                        </h5>
+                        <p class="text-muted small mb-0">
+                            Số tiền ký quỹ bảo chứng: <strong class="text-danger fs-6">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</strong>.
+                            Tiền ký quỹ sẽ được bảo lưu an toàn tại hệ thống và chỉ giải ngân cho Freelancer khi bạn nghiệm thu đạt từng mốc bàn giao.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-lg rounded-0 fw-bold px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
+                            <i class="bi bi-shield-check me-1"></i> Tiến hành ký quỹ ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Xác nhận Ký quỹ -->
+        <div class="modal fade" id="modalKyQuy" tabindex="-1" aria-labelledby="modalKyQuyLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-0">
+                    <form asp-controller="HopDong" asp-action="KyQuy" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maHD" value="@Model.maHD" />
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold" id="modalKyQuyLabel">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Ký quỹ bảo chứng hợp đồng (Escrow)
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="text-center mb-4">
+                                <span class="text-muted small text-uppercase">Tổng số tiền ký quỹ</span>
+                                <h2 class="text-primary fw-bold mt-1 mb-0">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</h2>
+                                <span class="badge bg-light text-muted border mt-2">Áp dụng cho Hợp đồng #@Model.maHD</span>
+                            </div>
+
+                            <div class="alert alert-info rounded-0 small mb-3">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                Tiền ký quỹ sẽ được bảo lưu an toàn tại hệ thống cho tới khi bạn kiểm tra và xác nhận nghiệm thu các mốc sản phẩm bàn giao từ Freelancer.
+                            </div>
+
+                            <ul class="list-unstyled small text-muted mb-0">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Trạng thái hợp đồng sẽ chuyển sang <strong>Đang thực hiện</strong>.</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Freelancer sẽ nhận được thông báo để bắt đầu công việc ngay lập tức.</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> Bạn có thể theo dõi tiến độ và duyệt từng giai đoạn.</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary rounded-0 fw-bold px-4">
+                                <i class="bi bi-check2-circle me-1"></i> Xác nhận Ký quỹ & Kích hoạt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Header Chi tiết Hợp đồng -->
     <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white">
         <div class="card-body p-4">
@@ -136,9 +209,17 @@
                     <div class="text-muted small mt-1">Mã hợp đồng: <strong class="text-dark">#@Model.maHD</strong> | Mã bài đăng: <strong class="text-dark">#@Model.maJob</strong></div>
                 </div>
                 <div class="text-end">
-                    <span class="badge @badgeClass px-3 py-2 fs-6 rounded-0">
-                        @tenTrangThai
-                    </span>
+                    <div class="d-flex align-items-center justify-content-end flex-wrap gap-2">
+                        <span class="badge @badgeClass px-3 py-2 fs-6 rounded-0">
+                            @tenTrangThai
+                        </span>
+                        @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
+                        {
+                            <button type="button" class="btn btn-primary rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
+                                <i class="bi bi-wallet2 me-1"></i> Tiến hành ký quỹ
+                            </button>
+                        }
+                    </div>
                     <div class="text-muted small mt-2">
                         Ngày tạo: @(Model.ngayBatDau?.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))
                     </div>

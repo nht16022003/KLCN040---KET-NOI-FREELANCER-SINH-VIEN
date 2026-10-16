@@ -178,9 +178,21 @@
                                             };
                                         }
 
-                                        <span class="badge @badgeClass rounded-0">
-                                            @tenTrangThai
-                                        </span>
+                                        <div class="d-flex align-items-center flex-wrap gap-2">
+                                            <span class="badge @badgeClass rounded-0">
+                                                @tenTrangThai
+                                            </span>
+
+                                            @if (!Model.LaFreelancer && hd.trangThai == "ChoKyQuy")
+                                            {
+                                                <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@hd.maHD"
+                                                   class="btn btn-sm btn-primary rounded-0 fw-bold shadow-sm d-inline-flex align-items-center"
+                                                   style="padding: 2px 8px; font-size: 0.78rem;"
+                                                   title="Xem chi tiết và tiến hành ký quỹ cho hợp đồng này">
+                                                    <i class="bi bi-wallet2 me-1"></i> Tiến hành ký quỹ
+                                                </a>
+                                            }
+                                        </div>
                                     </td>
 
                                     <td class="text-end">

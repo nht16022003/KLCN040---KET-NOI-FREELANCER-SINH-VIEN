@@ -254,6 +254,55 @@ namespace FreelancerStudent.API.Services
             return await _repository.CapNhatTrangThaiHopDongAsync(request.maHD, trangThaiMoi, thongBao);
         }
 
+        public async Task<bool> KyQuyHopDongAsync(string maHD, int? maUserNhaTuyenDung)
+        {
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                throw new ArgumentException("Mã hợp đồng không hợp lệ.");
+            }
+
+            var hopDong = await _repository.LayChiTietHopDongTheoMaAsync(maHD);
+            if (hopDong == null)
+            {
+                throw new ArgumentException("Không tìm thấy hợp đồng tương ứng.");
+            }
+
+            // Kiểm tra quyền của Nhà tuyển dụng nếu có truyền maUserNhaTuyenDung
+            if (maUserNhaTuyenDung.HasValue && maUserNhaTuyenDung.Value > 0)
+            {
+                if (hopDong.JobPost?.NhaTuyenDung?.User != null && hopDong.JobPost.NhaTuyenDung.User.maUser != maUserNhaTuyenDung.Value)
+                {
+                    throw new UnauthorizedAccessException("Bạn không có quyền thực hiện ký quỹ cho hợp đồng này.");
+                }
+            }
+
+            // Kiểm tra trạng thái hiện tại phải là ChoKyQuy
+            if (hopDong.trangThai != "ChoKyQuy")
+            {
+                throw new InvalidOperationException($"Hợp đồng đang ở trạng thái '{hopDong.trangThai}', không thể thực hiện ký quỹ.");
+            }
+
+            // Tạo thông báo gửi cho Freelancer
+            ThongBao? thongBao = null;
+            if (hopDong.FreelancerStudent?.User != null)
+            {
+                string tenNtd = hopDong.JobPost?.NhaTuyenDung?.tencongty ?? hopDong.JobPost?.NhaTuyenDung?.User?.hotenUser ?? "Nhà tuyển dụng";
+                string tieuDeCongViec = hopDong.JobPost?.tieude ?? "công việc";
+                thongBao = new ThongBao
+                {
+                    maUser = hopDong.FreelancerStudent.User.maUser,
+                    tieuDe = "Hợp đồng đã được ký quỹ & kích hoạt",
+                    noiDung = $"Nhà tuyển dụng {tenNtd} đã ký quỹ thành công cho hợp đồng {hopDong.maHD} ('{tieuDeCongViec}'). Hợp đồng chính thức bắt đầu, bạn có thể triển khai công việc ngay!",
+                    loaiThongBao = "HopDong",
+                    linkDieuHuong = $"/HopDong/ChiTiet?maHD={hopDong.maHD}",
+                    daDoc = false,
+                    ngayTao = DateTime.Now
+                };
+            }
+
+            return await _repository.CapNhatTrangThaiHopDongAsync(maHD, "DangThucHien", thongBao);
+        }
+
         private static HopDongResponseDTO MapToResponseDTO(HopDong h)
         {
             return new HopDongResponseDTO

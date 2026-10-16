@@ -28,5 +28,9 @@ namespace FreelancerStudent.Web.Services.Interfaces
             bool dongY,
             string? lyDoTuChoi,
             int maUserFreelancer);
+
+        Task<ApiReponse<bool>> KyQuyHopDongAsync(
+            string maHD,
+            int maUserNhaTuyenDung);
     }
 }

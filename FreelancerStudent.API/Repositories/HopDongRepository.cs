@@ -183,6 +183,10 @@ namespace FreelancerStudent.API.Repositories
             if (hopDong == null) return false;
 
             hopDong.trangThai = trangThaiMoi;
+            if (trangThaiMoi == "DangThucHien")
+            {
+                hopDong.ngayBatDau = DateTime.Now;
+            }
 
             if (thongBao != null)
             {

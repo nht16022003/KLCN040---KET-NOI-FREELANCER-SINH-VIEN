@@ -45,6 +45,8 @@ namespace FreelancerStudent.Web.ViewModels
         // Thuộc tính tiện ích giao diện
         public bool CoQuyenXacNhan { get; set; } = false;
         public bool LaFreelancerCuaHopDong { get; set; } = false;
+        public bool CoQuyenKyQuy { get; set; } = false;
+        public bool LaNhaTuyenDungCuaHopDong { get; set; } = false;
     }
 
     public class DanhSachHopDongViewModel

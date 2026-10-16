@@ -372,6 +372,28 @@ namespace FreelancerStudent.Web.Controllers
                 }
             }
 
+            // Kiểm tra xem user hiện tại có phải là Nhà tuyển dụng của hợp đồng này không
+            if (hopDong.maUserNhaTuyenDung.HasValue && hopDong.maUserNhaTuyenDung.Value == maUser.Value)
+            {
+                hopDong.LaNhaTuyenDungCuaHopDong = true;
+                if (hopDong.trangThai == "ChoKyQuy")
+                {
+                    hopDong.CoQuyenKyQuy = true;
+                }
+            }
+            else
+            {
+                var role = HttpContext.Session.GetString("tenRole");
+                if (role == "NhaTuyenDung")
+                {
+                    hopDong.LaNhaTuyenDungCuaHopDong = true;
+                    if (hopDong.trangThai == "ChoKyQuy")
+                    {
+                        hopDong.CoQuyenKyQuy = true;
+                    }
+                }
+            }
+
             return View(hopDong);
         }
 
@@ -393,6 +415,37 @@ namespace FreelancerStudent.Web.Controllers
             }
 
             var response = await _hopDongService.XacNhanHopDongAsync(maHD, dongY, lyDoTuChoi, maUser.Value);
+
+            if (response.success)
+            {
+                TempData["SuccessMessage"] = response.message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = response.message;
+            }
+
+            return RedirectToAction("ChiTiet", new { maHD });
+        }
+
+        // POST: /HopDong/KyQuy
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> KyQuy(string maHD)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                TempData["ErrorMessage"] = "Mã hợp đồng không hợp lệ.";
+                return RedirectToAction("Index");
+            }
+
+            var response = await _hopDongService.KyQuyHopDongAsync(maHD, maUser.Value);
 
             if (response.success)
             {

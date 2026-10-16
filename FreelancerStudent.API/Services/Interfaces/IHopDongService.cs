@@ -27,5 +27,9 @@ namespace FreelancerStudent.API.Services
         Task<bool> XacNhanHopDongAsync(
             XacNhanHopDong_RequestDTO request,
             int? maUserFreelancer);
+
+        Task<bool> KyQuyHopDongAsync(
+            string maHD,
+            int? maUserNhaTuyenDung);
     }
 }

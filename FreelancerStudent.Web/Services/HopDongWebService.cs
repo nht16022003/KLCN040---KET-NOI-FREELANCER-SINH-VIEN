@@ -250,5 +250,57 @@ namespace FreelancerStudent.Web.Services
 
             return result;
         }
+
+        public async Task<ApiReponse<bool>> KyQuyHopDongAsync(
+            string maHD,
+            int maUserNhaTuyenDung)
+        {
+            var result = new ApiReponse<bool>();
+
+            try
+            {
+                var payload = new
+                {
+                    maHD = maHD
+                };
+
+                var url = $"api/HopDong/KyQuy?maUserNhaTuyenDung={maUserNhaTuyenDung}";
+                using var response = await _httpClient.PostAsJsonAsync(url, payload);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.success = true;
+                    result.data = true;
+                    result.message = "Ký quỹ hợp đồng thành công! Hợp đồng đã được kích hoạt sang trạng thái Đang thực hiện.";
+                    return result;
+                }
+
+                try
+                {
+                    var errorObj = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                    if (errorObj != null && errorObj.TryGetValue("message", out var msg))
+                    {
+                        result.message = msg.ToString() ?? "Có lỗi xảy ra khi ký quỹ hợp đồng.";
+                    }
+                    else
+                    {
+                        result.message = $"Lỗi từ máy chủ ({(int)response.StatusCode})";
+                    }
+                }
+                catch
+                {
+                    result.message = $"Lỗi từ máy chủ ({(int)response.StatusCode})";
+                }
+
+                result.success = false;
+            }
+            catch (Exception ex)
+            {
+                result.success = false;
+                result.message = "Không thể kết nối đến máy chủ: " + ex.Message;
+            }
+
+            return result;
+        }
     }
 }
