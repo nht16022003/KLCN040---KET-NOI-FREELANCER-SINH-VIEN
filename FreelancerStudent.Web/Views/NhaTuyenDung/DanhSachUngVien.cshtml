@@ -104,19 +104,29 @@
                     </div>
 
                     <!-- Các nút thao tác -->
-                    <div class="d-flex justify-content-end gap-2 align-items-center">
-                        <!-- Nút Nhắn tin trao đổi -->
-                        <a href="/Chat?maFreelancerStudent=@item.maFreelancerStudents&maJob=@item.maJob" 
-                           class="btn btn-sm btn-outline-success rounded-0">
-                            Trao đổi
-                        </a>
+                    <div class="d-flex justify-content-end gap-2 align-items-center flex-wrap">
+                        @if (item.trangThaiUngTuyen == "ChapNhan")
+                        {
+                            <!-- Nút Nhắn tin trao đổi (Chỉ hiện khi đã duyệt ứng viên) -->
+                            <a href="/Chat?maFreelancerStudent=@item.maFreelancerStudents&maJob=@item.maJob" 
+                               class="btn btn-sm btn-outline-success rounded-0">
+                                <i class="bi bi-chat-dots me-1"></i> Trao đổi
+                            </a>
 
-                        @if (item.trangThaiUngTuyen == "ChoDuyet")
+                            <!-- Nút Tạo hợp đồng (Chỉ hiện khi đã duyệt ứng viên) -->
+                            <a href="/HopDong/TaoHopDong?maJob=@item.maJob&maFreelancerStudent=@item.maFreelancerStudents&maUngTuyen=@item.maUngTuyen"
+                               class="btn btn-sm btn-primary rounded-0 text-white fw-medium shadow-sm"
+                               title="Khởi tạo dự thảo hợp đồng với ứng viên này">
+                                <i class="bi bi-file-earmark-text me-1"></i> Tạo hợp đồng
+                            </a>
+                        }
+                        else if (item.trangThaiUngTuyen == "ChoDuyet")
                         {
                             <!-- Nút Duyệt / Chấp nhận -->
-                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post">
+                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post" class="d-inline">
                                 <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
                                 <input type="hidden" name="trangThai" value="ChapNhan" />
+                                <input type="hidden" name="maJob" value="@item.maJob" />
                                 <button type="submit" class="btn btn-sm btn-success rounded-0"
                                         style="background-color: #1B5E36; border-color: #1B5E36;"
                                         onclick="return confirm('Bạn có chắc chắn muốn duyệt ứng viên này?');">
@@ -125,9 +135,10 @@
                             </form>
 
                             <!-- Nút Từ chối -->
-                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post">
+                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post" class="d-inline">
                                 <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
                                 <input type="hidden" name="trangThai" value="TuChoi" />
+                                <input type="hidden" name="maJob" value="@item.maJob" />
                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-0"
                                         onclick="return confirm('Bạn có chắc chắn muốn từ chối ứng viên này?');">
                                     Từ chối

@@ -31,6 +31,8 @@ builder.Services.AddScoped<IGiaoDichNapTienRepository, GiaoDichNapTienRepository
 builder.Services.AddScoped<IGiaoDichNapTienService, GiaoDichNapTienService>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
+builder.Services.AddScoped<HopDongRepository>();
+builder.Services.AddScoped<IHopDongService, HopDongService>();
 
 
 

@@ -150,25 +150,25 @@ namespace FreelancerStudent.Web.Controllers
 
         //Tuấn
         [HttpGet]
-        public async Task<IActionResult> DanhSachUngTuyen()
+        public async Task<IActionResult> DanhSachUngTuyen(string? maJob)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (maUser == null)
             {
                 return RedirectToAction("DangNhap", "Account");
-
             }
-            var ketqua = await _jobPostService.layDSUngTuyenTheoMaUser(maUser.Value);
 
-            var dsUngTuyen = ketqua.data ?? new List<UngTuyenViewModel>();
-
-            return View(dsUngTuyen);
+            if (!string.IsNullOrEmpty(maJob))
+            {
+                return RedirectToAction("DanhSachUngVien", "NhaTuyenDung", new { maJob });
+            }
+            return RedirectToAction("DanhSachUngVien", "NhaTuyenDung");
         }
 
         //Tuấn
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DuyetUngTuyen(int maUngTuyen, string trangThai)
+        public async Task<IActionResult> DuyetUngTuyen(int maUngTuyen, string trangThai, string? maJob)
         {
             var ketQua = await _jobPostService.duyetUngTuyenAsync(maUngTuyen, trangThai);
             if (ketQua.success)
@@ -179,8 +179,12 @@ namespace FreelancerStudent.Web.Controllers
             {
                 TempData["ErrorMessage"] = ketQua.message;
             }
-            // Tải lại trang Danh sách ứng tuyển
-            return RedirectToAction("DanhSachUngTuyen");
+
+            if (!string.IsNullOrEmpty(maJob))
+            {
+                return RedirectToAction("DanhSachUngVien", "NhaTuyenDung", new { maJob });
+            }
+            return RedirectToAction("DanhSachUngVien", "NhaTuyenDung");
         }
 
         //Tuan

@@ -23,6 +23,7 @@ namespace FreelancerStudent.API.Data
         public DbSet<NhaTuyenDung> NhaTuyenDungs { get; set; }
 
         public DbSet<JobPost> JobPosts { get; set; }
+        public DbSet<HopDong> HopDongs { get; set; }
 
         public DbSet<Wallet> Wallets { get; set; }
 
@@ -40,6 +41,10 @@ namespace FreelancerStudent.API.Data
         public DbSet<Portfolio> Portfolios { get; set; }
 
         public DbSet<DuAnTrongPortfolio> DuAnTrongPortfolios { get; set; }
+
+        public DbSet<GiaiDoan_HopDong> GiaiDoan_HopDongs { get; set; }
+
+        public DbSet<ThongBao> ThongBaos { get; set; }
 
 
 
@@ -222,6 +227,66 @@ namespace FreelancerStudent.API.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<HopDong>(entity =>
+             {
+                 entity.ToTable("HopDong");
+
+                 // Khóa chính
+                 entity.HasKey(h => h.maHD);
+
+                 entity.Property(h => h.maHD)
+                     .HasMaxLength(20)
+                     .IsUnicode(false);
+
+                 entity.Property(h => h.maJob)
+                     .HasMaxLength(20)
+                     .IsUnicode(false);
+
+                 // Một JobPost có thể liên kết hợp đồng
+                 entity.HasOne(h => h.JobPost)
+                     .WithMany()
+                     .HasForeignKey(h => h.maJob)
+
+
+
+                     .OnDelete(DeleteBehavior.Restrict);
+
+                 // Một Freelancer có thể tham gia nhiều hợp đồng
+                 entity.HasOne(h => h.FreelancerStudent)
+                     .WithMany()
+                     .HasForeignKey(h => h.maFreelancerStudent)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+                 entity.Property(h => h.sotienkyquy)
+                     .HasColumnType("decimal(18,2)");
+
+                 entity.Property(h => h.trangThai)
+                     .HasMaxLength(30);
+
+                 entity.Property(h => h.dieuKhoan);
+             });
+
+             modelBuilder.Entity<GiaiDoan_HopDong>(entity =>
+             {
+                 entity.ToTable("GiaiDoan_HopDong");
+                 entity.HasKey(g => g.maGiaiDoan);
+
+                 entity.HasOne(g => g.HopDong)
+                     .WithMany(h => h.GiaiDoan_HopDongs)
+                     .HasForeignKey(g => g.maHD)
+                     .OnDelete(DeleteBehavior.Cascade);
+             });
+
+             modelBuilder.Entity<ThongBao>(entity =>
+             {
+                 entity.ToTable("ThongBao");
+                 entity.HasKey(t => t.maThongBao);
+
+                 entity.HasOne(t => t.User)
+                     .WithMany()
+                     .HasForeignKey(t => t.maUser)
+                     .OnDelete(DeleteBehavior.Cascade);
+             });
         }
     }
 }

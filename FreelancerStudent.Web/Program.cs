@@ -49,7 +49,7 @@ builder.Services.AddScoped<IBaiDangTimViecWebService, BaiDangTimViecWebService>(
 builder.Services.AddScoped<IChatWebService, ChatWebService>();
 builder.Services.AddScoped<IWalletWebService, WalletWebService>();
 builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
-
+builder.Services.AddScoped<IHopDongWebService, HopDongWebService>();
 
 var app = builder.Build();
 
