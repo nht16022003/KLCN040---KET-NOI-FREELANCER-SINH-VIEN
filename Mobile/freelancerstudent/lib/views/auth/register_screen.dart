@@ -15,6 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _fullNameController = TextEditingController();
   final _userNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -24,12 +25,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final fullName = _fullNameController.text.trim();
     final userName = _userNameController.text.trim();
     final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (fullName.isEmpty ||
         userName.isEmpty ||
         email.isEmpty ||
+        phone.isEmpty ||
         password.isEmpty) {
       _showMessage('Vui lòng nhập đầy đủ thông tin');
       return;
@@ -37,6 +40,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
       _showMessage('Email không hợp lệ');
+      return;
+    }
+
+    if (!RegExp(r'^(\+84|84|0)(3|5|7|8|9)\d{8}$').hasMatch(phone)) {
+      _showMessage('Số điện thoại không hợp lệ');
       return;
     }
 
@@ -55,6 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       fullName: fullName,
       userName: userName,
       email: email,
+      phoneNumber: phone,
       password: password,
       role: _selectedRole,
     );
@@ -82,6 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _fullNameController.dispose();
     _userNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -178,6 +188,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelText: 'Email',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'Số điện thoại',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.phone_outlined),
                     ),
                   ),
                   const SizedBox(height: 16),

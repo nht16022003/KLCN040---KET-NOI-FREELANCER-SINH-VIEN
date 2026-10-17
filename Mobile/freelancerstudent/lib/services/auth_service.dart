@@ -95,6 +95,7 @@ class AuthService {
     required String hoVaTen,
     required String tenTaiKhoan,
     required String email,
+    required String soDienThoai,
     required String matKhau,
     required String vaiTro,
   }) async {
@@ -105,10 +106,11 @@ class AuthService {
     if (hoVaTen.trim().isEmpty ||
         taiKhoanChuan.isEmpty ||
         emailChuan.isEmpty ||
+        soDienThoai.trim().isEmpty ||
         matKhau.trim().length < 6) {
       return ApiResponse<AuthResponseModel>(
         isSuccess: false,
-        message: 'Vui lòng nhập đầy đủ họ tên, tên tài khoản và mật khẩu tối thiểu 6 ký tự.',
+        message: 'Vui lòng nhập đầy đủ họ tên, tên tài khoản, số điện thoại và mật khẩu tối thiểu 6 ký tự.',
       );
     }
 
@@ -119,6 +121,7 @@ class AuthService {
           'hovaten': hoVaTen.trim(),
           'tentaikhoan': taiKhoanChuan,
           'email': emailChuan,
+          'sodienthoai': soDienThoai.trim(),
           'password': matKhau.trim(),
           'xacnhanmatkhau': matKhau.trim(),
           'marole': vaiTroChuan == 'NhaTuyenDung' ? 2 : 1,
@@ -154,12 +157,14 @@ class AuthService {
     String hoVaTen,
     String tenTaiKhoan,
     String email,
+    String soDienThoai,
     String matKhau,
   ) async {
     return dangKyTaiKhoan(
       hoVaTen: hoVaTen,
       tenTaiKhoan: tenTaiKhoan,
       email: email,
+      soDienThoai: soDienThoai,
       matKhau: matKhau,
       vaiTro: 'FreelancerStudent',
     );
@@ -170,12 +175,14 @@ class AuthService {
     String tenCongTy,
     String tenTaiKhoan,
     String email,
-    String matKhau,
-  ) async {
+    String matKhau, {
+    String soDienThoai = '',
+  }) async {
     return dangKyTaiKhoan(
       hoVaTen: tenCongTy,
       tenTaiKhoan: tenTaiKhoan,
       email: email,
+      soDienThoai: soDienThoai,
       matKhau: matKhau,
       vaiTro: 'NhaTuyenDung',
     );
@@ -206,32 +213,39 @@ class AuthService {
     required String fullName,
     required String userName,
     required String email,
+    required String phoneNumber,
     required String password,
     required String role,
-  }) =>
-      dangKyTaiKhoan(
-        hoVaTen: fullName,
-        tenTaiKhoan: userName,
-        email: email,
-        matKhau: password,
-        vaiTro: role,
-      );
+  }) => dangKyTaiKhoan(
+    hoVaTen: fullName,
+    tenTaiKhoan: userName,
+    email: email,
+    soDienThoai: phoneNumber,
+    matKhau: password,
+    vaiTro: role,
+  );
 
   Future<ApiResponse<AuthResponseModel>> registerStudent(
     String fullName,
     String userName,
     String email,
+    String phoneNumber,
     String password,
-  ) =>
-      dangKySinhVien(fullName, userName, email, password);
+  ) => dangKySinhVien(fullName, userName, email, phoneNumber, password);
 
   Future<ApiResponse<AuthResponseModel>> registerEmployer(
     String companyName,
     String userName,
     String email,
-    String password,
-  ) =>
-      dangKyNhaTuyenDung(companyName, userName, email, password);
+    String password, {
+    String phoneNumber = '',
+  }) => dangKyNhaTuyenDung(
+    companyName,
+    userName,
+    email,
+    password,
+    soDienThoai: phoneNumber,
+  );
 
   Future<ApiResponse<bool>> forgotPassword(String email) => quenMatKhau(email);
 }

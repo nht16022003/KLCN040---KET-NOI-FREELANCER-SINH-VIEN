@@ -74,8 +74,9 @@ class FreelancerProfileModel {
         : <String, dynamic>{};
 
     final skills =
-        ((root['kyNangs'] ?? root['skills']) is List
-                ? (root['kyNangs'] ?? root['skills']) as List
+        ((root['danhSachKyNang'] ?? root['kyNangs'] ?? root['skills']) is List
+                ? (root['danhSachKyNang'] ?? root['kyNangs'] ?? root['skills'])
+                      as List
                 : const <dynamic>[])
             .map(
               (e) =>
@@ -130,12 +131,16 @@ class FreelancerProfileModel {
                 ) ??
                 0,
       hoTen:
-          (user['hotenUser'] ?? user['hoTen'] ?? root['hoTen'] ?? 'Sinh viên')
+          (root['tenUser'] ??
+                  user['hotenUser'] ??
+                  user['hoTen'] ??
+                  root['hoTen'] ??
+                  'Sinh viên')
               .toString(),
-      email: (user['email'] ?? root['email'] ?? '').toString(),
-      sdt: (root['sdt'] ?? user['sdt'] ?? '') == ''
+      email: (root['email'] ?? user['email'] ?? '').toString(),
+      sdt: (root['sdt'] ?? user['sdt'] ?? user['sdtUser'] ?? '') == ''
           ? null
-          : (root['sdt'] ?? user['sdt'])?.toString(),
+          : (root['sdt'] ?? user['sdt'] ?? user['sdtUser'])?.toString(),
       ngaySinh: _parseDate(user['ngaysinh'] ?? root['ngaySinh']),
       avatarUrl: (root['avatarUrl'] ?? root['avatar'] ?? user['avatarUrl'])
           ?.toString(),
@@ -155,46 +160,85 @@ class FreelancerProfileModel {
                       .toString(),
                 ) ??
                 0,
-      maChuyenNganh: (freelancer['maChuyenNganh'] ?? '').toString(),
+      maChuyenNganh:
+          (root['maChuyenNganh'] ?? freelancer['maChuyenNganh'] ?? '')
+              .toString(),
       tenChuyenNganh:
-          (major['tenChuyenNganh'] ?? freelancer['tenChuyenNganh'] ?? '')
+          (root['tenChuyenNganh'] ??
+                      major['tenChuyenNganh'] ??
+                      freelancer['tenChuyenNganh'] ??
+                      '')
                   .toString() ==
               ''
           ? null
-          : (major['tenChuyenNganh'] ?? freelancer['tenChuyenNganh'] ?? '')
+          : (root['tenChuyenNganh'] ??
+                    major['tenChuyenNganh'] ??
+                    freelancer['tenChuyenNganh'] ??
+                    '')
                 .toString(),
-      tenTruong: (freelancer['tenTruong'] ?? '').toString() == ''
+      tenTruong:
+          (root['tenTruong'] ?? freelancer['tenTruong'] ?? '').toString() == ''
           ? null
-          : freelancer['tenTruong']?.toString(),
+          : (root['tenTruong'] ?? freelancer['tenTruong'])?.toString(),
       diaDiemTruong: (freelancer['diaDiemTruong'] ?? '').toString() == ''
           ? null
           : freelancer['diaDiemTruong']?.toString(),
       diaDiemFreelancerStudent:
-          (freelancer['diaDiemFreelancerStudent'] ?? '').toString() == ''
+          (root['diaDiemFreelancerStudent'] ??
+                      freelancer['diaDiemFreelancerStudent'] ??
+                      '')
+                  .toString() ==
+              ''
           ? null
-          : freelancer['diaDiemFreelancerStudent']?.toString(),
-      ngonNgu: (freelancer['ngonNgu'] ?? '').toString() == ''
+          : (root['diaDiemFreelancerStudent'] ??
+                    freelancer['diaDiemFreelancerStudent'])
+                ?.toString(),
+      ngonNgu: (root['ngonNgu'] ?? freelancer['ngonNgu'] ?? '').toString() == ''
           ? null
-          : freelancer['ngonNgu']?.toString(),
-      kyNangCoBan: (freelancer['kyNangCoBan'] ?? '').toString() == ''
+          : (root['ngonNgu'] ?? freelancer['ngonNgu'])?.toString(),
+      kyNangCoBan:
+          (root['kyNangCoBan'] ?? freelancer['kyNangCoBan'] ?? '').toString() ==
+              ''
           ? null
-          : freelancer['kyNangCoBan']?.toString(),
-      namThu: (freelancer['namThu'] ?? 1) is num
-          ? (freelancer['namThu'] ?? 1).toInt()
-          : int.tryParse((freelancer['namThu'] ?? '1').toString()) ?? 1,
-      gpa: (freelancer['GPA'] ?? freelancer['gpa'] ?? 0.0) is num
-          ? (freelancer['GPA'] ?? freelancer['gpa'] ?? 0.0).toDouble()
+          : (root['kyNangCoBan'] ?? freelancer['kyNangCoBan'])?.toString(),
+      namThu: (root['namThu'] ?? freelancer['namThu'] ?? 1) is num
+          ? (root['namThu'] ?? freelancer['namThu'] ?? 1).toInt()
+          : int.tryParse(
+                  (root['namThu'] ?? freelancer['namThu'] ?? '1').toString(),
+                ) ??
+                1,
+      gpa:
+          (root['GPA'] ??
+                  root['gpa'] ??
+                  freelancer['GPA'] ??
+                  freelancer['gpa'] ??
+                  0.0)
+              is num
+          ? (root['GPA'] ??
+                    root['gpa'] ??
+                    freelancer['GPA'] ??
+                    freelancer['gpa'] ??
+                    0.0)
+                .toDouble()
           : 0.0,
-      nienKhoa: (freelancer['nienKhoa'] ?? '2022-2026').toString(),
-      gioiThieu: (freelancer['gioithieu'] ?? '').toString() == ''
+      nienKhoa: (root['nienKhoa'] ?? freelancer['nienKhoa'] ?? '2022-2026')
+          .toString(),
+      gioiThieu:
+          (root['gioithieu'] ?? freelancer['gioithieu'] ?? '').toString() == ''
           ? null
-          : freelancer['gioithieu']?.toString(),
+          : (root['gioithieu'] ?? freelancer['gioithieu'])?.toString(),
       trangThaiNhanViec:
-          freelancer['trangthaiNhanViec'] == true ||
-          freelancer['trangthaiNhanViec'] == 1 ||
-          freelancer['trangThaiNhanViec'] == true ||
-          freelancer['trangThaiNhanViec'] == 1,
-      chiPhiTu: _parseDouble(freelancer['chiPhiTu']),
+          (root['trangthaiNhanViec'] ??
+                  root['trangThaiNhanViec'] ??
+                  freelancer['trangthaiNhanViec'] ??
+                  freelancer['trangThaiNhanViec']) ==
+              true ||
+          (root['trangthaiNhanViec'] ??
+                  root['trangThaiNhanViec'] ??
+                  freelancer['trangthaiNhanViec'] ??
+                  freelancer['trangThaiNhanViec']) ==
+              1,
+      chiPhiTu: _parseDouble(root['chiPhiTu'] ?? freelancer['chiPhiTu']),
       skills: skills,
       projects: projects,
       proofs: proofs,
@@ -216,6 +260,8 @@ class FreelancerProfileModel {
 }
 
 class PortfolioProjectModel {
+  final String? maDA;
+  final bool laDuAnNoiBat;
   final String tenDuAn;
   final String? moTa;
   final String? vaiTro;
@@ -224,6 +270,8 @@ class PortfolioProjectModel {
   final String? linkDemo;
 
   const PortfolioProjectModel({
+    this.maDA,
+    this.laDuAnNoiBat = false,
     required this.tenDuAn,
     this.moTa,
     this.vaiTro,
@@ -234,6 +282,8 @@ class PortfolioProjectModel {
 
   factory PortfolioProjectModel.fromJson(Map<String, dynamic> json) {
     return PortfolioProjectModel(
+      maDA: json['maDA']?.toString(),
+      laDuAnNoiBat: json['laDuAnNoiBat'] == true || json['laDuAnNoiBat'] == 1,
       tenDuAn: json['tenDuAn'] ?? 'Dự án cá nhân',
       moTa: json['moTa'] ?? json['description'],
       vaiTro: json['vaiTro'] ?? json['role'],

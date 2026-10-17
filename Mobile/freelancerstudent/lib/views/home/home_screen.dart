@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_tabHienTai == 0) {
               await nhaTuyenDungVM.taiDanhSachNhaTuyenDung();
             } else {
-              await jobViewModel.fetchJobs(
+              await jobViewModel.refreshJobs(
                 keyword: _boDieuKhienTimKiemViecLam.text.trim(),
               );
             }
@@ -199,15 +199,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     CircleAvatar(
                       radius: 24,
                       backgroundColor: const Color(0xFFE8F5E9),
-                      backgroundImage: authUser?.avatarUrl != null &&
+                      backgroundImage:
+                          authUser?.avatarUrl != null &&
                               authUser!.avatarUrl!.trim().isNotEmpty
                           ? NetworkImage(authUser.anhDaiDienHienThi)
                           : null,
-                      onBackgroundImageError: authUser?.avatarUrl != null &&
+                      onBackgroundImageError:
+                          authUser?.avatarUrl != null &&
                               authUser!.avatarUrl!.trim().isNotEmpty
                           ? (context, error) {}
                           : null,
-                      child: authUser?.avatarUrl == null ||
+                      child:
+                          authUser?.avatarUrl == null ||
                               authUser!.avatarUrl!.trim().isEmpty
                           ? Text(
                               tenHienThi.isNotEmpty
@@ -285,7 +288,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             boxShadow: _tabHienTai == 0
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.05,
+                                      ),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -337,7 +342,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             boxShadow: _tabHienTai == 1
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.05,
+                                      ),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -423,10 +430,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 4),
                   Text(
                     'Tìm kiếm doanh nghiệp đối tác & trực tiếp trao đổi',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF5C7567),
-                    ),
+                    style: TextStyle(fontSize: 13, color: Color(0xFF5C7567)),
                   ),
                 ],
               ),
@@ -473,7 +477,10 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'Tìm theo tên công ty, người liên hệ, địa chỉ...',
-              hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF88A092)),
+              hintStyle: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF88A092),
+              ),
               prefixIcon: const Icon(Icons.search, color: Color(0xFF2E8B57)),
               suffixIcon: _boDieuKhienTimKiemNhaTuyenDung.text.isNotEmpty
                   ? IconButton(
@@ -638,7 +645,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onChanged: _xuLyTimKiemViecLam,
             decoration: const InputDecoration(
               border: InputBorder.none,
-              hintText: 'Nhập từ khóa công việc...',
+              hintText: 'Tìm theo tiêu đề hoặc kỹ năng...',
               prefixIcon: Icon(Icons.search, color: Color(0xFF2E8B57)),
             ),
           ),
@@ -688,12 +695,20 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: _JobCard(
                 job: job,
-                onApply: () {
-                  showModalBottomSheet(
+                onApply: () async {
+                  final applied = await showModalBottomSheet<bool>(
                     context: context,
                     isScrollControlled: true,
                     builder: (_) => ApplyJobBottomSheet(job: job),
                   );
+                  if (applied == true && context.mounted) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MyApplicationsScreen(),
+                      ),
+                    );
+                  }
                 },
               ),
             ),
@@ -831,9 +846,7 @@ class _TheNhaTuyenDung extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFFEAF8EE),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: const Color(0xFFBFE7C7),
-                        ),
+                        border: Border.all(color: const Color(0xFFBFE7C7)),
                       ),
                       child: Text(
                         ntd.linhVucHienThi,
@@ -903,7 +916,10 @@ class _TheNhaTuyenDung extends StatelessWidget {
                   'Khu vực: ${ntd.diaChiHienThi}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF5C7567)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF5C7567),
+                  ),
                 ),
               ),
             ],
@@ -922,7 +938,10 @@ class _TheNhaTuyenDung extends StatelessWidget {
                   'Đại diện: ${ntd.nguoiDaiDien}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF5C7567)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF5C7567),
+                  ),
                 ),
               ),
             ],

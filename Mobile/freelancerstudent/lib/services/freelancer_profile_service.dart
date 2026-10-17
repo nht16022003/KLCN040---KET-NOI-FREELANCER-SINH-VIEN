@@ -1,5 +1,7 @@
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
+import '../core/constants/api_endpoints.dart';
+import '../models/freelancer_profile_edit_model.dart';
 import '../models/freelancer_profile_model.dart';
 
 class FreelancerProfileService {
@@ -22,7 +24,9 @@ class FreelancerProfileService {
           : const <dynamic>[];
 
       final matchedFreelancer = listData.cast<dynamic>().firstWhereOrNull(
-        (item) => item is Map && (item['maUser'] as num?) == maUser,
+        (item) =>
+            item is Map &&
+            int.tryParse(item['maUser']?.toString() ?? '') == maUser,
       );
 
       final freelancerId = matchedFreelancer is Map
@@ -40,36 +44,137 @@ class FreelancerProfileService {
         );
       }
 
-      final response = await _apiClient.get<Map<String, dynamic>>(
-        '/FreelancerStudent/Profile/$freelancerId',
-      );
-
-      final payload = response.data is Map<String, dynamic>
-          ? Map<String, dynamic>.from(response.data as Map<String, dynamic>)
-          : <String, dynamic>{};
-
-      final data = payload['data'] is Map<String, dynamic>
-          ? Map<String, dynamic>.from(payload['data'] as Map<String, dynamic>)
-          : <String, dynamic>{};
-
-      if (payload['success'] == true || data.isNotEmpty) {
-        return ApiResponse<FreelancerProfileModel>(
-          isSuccess: true,
-          data: FreelancerProfileModel.fromJson(data),
-          message: payload['message'] ?? 'Tải thông tin freelancer thành công',
-        );
-      }
-    } catch (_) {
+      return await getFreelancerProfileById(freelancerId.toInt());
+    } catch (e) {
       return ApiResponse<FreelancerProfileModel>(
         isSuccess: false,
-        message: 'Không thể tải hồ sơ người dùng từ máy chủ.',
+        message: 'Không thể tải hồ sơ người dùng: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<FreelancerProfileModel>> getFreelancerProfileById(
+    int freelancerId,
+  ) async {
+    if (freelancerId <= 0) {
+      return ApiResponse<FreelancerProfileModel>(
+        isSuccess: false,
+        message: 'Mã hồ sơ freelancer không hợp lệ.',
       );
     }
 
-    return ApiResponse<FreelancerProfileModel>(
-      isSuccess: false,
-      message: 'Không có dữ liệu hồ sơ người dùng.',
-    );
+    try {
+      final detailResponse = await _apiClient.get<Map<String, dynamic>>(
+        '${ApiEndpoints.chiTietHoSoFreelancer}/$freelancerId',
+      );
+      final detailPayload = _readMap(detailResponse.data);
+      final detail = _readMap(detailPayload['data']);
+      if (detailPayload['success'] != true || detail.isEmpty) {
+        return ApiResponse<FreelancerProfileModel>(
+          isSuccess: false,
+          message:
+              detailPayload['message']?.toString() ??
+              'Không thể tải thông tin chi tiết hồ sơ.',
+        );
+      }
+
+      final profileResponse = await _apiClient.get<Map<String, dynamic>>(
+        '${ApiEndpoints.profileFreelancer}/$freelancerId',
+      );
+      final profilePayload = _readMap(profileResponse.data);
+      final profile = _readMap(profilePayload['data']);
+      if (profilePayload['success'] != true || profile.isEmpty) {
+        return ApiResponse<FreelancerProfileModel>(
+          isSuccess: false,
+          message:
+              profilePayload['message']?.toString() ??
+              'Không thể tải portfolio freelancer.',
+        );
+      }
+
+      return ApiResponse<FreelancerProfileModel>(
+        isSuccess: true,
+        data: FreelancerProfileModel.fromJson({...profile, ...detail}),
+        message:
+            profilePayload['message']?.toString() ??
+            'Tải thông tin freelancer thành công.',
+      );
+    } catch (e) {
+      return ApiResponse<FreelancerProfileModel>(
+        isSuccess: false,
+        message: 'Không thể tải hồ sơ freelancer: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<bool>> updateFreelancerProfile(
+    FreelancerProfileEditModel profile,
+  ) async {
+    try {
+      final response = await _apiClient.put<Map<String, dynamic>>(
+        ApiEndpoints.capNhatHoSoFreelancer,
+        profile.toJson(),
+      );
+      final payload = _readMap(response.data);
+      return ApiResponse<bool>(
+        isSuccess: payload['success'] == true,
+        data: payload['success'] == true,
+        message:
+            payload['message']?.toString() ??
+            'Không thể cập nhật hồ sơ freelancer.',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi khi cập nhật hồ sơ freelancer: $e',
+      );
+    }
+  }
+
+  Future<ApiResponse<bool>> addPortfolioProject({
+    required int freelancerId,
+    required String projectName,
+    String? role,
+    String? description,
+    String? technologies,
+    String? githubUrl,
+    String? demoUrl,
+  }) async {
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        ApiEndpoints.duAnPortfolio,
+        {
+          'maFreelancerStudents': freelancerId,
+          'tenDuAn': projectName,
+          'vaiTro': role,
+          'moTa': description,
+          'congnghe': technologies,
+          'linkGithub': githubUrl,
+          'linkDemo': demoUrl,
+        },
+      );
+      final payload = _readMap(response.data);
+      return ApiResponse<bool>(
+        isSuccess: payload['success'] == true,
+        data: payload['success'] == true,
+        message:
+            payload['message']?.toString() ??
+            (payload['success'] == true
+                ? 'Đã thêm dự án portfolio.'
+                : 'Không thể thêm dự án portfolio.'),
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi khi thêm dự án portfolio: $e',
+      );
+    }
+  }
+
+  Map<String, dynamic> _readMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return <String, dynamic>{};
   }
 }
 

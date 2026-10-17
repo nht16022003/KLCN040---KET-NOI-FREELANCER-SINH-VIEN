@@ -28,10 +28,14 @@ class _MyApplicationsScreenState extends State<MyApplicationsScreen> {
     if (normalized.isEmpty) return 'Đang chờ duyệt';
 
     final lower = normalized.toLowerCase();
-    if (lower.contains('accept') || lower.contains('approved')) {
+    if (lower == 'chapnhan' ||
+        lower.contains('accept') ||
+        lower.contains('approved')) {
       return 'Đã phê duyệt';
     }
-    if (lower.contains('reject') || lower.contains('denied')) {
+    if (lower == 'tuchoi' ||
+        lower.contains('reject') ||
+        lower.contains('denied')) {
       return 'Bị từ chối';
     }
     return 'Đang chờ duyệt';
@@ -122,7 +126,11 @@ class _ApplicationCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        title: Text('Công việc #${application.jobId}'),
+        title: Text(
+          application.tieude.isEmpty
+              ? 'Công việc #${application.jobId}'
+              : application.tieude,
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

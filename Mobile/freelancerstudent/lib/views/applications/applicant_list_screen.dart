@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/api_endpoints.dart';
 import '../../models/application_model.dart';
 import '../../services/application_service.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../profile/profile_screen.dart';
 
 class ApplicantListScreen extends StatefulWidget {
   const ApplicantListScreen({super.key});
@@ -17,6 +19,7 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   List<ApplicationModel> _applicants = <ApplicationModel>[];
+  final Set<String> _updatingIds = <String>{};
 
   @override
   void initState() {
@@ -63,13 +66,13 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
     final value = status.trim();
     if (value.isEmpty) return 'Chờ duyệt';
     final lower = value.toLowerCase();
-    if (lower.contains('approved') ||
-        lower.contains('duyet') ||
+    if (lower == 'chapnhan' ||
+        lower.contains('approved') ||
         lower.contains('accept')) {
       return 'Phê duyệt';
     }
-    if (lower.contains('reject') ||
-        lower.contains('tu choi') ||
+    if (lower == 'tuchoi' ||
+        lower.contains('reject') ||
         lower.contains('denied')) {
       return 'Từ chối';
     }
@@ -85,8 +88,8 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
     ApplicationModel applicant,
     String nextStatus,
   ) async {
-    final index = _applicants.indexWhere((item) => item.id == applicant.id);
-    if (index == -1) return;
+    if (_updatingIds.contains(applicant.id)) return;
+    setState(() => _updatingIds.add(applicant.id));
 
     final response = await _service.updateApplicationStatus(
       applicant.id,
@@ -94,20 +97,16 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
     );
 
     if (!mounted) return;
+    setState(() => _updatingIds.remove(applicant.id));
 
     if (response.isSuccess) {
+      final index = _applicants.indexWhere((item) => item.id == applicant.id);
+      if (index == -1) return;
       setState(() {
-        _applicants[index] = ApplicationModel(
-          id: applicant.id,
-          jobId: applicant.jobId,
-          applicantId: applicant.applicantId,
-          coverLetter: applicant.coverLetter,
-          proposedBudget: applicant.proposedBudget,
-          status: nextStatus,
-        );
+        _applicants[index] = applicant.copyWith(status: nextStatus);
       });
 
-      final label = nextStatus == 'Approved'
+      final label = nextStatus == 'ChapNhan'
           ? 'đã được phê duyệt'
           : 'bị từ chối';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -167,6 +166,7 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                 final applicant = _applicants[index];
                 final isPending = _isPending(applicant);
                 final statusText = _statusLabel(applicant.status);
+                final freelancerId = int.tryParse(applicant.applicantId);
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -177,42 +177,90 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                       children: [
                         Row(
                           children: [
-                            const CircleAvatar(
-                              backgroundColor: Color(0xFFE9E9E9),
-                              child: Icon(Icons.person, color: Colors.black87),
+                            InkWell(
+                              borderRadius: BorderRadius.circular(28),
+                              onTap: freelancerId == null || freelancerId <= 0
+                                  ? null
+                                  : () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ProfileScreen(
+                                          freelancerId: freelancerId,
+                                          readOnly: true,
+                                        ),
+                                      ),
+                                    ),
+                              child: CircleAvatar(
+                                backgroundColor: const Color(0xFFE9E9E9),
+                                backgroundImage:
+                                    applicant.avatar?.trim().isNotEmpty == true
+                                    ? NetworkImage(
+                                        ApiEndpoints.dinhDangUrlAnh(
+                                          applicant.avatar,
+                                          tenMacDinh:
+                                              applicant.tenUser ?? 'Freelancer',
+                                        ),
+                                      )
+                                    : null,
+                                child:
+                                    applicant.avatar?.trim().isNotEmpty == true
+                                    ? null
+                                    : const Icon(
+                                        Icons.person,
+                                        color: Colors.black87,
+                                      ),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Freelancer #${applicant.applicantId}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17,
+                              child: InkWell(
+                                onTap: freelancerId == null || freelancerId <= 0
+                                    ? null
+                                    : () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ProfileScreen(
+                                            freelancerId: freelancerId,
+                                            readOnly: true,
+                                          ),
+                                        ),
+                                      ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      applicant.tenUser?.trim().isNotEmpty ==
+                                              true
+                                          ? applicant.tenUser!
+                                          : 'Freelancer #${applicant.applicantId}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    statusText,
-                                    style: TextStyle(
-                                      color: statusText == 'Phê duyệt'
-                                          ? Colors.green
-                                          : statusText == 'Từ chối'
-                                          ? Colors.red
-                                          : const Color(0xFFB88A00),
-                                      fontWeight: FontWeight.w600,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      statusText,
+                                      style: TextStyle(
+                                        color: statusText == 'Phê duyệt'
+                                            ? Colors.green
+                                            : statusText == 'Từ chối'
+                                            ? Colors.red
+                                            : const Color(0xFFB88A00),
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Mã công việc: ${applicant.jobId}',
+                          applicant.tieude.isEmpty
+                              ? 'Mã công việc: ${applicant.jobId}'
+                              : 'Công việc: ${applicant.tieude}',
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
@@ -231,8 +279,12 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                             children: [
                               Expanded(
                                 child: ElevatedButton.icon(
-                                  onPressed: () =>
-                                      _updateStatus(applicant, 'Approved'),
+                                  onPressed: _updatingIds.contains(applicant.id)
+                                      ? null
+                                      : () => _updateStatus(
+                                          applicant,
+                                          'ChapNhan',
+                                        ),
                                   icon: const Icon(Icons.check),
                                   label: const Text('Phê duyệt'),
                                   style: ElevatedButton.styleFrom(
@@ -244,8 +296,10 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: ElevatedButton.icon(
-                                  onPressed: () =>
-                                      _updateStatus(applicant, 'Rejected'),
+                                  onPressed: _updatingIds.contains(applicant.id)
+                                      ? null
+                                      : () =>
+                                            _updateStatus(applicant, 'TuChoi'),
                                   icon: const Icon(Icons.close),
                                   label: const Text('Từ chối'),
                                   style: ElevatedButton.styleFrom(

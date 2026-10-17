@@ -9,7 +9,7 @@ class ApplicationService {
   final ApiClient _apiClient;
 
   ApplicationService({ApiClient? apiClient})
-      : _apiClient = apiClient ?? ApiClient();
+    : _apiClient = apiClient ?? ApiClient();
 
   // ==========================================
   // HÀM TIẾNG VIỆT ĐỒNG BỘ VỚI BACKEND API
@@ -18,17 +18,17 @@ class ApplicationService {
   /// Sinh viên nộp đơn ứng tuyển (JobPostController.NopDonUngTuyen - POST api/JobPost/UngTuyen)
   Future<ApiResponse<ApplicationModel>> nopDonUngTuyen({
     required String maJob,
-    required int maFreelancerStudents,
+    required int maUser,
     required String thuGioiThieu,
-    required double thulaoDeXuat,
+    double? thulaoDeXuat,
     String? thoiGianHoanThanhDeXuat,
   }) async {
     final payload = <String, dynamic>{
       'maJob': maJob,
-      'maFreelancerStudents': maFreelancerStudents,
+      'maUser': maUser,
       'thuGioiThieu': thuGioiThieu,
-      'thulaoDeXuat': thulaoDeXuat,
-      'thoiGianHoanThanhDeXuat': thoiGianHoanThanhDeXuat ?? '14 ngày',
+      'thulaoDeXuat': ?thulaoDeXuat,
+      'thoiGianHoanThanhDeXuat': ?thoiGianHoanThanhDeXuat,
     };
 
     try {
@@ -41,10 +41,11 @@ class ApplicationService {
           ? response.data as Map<String, dynamic>
           : <String, dynamic>{};
 
-      if (body['success'] == true || response.statusCode == 200) {
+      if (body['success'] == true) {
         return ApiResponse<ApplicationModel>(
           isSuccess: true,
-          message: body['message']?.toString() ?? 'Nộp đơn ứng tuyển thành công!',
+          message:
+              body['message']?.toString() ?? 'Nộp đơn ứng tuyển thành công!',
           data: ApplicationModel.fromJson(payload),
         );
       }
@@ -80,10 +81,7 @@ class ApplicationService {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
         ApiEndpoints.duyetUngTuyen,
-        {
-          'maUngTuyen': maUngTuyen,
-          'trangThai': trangThai,
-        },
+        {'maUngTuyen': maUngTuyen, 'trangThai': trangThai},
       );
 
       final body = response.data is Map<String, dynamic>
@@ -92,8 +90,9 @@ class ApplicationService {
 
       return ApiResponse<bool>(
         isSuccess: body['success'] == true,
-        data: true,
-        message: body['message']?.toString() ?? 'Cập nhật trạng thái thành công!',
+        data: body['success'] == true,
+        message:
+            body['message']?.toString() ?? 'Cập nhật trạng thái thành công!',
       );
     } on DioException catch (e) {
       final backendMessage = (e.response?.data is Map)
@@ -104,6 +103,11 @@ class ApplicationService {
         message: backendMessage.isNotEmpty
             ? backendMessage
             : 'Duyệt ứng tuyển thất bại.',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi khi cập nhật trạng thái đơn ứng tuyển: $e',
       );
     }
   }
@@ -124,13 +128,17 @@ class ApplicationService {
       final items = rawData is List ? rawData : <dynamic>[];
 
       return ApiResponse<List<ApplicationModel>>(
-        isSuccess: true,
+        isSuccess: body['success'] != false,
         data: items
             .map(
               (item) => ApplicationModel.fromJson(item as Map<String, dynamic>),
             )
             .toList(),
-        message: items.isEmpty ? 'Chưa có đơn ứng tuyển nào.' : '',
+        message: body['success'] == false
+            ? body['message']?.toString() ?? 'Không thể tải danh sách đơn.'
+            : items.isEmpty
+            ? 'Chưa có đơn ứng tuyển nào.'
+            : '',
       );
     } on DioException catch (e) {
       return ApiResponse<List<ApplicationModel>>(
@@ -152,16 +160,19 @@ class ApplicationService {
     String jobId,
     Map<String, dynamic> data,
   ) {
-    final rawUserId = data['maFreelancerStudents'] ?? data['maFreelancerStudent'] ?? 0;
-    final parsedUserId = rawUserId is int ? rawUserId : int.tryParse(rawUserId.toString()) ?? 0;
+    final rawUserId = data['maUser'] ?? data['userId'] ?? 0;
+    final parsedUserId = rawUserId is int
+        ? rawUserId
+        : int.tryParse(rawUserId.toString()) ?? 0;
     final rawBudget = data['thulaoDeXuat'] ?? data['proposedBudget'] ?? 0;
     final parsedBudget = rawBudget is num ? rawBudget.toDouble() : 0.0;
 
     return nopDonUngTuyen(
       maJob: jobId,
-      maFreelancerStudents: parsedUserId,
-      thuGioiThieu: (data['thuGioiThieu'] ?? data['coverLetter'] ?? '').toString(),
-      thulaoDeXuat: parsedBudget,
+      maUser: parsedUserId,
+      thuGioiThieu: (data['thuGioiThieu'] ?? data['coverLetter'] ?? '')
+          .toString(),
+      thulaoDeXuat: parsedBudget > 0 ? parsedBudget : null,
     );
   }
 
@@ -172,7 +183,9 @@ class ApplicationService {
     final parsedId = int.tryParse(applicationId) ?? 0;
     final res = await duyetUngTuyen(
       maUngTuyen: parsedId,
-      trangThai: status == 'Accepted' ? 'ChapNhan' : (status == 'Rejected' ? 'TuChoi' : status),
+      trangThai: status == 'Accepted'
+          ? 'ChapNhan'
+          : (status == 'Rejected' ? 'TuChoi' : status),
     );
     return ApiResponse<ApplicationModel>(
       isSuccess: res.isSuccess,
