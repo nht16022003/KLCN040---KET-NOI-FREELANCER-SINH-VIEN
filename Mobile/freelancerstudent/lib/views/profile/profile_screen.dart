@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/api_endpoints.dart';
 import '../../models/freelancer_profile_model.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../../viewmodels/freelancer_profile_viewmodel.dart';
@@ -176,12 +177,31 @@ class _ProfileOverviewTab extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: const Color(0xFFE9E9E9),
-                  child: const Icon(
-                    Icons.person,
-                    size: 34,
-                    color: Colors.black87,
-                  ),
+                  backgroundColor: const Color(0xFFE8F5E9),
+                  backgroundImage: (profile.avatarUrl?.isNotEmpty == true ||
+                          authUser?.avatarUrl?.isNotEmpty == true)
+                      ? NetworkImage(
+                          ApiEndpoints.dinhDangUrlAnh(
+                            profile.avatarUrl ?? authUser?.avatarUrl,
+                            tenMacDinh: displayName,
+                          ),
+                        )
+                      : null,
+                  onBackgroundImageError: (profile.avatarUrl?.isNotEmpty ==
+                              true ||
+                          authUser?.avatarUrl?.isNotEmpty == true)
+                      ? (context, error) {}
+                      : null,
+                  child: (profile.avatarUrl == null ||
+                              profile.avatarUrl!.isEmpty) &&
+                          (authUser?.avatarUrl == null ||
+                              authUser!.avatarUrl!.isEmpty)
+                      ? const Icon(
+                          Icons.person,
+                          size: 34,
+                          color: Color(0xFF1D5D3B),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(

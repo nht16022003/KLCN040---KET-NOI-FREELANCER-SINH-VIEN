@@ -6,27 +6,45 @@ import '../services/wallet_service.dart';
 class WalletViewModel extends ChangeNotifier {
   final WalletService _walletService = WalletService();
 
-  bool _isLoading = false;
-  WalletModel? _wallet;
-  String? _errorMessage;
+  // ==========================================
+  // BIẾN TRẠNG THÁI TIẾNG VIỆT
+  // ==========================================
+  bool _dangTai = false;
+  WalletModel? _vi;
+  String? _thongBaoLoi;
 
-  bool get isLoading => _isLoading;
-  WalletModel? get wallet => _wallet;
-  String? get errorMessage => _errorMessage;
+  bool get dangTai => _dangTai;
+  WalletModel? get vi => _vi;
+  String? get thongBaoLoi => _thongBaoLoi;
 
-  Future<void> fetchWalletBalance() async {
-    _isLoading = true;
-    _errorMessage = null;
+  // Tương thích ngược
+  bool get isLoading => _dangTai;
+  WalletModel? get wallet => _vi;
+  String? get errorMessage => _thongBaoLoi;
+
+  // ==========================================
+  // HÀM XỬ LÝ TIẾNG VIỆT
+  // ==========================================
+
+  /// Tải thông tin số dư ví từ API
+  Future<void> taiThongTinVi([int? maUser]) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
     notifyListeners();
 
-    final response = await _walletService.getWalletBalance();
+    final response = await _walletService.layViTheoUser(maUser ?? 1);
     if (response.isSuccess) {
-      _wallet = response.data;
+      _vi = response.data;
     } else {
-      _errorMessage = response.message;
+      _thongBaoLoi = response.message;
     }
 
-    _isLoading = false;
+    _dangTai = false;
     notifyListeners();
   }
+
+  // ==========================================
+  // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
+  // ==========================================
+  Future<void> fetchWalletBalance() => taiThongTinVi();
 }

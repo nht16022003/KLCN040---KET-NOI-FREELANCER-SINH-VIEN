@@ -8,88 +8,105 @@ import '../services/auth_service.dart';
 class AuthViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
 
-  bool _isLoading = false;
-  String? _errorMessage;
-  AuthResponseModel? _currentUser;
+  // ==========================================
+  // BIẾN TRẠNG THÁI TIẾNG VIỆT
+  // ==========================================
+  bool _dangTai = false;
+  String? _thongBaoLoi;
+  AuthResponseModel? _nguoiDungHienTai;
 
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  AuthResponseModel? get currentUser => _currentUser;
+  bool get dangTai => _dangTai;
+  String? get thongBaoLoi => _thongBaoLoi;
+  AuthResponseModel? get nguoiDungHienTai => _nguoiDungHienTai;
 
-  Future<bool> login(String email, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
+  // Tương thích ngược
+  bool get isLoading => _dangTai;
+  String? get errorMessage => _thongBaoLoi;
+  AuthResponseModel? get currentUser => _nguoiDungHienTai;
+
+  // ==========================================
+  // HÀM XỬ LÝ TIẾNG VIỆT
+  // ==========================================
+
+  /// Đăng nhập tài khoản
+  Future<bool> dangNhap(String tenTaiKhoanHoacEmail, String matKhau) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
     notifyListeners();
 
-    final response = await _authService.login(email, password);
+    final response = await _authService.dangNhap(tenTaiKhoanHoacEmail, matKhau);
     if (response.isSuccess && response.data != null) {
-      _currentUser = response.data;
-      _isLoading = false;
+      _nguoiDungHienTai = response.data;
+      _dangTai = false;
       notifyListeners();
       return true;
     }
 
-    _errorMessage = response.message;
-    _isLoading = false;
+    _thongBaoLoi = response.message;
+    _dangTai = false;
     notifyListeners();
     return false;
   }
 
-  Future<bool> registerAccount({
-    required String fullName,
-    required String userName,
+  /// Đăng ký tài khoản mới
+  Future<bool> dangKyTaiKhoan({
+    required String hoVaTen,
+    required String tenTaiKhoan,
     required String email,
-    required String password,
-    required String role,
+    required String matKhau,
+    required String vaiTro,
   }) async {
-    _isLoading = true;
-    _errorMessage = null;
+    _dangTai = true;
+    _thongBaoLoi = null;
     notifyListeners();
 
-    final response = await _authService.registerAccount(
-      fullName: fullName,
-      userName: userName,
+    final response = await _authService.dangKyTaiKhoan(
+      hoVaTen: hoVaTen,
+      tenTaiKhoan: tenTaiKhoan,
       email: email,
-      password: password,
-      role: role,
+      matKhau: matKhau,
+      vaiTro: vaiTro,
     );
 
     if (response.isSuccess && response.data != null) {
-      _currentUser = response.data;
-      _isLoading = false;
+      _nguoiDungHienTai = response.data;
+      _dangTai = false;
       notifyListeners();
       return true;
     }
 
-    _errorMessage = response.message;
-    _isLoading = false;
+    _thongBaoLoi = response.message;
+    _dangTai = false;
     notifyListeners();
     return false;
   }
 
-  Future<void> registerStudent(
-    String fullName,
-    String userName,
+  /// Đăng ký nhanh tài khoản sinh viên
+  Future<void> dangKySinhVien(
+    String hoVaTen,
+    String tenTaiKhoan,
     String email,
-    String password,
+    String matKhau,
   ) async {
-    await registerAccount(
-      fullName: fullName,
-      userName: userName,
+    await dangKyTaiKhoan(
+      hoVaTen: hoVaTen,
+      tenTaiKhoan: tenTaiKhoan,
       email: email,
-      password: password,
-      role: 'FreelancerStudent',
+      matKhau: matKhau,
+      vaiTro: 'FreelancerStudent',
     );
   }
 
-  Future<void> loadSession() async {
-    final user = await _authService.getStoredSession();
-    _currentUser = user;
-    _errorMessage = null;
+  /// Tải phiên đăng nhập đã lưu trong máy
+  Future<void> taiPhienDangNhap() async {
+    final user = await _authService.layPhienDangNhapDaLuu();
+    _nguoiDungHienTai = user;
+    _thongBaoLoi = null;
     notifyListeners();
   }
 
-  Future<void> logout() async {
+  /// Đăng xuất tài khoản
+  Future<void> dangXuat() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(PrefKeys.accessToken);
     await prefs.remove(PrefKeys.userRole);
@@ -97,8 +114,40 @@ class AuthViewModel extends ChangeNotifier {
     await prefs.remove('user_email');
     await prefs.remove('user_full_name');
 
-    _currentUser = null;
-    _errorMessage = null;
+    _nguoiDungHienTai = null;
+    _thongBaoLoi = null;
     notifyListeners();
   }
+
+  // ==========================================
+  // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
+  // ==========================================
+  Future<bool> login(String email, String password) => dangNhap(email, password);
+
+  Future<bool> registerAccount({
+    required String fullName,
+    required String userName,
+    required String email,
+    required String password,
+    required String role,
+  }) =>
+      dangKyTaiKhoan(
+        hoVaTen: fullName,
+        tenTaiKhoan: userName,
+        email: email,
+        matKhau: password,
+        vaiTro: role,
+      );
+
+  Future<void> registerStudent(
+    String fullName,
+    String userName,
+    String email,
+    String password,
+  ) =>
+      dangKySinhVien(fullName, userName, email, password);
+
+  Future<void> loadSession() => taiPhienDangNhap();
+
+  Future<void> logout() => dangXuat();
 }

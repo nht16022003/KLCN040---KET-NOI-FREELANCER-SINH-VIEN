@@ -1,12 +1,30 @@
 import 'package:flutter/material.dart';
 
 class ChatDetailScreen extends StatelessWidget {
-  const ChatDetailScreen({super.key});
+  final String? receiverId;
+  final String? receiverName;
+  final String? avatarUrl;
+
+  const ChatDetailScreen({
+    super.key,
+    this.receiverId,
+    this.receiverName,
+    this.avatarUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final title = receiverName != null && receiverName!.isNotEmpty
+        ? 'Chat với $receiverName'
+        : 'Chat với Nguyễn Văn A';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat với Nguyễn Văn A')),
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1D5D3B),
+        elevation: 0.5,
+      ),
       body: Column(
         children: [
           Expanded(

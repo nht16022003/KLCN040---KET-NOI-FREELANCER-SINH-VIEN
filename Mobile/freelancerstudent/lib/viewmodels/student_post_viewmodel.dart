@@ -6,27 +6,45 @@ import '../services/student_post_service.dart';
 class StudentPostViewModel extends ChangeNotifier {
   final StudentPostService _service = StudentPostService();
 
-  bool _isLoading = false;
-  List<StudentPostModel> _posts = <StudentPostModel>[];
-  String? _errorMessage;
+  // ==========================================
+  // BIẾN TRẠNG THÁI TIẾNG VIỆT
+  // ==========================================
+  bool _dangTai = false;
+  List<StudentPostModel> _danhSachBaiDang = <StudentPostModel>[];
+  String? _thongBaoLoi;
 
-  bool get isLoading => _isLoading;
-  List<StudentPostModel> get posts => _posts;
-  String? get errorMessage => _errorMessage;
+  bool get dangTai => _dangTai;
+  List<StudentPostModel> get danhSachBaiDang => _danhSachBaiDang;
+  String? get thongBaoLoi => _thongBaoLoi;
 
-  Future<void> fetchStudentPosts() async {
-    _isLoading = true;
-    _errorMessage = null;
+  // Tương thích ngược
+  bool get isLoading => _dangTai;
+  List<StudentPostModel> get posts => _danhSachBaiDang;
+  String? get errorMessage => _thongBaoLoi;
+
+  // ==========================================
+  // HÀM XỬ LÝ TIẾNG VIỆT
+  // ==========================================
+
+  /// Tải danh sách các bài đăng tìm việc của sinh viên
+  Future<void> taiDanhSachBaiDangTimViec() async {
+    _dangTai = true;
+    _thongBaoLoi = null;
     notifyListeners();
 
-    final response = await _service.getStudentPosts();
+    final response = await _service.layTatCaBaiDangTimViec();
     if (response.isSuccess) {
-      _posts = response.data ?? <StudentPostModel>[];
+      _danhSachBaiDang = response.data ?? <StudentPostModel>[];
     } else {
-      _errorMessage = response.message;
+      _thongBaoLoi = response.message;
     }
 
-    _isLoading = false;
+    _dangTai = false;
     notifyListeners();
   }
+
+  // ==========================================
+  // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
+  // ==========================================
+  Future<void> fetchStudentPosts() => taiDanhSachBaiDangTimViec();
 }

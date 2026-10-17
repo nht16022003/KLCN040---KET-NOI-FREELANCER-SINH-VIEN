@@ -74,6 +74,17 @@ if (app.Environment.IsDevelopment())
 // 1. BẬT CORS CHO PHÉP WEB MVC GỌI SANG VÀ KẾT NỐI SIGNALR
 app.UseCors("AllowWebClient");
 
+// 1.5. PHỤC VỤ FILE TĨNH (AVATAR, LOGO) TỪ THƯ MỤC WWWROOT CỦA WEB ĐỂ MOBILE TẢI ĐƯỢC ẢNH
+var webWwwRoot = Path.Combine(builder.Environment.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot");
+if (Directory.Exists(webWwwRoot))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.GetFullPath(webWwwRoot)),
+        RequestPath = ""
+    });
+}
+
 // app.UseHttpsRedirection(); // Bỏ qua HTTPS redirect trong local dev để tránh lỗi 307 cho kết nối SignalR
 
 app.UseAuthorization();

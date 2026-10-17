@@ -6,41 +6,64 @@ import '../services/application_service.dart';
 class ApplicationViewModel extends ChangeNotifier {
   final ApplicationService _service = ApplicationService();
 
-  bool _isLoading = false;
-  List<ApplicationModel> _applications = <ApplicationModel>[];
-  String? _errorMessage;
+  // ==========================================
+  // BIẾN TRẠNG THÁI TIẾNG VIỆT
+  // ==========================================
+  bool _dangTai = false;
+  List<ApplicationModel> _danhSachUngTuyen = <ApplicationModel>[];
+  String? _thongBaoLoi;
 
-  bool get isLoading => _isLoading;
-  List<ApplicationModel> get applications => _applications;
-  String? get errorMessage => _errorMessage;
+  bool get dangTai => _dangTai;
+  List<ApplicationModel> get danhSachUngTuyen => _danhSachUngTuyen;
+  String? get thongBaoLoi => _thongBaoLoi;
 
-  Future<void> fetchMyApplications({int? userId}) async {
-    _isLoading = true;
-    _errorMessage = null;
+  // Tương thích ngược
+  bool get isLoading => _dangTai;
+  List<ApplicationModel> get applications => _danhSachUngTuyen;
+  String? get errorMessage => _thongBaoLoi;
+
+  // ==========================================
+  // HÀM XỬ LÝ TIẾNG VIỆT
+  // ==========================================
+
+  /// Tải danh sách đơn ứng tuyển
+  Future<void> taiDanhSachUngTuyen({int? maUser}) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
     notifyListeners();
 
-    final response = await _service.getMyApplications(userId: userId);
+    final response = await _service.layDanhSachUngTuyenTheoUser(maUser ?? 0);
     if (response.isSuccess) {
-      _applications = response.data ?? <ApplicationModel>[];
-      if (_applications.isEmpty &&
+      _danhSachUngTuyen = response.data ?? <ApplicationModel>[];
+      if (_danhSachUngTuyen.isEmpty &&
           response.message.isNotEmpty &&
-          !response.message.contains('Bạn chưa có đơn ứng tuyển nào')) {
-        _errorMessage = response.message;
+          !response.message.contains('Chưa có đơn ứng tuyển nào')) {
+        _thongBaoLoi = response.message;
       }
     } else {
-      _errorMessage = response.message;
+      _thongBaoLoi = response.message;
     }
 
-    _isLoading = false;
+    _dangTai = false;
     notifyListeners();
   }
 
-  void addLocalApplication(ApplicationModel application) {
-    final exists = _applications.any((item) => item.id == application.id);
-    if (!exists) {
-      _applications = [application, ..._applications];
-      _errorMessage = null;
+  /// Thêm đơn ứng tuyển vào danh sách hiển thị
+  void themUngTuyenCucBo(ApplicationModel ungTuyen) {
+    final tonTai = _danhSachUngTuyen.any((item) => item.maUngTuyen == ungTuyen.maUngTuyen);
+    if (!tonTai) {
+      _danhSachUngTuyen = [ungTuyen, ..._danhSachUngTuyen];
+      _thongBaoLoi = null;
       notifyListeners();
     }
   }
+
+  // ==========================================
+  // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
+  // ==========================================
+  Future<void> fetchMyApplications({int? userId}) =>
+      taiDanhSachUngTuyen(maUser: userId);
+
+  void addLocalApplication(ApplicationModel application) =>
+      themUngTuyenCucBo(application);
 }

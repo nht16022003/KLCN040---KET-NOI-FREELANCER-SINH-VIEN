@@ -1,33 +1,40 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/constants/api_endpoints.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/storage/pref_keys.dart';
 import '../models/auth_response_model.dart';
-import '../core/constants/api_endpoints.dart';
 
 class AuthService {
   final ApiClient _apiClient = ApiClient();
 
-  String _normalizeRole(String role) {
-    final value = role.trim();
+  String _chuanHoaVaiTro(String vaiTro) {
+    final value = vaiTro.trim();
     if (value.toLowerCase() == 'nhatuyendung' ||
-        value.toLowerCase() == 'employer') {
+        value.toLowerCase() == 'employer' ||
+        value == '2') {
       return 'NhaTuyenDung';
     }
     return 'FreelancerStudent';
   }
 
-  Future<void> _saveSession(AuthResponseModel user) async {
+  // ==========================================
+  // HÀM TIẾNG VIỆT ĐỒNG BỘ VỚI BACKEND API
+  // ==========================================
+
+  /// Lưu phiên đăng nhập an toàn vào thiết bị
+  Future<void> luuPhienDangNhap(AuthResponseModel nguoiDung) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(PrefKeys.userRole, user.role);
-    await prefs.setString(PrefKeys.accessToken, user.token);
-    await prefs.setString('user_email', user.email);
-    await prefs.setInt(PrefKeys.userId, user.userId);
-    await prefs.setString('user_full_name', user.fullName);
+    await prefs.setString(PrefKeys.userRole, nguoiDung.role);
+    await prefs.setString(PrefKeys.accessToken, nguoiDung.token);
+    await prefs.setString('user_email', nguoiDung.email);
+    await prefs.setInt(PrefKeys.userId, nguoiDung.userId);
+    await prefs.setString('user_full_name', nguoiDung.fullName);
   }
 
-  Future<AuthResponseModel?> getStoredSession() async {
+  /// Lấy phiên đăng nhập đã lưu trong máy
+  Future<AuthResponseModel?> layPhienDangNhapDaLuu() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(PrefKeys.accessToken) ?? '';
     final email = prefs.getString('user_email') ?? '';
@@ -48,14 +55,15 @@ class AuthService {
     );
   }
 
-  Future<ApiResponse<AuthResponseModel>> login(
-    String email,
-    String password,
+  /// Đăng nhập tài khoản (AuthController.DangNhap)
+  Future<ApiResponse<AuthResponseModel>> dangNhap(
+    String tenTaiKhoanHoacEmail,
+    String matKhau,
   ) async {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
-        ApiEndpoints.authLogin,
-        {'tentaikhoan_email': email.trim(), 'password': password},
+        ApiEndpoints.dangNhap,
+        {'tentaikhoan_email': tenTaiKhoanHoacEmail.trim(), 'password': matKhau},
       );
 
       final handled = await _apiClient.handleResponse(
@@ -64,55 +72,56 @@ class AuthService {
       );
 
       if (handled.isSuccess && handled.data != null) {
-        await _saveSession(handled.data!);
+        await luuPhienDangNhap(handled.data!);
         return handled;
       }
 
       return ApiResponse<AuthResponseModel>(
         isSuccess: false,
         message: handled.message.isEmpty
-            ? 'Email hoặc mật khẩu không hợp lệ.'
+            ? 'Tên tài khoản hoặc mật khẩu không chính xác.'
             : handled.message,
       );
     } catch (e) {
       return ApiResponse<AuthResponseModel>(
         isSuccess: false,
-        message: 'Không thể kết nối tới máy chủ. Chi tiết: ${e.toString()}',
+        message: 'Không thể kết nối tới máy chủ API: ${e.toString()}',
       );
     }
   }
 
-  Future<ApiResponse<AuthResponseModel>> registerAccount({
-    required String fullName,
-    required String userName,
+  /// Đăng ký tài khoản (AuthController.dangky)
+  Future<ApiResponse<AuthResponseModel>> dangKyTaiKhoan({
+    required String hoVaTen,
+    required String tenTaiKhoan,
     required String email,
-    required String password,
-    required String role,
+    required String matKhau,
+    required String vaiTro,
   }) async {
-    final normalizedRole = _normalizeRole(role);
-    final normalizedEmail = email.trim();
-    final normalizedUserName = userName.trim();
+    final vaiTroChuan = _chuanHoaVaiTro(vaiTro);
+    final emailChuan = email.trim();
+    final taiKhoanChuan = tenTaiKhoan.trim();
 
-    if (fullName.trim().isEmpty ||
-        normalizedUserName.isEmpty ||
-        normalizedEmail.isEmpty ||
-        password.trim().length < 6) {
+    if (hoVaTen.trim().isEmpty ||
+        taiKhoanChuan.isEmpty ||
+        emailChuan.isEmpty ||
+        matKhau.trim().length < 6) {
       return ApiResponse<AuthResponseModel>(
         isSuccess: false,
-        message: 'Vui lòng nhập đầy đủ thông tin, tên tài khoản và mật khẩu tối thiểu 6 ký tự.',
+        message: 'Vui lòng nhập đầy đủ họ tên, tên tài khoản và mật khẩu tối thiểu 6 ký tự.',
       );
     }
 
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
-        ApiEndpoints.authRegister,
+        ApiEndpoints.dangKy,
         {
-          'hovaten': fullName.trim(),
-          'tentaikhoan': normalizedUserName,
-          'email': normalizedEmail,
-          'password': password.trim(),
-          'xacnhanmatkhau': password.trim(),
-          'marole': normalizedRole == 'NhaTuyenDung' ? 2 : 1,
+          'hovaten': hoVaTen.trim(),
+          'tentaikhoan': taiKhoanChuan,
+          'email': emailChuan,
+          'password': matKhau.trim(),
+          'xacnhanmatkhau': matKhau.trim(),
+          'marole': vaiTroChuan == 'NhaTuyenDung' ? 2 : 1,
         },
       );
 
@@ -122,7 +131,7 @@ class AuthService {
       );
 
       if (handled.isSuccess && handled.data != null) {
-        await _saveSession(handled.data!);
+        await luuPhienDangNhap(handled.data!);
         return handled;
       }
 
@@ -135,46 +144,48 @@ class AuthService {
     } catch (e) {
       return ApiResponse<AuthResponseModel>(
         isSuccess: false,
-        message:
-            'Không thể kết nối tới máy chủ. Tài khoản chưa được lưu vào database. Chi tiết: ${e.toString()}',
+        message: 'Không thể kết nối tới máy chủ. Chi tiết: ${e.toString()}',
       );
     }
   }
 
-  Future<ApiResponse<AuthResponseModel>> registerStudent(
-    String fullName,
-    String userName,
+  /// Đăng ký dành cho Sinh viên Freelancer
+  Future<ApiResponse<AuthResponseModel>> dangKySinhVien(
+    String hoVaTen,
+    String tenTaiKhoan,
     String email,
-    String password,
+    String matKhau,
   ) async {
-    return registerAccount(
-      fullName: fullName,
-      userName: userName,
+    return dangKyTaiKhoan(
+      hoVaTen: hoVaTen,
+      tenTaiKhoan: tenTaiKhoan,
       email: email,
-      password: password,
-      role: 'FreelancerStudent',
+      matKhau: matKhau,
+      vaiTro: 'FreelancerStudent',
     );
   }
 
-  Future<ApiResponse<AuthResponseModel>> registerEmployer(
-    String companyName,
-    String userName,
+  /// Đăng ký dành cho Nhà tuyển dụng
+  Future<ApiResponse<AuthResponseModel>> dangKyNhaTuyenDung(
+    String tenCongTy,
+    String tenTaiKhoan,
     String email,
-    String password,
+    String matKhau,
   ) async {
-    return registerAccount(
-      fullName: companyName,
-      userName: userName,
+    return dangKyTaiKhoan(
+      hoVaTen: tenCongTy,
+      tenTaiKhoan: tenTaiKhoan,
       email: email,
-      password: password,
-      role: 'NhaTuyenDung',
+      matKhau: matKhau,
+      vaiTro: 'NhaTuyenDung',
     );
   }
 
-  Future<ApiResponse<bool>> forgotPassword(String email) async {
+  /// Quên mật khẩu
+  Future<ApiResponse<bool>> quenMatKhau(String email) async {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
-        '/Auth/forgot-password',
+        ApiEndpoints.quenMatKhau,
         {'email': email},
       );
       return await _apiClient.handleResponse(response, (_) => true);
@@ -182,4 +193,45 @@ class AuthService {
       return ApiResponse<bool>(isSuccess: false, message: e.toString());
     }
   }
+
+  // ==========================================
+  // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
+  // ==========================================
+  Future<AuthResponseModel?> getStoredSession() => layPhienDangNhapDaLuu();
+
+  Future<ApiResponse<AuthResponseModel>> login(String email, String password) =>
+      dangNhap(email, password);
+
+  Future<ApiResponse<AuthResponseModel>> registerAccount({
+    required String fullName,
+    required String userName,
+    required String email,
+    required String password,
+    required String role,
+  }) =>
+      dangKyTaiKhoan(
+        hoVaTen: fullName,
+        tenTaiKhoan: userName,
+        email: email,
+        matKhau: password,
+        vaiTro: role,
+      );
+
+  Future<ApiResponse<AuthResponseModel>> registerStudent(
+    String fullName,
+    String userName,
+    String email,
+    String password,
+  ) =>
+      dangKySinhVien(fullName, userName, email, password);
+
+  Future<ApiResponse<AuthResponseModel>> registerEmployer(
+    String companyName,
+    String userName,
+    String email,
+    String password,
+  ) =>
+      dangKyNhaTuyenDung(companyName, userName, email, password);
+
+  Future<ApiResponse<bool>> forgotPassword(String email) => quenMatKhau(email);
 }

@@ -5,7 +5,9 @@ import 'viewmodels/application_viewmodel.dart';
 import 'viewmodels/auth_viewmodel.dart';
 import 'viewmodels/chat_viewmodel.dart';
 import 'viewmodels/freelancer_profile_viewmodel.dart';
+import 'viewmodels/hop_dong_viewmodel.dart';
 import 'viewmodels/job_viewmodel.dart';
+import 'viewmodels/nha_tuyen_dung_viewmodel.dart';
 import 'viewmodels/student_post_viewmodel.dart';
 import 'viewmodels/wallet_viewmodel.dart';
 import 'views/auth/splash_screen.dart';
@@ -28,6 +30,8 @@ class FreelancerStudentApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => WalletViewModel()),
         ChangeNotifierProvider(create: (_) => ChatViewModel()),
         ChangeNotifierProvider(create: (_) => FreelancerProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => HopDongViewModel()),
+        ChangeNotifierProvider(create: (_) => NhaTuyenDungViewModel()),
       ],
       child: MaterialApp(
         title: 'FLsv',
