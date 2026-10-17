@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../models/job_post_model.dart';
 import '../../services/application_service.dart';
 import '../../viewmodels/auth_viewmodel.dart';
-import '../applications/my_applications_screen.dart';
 
 class ApplyJobBottomSheet extends StatefulWidget {
   final JobPostModel job;
@@ -44,14 +43,13 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
     final service = ApplicationService();
     final response = await service.applyJob(widget.job.id, {
       'maJob': widget.job.id,
-      'maFreelancerStudents': currentUser.userId,
+      'maUser': currentUser.userId,
       'thuGioiThieu': coverLetter,
       'status': 'Pending',
     });
 
-    setState(() => _isSubmitting = false);
-
     if (!mounted) return;
+    setState(() => _isSubmitting = false);
 
     if (response.isSuccess) {
       final successMessage = response.message.isEmpty
@@ -60,13 +58,7 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(successMessage)));
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MyApplicationsScreen()),
-      );
+      Navigator.pop(context, true);
       return;
     }
 

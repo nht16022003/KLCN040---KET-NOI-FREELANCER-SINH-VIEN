@@ -38,12 +38,12 @@ class ApplicationModel {
     String? coverLetter,
     double? proposedBudget,
     String? status,
-  })  : maUngTuyen = id ?? maUngTuyen,
-        maJob = jobId ?? maJob,
-        maFreelancerStudents = applicantId ?? maFreelancerStudents,
-        thuGioiThieu = coverLetter ?? thuGioiThieu,
-        thulaoDeXuat = proposedBudget ?? thulaoDeXuat,
-        trangThaiUngTuyen = status ?? trangThaiUngTuyen;
+  }) : maUngTuyen = id ?? maUngTuyen,
+       maJob = jobId ?? maJob,
+       maFreelancerStudents = applicantId ?? maFreelancerStudents,
+       thuGioiThieu = coverLetter ?? thuGioiThieu,
+       thulaoDeXuat = proposedBudget ?? thulaoDeXuat,
+       trangThaiUngTuyen = status ?? trangThaiUngTuyen;
 
   // Tên biến/getter thuần tiếng Việt
   String get maDonUngTuyen => maUngTuyen;
@@ -62,12 +62,34 @@ class ApplicationModel {
   double get proposedBudget => thulaoDeXuat;
   String get status => trangThaiUngTuyen;
 
+  ApplicationModel copyWith({String? status}) => ApplicationModel(
+    maUngTuyen: maUngTuyen,
+    maJob: maJob,
+    maFreelancerStudents: maFreelancerStudents,
+    thuGioiThieu: thuGioiThieu,
+    thulaoDeXuat: thulaoDeXuat,
+    trangThaiUngTuyen: status ?? trangThaiUngTuyen,
+    tieude: tieude,
+    tenUser: tenUser,
+    emailUser: emailUser,
+    sdtUser: sdtUser,
+    avatar: avatar,
+    tenTruong: tenTruong,
+    tenChuyenNganh: tenChuyenNganh,
+    thoiGianHoanThanhDeXuat: thoiGianHoanThanhDeXuat,
+  );
+
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
     final rawId = json['maUngTuyen'] ?? json['id'] ?? '';
     final rawJobId = json['maJob'] ?? json['jobId'] ?? '';
-    final rawApplicantId = json['maFreelancerStudents'] ?? json['maFreelancerStudent'] ?? json['applicantId'] ?? '';
+    final rawApplicantId =
+        json['maFreelancerStudents'] ??
+        json['maFreelancerStudent'] ??
+        json['applicantId'] ??
+        '';
     final rawCover = json['thuGioiThieu'] ?? json['coverLetter'] ?? '';
-    final rawBudget = json['thulaoDeXuat'] ?? json['thulao'] ?? json['proposedBudget'] ?? 0;
+    final rawBudget =
+        json['thulaoDeXuat'] ?? json['thulao'] ?? json['proposedBudget'] ?? 0;
     final rawStatus = json['trangThaiUngTuyen'] ?? json['status'] ?? 'ChoDuyet';
 
     return ApplicationModel(
@@ -75,7 +97,9 @@ class ApplicationModel {
       maJob: rawJobId.toString(),
       maFreelancerStudents: rawApplicantId.toString(),
       thuGioiThieu: rawCover.toString(),
-      thulaoDeXuat: rawBudget is num ? rawBudget.toDouble() : 0,
+      thulaoDeXuat: rawBudget is num
+          ? rawBudget.toDouble()
+          : double.tryParse(rawBudget.toString()) ?? 0,
       trangThaiUngTuyen: rawStatus.toString(),
       tieude: (json['tieude'] ?? json['title'] ?? '').toString(),
       tenUser: json['tenUser']?.toString() ?? json['hovaten']?.toString(),

@@ -9,7 +9,10 @@ import '../../viewmodels/freelancer_profile_viewmodel.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final int? freelancerId;
+  final bool readOnly;
+
+  const ProfileScreen({super.key, this.freelancerId, this.readOnly = false});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -20,9 +23,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = context.read<FreelancerProfileViewModel>();
+      if (widget.freelancerId != null) {
+        viewModel.loadProfileById(widget.freelancerId!);
+        return;
+      }
       final userId = context.read<AuthViewModel>().currentUser?.userId ?? 0;
-      final targetUserId = userId > 0 ? userId : 1;
-      context.read<FreelancerProfileViewModel>().loadProfile(targetUserId);
+      if (userId > 0) viewModel.loadProfile(userId);
     });
   }
 
@@ -47,11 +54,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  final currentUserId =
-                      context.read<AuthViewModel>().currentUser?.userId ?? 1;
-                  context.read<FreelancerProfileViewModel>().loadProfile(
-                    currentUserId,
-                  );
+                  final profileViewModel = context
+                      .read<FreelancerProfileViewModel>();
+                  if (widget.freelancerId != null) {
+                    profileViewModel.loadProfileById(widget.freelancerId!);
+                  } else {
+                    final currentUserId =
+                        context.read<AuthViewModel>().currentUser?.userId ?? 0;
+                    if (currentUserId > 0) {
+                      profileViewModel.loadProfile(currentUserId);
+                    }
+                  }
                 },
                 child: const Text('Thử lại'),
               ),
@@ -62,6 +75,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final authUser = context.read<AuthViewModel>().currentUser;
+    final canEdit =
+        widget.freelancerId == null &&
+        !widget.readOnly &&
+        authUser?.role == 'FreelancerStudent' &&
+        profile?.maFreelancerStudents != null &&
+        profile!.maFreelancerStudents > 0;
     final data =
         profile ??
         FreelancerProfileModel(
@@ -88,26 +107,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          title: const Text(
-            'Cài đặt tài khoản',
+          title: Text(
+            canEdit ? 'Hồ sơ năng lực' : 'Hồ sơ Freelancer',
             style: TextStyle(
               color: Color(0xFF1D5D3B),
               fontWeight: FontWeight.bold,
             ),
           ),
           actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                );
-              },
-              icon: const Icon(
-                Icons.edit_note_rounded,
-                color: Color(0xFF2E8B57),
+            if (canEdit)
+              IconButton(
+                onPressed: () async {
+                  final profileViewModel = context
+                      .read<FreelancerProfileViewModel>();
+                  final saved = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const EditProfileScreen(),
+                    ),
+                  );
+                  if (!mounted || saved != true) return;
+                  final id = profileViewModel.profile?.maFreelancerStudents;
+                  if (id != null) profileViewModel.loadProfileById(id);
+                },
+                icon: const Icon(
+                  Icons.edit_note_rounded,
+                  color: Color(0xFF2E8B57),
+                ),
               ),
-            ),
           ],
           bottom: const TabBar(
             isScrollable: true,
@@ -127,7 +154,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               _ProfileOverviewTab(profile: data),
               _ProfileIntroTab(profile: data),
-              _ProfilePortfolioTab(profile: data),
+              _ProfilePortfolioTab(
+                profile: data,
+                onAddProject: canEdit ? () => _addPortfolioProject(data) : null,
+              ),
               _ProfileProofTab(profile: data),
             ],
           ),
@@ -135,6 +165,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Future<void> _addPortfolioProject(FreelancerProfileModel profile) async {
+    final formKey = GlobalKey<FormState>();
+    final name = TextEditingController();
+    final role = TextEditingController();
+    final description = TextEditingController();
+    final technologies = TextEditingController();
+    final github = TextEditingController();
+    final demo = TextEditingController();
+
+    final project = await showDialog<Map<String, String?>>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Thêm dự án portfolio'),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _projectField(name, 'Tên dự án', required: true),
+                _projectField(role, 'Vai trò'),
+                _projectField(description, 'Mô tả', maxLines: 3),
+                _projectField(technologies, 'Công nghệ'),
+                _projectField(github, 'Link GitHub'),
+                _projectField(demo, 'Link Demo'),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (!formKey.currentState!.validate()) return;
+              Navigator.pop(dialogContext, {
+                'name': name.text.trim(),
+                'role': role.text.trim(),
+                'description': description.text.trim(),
+                'technologies': technologies.text.trim(),
+                'github': github.text.trim(),
+                'demo': demo.text.trim(),
+              });
+            },
+            child: const Text('Thêm'),
+          ),
+        ],
+      ),
+    );
+    name.dispose();
+    role.dispose();
+    description.dispose();
+    technologies.dispose();
+    github.dispose();
+    demo.dispose();
+    if (project == null || !mounted) return;
+
+    final viewModel = context.read<FreelancerProfileViewModel>();
+    final success = await viewModel.addPortfolioProject(
+      freelancerId: profile.maFreelancerStudents,
+      projectName: project['name']!,
+      role: project['role'],
+      description: project['description'],
+      technologies: project['technologies'],
+      githubUrl: project['github'],
+      demoUrl: project['demo'],
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Đã thêm dự án portfolio.'
+              : viewModel.errorMessage ?? 'Không thể thêm dự án.',
+        ),
+      ),
+    );
+  }
+
+  Widget _projectField(
+    TextEditingController controller,
+    String label, {
+    bool required = false,
+    int maxLines = 1,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      validator: required
+          ? (value) => value == null || value.trim().isEmpty
+                ? '$label không được để trống.'
+                : null
+          : null,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    ),
+  );
 }
 
 class _ProfileOverviewTab extends StatelessWidget {
@@ -178,7 +311,8 @@ class _ProfileOverviewTab extends StatelessWidget {
                 CircleAvatar(
                   radius: 32,
                   backgroundColor: const Color(0xFFE8F5E9),
-                  backgroundImage: (profile.avatarUrl?.isNotEmpty == true ||
+                  backgroundImage:
+                      (profile.avatarUrl?.isNotEmpty == true ||
                           authUser?.avatarUrl?.isNotEmpty == true)
                       ? NetworkImage(
                           ApiEndpoints.dinhDangUrlAnh(
@@ -187,12 +321,13 @@ class _ProfileOverviewTab extends StatelessWidget {
                           ),
                         )
                       : null,
-                  onBackgroundImageError: (profile.avatarUrl?.isNotEmpty ==
-                              true ||
+                  onBackgroundImageError:
+                      (profile.avatarUrl?.isNotEmpty == true ||
                           authUser?.avatarUrl?.isNotEmpty == true)
                       ? (context, error) {}
                       : null,
-                  child: (profile.avatarUrl == null ||
+                  child:
+                      (profile.avatarUrl == null ||
                               profile.avatarUrl!.isEmpty) &&
                           (authUser?.avatarUrl == null ||
                               authUser!.avatarUrl!.isEmpty)
@@ -342,8 +477,9 @@ class _ProfileIntroTab extends StatelessWidget {
 
 class _ProfilePortfolioTab extends StatelessWidget {
   final FreelancerProfileModel profile;
+  final VoidCallback? onAddProject;
 
-  const _ProfilePortfolioTab({required this.profile});
+  const _ProfilePortfolioTab({required this.profile, this.onAddProject});
 
   @override
   Widget build(BuildContext context) {
@@ -369,27 +505,23 @@ class _ProfilePortfolioTab extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Thêm dự án'),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF7BCB9A),
-                foregroundColor: const Color(0xFF0F2E1A),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          if (onAddProject != null)
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onAddProject,
+                icon: const Icon(Icons.add),
+                label: const Text('Thêm dự án'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF7BCB9A),
+                  foregroundColor: const Color(0xFF0F2E1A),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

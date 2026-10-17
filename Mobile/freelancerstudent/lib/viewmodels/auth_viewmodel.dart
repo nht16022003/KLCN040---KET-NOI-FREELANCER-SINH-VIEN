@@ -53,6 +53,7 @@ class AuthViewModel extends ChangeNotifier {
     required String hoVaTen,
     required String tenTaiKhoan,
     required String email,
+    required String soDienThoai,
     required String matKhau,
     required String vaiTro,
   }) async {
@@ -64,6 +65,7 @@ class AuthViewModel extends ChangeNotifier {
       hoVaTen: hoVaTen,
       tenTaiKhoan: tenTaiKhoan,
       email: email,
+      soDienThoai: soDienThoai,
       matKhau: matKhau,
       vaiTro: vaiTro,
     );
@@ -86,12 +88,14 @@ class AuthViewModel extends ChangeNotifier {
     String hoVaTen,
     String tenTaiKhoan,
     String email,
+    String soDienThoai,
     String matKhau,
   ) async {
     await dangKyTaiKhoan(
       hoVaTen: hoVaTen,
       tenTaiKhoan: tenTaiKhoan,
       email: email,
+      soDienThoai: soDienThoai,
       matKhau: matKhau,
       vaiTro: 'FreelancerStudent',
     );
@@ -122,30 +126,32 @@ class AuthViewModel extends ChangeNotifier {
   // ==========================================
   // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
   // ==========================================
-  Future<bool> login(String email, String password) => dangNhap(email, password);
+  Future<bool> login(String email, String password) =>
+      dangNhap(email, password);
 
   Future<bool> registerAccount({
     required String fullName,
     required String userName,
     required String email,
+    required String phoneNumber,
     required String password,
     required String role,
-  }) =>
-      dangKyTaiKhoan(
-        hoVaTen: fullName,
-        tenTaiKhoan: userName,
-        email: email,
-        matKhau: password,
-        vaiTro: role,
-      );
+  }) => dangKyTaiKhoan(
+    hoVaTen: fullName,
+    tenTaiKhoan: userName,
+    email: email,
+    soDienThoai: phoneNumber,
+    matKhau: password,
+    vaiTro: role,
+  );
 
   Future<void> registerStudent(
     String fullName,
     String userName,
     String email,
+    String phoneNumber,
     String password,
-  ) =>
-      dangKySinhVien(fullName, userName, email, password);
+  ) => dangKySinhVien(fullName, userName, email, phoneNumber, password);
 
   Future<void> loadSession() => taiPhienDangNhap();
 

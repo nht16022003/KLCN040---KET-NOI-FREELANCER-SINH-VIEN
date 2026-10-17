@@ -38,6 +38,7 @@ class FakeAuthViewModel extends AuthViewModel {
     required String fullName,
     required String userName,
     required String email,
+    required String phoneNumber,
     required String password,
     required String role,
   }) async {
@@ -89,8 +90,9 @@ void main() {
     await tester.enterText(find.byType(TextField).at(0), 'Nguyen Van A');
     await tester.enterText(find.byType(TextField).at(1), 'nguyenvana');
     await tester.enterText(find.byType(TextField).at(2), 'test@example.com');
-    await tester.enterText(find.byType(TextField).at(3), '123456');
+    await tester.enterText(find.byType(TextField).at(3), '0912345678');
     await tester.enterText(find.byType(TextField).at(4), '123456');
+    await tester.enterText(find.byType(TextField).at(5), '123456');
 
     final submitButton = find.widgetWithText(ElevatedButton, 'Tạo tài khoản');
     await tester.ensureVisible(submitButton);
