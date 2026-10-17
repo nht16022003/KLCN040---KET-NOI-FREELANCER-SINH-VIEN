@@ -1,0 +1,520 @@
+@model FreelancerStudent.Web.ViewModels.HopDongViewModel
+@{
+    ViewData["Title"] = "Chi tiết hợp đồng " + Model.maHD;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var dsTrangThai = new Dictionary<string, string>
+    {
+        { "ChoXacNhan", "Chờ Freelancer xác nhận" },
+        { "ChoKyKet", "Chờ ký kết" },
+        { "ChoKyQuy", "Chờ ký quỹ" },
+        { "DangThucHien", "Đang thực hiện" },
+        { "DaHoanThanh", "Đã hoàn thành" },
+        { "DaHuy", "Đã hủy" },
+        { "DangTranhChap", "Đang tranh chấp" }
+    };
+
+    var tenTrangThai = dsTrangThai.TryGetValue(Model.trangThai, out var ten) ? ten : Model.trangThai;
+
+    var badgeClass = Model.trangThai switch
+    {
+        "ChoXacNhan" => "bg-warning text-dark",
+        "ChoKyKet" => "bg-info text-dark",
+        "ChoKyQuy" => "bg-primary text-white",
+        "DangThucHien" => "bg-success text-white",
+        "DaHoanThanh" => "bg-dark text-white",
+        "DaHuy" => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Index" class="text-decoration-none text-success">Quản lý hợp đồng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi tiết hợp đồng #@Model.maHD</li>
+        </ol>
+    </nav>
+
+    <!-- Thông báo Alert nếu có -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- BANNER HÀNH ĐỘNG CHO FREELANCER (KHI HỢP ĐỒNG ĐANG Ở TRẠNG THÁI CHỜ XÁC NHẬN) -->
+    @if (Model.CoQuyenXacNhan)
+    {
+        <div class="card border-warning bg-warning bg-opacity-10 rounded-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-warning text-dark px-2 py-1 fs-6">
+                                <i class="bi bi-bell-fill me-1"></i> Dự thảo hợp đồng đang chờ bạn xác nhận
+                            </span>
+                        </div>
+                        <p class="text-dark mb-0 mt-2">
+                            Nhà tuyển dụng đã tạo dự thảo hợp đồng này và gửi cho bạn. Vui lòng xem kỹ thông tin công việc, thù lao, các mốc bàn giao và điều khoản cam kết bên dưới trước khi đưa ra quyết định.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <!-- Nút Từ chối -->
+                        <button type="button" class="btn btn-outline-danger rounded-0 px-3 fw-medium" data-bs-toggle="modal" data-bs-target="#modalTuChoi">
+                            <i class="bi bi-x-circle me-1"></i> Từ chối hợp đồng
+                        </button>
+
+                        <!-- Form Xác nhận hợp đồng -->
+                        <form asp-controller="HopDong" asp-action="XacNhan" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đồng ý dự thảo hợp đồng này?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="dongY" value="true" />
+                            <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold shadow-sm" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                <i class="bi bi-check2-circle me-1"></i> Xác nhận hợp đồng
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Từ chối hợp đồng -->
+        <div class="modal fade" id="modalTuChoi" tabindex="-1" aria-labelledby="modalTuChoiLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-0">
+                    <form asp-controller="HopDong" asp-action="XacNhan" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maHD" value="@Model.maHD" />
+                        <input type="hidden" name="dongY" value="false" />
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title text-danger fw-bold" id="modalTuChoiLabel">
+                                <i class="bi bi-x-circle me-1"></i> Từ chối dự thảo hợp đồng
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small">
+                                Bạn có chắc chắn muốn từ chối dự thảo hợp đồng này không? Khi từ chối, hợp đồng sẽ bị hủy và thông báo sẽ được gửi đến Nhà tuyển dụng.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Lý do từ chối (tùy chọn):</label>
+                                <textarea name="lyDoTuChoi" class="form-control rounded-0" rows="3" placeholder="Nhập lý do thù lao chưa phù hợp, thời gian không đủ hoặc điều khoản chưa thỏa đáng..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger rounded-0 fw-bold">Xác nhận từ chối</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- BANNER HÀNH ĐỘNG CHO NHÀ TUYỂN DỤNG (KHI HỢP ĐỒNG ĐANG Ở TRẠNG THÁI CHỜ KÝ QUỸ) -->
+    @if (Model.CoQuyenKyQuy && Model.LaNhaTuyenDungCuaHopDong && Model.maUserNhaTuyenDung.HasValue && Model.trangThai == "ChoKyQuy")
+    {
+        <div class="card border-primary bg-primary bg-opacity-10 rounded-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary text-white px-2 py-1 fs-6">
+                                <i class="bi bi-wallet2 me-1"></i> Hợp đồng đang chờ bạn ký quỹ
+                            </span>
+                        </div>
+                        <h5 class="fw-bold text-primary mb-1 mt-2">
+                            Freelancer đã đồng ý nhận việc! Vui lòng tiến hành ký quỹ để kích hoạt hợp đồng.
+                        </h5>
+                        <p class="text-muted small mb-0">
+                            Số tiền ký quỹ bảo chứng: <strong class="text-danger fs-6">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</strong>.
+                            Tiền ký quỹ sẽ được bảo lưu an toàn tại hệ thống và chỉ giải ngân cho Freelancer khi bạn nghiệm thu đạt từng mốc bàn giao.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-lg rounded-0 fw-bold px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
+                            <i class="bi bi-shield-check me-1"></i> Tiến hành ký quỹ ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Xác nhận Ký quỹ -->
+        <div class="modal fade" id="modalKyQuy" tabindex="-1" aria-labelledby="modalKyQuyLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-0">
+                    <form asp-controller="HopDong" asp-action="KyQuy" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maHD" value="@Model.maHD" />
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold" id="modalKyQuyLabel">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Ký quỹ bảo chứng hợp đồng (Escrow)
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="text-center mb-4">
+                                <span class="text-muted small text-uppercase">Tổng số tiền ký quỹ</span>
+                                <h2 class="text-primary fw-bold mt-1 mb-0">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</h2>
+                                <span class="badge bg-light text-muted border mt-2">Áp dụng cho Hợp đồng #@Model.maHD</span>
+                            </div>
+                            @{
+                                decimal soTienCanKyQuy = Model.sotienkyquy ?? 0;
+                                decimal soDuHienTai = Model.SoDuKhaDung;
+
+                                bool duTien = Model.DaTaiThongTinVi
+                                    && soTienCanKyQuy > 0
+                                    && soDuHienTai >= soTienCanKyQuy;
+
+                                decimal soTienConThieu = Math.Max(
+                                    0,
+                                    soTienCanKyQuy - soDuHienTai
+                                );
+                            }
+
+                            <div class="border p-3 mb-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold">
+                                        <i class="bi bi-wallet2 me-1"></i>
+                                        Số dư khả dụng:
+                                    </span>
+
+                                    <strong class="text-success">
+                                        @Model.SoDuKhaDung.ToString("N0") VNĐ
+                                    </strong>
+                                </div>
+                            </div>
+
+                            @if (!Model.DaTaiThongTinVi)
+                            {
+                                <div class="alert alert-warning rounded-0">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    Không thể tải thông tin ví.
+                                    Vui lòng tải lại trang trước khi ký quỹ.
+                                </div>
+                            }
+                            else if (duTien)
+                            {
+                                <div class="alert alert-success rounded-0">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    Số dư ví đủ để ký quỹ hợp đồng.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-danger rounded-0">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    Số dư ví không đủ để ký quỹ.
+
+                                    <div class="mt-2">
+                                        Cần nạp thêm:
+                                        <strong>
+                                            @soTienConThieu.ToString("N0") VNĐ
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <a asp-controller="Wallet"
+                                asp-action="Index"
+                                class="btn btn-outline-primary rounded-0 mb-3">
+                                    <i class="bi bi-plus-circle me-1"></i>
+                                    Nạp tiền vào ví
+                                </a>
+                            }
+                            <div class="alert alert-info rounded-0 small mb-3">
+                                <i class="bi bi-info-circle-fill me-1"></i>
+                                Tiền ký quỹ sẽ được bảo lưu an toàn tại hệ thống cho tới khi bạn kiểm tra và xác nhận nghiệm thu các mốc sản phẩm bàn giao từ Freelancer.
+                            </div>
+
+                            <ul class="list-unstyled small text-muted mb-0">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Trạng thái hợp đồng sẽ chuyển sang <strong>Đang thực hiện</strong>.</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Freelancer sẽ nhận được thông báo để bắt đầu công việc ngay lập tức.</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> Bạn có thể theo dõi tiến độ và duyệt từng giai đoạn.</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary rounded-0 fw-bold px-4" disabled="@(!duTien)">
+                                <i class="bi bi-check2-circle me-1"></i>Xác nhận Ký quỹ & Kích hoạt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Header Chi tiết Hợp đồng -->
+    <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 border-bottom">
+                <div>
+                    <span class="text-muted small text-uppercase fw-bold">Hợp đồng dịch vụ Freelance</span>
+                    <h3 class="fw-bold text-success mb-0 mt-1">@Model.tenCongViec</h3>
+                    <div class="text-muted small mt-1">Mã hợp đồng: <strong class="text-dark">#@Model.maHD</strong> | Mã bài đăng: <strong class="text-dark">#@Model.maJob</strong></div>
+                </div>
+                <div class="text-end">
+                    <div class="d-flex align-items-center justify-content-end flex-wrap gap-2">
+                        <span class="badge @badgeClass px-3 py-2 fs-6 rounded-0">
+                            @tenTrangThai
+                        </span>
+                        @if (Model.CoQuyenKyQuy && Model.LaNhaTuyenDungCuaHopDong && Model.maUserNhaTuyenDung.HasValue && Model.trangThai == "ChoKyQuy")
+                        {
+                            <button type="button" class="btn btn-primary rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
+                                <i class="bi bi-wallet2 me-1"></i> Tiến hành ký quỹ
+                            </button>
+                        }
+                    </div>
+                    <div class="text-muted small mt-2">
+                        Ngày tạo: @(Model.ngayBatDau?.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 Thông số chính -->
+            <div class="row g-3 text-center mt-3">
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light border">
+                        <div class="text-muted small text-uppercase">Thù lao thỏa thuận</div>
+                        <div class="fs-5 fw-bold text-success mt-1">
+                            @(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light border">
+                        <div class="text-muted small text-uppercase">Hình thức làm việc</div>
+                        <div class="fs-5 fw-bold text-dark mt-1">
+                            @(string.IsNullOrWhiteSpace(Model.hinhthuclamviec) ? "Remote" : Model.hinhthuclamviec)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light border">
+                        <div class="text-muted small text-uppercase">Ngày bắt đầu</div>
+                        <div class="fs-5 fw-bold text-dark mt-1">
+                            @(Model.ngayBatDau?.ToString("dd/MM/yyyy") ?? "-")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light border">
+                        <div class="text-muted small text-uppercase">Hạn chót hoàn thành</div>
+                        <div class="fs-5 fw-bold text-danger mt-1">
+                            @(Model.ngayKetThuc?.ToString("dd/MM/yyyy") ?? "-")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin 2 bên giao kết -->
+    <div class="row g-4 mb-4">
+        <!-- Bên A: Khách hàng / Nhà tuyển dụng -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-0 h-100">
+                <div class="card-header bg-light border-bottom py-2">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-building text-success me-2"></i>BÊN A: BÊN THUÊ (NHÀ TUYỂN DỤNG)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="text-muted small">Tên doanh nghiệp / Đơn vị:</span>
+                        <div class="fw-bold text-dark">@(!string.IsNullOrWhiteSpace(Model.tenNhaTuyenDung) ? Model.tenNhaTuyenDung : "Nhà tuyển dụng")</div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.emailNhaTuyenDung))
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small">Email liên hệ:</span>
+                            <div class="text-secondary">@Model.emailNhaTuyenDung</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.sdtNhaTuyenDung))
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small">Số điện thoại:</span>
+                            <div class="text-secondary">@Model.sdtNhaTuyenDung</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Bên B: Freelancer / Sinh viên -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-0 h-100">
+                <div class="card-header bg-light border-bottom py-2">
+                    <h6 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-person-badge text-success me-2"></i>BÊN B: BÊN NHẬN VIỆC (FREELANCER)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="text-muted small">Họ và tên Freelancer:</span>
+                        <div class="fw-bold text-success">@(!string.IsNullOrWhiteSpace(Model.tenFreelancer) ? Model.tenFreelancer : "Sinh viên")</div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.truongFreelancer))
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small">Trường / Học viện:</span>
+                            <div class="text-secondary">@Model.truongFreelancer</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.chuyenNganhFreelancer))
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small">Chuyên ngành đào tạo:</span>
+                            <div class="text-secondary">@Model.chuyenNganhFreelancer</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.emailFreelancer))
+                    {
+                        <div class="mb-2">
+                            <span class="text-muted small">Email sinh viên:</span>
+                            <div class="text-secondary">@Model.emailFreelancer</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mô tả công việc yêu cầu nếu có -->
+    @if (!string.IsNullOrWhiteSpace(Model.moTaCongViec))
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4">
+            <div class="card-header bg-light border-bottom py-2">
+                <h6 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-file-text text-success me-2"></i>Mô tả yêu cầu công việc
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-0 text-muted" style="white-space: pre-line;">@Model.moTaCongViec</p>
+            </div>
+        </div>
+    }
+
+    <!-- Lộ trình các mốc bàn giao (Milestones) -->
+    <div class="card border-0 shadow-sm rounded-0 mb-4">
+        <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-signpost-split text-success me-2"></i>Lộ trình các mốc bàn giao (Milestones)
+            </h5>
+            <span class="badge bg-secondary rounded-0">@(Model.giaiDoans?.Count ?? 0) giai đoạn</span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.giaiDoans != null && Model.giaiDoans.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;" class="text-center">#</th>
+                                <th>Tên giai đoạn / Mốc bàn giao</th>
+                                <th>Mô tả & Tiêu chí nghiệm thu</th>
+                                <th>Hạn chót mốc</th>
+                                <th class="text-end">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.giaiDoans.Count; i++)
+                            {
+                                var gd = Model.giaiDoans[i];
+                                <tr>
+                                    <td class="text-center fw-bold text-muted">@(i + 1)</td>
+                                    <td class="fw-semibold text-dark">@gd.tenGiaiDoan</td>
+                                    <td class="text-muted small">@(string.IsNullOrWhiteSpace(gd.moTa) ? "Theo yêu cầu chung" : gd.moTa)</td>
+                                    <td class="fw-medium text-dark">@gd.hanChot.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">
+                                        @if (gd.trangThai == "DaNghiemThu")
+                                        {
+                                            <span class="badge bg-success rounded-0">Đã nghiệm thu</span>
+                                        }
+                                        else if (gd.trangThai == "ChoDuyet")
+                                        {
+                                            <span class="badge bg-warning text-dark rounded-0">Chờ duyệt</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-secondary border rounded-0">Chưa đạt</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-3 text-center text-muted">
+                    Hợp đồng này nghiệm thu toàn bộ một lần sau khi hoàn thành.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Điều khoản giao kết cụ thể -->
+    <div class="card border-0 shadow-sm rounded-0 mb-4">
+        <div class="card-header bg-light border-bottom py-3">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-shield-lock text-success me-2"></i>Điều khoản giao kết cụ thể
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrWhiteSpace(Model.dieuKhoan))
+            {
+                <div class="p-3 bg-light border font-monospace small" style="white-space: pre-line; line-height: 1.7;">
+                    @Model.dieuKhoan
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Áp dụng theo các điều khoản tiêu chuẩn của nền tảng kết nối Freelancer Sinh Viên.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Nút quay lại & Hành động cuối trang -->
+    <div class="d-flex justify-content-between align-items-center">
+        <a asp-controller="HopDong" asp-action="Index" class="btn btn-outline-secondary rounded-0">
+            <i class="bi bi-arrow-left me-1"></i> Trở về danh sách hợp đồng
+        </a>
+
+        @if (Model.CoQuyenXacNhan)
+        {
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-danger rounded-0 px-3" data-bs-toggle="modal" data-bs-target="#modalTuChoi">
+                    Từ chối
+                </button>
+                <form asp-controller="HopDong" asp-action="XacNhan" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đồng ý dự thảo hợp đồng này?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                    <input type="hidden" name="dongY" value="true" />
+                    <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                        <i class="bi bi-check2-circle me-1"></i> Xác nhận hợp đồng
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>

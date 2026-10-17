@@ -1,0 +1,461 @@
+@model FreelancerStudent.Web.ViewModels.TaoHopDongViewModel
+@{
+    ViewData["Title"] = "Khởi tạo dự thảo hợp đồng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var rawAvt = Model.avatarFreelancer;
+    var avatarSinhVien = !string.IsNullOrEmpty(rawAvt)
+        ? (rawAvt.StartsWith("http", StringComparison.OrdinalIgnoreCase) || rawAvt.StartsWith("/") ? rawAvt : "/" + rawAvt)
+        : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(Model.tenFreelancer ?? "Freelancer")}&background=E8F5E9&color=2E7D32";
+}
+
+<style>
+    /* Ẩn triệt để nút mũi tên lên/xuống (spin buttons) ở các ô input number để người dùng tự do nhập số từ bàn phím */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        margin: 0 !important;
+    }
+    input[type=number] {
+        -moz-appearance: textfield !important;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Index" class="text-decoration-none text-success">Quản lý hợp đồng</a></li>
+            <li class="breadcrumb-item"><a href="javascript:history.back()" class="text-decoration-none text-success">Danh sách ứng viên</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Khởi tạo dự thảo hợp đồng</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div>
+            <h3 class="fw-bold text-success mb-1">
+                <i class="bi bi-file-earmark-text-fill me-2"></i>Khởi tạo dự thảo hợp đồng
+            </h3>
+            <p class="text-muted mb-0">Thiết lập các điều khoản, thù lao và lộ trình mốc bàn giao với Freelancer đã chọn.</p>
+        </div>
+        <div>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-0">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @ViewData.ModelState[string.Empty]?.Errors.First().ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-controller="HopDong" asp-action="TaoHopDong" method="post" id="formTaoHopDong">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="maJob" />
+        <input type="hidden" asp-for="maFreelancerStudent" />
+        <input type="hidden" asp-for="maUngTuyen" />
+        <input type="hidden" asp-for="tieuDeJob" />
+        <input type="hidden" asp-for="moTaJob" />
+        <input type="hidden" asp-for="tenFreelancer" />
+
+        <div class="row g-4">
+            <!-- Cột trái: Thông tin bài đăng & Ứng viên (Tự động điền sẵn) -->
+            <div class="col-lg-4">
+                <!-- Card Thông tin bài đăng -->
+                <div class="card border-0 shadow-sm rounded-0 mb-4">
+                    <div class="card-header bg-success text-white py-2 rounded-0">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bi bi-briefcase me-2"></i>Bài tuyển dụng gốc
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted small text-uppercase fw-bold">Mã công việc</label>
+                            <div class="fw-bold text-dark">#@Model.maJob</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small text-uppercase fw-bold">Tiêu đề bài đăng</label>
+                            <div class="fw-semibold text-success fs-6">@Model.tieuDeJob</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small text-uppercase fw-bold">Ngân sách dự kiến</label>
+                            <div class="text-dark fw-bold">
+                                @(Model.nganSachGoc.HasValue && Model.nganSachGoc.Value > 0 ? Model.nganSachGoc.Value.ToString("N0") + " VNĐ" : "Thỏa thuận")
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.moTaJob))
+                        {
+                            <div class="mb-0">
+                                <label class="text-muted small text-uppercase fw-bold">Mô tả yêu cầu</label>
+                                <div class="p-2 bg-light border text-muted small" style="max-height: 180px; overflow-y: auto; white-space: pre-line;">
+                                    @Model.moTaJob
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Card Thông tin Freelancer -->
+                <div class="card border-0 shadow-sm rounded-0">
+                    <div class="card-header bg-light border-bottom py-2 rounded-0">
+                        <h6 class="mb-0 fw-semibold text-dark">
+                            <i class="bi bi-person-check me-2 text-success"></i>Freelancer hợp tác
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="@avatarSinhVien" alt="@Model.tenFreelancer" class="rounded-0 border me-3"
+                                 style="width: 56px; height: 56px; object-fit: cover;"
+                                 onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(Model.tenFreelancer ?? "Freelancer")&background=E8F5E9&color=2E7D32';" />
+                            <div>
+                                <h6 class="fw-bold text-success mb-1">@Model.tenFreelancer</h6>
+                                <div class="text-muted small">@Model.truongFreelancer</div>
+                                <div class="text-secondary small">@Model.chuyenNganhFreelancer</div>
+                            </div>
+                        </div>
+
+                        @if (Model.thulaoDeXuat.HasValue && Model.thulaoDeXuat.Value > 0)
+                        {
+                            <div class="p-2 mb-2 bg-light border">
+                                <span class="small text-muted">Thù lao sinh viên đề xuất:</span>
+                                <span class="fw-bold text-success d-block">@Model.thulaoDeXuat.Value.ToString("N0") VNĐ</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.camKetThoiGian))
+                        {
+                            <div class="p-2 bg-light border">
+                                <span class="small text-muted">Cam kết thời gian:</span>
+                                <span class="fw-semibold text-dark d-block">@Model.camKetThoiGian</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Form nhập thông tin hợp đồng & Milestones -->
+            <div class="col-lg-8">
+                <!-- Card 1: Điều khoản & Thù lao chính -->
+                <div class="card border-0 shadow-sm rounded-0 mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold text-dark">
+                            <i class="bi bi-cash-coin text-success me-2"></i>Thù lao thỏa thuận & Thời hạn thực hiện
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Thù lao thỏa thuận: Người dùng tự do nhập số tùy ý từ bàn phím -->
+                            <div class="col-md-6">
+                                <label asp-for="sotienkyquy" class="form-label fw-semibold">
+                                    Thù lao thỏa thuận (VNĐ) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="sotienkyquy" type="number" id="inputThuLao"
+                                           class="form-control rounded-0 fw-bold text-success fs-5"
+                                           placeholder="Nhập số tiền bạn muốn (vd: 3500000)" />
+                                    <span class="input-group-text rounded-0 fw-bold">VNĐ</span>
+                                </div>
+                                <span asp-validation-for="sotienkyquy" class="text-danger small"></span>
+                                <div class="form-text small text-muted mt-1" id="thuLaoFormatted">Định dạng: Đang tính...</div>
+                            </div>
+
+                            <!-- Hình thức làm việc -->
+                            <div class="col-md-6">
+                                <label asp-for="hinhthuclamviec" class="form-label fw-semibold">
+                                    Hình thức làm việc <span class="text-danger">*</span>
+                                </label>
+                                <select asp-for="hinhthuclamviec" class="form-select rounded-0">
+                                    <option value="Remote">Làm từ xa (Remote)</option>
+                                    <option value="Hybrid">Linh hoạt (Hybrid)</option>
+                                    <option value="Onsite">Tại chỗ / Văn phòng (Onsite)</option>
+                                </select>
+                                <span asp-validation-for="hinhthuclamviec" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Ngày bắt đầu -->
+                            <div class="col-md-6">
+                                <label asp-for="ngayBatDau" class="form-label fw-semibold">
+                                    Ngày bắt đầu hợp đồng
+                                </label>
+                                <input asp-for="ngayBatDau" type="date" class="form-control rounded-0"
+                                       value="@(Model.ngayBatDau?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
+                                <span asp-validation-for="ngayBatDau" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Hạn chót hoàn thành tổng thể (deadline) -->
+                            <div class="col-md-6">
+                                <label asp-for="ngayKetThuc" class="form-label fw-semibold">
+                                    Hạn chót hoàn thành tổng thể (Deadline) <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="ngayKetThuc" type="date" id="inputNgayKetThuc" class="form-control rounded-0 fw-bold"
+                                       value="@Model.ngayKetThuc.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="ngayKetThuc" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Điều khoản giao kết cụ thể -->
+                            <div class="col-12 mt-3">
+                                <label asp-for="dieuKhoan" class="form-label fw-semibold d-flex justify-content-between">
+                                    <span>Điều khoản giao kết cụ thể</span>
+                                    <span class="text-muted small fw-normal">Đã điền sẵn điều khoản mẫu chuẩn</span>
+                                </label>
+                                <textarea asp-for="dieuKhoan" class="form-control rounded-0 font-monospace small" rows="8"
+                                          placeholder="Nhập các điều khoản quyền lợi, nghĩa vụ, bảo mật và nghiệm thu..."></textarea>
+                                <span asp-validation-for="dieuKhoan" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Thiết lập mốc bàn giao (Milestones) & Tỷ lệ giải ngân -->
+                <div class="card border-0 shadow-sm rounded-0 mb-4">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">
+                                <i class="bi bi-signpost-split text-success me-2"></i>Các mốc bàn giao & Tỷ lệ giải ngân (Milestones)
+                            </h5>
+                            <small class="text-muted">Tùy chọn thiết lập các giai đoạn nghiệm thu kèm tỷ lệ giải ngân tương ứng</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-0" id="btnThemGiaiDoan">
+                            <i class="bi bi-plus-circle me-1"></i> Thêm mốc bàn giao
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Progress bar tổng tỷ lệ giải ngân -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small fw-semibold text-muted">Tổng tỷ lệ giải ngân các giai đoạn:</span>
+                                <span class="badge bg-success" id="badgeTongTyLe">100%</span>
+                            </div>
+                            <div class="progress rounded-0" style="height: 10px;">
+                                <div class="progress-bar bg-success progress-bar-striped" id="progressBarTyLe"
+                                     role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="text-danger small mt-1 d-none" id="canhBaoTyLe">
+                                <i class="bi bi-exclamation-circle me-1"></i> Tổng tỷ lệ giải ngân chưa đủ hoặc vượt quá 100%!
+                            </div>
+                        </div>
+
+                        <!-- Danh sách các mốc bàn giao -->
+                        <div id="danhSachGiaiDoan">
+                            @for (int i = 0; i < Model.giaiDoans.Count; i++)
+                            {
+                                <div class="giai-doan-item p-3 border mb-3 bg-light position-relative" data-index="@i">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                        <span class="fw-bold text-success giai-doan-title">
+                                            <i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #@(i + 1)
+                                        </span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-xoa-gd border-0 rounded-0" title="Xóa mốc này">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold">Tên giai đoạn / mốc bàn giao <span class="text-danger">*</span></label>
+                                            <input name="giaiDoans[@i].tenGiaiDoan" value="@Model.giaiDoans[i].tenGiaiDoan" class="form-control form-control-sm rounded-0 input-ten-gd" required />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Hạn chót mốc</label>
+                                            <input name="giaiDoans[@i].hanChot" type="date" value="@(Model.giaiDoans[i].hanChot?.ToString("yyyy-MM-dd") ?? Model.ngayKetThuc.ToString("yyyy-MM-dd"))" class="form-control form-control-sm rounded-0 input-hanchot-gd" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Tỷ lệ giải ngân (%)</label>
+                                            <div class="input-group input-group-sm">
+                                                <input name="giaiDoans[@i].tyLeGiaiNgan" type="number" min="0" max="100" value="@(Model.giaiDoans[i].tyLeGiaiNgan ?? 100)" class="form-control rounded-0 input-ty-le-gd" placeholder="%" />
+                                                <span class="input-group-text rounded-0">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label small fw-semibold">Mô tả sản phẩm bàn giao của mốc</label>
+                                            <input name="giaiDoans[@i].moTa" value="@Model.giaiDoans[i].moTa" class="form-control form-control-sm rounded-0" placeholder="Yêu cầu sản phẩm, tiêu chí nghiệm thu của mốc này..." />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold">Số tiền ước tính</label>
+                                            <input name="giaiDoans[@i].soTien" type="number" value="@Model.giaiDoans[i].soTien" class="form-control form-control-sm rounded-0 input-sotien-gd" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thao tác gửi hợp đồng -->
+                <div class="card border-0 shadow-sm rounded-0 p-3 bg-white">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="text-muted small">
+                            <i class="bi bi-shield-check text-success me-1"></i>
+                            Nhấn <strong>"Gửi hợp đồng"</strong> sẽ chuyển hợp đồng sang trạng thái <strong>"Chờ Freelancer xác nhận"</strong> và gửi thông báo trực tiếp cho ứng viên.
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-0 px-3">
+                                Hủy bỏ
+                            </a>
+                            <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold shadow-sm"
+                                    style="background-color: #1B5E36; border-color: #1B5E36;" id="btnGuiHopDong">
+                                <i class="bi bi-send-fill me-1"></i> Gửi hợp đồng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputThuLao = document.getElementById('inputThuLao');
+            const thuLaoFormatted = document.getElementById('thuLaoFormatted');
+            const danhSachGiaiDoan = document.getElementById('danhSachGiaiDoan');
+            const btnThemGiaiDoan = document.getElementById('btnThemGiaiDoan');
+            const badgeTongTyLe = document.getElementById('badgeTongTyLe');
+            const progressBarTyLe = document.getElementById('progressBarTyLe');
+            const canhBaoTyLe = document.getElementById('canhBaoTyLe');
+            const inputNgayKetThuc = document.getElementById('inputNgayKetThuc');
+
+            function capNhatTienVaTyLe() {
+                const tongTien = parseFloat(inputThuLao.value) || 0;
+                thuLaoFormatted.innerText = "Định dạng: " + tongTien.toLocaleString('vi-VN') + " VNĐ";
+
+                let tongTyLe = 0;
+                const items = danhSachGiaiDoan.querySelectorAll('.giai-doan-item');
+
+                items.forEach((item, index) => {
+                    item.setAttribute('data-index', index);
+                    const titleEl = item.querySelector('.giai-doan-title');
+                    if (titleEl) {
+                        titleEl.innerHTML = `<i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #${index + 1}`;
+                    }
+
+                    // Cập nhật lại name cho input để ASP.NET Core bind mảng chính xác
+                    item.querySelectorAll('input').forEach(inp => {
+                        const name = inp.getAttribute('name');
+                        if (name) {
+                            inp.setAttribute('name', name.replace(/giaiDoans\[\d+\]/, `giaiDoans[${index}]`));
+                        }
+                    });
+
+                    const inputTyLe = item.querySelector('.input-ty-le-gd');
+                    const inputSoTien = item.querySelector('.input-sotien-gd');
+
+                    const tyLe = parseFloat(inputTyLe.value) || 0;
+                    tongTyLe += tyLe;
+
+                    const soTienGiaiDoan = Math.round((tongTien * tyLe) / 100);
+                    if (inputSoTien) {
+                        inputSoTien.value = soTienGiaiDoan;
+                    }
+                });
+
+                badgeTongTyLe.innerText = tongTyLe + "%";
+                progressBarTyLe.style.width = Math.min(tongTyLe, 100) + "%";
+
+                if (tongTyLe === 100) {
+                    badgeTongTyLe.className = "badge bg-success";
+                    progressBarTyLe.className = "progress-bar bg-success";
+                    canhBaoTyLe.classList.add('d-none');
+                } else {
+                    badgeTongTyLe.className = "badge bg-warning text-dark";
+                    progressBarTyLe.className = "progress-bar bg-warning";
+                    canhBaoTyLe.classList.remove('d-none');
+                    canhBaoTyLe.innerHTML = `<i class="bi bi-exclamation-circle me-1"></i> Tổng tỷ lệ giải ngân hiện tại là ${tongTyLe}%. Vui lòng điều chỉnh để đạt đủ 100%!`;
+                }
+            }
+
+            inputThuLao.addEventListener('input', capNhatTienVaTyLe);
+
+            // Xử lý thêm mốc bàn giao
+            btnThemGiaiDoan.addEventListener('click', function () {
+                const count = danhSachGiaiDoan.querySelectorAll('.giai-doan-item').length;
+                const deadline = inputNgayKetThuc.value || '';
+
+                const html = `
+                    <div class="giai-doan-item p-3 border mb-3 bg-light position-relative" data-index="${count}">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                            <span class="fw-bold text-success giai-doan-title">
+                                <i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #${count + 1}
+                            </span>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-xoa-gd border-0 rounded-0" title="Xóa mốc này">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Tên giai đoạn / mốc bàn giao <span class="text-danger">*</span></label>
+                                <input name="giaiDoans[${count}].tenGiaiDoan" value="Giai đoạn ${count + 1}: " class="form-control form-control-sm rounded-0 input-ten-gd" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Hạn chót mốc</label>
+                                <input name="giaiDoans[${count}].hanChot" type="date" value="${deadline}" class="form-control form-control-sm rounded-0 input-hanchot-gd" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Tỷ lệ giải ngân (%)</label>
+                                <div class="input-group input-group-sm">
+                                    <input name="giaiDoans[${count}].tyLeGiaiNgan" type="number" min="0" max="100" value="0" class="form-control rounded-0 input-ty-le-gd" placeholder="%" />
+                                    <span class="input-group-text rounded-0">%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold">Mô tả sản phẩm bàn giao của mốc</label>
+                                <input name="giaiDoans[${count}].moTa" class="form-control form-control-sm rounded-0" placeholder="Yêu cầu sản phẩm, tiêu chí nghiệm thu của mốc này..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Số tiền ước tính</label>
+                                <input name="giaiDoans[${count}].soTien" type="number" value="0" class="form-control form-control-sm rounded-0 input-sotien-gd" readonly />
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                danhSachGiaiDoan.insertAdjacentHTML('beforeend', html);
+                capNhatTienVaTyLe();
+            });
+
+            // Xóa mốc
+            danhSachGiaiDoan.addEventListener('click', function (e) {
+                if (e.target.closest('.btn-xoa-gd')) {
+                    const item = e.target.closest('.giai-doan-item');
+                    if (danhSachGiaiDoan.querySelectorAll('.giai-doan-item').length <= 1) {
+                        alert("Hợp đồng cần tối thiểu 1 mốc bàn giao / nghiệm thu!");
+                        return;
+                    }
+                    item.remove();
+                    capNhatTienVaTyLe();
+                }
+            });
+
+            // Lắng nghe thay đổi tỷ lệ % trong mốc
+            danhSachGiaiDoan.addEventListener('input', function (e) {
+                if (e.target.classList.contains('input-ty-le-gd')) {
+                    capNhatTienVaTyLe();
+                }
+            });
+
+            // Xác nhận khi gửi
+            document.getElementById('formTaoHopDong').addEventListener('submit', function (e) {
+                const tongTien = parseFloat(inputThuLao.value) || 0;
+                if (tongTien <= 0) {
+                    alert("Vui lòng nhập thù lao thỏa thuận hợp lệ (> 0 VNĐ)!");
+                    inputThuLao.focus();
+                    e.preventDefault();
+                    return;
+                }
+
+                if (!confirm("Bạn có chắc chắn muốn gửi dự thảo hợp đồng này cho Freelancer không? Trạng thái hợp đồng sẽ chuyển thành 'Chờ Freelancer xác nhận'.")) {
+                    e.preventDefault();
+                }
+            });
+
+            capNhatTienVaTyLe();
+        });
+    </script>
+}

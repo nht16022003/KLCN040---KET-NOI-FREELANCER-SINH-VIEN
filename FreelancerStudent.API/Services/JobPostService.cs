@@ -6,6 +6,8 @@ using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories;
 using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
+using FreelancerStudent.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace FreelancerStudent.API.Services
 {
@@ -18,14 +20,20 @@ namespace FreelancerStudent.API.Services
 
         private readonly IFreelancerStudentRepository _free;
 
+        private readonly ApplicationDBContext _context;
 
-
-        public JobPostService(IJobPostRepository nhaTuyenDungRepository, INhaTuyenDungRepository ntd, IUserRepository user, IFreelancerStudentRepository free)
+        public JobPostService(
+            IJobPostRepository nhaTuyenDungRepository,
+            INhaTuyenDungRepository ntd,
+            IUserRepository user,
+            IFreelancerStudentRepository free,
+            ApplicationDBContext context)
         {
             _jopPostRepository = nhaTuyenDungRepository;
             _ntd = ntd;
             _user = user;
             _free = free;
+            _context = context;
         }
 
 
@@ -236,7 +244,22 @@ namespace FreelancerStudent.API.Services
                 return new List<UngTuyen_ReponseDTO>();
             }
 
+            var maJobs = dsUngTuyen
+                .Select(u => u.maJob)
+                .Distinct()
+                .ToList();
 
+            var maFreelancers = dsUngTuyen
+                .Select(u => u.maFreelancerStudent)
+                .Distinct()
+                .ToList();
+
+            var dsHopDong = await _context.HopDongs
+                .AsNoTracking()
+                .Where(h =>
+                    maJobs.Contains(h.maJob) &&
+                    maFreelancers.Contains(h.maFreelancerStudent))
+                .ToListAsync();
             return dsUngTuyen.Select(u => new UngTuyen_ReponseDTO
             {
                 maUngTuyen = u.maUngTuyen,
@@ -274,7 +297,30 @@ namespace FreelancerStudent.API.Services
                 tenTruong = u.FreelamcerStudents?.tenTruong ?? string.Empty,
                 GPA = u.FreelamcerStudents?.GPA ?? 0,
                 namThu = u.FreelamcerStudents?.namThu ?? 1,
-                tenChuyenNganh = u.FreelamcerStudents?.ChuyenNganh?.tenChuyenNganh ?? string.Empty
+                tenChuyenNganh = u.FreelamcerStudents?.ChuyenNganh?.tenChuyenNganh ?? string.Empty,
+                TrangThaiHopDong =
+                    u.trangThaiUngTuyen == "TuChoi"
+                        ? (dsHopDong.Any(h =>
+                            h.maJob == u.maJob &&
+                            h.maFreelancerStudent == u.maFreelancerStudent &&
+                            h.trangThai == "DaHuy")
+                            ? "DaHuy"
+                            : null)
+                        : dsHopDong
+                            .Where(h =>
+                                h.maJob == u.maJob &&
+                                h.maFreelancerStudent == u.maFreelancerStudent &&
+                                h.trangThai != "DaHuy")
+                            .Select(h => h.trangThai)
+                            .FirstOrDefault(),
+
+                MaHopDong = dsHopDong
+                    .Where(h =>
+                        h.maJob == u.maJob &&
+                        h.maFreelancerStudent == u.maFreelancerStudent &&
+                        h.trangThai != "DaHuy")
+                    .Select(h => h.maHD)
+                    .FirstOrDefault(),
             }).ToList();
 
         }
@@ -291,7 +337,19 @@ namespace FreelancerStudent.API.Services
             {
                 throw new Exception("Trạng thái duyệt không hợp lệ! (Chỉ chấp nhận 'ChapNhan' hoặc 'TuChoi')");
             }
+            var donUngTuyen = await _jopPostRepository.layUngTuyenTheoMaAsync(request.maUngTuyen);
 
+            if (donUngTuyen == null)
+            {
+                throw new ArgumentException(
+                    "Không tìm thấy đơn ứng tuyển.");
+            }
+
+            if (donUngTuyen.trangThaiUngTuyen != "ChoDuyet")
+            {
+                throw new InvalidOperationException(
+                    "Chỉ được duyệt hoặc từ chối đơn đang chờ duyệt.");
+            }
             var ketQua = await _jopPostRepository.capNhatTrangThaiUngTuyenAsync(request.maUngTuyen, request.trangThai);
 
             if (!ketQua)
@@ -302,37 +360,97 @@ namespace FreelancerStudent.API.Services
 
         }
 
-        public async Task<bool> nopDonUngTuyenAsync(UngTuyen_RequestDTO requets)
+        public async Task<bool> nopDonUngTuyenAsync(UngTuyen_RequestDTO request)
         {
-            var sinhvien = await _free.layFreelancerStudent_TheoMaUser(requets.maUser);
+            if (request == null ||
+                request.maUser <= 0 ||
+                string.IsNullOrWhiteSpace(request.maJob))
+            {
+                throw new ArgumentException("Thông tin ứng tuyển không hợp lệ.");
+            }
+
+            var sinhvien = await _free.layFreelancerStudent_TheoMaUser(
+                request.maUser);
+
             if (sinhvien == null)
             {
-                var user = await _user.timUserTheoMaUserAsync(requets.maUser);
+                var user = await _user.timUserTheoMaUserAsync(request.maUser);
+
                 if (user != null && user.maRole == 1)
                 {
-                    sinhvien = await _free.themFreelancerStudent_DuaVaoMaRoleCuaUsers(user, user.maRole);
+                    sinhvien = await _free.themFreelancerStudent_DuaVaoMaRoleCuaUsers(
+                        user, user.maRole);
                 }
 
                 if (sinhvien == null)
                 {
-                    throw new Exception("Chưa tìm thấy hồ sơ Sinh viên của bạn để ứng tuyển!");
+                    throw new InvalidOperationException(
+                        "Chưa tìm thấy hồ sơ sinh viên để ứng tuyển.");
                 }
             }
 
+            var donCu = await _jopPostRepository
+                .layDonUngTuyenTheoJobVaFreelancerAsync(
+                    request.maJob,
+                    sinhvien.maFreelancerStudents);
 
+            if (donCu != null)
+            {
+                if (donCu.trangThaiUngTuyen == "ChoDuyet")
+                {
+                    throw new InvalidOperationException(
+                        "Bạn đã nộp đơn cho công việc này. Vui lòng chờ duyệt.");
+                }
+
+                if (donCu.trangThaiUngTuyen == "ChapNhan")
+                {
+                    throw new InvalidOperationException(
+                        "Đơn ứng tuyển của bạn đã được chấp nhận.");
+                }
+
+                if (donCu.trangThaiUngTuyen != "TuChoi")
+                {
+                    throw new InvalidOperationException(
+                        "Đơn ứng tuyển hiện tại không thể nộp lại.");
+                }
+
+                // Đơn bị từ chối: cho phép ứng tuyển lại
+                donCu.thuGioiThieu =
+                    (request.thuGioiThieu ?? string.Empty).Trim();
+
+                donCu.thulaoDeXuat = request.thulaoDeXuat;
+
+                donCu.thoiGianHoanThanhDeXuat =
+                    request.thoiGianHoanThanhDeXuat;
+
+                donCu.fileCV = request.fileCV;
+
+                donCu.ngayUngTuyen = DateTime.UtcNow;
+
+                donCu.trangThaiUngTuyen = "ChoDuyet";
+
+                await _jopPostRepository.capNhatDonUngTuyenAsync(donCu);
+
+                return true;
+            }
+
+            // Chưa từng ứng tuyển: tạo đơn mới
             var ungTuyenMoi = new UngTuyen
             {
-                maJob = requets.maJob,
+                maJob = request.maJob,
                 maFreelancerStudent = sinhvien.maFreelancerStudents,
-                thuGioiThieu = (requets.thuGioiThieu ?? string.Empty).Trim(),
-                thulaoDeXuat = requets.thulaoDeXuat,
-                thoiGianHoanThanhDeXuat = requets.thoiGianHoanThanhDeXuat,
-                fileCV = requets.fileCV,
+                thuGioiThieu =
+                    (request.thuGioiThieu ?? string.Empty).Trim(),
+                thulaoDeXuat = request.thulaoDeXuat,
+                thoiGianHoanThanhDeXuat =
+                    request.thoiGianHoanThanhDeXuat,
+                fileCV = request.fileCV,
                 ngayUngTuyen = DateTime.UtcNow,
                 trangThaiUngTuyen = "ChoDuyet"
             };
 
             await _jopPostRepository.themUngTuyenAsync(ungTuyenMoi);
+
             return true;
         }
 

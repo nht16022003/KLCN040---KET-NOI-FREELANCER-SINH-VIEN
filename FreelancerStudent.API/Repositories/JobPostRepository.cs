@@ -112,6 +112,25 @@ namespace FreelancerStudent.API.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<UngTuyen?> layDonUngTuyenTheoJobVaFreelancerAsync(string maJob, int maFreelancerStudent)
+        {
+            return await _context.UngTuyens
+                .Where(u =>
+                    u.maJob == maJob &&
+                    u.maFreelancerStudent == maFreelancerStudent)
+                .OrderByDescending(u => u.ngayUngTuyen)
+                .ThenByDescending(u => u.maUngTuyen)
+                .FirstOrDefaultAsync();
+        }
 
+        public async Task<bool> capNhatDonUngTuyenAsync(UngTuyen ungTuyen)
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<UngTuyen?> layUngTuyenTheoMaAsync(int maUngTuyen)
+        {
+            return await _context.UngTuyens.FirstOrDefaultAsync(u => u.maUngTuyen == maUngTuyen);
+        }
     }
 }

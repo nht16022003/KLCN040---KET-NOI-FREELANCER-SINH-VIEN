@@ -102,6 +102,10 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
         public string? tenCongTy { get; set; }
         public string? avatarNhaTuyenDung { get; set; }
+
+        public string? TrangThaiHopDong { get; set; }
+
+        public string? MaHopDong { get; set; }
     }
 
 

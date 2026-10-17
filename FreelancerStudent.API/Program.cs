@@ -33,7 +33,7 @@ builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 builder.Services.AddScoped<HopDongRepository>();
 builder.Services.AddScoped<IHopDongService, HopDongService>();
-    
+
 
 
 

@@ -30,6 +30,8 @@ namespace FreelancerStudent.API.Models
         [MaxLength(30)]
         public string? trangThai { get; set; }
 
+        public string? dieuKhoan { get; set; }
+
         // Một hợp đồng thuộc về một bài tuyển dụng
         [ForeignKey("maJob")]
         public virtual JobPost? JobPost { get; set; }
@@ -41,5 +43,8 @@ namespace FreelancerStudent.API.Models
             get;
             set;
         }
+
+        // Danh sách các giai đoạn / mốc bàn giao của hợp đồng
+        public virtual ICollection<GiaiDoan_HopDong>? GiaiDoan_HopDongs { get; set; } = new List<GiaiDoan_HopDong>();
     }
 }

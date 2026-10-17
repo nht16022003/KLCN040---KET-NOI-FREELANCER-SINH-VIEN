@@ -1005,57 +1005,30 @@ SELECT * FROM GiaoDichNapTien;
 
 
 
-SELECT * FROM JobPost T, UngTuyen J
-WHERE T.maJob = J.maJob
 
+USE [KETNOI_FREELANCERSV];
+GO
 
-DROP TABLE Task_CongViec;
-DROP TABLE GiaiDoan_HopDong;
+-- 1. Bổ sung cột điều khoản hợp đồng nếu chưa có
+IF COL_LENGTH('dbo.HopDong', 'dieuKhoan') IS NULL
+BEGIN
+    ALTER TABLE dbo.HopDong
+    ADD dieuKhoan NVARCHAR(MAX) NULL;
+END;
+GO
 
-DROP TABLE ThongBao;
-DROP TABLE DanhGia_NhanXet;
+-- 2. Tạo index ngăn hợp đồng đang hoạt động bị trùng
+-- Hợp đồng DaHuy vẫn được giữ trong lịch sử
 
-DROP TABLE FileGhimChat;
-DROP TABLE TinNhanChat;
-DROP TABLE PhongChat;
-
-DROP TABLE BANGCHUNG_TRANHCHAP;
-DROP TABLE TranhChap;
-
-DROP TABLE YeuCauGiaHanDeadline;
-DROP TABLE TaiKhoanNganHang;
-DROP TABLE YeuCauNapTien;
-
-DROP TABLE BanGiao_SanPham;
-DROP TABLE HopDong;
-
-DROP TABLE UngThue;
-DROP TABLE UngTuyen;
-DROP TABLE JobPost;
-
-DROP TABLE DuAn_Trong_Portfolio;
-DROP TABLE Portfolio;
-
-DROP TABLE YeuCauRutTien;
-DROP TABLE LichSuGiaoDich;
-DROP TABLE YeuCauHoTro;
-DROP TABLE CauHinhPhiHoaHong_PhiDangBai;
-DROP TABLE DieuChinhSoDu;
-
-DROP TABLE FreelancerYeuThich;
-DROP TABLE NhaTuyenDung;
-
-DROP TABLE BaiDangTimViec_FreelancerStudent;
-DROP TABLE KyNang;
-DROP TABLE FreelancerStudents;
-
-DROP TABLE ChuyenNganh;
-
-DROP TABLE MinhChung_FreelancerStudents;
-DROP TABLE LichSu_XuLyTaiKhoan;
-
-DROP TABLE Admin;
-DROP TABLE Wallet;
-
-DROP TABLE Users;
-DROP TABLE Roles;
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'UX_HopDong_MaJob_Active'
+      AND object_id = OBJECT_ID('dbo.HopDong')
+)
+BEGIN
+    CREATE UNIQUE INDEX UX_HopDong_MaJob_Active
+    ON dbo.HopDong(maJob)
+    WHERE trangThai <> 'DaHuy';
+END;
+GO

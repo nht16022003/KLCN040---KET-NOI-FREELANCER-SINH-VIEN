@@ -11,6 +11,6 @@ Quản lý toàn bộ các hằng số không thay đổi trong ứng dụng, tr
   - `applications` (`/UngTuyen/...`)
   - `wallet`, `depositTransactions` (`/Wallet/...`, `/GiaoDichNapTien/...`)
   - `chatHubUrl` (`/chatHub` cho SignalR)
-- `app_colors.dart`: Định nghĩa bảng màu chuẩn (Primary, Secondary, Background, TextColor, ErrorColor...).
+- `app_colors.dart`: Định nghĩa bảng màu chuẩn (Primary, Secondary, Background, TextColor, ErrorColor...). Màu cho dự án lấy màu chủ đạo là xanh lá sáng hơi nhạt kết hợp với màu trắng xanh cho nền.
 - `app_text_styles.dart`: Định nghĩa Typography, Font size, Font weight chuẩn theo thiết kế.
 - `app_constants.dart`: Các hằng số khác (Page size phân trang, timeout request 30s, regex kiểm tra email/SĐT...).

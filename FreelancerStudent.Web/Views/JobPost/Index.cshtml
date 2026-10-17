@@ -3,6 +3,9 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Danh sách bài đăng tuyển dụng";
+    var trangThaiTheoJob =
+    ViewBag.TrangThaiUngTuyen as Dictionary<string, string>
+    ?? new Dictionary<string, string>();
 }
 
 <div class="container py-4">
@@ -56,10 +59,42 @@
                                 Xem Chi Tiết
                             </a>
 
-                            <a asp-controller="JobPost" asp-action="UngTuyen" asp-route-maJob="@jobPostViewModel.maJob"
-                               class="btn btn-success">
-                                Ứng Tuyển
-                            </a>
+                            @{
+                                trangThaiTheoJob.TryGetValue(
+                                    jobPostViewModel.maJob,
+                                    out var trangThaiDon);
+                            }
+
+                            @if (trangThaiDon == "ChoDuyet")
+                            {
+                                <button class="btn btn-secondary" disabled>
+                                    Đã nộp đơn
+                                </button>
+                            }
+                            else if (trangThaiDon == "ChapNhan")
+                            {
+                                <button class="btn btn-success" disabled>
+                                    Đã được duyệt
+                                </button>
+                            }
+                            else if (trangThaiDon == "TuChoi")
+                            {
+                                <a asp-controller="JobPost"
+                                asp-action="UngTuyen"
+                                asp-route-maJob="@jobPostViewModel.maJob"
+                                class="btn btn-warning">
+                                    Ứng tuyển lại
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="JobPost"
+                                asp-action="UngTuyen"
+                                asp-route-maJob="@jobPostViewModel.maJob"
+                                class="btn btn-success">
+                                    Ứng tuyển
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>

@@ -104,36 +104,115 @@
                     </div>
 
                     <!-- Các nút thao tác -->
-                    <div class="d-flex justify-content-end gap-2 align-items-center">
-                        <!-- Nút Nhắn tin trao đổi -->
-                        <a href="/Chat?maFreelancerStudent=@item.maFreelancerStudents&maJob=@item.maJob" 
-                           class="btn btn-sm btn-outline-success rounded-0">
-                            Trao đổi
-                        </a>
+                    <!-- Các nút thao tác -->
+                    <div class="d-flex justify-content-end gap-2 align-items-center flex-wrap">
 
-                        @if (item.trangThaiUngTuyen == "ChoDuyet")
+                        @if (item.trangThaiUngTuyen == "TuChoi" && item.TrangThaiHopDong == "DaHuy")
                         {
-                            <!-- Nút Duyệt / Chấp nhận -->
-                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post">
+                            <span class="badge bg-danger rounded-0 p-2">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Đã hủy - Chờ ứng tuyển lại
+                            </span>
+                        }
+                        else if (item.trangThaiUngTuyen == "ChapNhan")
+                        {
+                            @if (item.TrangThaiHopDong == "DaHuy")
+                            {
+                                <span class="badge bg-danger rounded-0 p-2">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Đã hủy
+                                </span>
+                            }
+                            else if (item.TrangThaiHopDong == "ChoXacNhan")
+                            {
+                                <span class="badge bg-warning text-dark rounded-0 p-2">
+                                    Chờ Freelancer xác nhận
+                                </span>
+                            }
+                            else if (item.TrangThaiHopDong == "ChoKyQuy")
+                            {
+                                <span class="badge bg-warning text-dark rounded-0 p-2">
+                                    Chờ ký quỹ
+                                </span>
+                            }
+                            else if (item.TrangThaiHopDong == "DangThucHien")
+                            {
+                                <span class="badge bg-success rounded-0 p-2">
+                                    Đang thực hiện
+                                </span>
+                            }
+                            else if (string.IsNullOrEmpty(item.TrangThaiHopDong))
+                            {
+                                <!-- Nút trao đổi -->
+                                <a href="/Chat?maFreelancerStudent=@item.maFreelancerStudents&maJob=@item.maJob"
+                                class="btn btn-sm btn-outline-success rounded-0">
+                                    <i class="bi bi-chat-dots me-1"></i>
+                                    Trao đổi
+                                </a>
+
+                                <!-- Nút tạo hợp đồng -->
+                                <a href="/HopDong/TaoHopDong?maJob=@item.maJob&maFreelancerStudent=@item.maFreelancerStudents&maUngTuyen=@item.maUngTuyen"
+                                class="btn btn-sm btn-primary rounded-0 text-white fw-medium shadow-sm"
+                                title="Khởi tạo dự thảo hợp đồng với ứng viên này">
+                                    <i class="bi bi-file-earmark-text me-1"></i>
+                                    Tạo hợp đồng
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary rounded-0 p-2">
+                                    @item.TrangThaiHopDong
+                                </span>
+                            }
+                        }
+                        else if (item.trangThaiUngTuyen == "ChoDuyet")
+                        {
+                            <!-- Nút duyệt -->
+                            <form asp-controller="JobPost"
+                                asp-action="DuyetUngTuyen"
+                                method="post"
+                                class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
                                 <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
                                 <input type="hidden" name="trangThai" value="ChapNhan" />
-                                <button type="submit" class="btn btn-sm btn-success rounded-0"
+                                <input type="hidden" name="maJob" value="@item.maJob" />
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-success rounded-0"
                                         style="background-color: #1B5E36; border-color: #1B5E36;"
                                         onclick="return confirm('Bạn có chắc chắn muốn duyệt ứng viên này?');">
                                     Duyệt
                                 </button>
                             </form>
 
-                            <!-- Nút Từ chối -->
-                            <form asp-controller="JobPost" asp-action="DuyetUngTuyen" method="post">
+                            <!-- Nút từ chối -->
+                            <form asp-controller="JobPost"
+                                asp-action="DuyetUngTuyen"
+                                method="post"
+                                class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
                                 <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
                                 <input type="hidden" name="trangThai" value="TuChoi" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-0"
+                                <input type="hidden" name="maJob" value="@item.maJob" />
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger rounded-0"
                                         onclick="return confirm('Bạn có chắc chắn muốn từ chối ứng viên này?');">
                                     Từ chối
                                 </button>
                             </form>
                         }
+                        else if (item.trangThaiUngTuyen == "TuChoi")
+                        {
+                            <span class="badge bg-secondary rounded-0 p-2">
+                                Đã từ chối / Chờ ứng tuyển lại
+                            </span>
+                        }
+
                     </div>
 
                 </div>
