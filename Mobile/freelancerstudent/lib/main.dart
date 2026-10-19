@@ -1,16 +1,19 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'viewmodels/application_viewmodel.dart';
-import 'viewmodels/auth_viewmodel.dart';
-import 'viewmodels/chat_viewmodel.dart';
-import 'viewmodels/freelancer_profile_viewmodel.dart';
-import 'viewmodels/hop_dong_viewmodel.dart';
-import 'viewmodels/job_viewmodel.dart';
-import 'viewmodels/nha_tuyen_dung_viewmodel.dart';
-import 'viewmodels/student_post_viewmodel.dart';
-import 'viewmodels/wallet_viewmodel.dart';
-import 'views/auth/splash_screen.dart';
+import 'core/theme/chu_de_ung_dung.dart';
+
+import 'viewmodels/viewmodel_ung_tuyen.dart';
+import 'viewmodels/viewmodel_xac_thuc.dart';
+import 'viewmodels/viewmodel_chat.dart';
+import 'viewmodels/viewmodel_ho_so_freelancer.dart';
+import 'viewmodels/viewmodel_hop_dong.dart';
+import 'viewmodels/viewmodel_cong_viec.dart';
+import 'viewmodels/viewmodel_nha_tuyen_dung.dart';
+import 'viewmodels/viewmodel_bai_dang_sinh_vien.dart';
+import 'viewmodels/viewmodel_task_cong_viec.dart';
+import 'viewmodels/viewmodel_vi_tien.dart';
+import 'views/auth/man_hinh_khoi_dong.dart';
 
 void main() {
   runApp(const FreelancerStudentApp());
@@ -31,21 +34,13 @@ class FreelancerStudentApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatViewModel()),
         ChangeNotifierProvider(create: (_) => FreelancerProfileViewModel()),
         ChangeNotifierProvider(create: (_) => HopDongViewModel()),
+        ChangeNotifierProvider(create: (_) => TaskViewModel()),
         ChangeNotifierProvider(create: (_) => NhaTuyenDungViewModel()),
       ],
       child: MaterialApp(
         title: 'FLsv',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          primarySwatch: Colors.amber,
-          scaffoldBackgroundColor: const Color(0xFFF8F7F2),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFF2C94C),
-            primary: const Color(0xFFF2C94C),
-            secondary: const Color(0xFFE9B72F),
-          ),
-        ),
+        theme: AppTheme.lightTheme,
         home: const SplashScreen(),
       ),
     );

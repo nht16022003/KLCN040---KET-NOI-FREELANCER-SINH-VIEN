@@ -159,7 +159,7 @@ namespace FreelancerStudent.API.Repositories
                 .Include(h => h.FreelancerStudent)
                     .ThenInclude(f => f.User)
                 .Include(h => h.GiaiDoan_HopDongs)
-                .FirstOrDefaultAsync(h => h.maJob == maJob);
+                .FirstOrDefaultAsync(h => h.maJob == maJob && h.trangThai != "DaHuy");
         }
 
         public async Task<JobPost?> LayJobPostTheoMaAsync(string maJob)
@@ -177,24 +177,125 @@ namespace FreelancerStudent.API.Repositories
                 .FirstOrDefaultAsync(f => f.maFreelancerStudents == maFreelancerStudent);
         }
 
-        public async Task<bool> CapNhatTrangThaiHopDongAsync(string maHD, string trangThaiMoi, ThongBao? thongBao)
+        public async Task<bool> CapNhatTrangThaiHopDongAsync(
+            string maHD,
+            string trangThaiMoi,
+            ThongBao? thongBao,
+            string? lyDoTuChoi = null)
         {
-            var hopDong = await _context.HopDongs.FirstOrDefaultAsync(h => h.maHD == maHD);
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var hopDong = await _context.HopDongs
+                    .FirstOrDefaultAsync(h => h.maHD == maHD);
+
+                if (hopDong == null)
+                {
+                    return false;
+                }
+
+                if (hopDong.trangThai != "ChoXacNhan")
+                {
+                    throw new InvalidOperationException(
+                        "Hợp đồng không còn ở trạng thái chờ xác nhận.");
+                }
+
+                if (trangThaiMoi != "ChoKyQuy" &&
+                    trangThaiMoi != "DaHuy")
+                {
+                    throw new InvalidOperationException(
+                        "Trạng thái hợp đồng mới không hợp lệ.");
+                }
+
+                if (trangThaiMoi == "DaHuy")
+                {
+                    // Khi Freelancer từ chối dự thảo hợp đồng, đơn ứng tuyển vẫn giữ nguyên trạng thái "ChapNhan"
+                    // để Nhà tuyển dụng có thể khởi tạo lại hợp đồng mới cho ứng viên này.
+                    var dsDonUngTuyen = await _context.UngTuyens
+                        .Where(u =>
+                            u.maJob == hopDong.maJob &&
+                            u.maFreelancerStudent == hopDong.maFreelancerStudent)
+                        .ToListAsync();
+
+                    if (dsDonUngTuyen.Count > 0)
+                    {
+                        var donUngTuyen = dsDonUngTuyen[0];
+                        if (donUngTuyen.trangThaiUngTuyen != "ChapNhan")
+                        {
+                            donUngTuyen.trangThaiUngTuyen = "ChapNhan";
+                        }
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(lyDoTuChoi))
+                    {
+                        string dieuKhoanHienTai = hopDong.dieuKhoan ?? string.Empty;
+                        hopDong.dieuKhoan = $"{dieuKhoanHienTai}\n[LY_DO_TU_CHOI]: {lyDoTuChoi.Trim()}".Trim();
+                    }
+                }
+
+                hopDong.trangThai = trangThaiMoi;
+
+                if (thongBao != null)
+                {
+                    await _context.ThongBaos.AddAsync(thongBao);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<bool> XoaHopDongAsync(string maHD)
+        {
+            if (string.IsNullOrWhiteSpace(maHD)) return false;
+
+            var hopDong = await _context.HopDongs
+                .Include(h => h.GiaiDoan_HopDongs)
+                .Include(h => h.Tasks)
+                .FirstOrDefaultAsync(h => h.maHD == maHD);
+
             if (hopDong == null) return false;
 
-            hopDong.trangThai = trangThaiMoi;
-            if (trangThaiMoi == "DangThucHien")
-            {
-                hopDong.ngayBatDau = DateTime.Now;
-            }
-
-            if (thongBao != null)
-            {
-                await _context.ThongBaos.AddAsync(thongBao);
-            }
-
+            _context.HopDongs.Remove(hopDong);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<int> XoaCacHopDongDaHuyTheoJobVaFreelancerAsync(string maJob, int maFreelancerStudent)
+        {
+            var dsHopDongDaHuy = await _context.HopDongs
+                .Include(h => h.GiaiDoan_HopDongs)
+                .Include(h => h.Tasks)
+                .Where(h =>
+                    h.maJob == maJob &&
+                    h.maFreelancerStudent == maFreelancerStudent &&
+                    h.trangThai == "DaHuy")
+                .ToListAsync();
+
+            if (dsHopDongDaHuy.Count == 0) return 0;
+
+            _context.HopDongs.RemoveRange(dsHopDongDaHuy);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<HopDong?> LayHopDongMoiNhatTheoJobVaFreelancerAsync(string maJob, int maFreelancerStudent)
+        {
+            return await _context.HopDongs
+                .AsNoTracking()
+                .Where(h =>
+                    h.maJob == maJob &&
+                    h.maFreelancerStudent == maFreelancerStudent &&
+                    h.trangThai != "DaHuy")
+                .FirstOrDefaultAsync();
         }
     }
 }

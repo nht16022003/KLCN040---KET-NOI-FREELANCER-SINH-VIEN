@@ -22,13 +22,35 @@ namespace FreelancerStudent.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var layDanhSachJobPost = await _jobPostService.layDanhSachJobPost();
+            var ketQuaJob = await _jobPostService.layDanhSachJobPost();
 
+            var dsJob = ketQuaJob.data ?? new List<JobPostViewModel>();
 
-            Console.WriteLine($"===> [SỐ LƯỢNG NTD NHẬN ĐƯỢC]: {layDanhSachJobPost.data?.Count ?? 0}");
+            var trangThaiTheoJob = new Dictionary<string, string>();
 
-            var dsJobPost = layDanhSachJobPost.data ?? new List<FreelancerStudent.Web.ViewModels.JobPostViewModel>();
-            return View(dsJobPost);
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            var role = HttpContext.Session.GetString("tenRole");
+
+            if (maUser.HasValue && role == "FreelancerStudent")
+            {
+                var ketQuaDon = await _jobPostService
+                    .layDSUngTuyenTheoMaUser(maUser.Value);
+
+                if (ketQuaDon.success && ketQuaDon.data != null)
+                {
+                    trangThaiTheoJob = ketQuaDon.data
+                        .GroupBy(x => x.maJob)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.OrderByDescending(x => x.ngayUngTuyen)
+                                .First().trangThaiUngTuyen ?? ""
+                        );
+                }
+            }
+
+            ViewBag.TrangThaiUngTuyen = trangThaiTheoJob;
+
+            return View(dsJob);
         }
 
         //XS
@@ -196,7 +218,25 @@ namespace FreelancerStudent.Web.Controllers
             {
                 return RedirectToAction("DangNhap", "Account");
             }
+            var ketQuaDon = await _jobPostService.layDSUngTuyenTheoMaUser(maUser.Value);
 
+            if (ketQuaDon.success && ketQuaDon.data != null)
+            {
+                var donDaNop = ketQuaDon.data
+                    .Where(u => u.maJob == maJob)
+                    .OrderByDescending(u => u.ngayUngTuyen)
+                    .FirstOrDefault();
+
+                if (donDaNop != null &&
+                    (donDaNop.trangThaiUngTuyen == "ChoDuyet" ||
+                    donDaNop.trangThaiUngTuyen == "ChapNhan"))
+                {
+                    TempData["ErrorMessage"] =
+                        "Bạn đã ứng tuyển công việc này và không thể nộp đơn trùng.";
+
+                    return RedirectToAction("Index");
+                }
+            }
             //Lay thong tin bai jobpost
 
             var dsJob = await _jobPostService.layDanhSachJobPost();

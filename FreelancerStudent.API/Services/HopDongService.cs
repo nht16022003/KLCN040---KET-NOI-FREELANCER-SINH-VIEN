@@ -3,16 +3,22 @@ using FreelancerStudent.API.DTOs.ReponseDTOs;
 using FreelancerStudent.API.DTOs.RequestDTOs;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories;
+using FreelancerStudent.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace FreelancerStudent.API.Services
 {
     public class HopDongService : IHopDongService
     {
         private readonly HopDongRepository _repository;
+        private readonly ApplicationDBContext _context;
 
-        public HopDongService(HopDongRepository repository)
+        public HopDongService(
+            HopDongRepository repository,
+            ApplicationDBContext context)
         {
             _repository = repository;
+            _context = context;
         }
 
         public async Task<List<HopDongResponseDTO>>
@@ -91,19 +97,64 @@ namespace FreelancerStudent.API.Services
             }
 
             // Kiểm tra quyền sở hữu bài đăng nếu có maUserNTD
-            if (maUserNTD.HasValue && maUserNTD.Value > 0)
+            if (!maUserNTD.HasValue || maUserNTD.Value <= 0)
             {
-                if (job.NhaTuyenDung != null && job.NhaTuyenDung.maUser != maUserNTD.Value)
+                throw new UnauthorizedAccessException(
+                    "Bạn cần đăng nhập bằng tài khoản Nhà tuyển dụng.");
+            }
+
+            if (job.NhaTuyenDung == null ||
+                job.NhaTuyenDung.maUser != maUserNTD.Value)
+            {
+                throw new UnauthorizedAccessException(
+                    "Bạn không có quyền tạo hợp đồng cho bài tuyển dụng này.");
+            }
+
+            // Tự động xóa các hợp đồng cũ đã bị từ chối / hủy của Job và Freelancer này khỏi SQL
+            await _repository.XoaCacHopDongDaHuyTheoJobVaFreelancerAsync(request.maJob, request.maFreelancerStudent);
+
+            // Kiểm tra xem Job đã có hợp đồng chưa
+            var hopDongHienCo = await _repository.LayHopDongMoiNhatTheoJobVaFreelancerAsync(request.maJob, request.maFreelancerStudent);
+
+            if (hopDongHienCo != null)
+            {
+                throw new InvalidOperationException(
+                    $"Freelancer này đã có hợp đồng {hopDongHienCo.maHD} " +
+                    $"ở trạng thái '{hopDongHienCo.trangThai}'.");
+            }
+            UngTuyen? donUngTuyen = null;
+            if (request.maUngTuyen.HasValue && request.maUngTuyen.Value > 0)
+            {
+                donUngTuyen = await _context.UngTuyens
+                    .FirstOrDefaultAsync(u => u.maUngTuyen == request.maUngTuyen.Value);
+            }
+            else
+            {
+                donUngTuyen = await _context.UngTuyens
+                    .FirstOrDefaultAsync(u => u.maJob == request.maJob && u.maFreelancerStudent == request.maFreelancerStudent);
+                if (donUngTuyen != null)
                 {
-                    throw new UnauthorizedAccessException("Bạn không có quyền tạo hợp đồng cho bài tuyển dụng này.");
+                    request.maUngTuyen = donUngTuyen.maUngTuyen;
                 }
             }
 
-            // Kiểm tra xem Job đã có hợp đồng chưa
-            var hopDongHienCo = await _repository.LayHopDongTheoMaJobAsync(request.maJob);
-            if (hopDongHienCo != null && hopDongHienCo.trangThai != "DaHuy")
+            if (donUngTuyen == null)
             {
-                throw new InvalidOperationException($"Bài tuyển dụng này đã có hợp đồng ({hopDongHienCo.maHD}) đang ở trạng thái '{hopDongHienCo.trangThai}'.");
+                throw new InvalidOperationException("Không tìm thấy đơn ứng tuyển tương ứng với Freelancer và công việc này.");
+            }
+
+            if (donUngTuyen.maJob != request.maJob ||
+                donUngTuyen.maFreelancerStudent != request.maFreelancerStudent)
+            {
+                throw new InvalidOperationException(
+                    "Đơn ứng tuyển không thuộc công việc hoặc Freelancer đã chọn.");
+            }
+
+            if (donUngTuyen.trangThaiUngTuyen != "ChapNhan")
+            {
+                // Nếu đơn ứng tuyển từng bị đổi sang TuChoi do code cũ, tự động phục hồi về ChapNhan
+                donUngTuyen.trangThaiUngTuyen = "ChapNhan";
+                await _context.SaveChangesAsync();
             }
 
             // Kiểm tra Freelancer
@@ -184,7 +235,39 @@ namespace FreelancerStudent.API.Services
             if (string.IsNullOrWhiteSpace(maHD)) return null;
 
             var hopDong = await _repository.LayChiTietHopDongTheoMaAsync(maHD);
-            return hopDong != null ? MapToResponseDTO(hopDong) : null;
+            if (hopDong == null) return null;
+
+            var dto = MapToResponseDTO(hopDong);
+
+            // Nếu hợp đồng đã hủy mà chưa có lý do từ chối trích xuất được từ điều khoản, tìm trong Thông báo gần nhất
+            if (hopDong.trangThai == "DaHuy" && string.IsNullOrWhiteSpace(dto.lyDoTuChoi))
+            {
+                var tb = await _context.ThongBaos
+                    .AsNoTracking()
+                    .Where(t => t.loaiThongBao == "HopDong" && t.noiDung != null && t.noiDung.Contains(maHD) && t.noiDung.Contains("từ chối"))
+                    .OrderByDescending(t => t.ngayTao)
+                    .FirstOrDefaultAsync();
+
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.noiDung))
+                {
+                    int idx = tb.noiDung.IndexOf("Lý do: ", StringComparison.OrdinalIgnoreCase);
+                    if (idx >= 0)
+                    {
+                        dto.lyDoTuChoi = tb.noiDung.Substring(idx + 7).Trim().TrimEnd('.');
+                    }
+                }
+            }
+
+            var donUngTuyen = await _context.UngTuyens
+                .AsNoTracking()
+                .Where(u => u.maJob == hopDong.maJob && u.maFreelancerStudent == hopDong.maFreelancerStudent)
+                .FirstOrDefaultAsync();
+            if (donUngTuyen != null)
+            {
+                dto.maUngTuyen = donUngTuyen.maUngTuyen;
+            }
+
+            return dto;
         }
 
         public async Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaJobAsync(string maJob)
@@ -211,12 +294,17 @@ namespace FreelancerStudent.API.Services
             }
 
             // Kiểm tra quyền của Freelancer nếu có truyền maUserFreelancer
-            if (maUserFreelancer.HasValue && maUserFreelancer.Value > 0)
+            if (!maUserFreelancer.HasValue || maUserFreelancer.Value <= 0)
             {
-                if (hopDong.FreelancerStudent?.User != null && hopDong.FreelancerStudent.User.maUser != maUserFreelancer.Value)
-                {
-                    throw new UnauthorizedAccessException("Bạn không có quyền xác nhận hợp đồng này.");
-                }
+                throw new UnauthorizedAccessException(
+                    "Bạn cần đăng nhập bằng tài khoản Freelancer.");
+            }
+
+            if (hopDong.FreelancerStudent?.User == null ||
+                hopDong.FreelancerStudent.User.maUser != maUserFreelancer.Value)
+            {
+                throw new UnauthorizedAccessException(
+                    "Bạn không có quyền xác nhận hợp đồng này.");
             }
 
             // Kiểm tra trạng thái hiện tại
@@ -251,10 +339,183 @@ namespace FreelancerStudent.API.Services
                 };
             }
 
-            return await _repository.CapNhatTrangThaiHopDongAsync(request.maHD, trangThaiMoi, thongBao);
+            return await _repository.CapNhatTrangThaiHopDongAsync(request.maHD, trangThaiMoi, thongBao, request.lyDoTuChoi);
         }
 
         public async Task<bool> KyQuyHopDongAsync(string maHD, int? maUserNhaTuyenDung)
+        {
+            // 1. Kiểm tra dữ liệu đầu vào
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                throw new ArgumentException("Mã hợp đồng không hợp lệ.");
+            }
+
+            if (!maUserNhaTuyenDung.HasValue ||
+                maUserNhaTuyenDung.Value <= 0)
+            {
+                throw new UnauthorizedAccessException(
+                    "Không xác định được tài khoản nhà tuyển dụng.");
+            }
+
+            // 2. Lấy thông tin hợp đồng
+            var hopDong = await _repository
+                .LayChiTietHopDongTheoMaAsync(maHD);
+
+            if (hopDong == null)
+            {
+                throw new ArgumentException(
+                    "Không tìm thấy hợp đồng.");
+            }
+
+            // 3. Kiểm tra quyền sở hữu hợp đồng
+            int? maUserChuHopDong =
+                hopDong.JobPost?.NhaTuyenDung?.User?.maUser;
+
+            if (!maUserChuHopDong.HasValue ||
+                maUserChuHopDong.Value != maUserNhaTuyenDung.Value)
+            {
+                throw new UnauthorizedAccessException(
+                    "Bạn không có quyền ký quỹ hợp đồng này.");
+            }
+
+            // 4. Kiểm tra trạng thái hợp đồng
+            if (hopDong.trangThai != "ChoKyQuy")
+            {
+                throw new InvalidOperationException(
+                    $"Hợp đồng đang ở trạng thái '{hopDong.trangThai}', " +
+                    "không thể thực hiện ký quỹ.");
+            }
+
+            // 5. Kiểm tra số tiền ký quỹ
+            decimal soTienKyQuy = hopDong.sotienkyquy ?? 0;
+
+            if (soTienKyQuy <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Số tiền ký quỹ phải lớn hơn 0.");
+            }
+
+            // 6. Kiểm tra Freelancer nhận thông báo
+            int? maUserFreelancer =
+                hopDong.FreelancerStudent?.User?.maUser;
+
+            if (!maUserFreelancer.HasValue)
+            {
+                throw new InvalidOperationException(
+                    "Không tìm thấy tài khoản Freelancer.");
+            }
+
+            // 7. Bắt đầu Database Transaction
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // 8. Khóa trạng thái hợp đồng bằng cập nhật có điều kiện
+                // Chỉ một request được chuyển từ ChoKyQuy sang DangThucHien
+                int soHopDongCapNhat =
+                    await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                        UPDATE HopDong
+                        SET trangThai = N'DangThucHien',
+                            ngayBatDau = GETDATE()
+                        WHERE maHD = {maHD}
+                        AND trangThai = N'ChoKyQuy'
+                    ");
+
+                if (soHopDongCapNhat != 1)
+                {
+                    throw new InvalidOperationException(
+                        "Hợp đồng đã được ký quỹ hoặc trạng thái đã thay đổi.");
+                }
+
+                // 9. Trừ số dư khả dụng và cộng số dư đóng băng
+                // Chỉ cập nhật nếu số dư thực tế vẫn đủ tiền
+                int soViCapNhat =
+                    await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                        UPDATE Wallet
+                        SET soDuKhaDung = soDuKhaDung - {soTienKyQuy},
+                            soDuDongBang = soDuDongBang + {soTienKyQuy}
+                        WHERE maUser = {maUserNhaTuyenDung.Value}
+                        AND soDuKhaDung >= {soTienKyQuy}
+                    ");
+
+                if (soViCapNhat != 1)
+                {
+                    throw new InvalidOperationException(
+                        "Số dư ví không đủ để ký quỹ hoặc không tìm thấy ví.");
+                }
+
+                // 10. Lấy số dư ví sau khi ký quỹ
+                var wallet = await _context.Wallets
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        w => w.maUser == maUserNhaTuyenDung.Value);
+
+                if (wallet == null)
+                {
+                    throw new InvalidOperationException(
+                        "Không tìm thấy ví nhà tuyển dụng.");
+                }
+
+                decimal soDuSau = wallet.soDuKhaDung ?? 0;
+                decimal soDuTruoc = soDuSau + soTienKyQuy;
+
+                // 11. Ghi lịch sử giao dịch ký quỹ
+                var lichSu = new LichSuGiaoDich
+                {
+                    maWallet = wallet.maWallet,
+                    loaiGiaoDich = "KyQuyHopDong",
+                    soTien = soTienKyQuy,
+                    soDuTruocGD = soDuTruoc,
+                    soDuSauGD = soDuSau,
+                    noiDung = $"Ký quỹ hợp đồng {maHD}",
+                    phuongThucThanhToan = "ViNoiBo",
+                    trangThai = "ThanhCong",
+                    ngayTao = DateTime.Now
+                };
+
+                await _context.LichSuGiaoDichs.AddAsync(lichSu);
+
+                // 12. Tạo thông báo cho Freelancer
+                string tenNhaTuyenDung =
+                    hopDong.JobPost?.NhaTuyenDung?.tencongty
+                    ?? hopDong.JobPost?.NhaTuyenDung?.User?.hotenUser
+                    ?? "Nhà tuyển dụng";
+
+                var thongBao = new ThongBao
+                {
+                    maUser = maUserFreelancer.Value,
+                    tieuDe = "Hợp đồng đã được ký quỹ & kích hoạt",
+                    noiDung =
+                        $"Nhà tuyển dụng {tenNhaTuyenDung} đã ký quỹ " +
+                        $"{soTienKyQuy:N0} VNĐ cho hợp đồng {maHD}. " +
+                        "Bạn có thể bắt đầu thực hiện công việc.",
+                    loaiThongBao = "HopDong",
+                    linkDieuHuong =
+                        $"/HopDong/ChiTiet?maHD={maHD}",
+                    daDoc = false,
+                    ngayTao = DateTime.Now
+                };
+
+                await _context.ThongBaos.AddAsync(thongBao);
+
+                // 13. Lưu lịch sử và thông báo
+                await _context.SaveChangesAsync();
+
+                // 14. Xác nhận toàn bộ giao dịch
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch
+            {
+                // Nếu có lỗi, hoàn tác toàn bộ thay đổi
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<bool> XoaHopDongAsync(string maHD, int? maUserNTD)
         {
             if (string.IsNullOrWhiteSpace(maHD))
             {
@@ -264,47 +525,39 @@ namespace FreelancerStudent.API.Services
             var hopDong = await _repository.LayChiTietHopDongTheoMaAsync(maHD);
             if (hopDong == null)
             {
-                throw new ArgumentException("Không tìm thấy hợp đồng tương ứng.");
+                return false;
             }
 
-            // Kiểm tra quyền của Nhà tuyển dụng nếu có truyền maUserNhaTuyenDung
-            if (maUserNhaTuyenDung.HasValue && maUserNhaTuyenDung.Value > 0)
+            if (!maUserNTD.HasValue || maUserNTD.Value <= 0)
             {
-                if (hopDong.JobPost?.NhaTuyenDung?.User != null && hopDong.JobPost.NhaTuyenDung.User.maUser != maUserNhaTuyenDung.Value)
-                {
-                    throw new UnauthorizedAccessException("Bạn không có quyền thực hiện ký quỹ cho hợp đồng này.");
-                }
+                throw new UnauthorizedAccessException("Bạn cần đăng nhập bằng tài khoản Nhà tuyển dụng.");
             }
 
-            // Kiểm tra trạng thái hiện tại phải là ChoKyQuy
-            if (hopDong.trangThai != "ChoKyQuy")
+            if (hopDong.JobPost?.NhaTuyenDung?.User == null ||
+                hopDong.JobPost.NhaTuyenDung.User.maUser != maUserNTD.Value)
             {
-                throw new InvalidOperationException($"Hợp đồng đang ở trạng thái '{hopDong.trangThai}', không thể thực hiện ký quỹ.");
+                throw new UnauthorizedAccessException("Bạn không có quyền xóa hợp đồng này.");
             }
 
-            // Tạo thông báo gửi cho Freelancer
-            ThongBao? thongBao = null;
-            if (hopDong.FreelancerStudent?.User != null)
-            {
-                string tenNtd = hopDong.JobPost?.NhaTuyenDung?.tencongty ?? hopDong.JobPost?.NhaTuyenDung?.User?.hotenUser ?? "Nhà tuyển dụng";
-                string tieuDeCongViec = hopDong.JobPost?.tieude ?? "công việc";
-                thongBao = new ThongBao
-                {
-                    maUser = hopDong.FreelancerStudent.User.maUser,
-                    tieuDe = "Hợp đồng đã được ký quỹ & kích hoạt",
-                    noiDung = $"Nhà tuyển dụng {tenNtd} đã ký quỹ thành công cho hợp đồng {hopDong.maHD} ('{tieuDeCongViec}'). Hợp đồng chính thức bắt đầu, bạn có thể triển khai công việc ngay!",
-                    loaiThongBao = "HopDong",
-                    linkDieuHuong = $"/HopDong/ChiTiet?maHD={hopDong.maHD}",
-                    daDoc = false,
-                    ngayTao = DateTime.Now
-                };
-            }
-
-            return await _repository.CapNhatTrangThaiHopDongAsync(maHD, "DangThucHien", thongBao);
+            return await _repository.XoaHopDongAsync(maHD);
         }
 
         private static HopDongResponseDTO MapToResponseDTO(HopDong h)
         {
+            string? lyDoTuChoi = null;
+            string? dieuKhoanSach = h.dieuKhoan;
+
+            if (!string.IsNullOrWhiteSpace(h.dieuKhoan))
+            {
+                const string tag = "[LY_DO_TU_CHOI]:";
+                int idx = h.dieuKhoan.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    lyDoTuChoi = h.dieuKhoan.Substring(idx + tag.Length).Trim();
+                    dieuKhoanSach = h.dieuKhoan.Substring(0, idx).Trim();
+                }
+            }
+
             return new HopDongResponseDTO
             {
                 maHD = h.maHD,
@@ -329,7 +582,8 @@ namespace FreelancerStudent.API.Services
                 ngayKetThuc = h.ngayKetThuc,
                 sotienkyquy = h.sotienkyquy,
                 hinhthuclamviec = h.hinhthuclamviec,
-                dieuKhoan = h.dieuKhoan,
+                dieuKhoan = dieuKhoanSach,
+                lyDoTuChoi = lyDoTuChoi,
                 trangThai = h.trangThai ?? string.Empty,
                 giaiDoans = h.GiaiDoan_HopDongs?.Select(g => new GiaiDoanHopDong_ResponseDTO
                 {

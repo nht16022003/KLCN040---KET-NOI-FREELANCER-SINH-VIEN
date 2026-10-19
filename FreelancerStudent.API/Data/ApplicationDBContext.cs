@@ -26,6 +26,7 @@ namespace FreelancerStudent.API.Data
         public DbSet<HopDong> HopDongs { get; set; }
 
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<LichSuGiaoDich> LichSuGiaoDichs { get; set; }
 
         public DbSet<UngTuyen> UngTuyens { get; set; }
 
@@ -43,6 +44,8 @@ namespace FreelancerStudent.API.Data
         public DbSet<DuAnTrongPortfolio> DuAnTrongPortfolios { get; set; }
 
         public DbSet<GiaiDoan_HopDong> GiaiDoan_HopDongs { get; set; }
+
+        public DbSet<Task_CongViec> Task_CongViecs { get; set; }
 
         public DbSet<ThongBao> ThongBaos { get; set; }
 
@@ -286,6 +289,22 @@ namespace FreelancerStudent.API.Data
                      .WithMany()
                      .HasForeignKey(t => t.maUser)
                      .OnDelete(DeleteBehavior.Cascade);
+             });
+
+             modelBuilder.Entity<Task_CongViec>(entity =>
+             {
+                 entity.ToTable("Task_CongViec");
+                 entity.HasKey(t => t.maTask);
+
+                 entity.HasOne(t => t.HopDong)
+                     .WithMany(h => h.Tasks)
+                     .HasForeignKey(t => t.maHD)
+                     .OnDelete(DeleteBehavior.Cascade);
+
+                 entity.HasOne(t => t.GiaiDoan_HopDong)
+                     .WithMany()
+                     .HasForeignKey(t => t.maGiaiDoan)
+                     .OnDelete(DeleteBehavior.SetNull);
              });
         }
     }

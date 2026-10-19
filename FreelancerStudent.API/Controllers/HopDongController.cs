@@ -172,10 +172,22 @@ namespace FreelancerStudent.API.Controllers
             try
             {
                 var ketQua = await _hopDongService.XacNhanHopDongAsync(request, maUserFreelancer);
+
+                if (!ketQua)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy hợp đồng cần xác nhận."
+                    });
+                }
+
                 return Ok(new
                 {
-                    success = ketQua,
-                    message = request.dongY ? "Đã xác nhận dự thảo hợp đồng thành công!" : "Đã từ chối dự thảo hợp đồng."
+                    success = true,
+                    message = request.dongY
+                        ? "Đã xác nhận dự thảo hợp đồng thành công!"
+                        : "Đã từ chối dự thảo hợp đồng. Bạn có thể ứng tuyển lại."
                 });
             }
             catch (ArgumentException ex)
@@ -202,35 +214,119 @@ namespace FreelancerStudent.API.Controllers
             [FromBody] KyQuyHopDong_RequestDTO request,
             [FromQuery] int? maUserNhaTuyenDung)
         {
-            if (!ModelState.IsValid || request == null || string.IsNullOrWhiteSpace(request.maHD))
+            // 1. Kiểm tra dữ liệu đầu vào
+            if (!ModelState.IsValid ||
+                request == null ||
+                string.IsNullOrWhiteSpace(request.maHD))
             {
-                return BadRequest(new { message = "Mã hợp đồng không hợp lệ." });
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Mã hợp đồng không hợp lệ."
+                });
+            }
+
+            // 2. Kiểm tra mã nhà tuyển dụng
+            if (!maUserNhaTuyenDung.HasValue ||
+                maUserNhaTuyenDung.Value <= 0)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Không xác định được nhà tuyển dụng."
+                });
             }
 
             try
             {
-                var ketQua = await _hopDongService.KyQuyHopDongAsync(request.maHD, maUserNhaTuyenDung);
+                // 3. Gọi Service xử lý ký quỹ
+                var ketQua = await _hopDongService.KyQuyHopDongAsync(
+                    request.maHD,
+                    maUserNhaTuyenDung
+                );
+
+                // 4. Kiểm tra kết quả nghiệp vụ
+                if (!ketQua)
+                {
+                    return Conflict(new
+                    {
+                        success = false,
+                        message = "Ký quỹ hợp đồng không thành công."
+                    });
+                }
+
+                // 5. Trả kết quả thành công
                 return Ok(new
                 {
-                    success = ketQua,
-                    message = "Ký quỹ hợp đồng thành công! Hợp đồng đã chuyển sang trạng thái Đang thực hiện."
+                    success = true,
+                    message = "Ký quỹ hợp đồng thành công! " +
+                            "Hợp đồng đã chuyển sang trạng thái Đang thực hiện."
                 });
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
             catch (UnauthorizedAccessException ex)
             {
-                return StatusCode(403, new { message = ex.Message });
+                return StatusCode(403, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(new { message = ex.Message });
+                return Conflict(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Đã xảy ra lỗi hệ thống khi ký quỹ hợp đồng."
+                });
+            }
+        }
+
+        // DELETE: api/HopDong/{maHD}
+        [HttpDelete("{maHD}")]
+        public async Task<IActionResult> XoaHopDong(string maHD, [FromQuery] int? maUserNTD)
+        {
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                return BadRequest(new { success = false, message = "Mã hợp đồng không hợp lệ." });
+            }
+
+            try
+            {
+                var ketQua = await _hopDongService.XoaHopDongAsync(maHD, maUserNTD);
+                if (!ketQua)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy hợp đồng để xóa." });
+                }
+
+                return Ok(new { success = true, message = "Đã xóa hợp đồng thành công." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi hệ thống khi ký quỹ hợp đồng: " + ex.Message });
+                return StatusCode(500, new { success = false, message = "Lỗi khi xóa hợp đồng: " + ex.Message });
             }
         }
     }

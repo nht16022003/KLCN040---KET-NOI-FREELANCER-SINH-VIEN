@@ -97,5 +97,9 @@ namespace FreelancerStudent.Web.Models
 
         public string? tenCongTy { get; set; }
         public string? avatarNhaTuyenDung { get; set; }
+        //TA
+        public string? TrangThaiHopDong { get; set; }
+
+        public string? MaHopDong { get; set; }
     }
 }

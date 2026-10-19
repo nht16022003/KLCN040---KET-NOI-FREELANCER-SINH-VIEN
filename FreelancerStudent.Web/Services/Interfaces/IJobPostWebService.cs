@@ -34,5 +34,7 @@ namespace FreelancerStudent.Web.Services.Interfaces
 
         //Tuấn
         Task<ApiReponse<bool>> capNhatJobPostAsync(JobPostViewModel model);
+
+
     }
 }

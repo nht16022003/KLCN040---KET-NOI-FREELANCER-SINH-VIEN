@@ -36,5 +36,10 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //Tuấn
         Task<bool> capNhatJobPostAsync(JobPost job);
 
+        Task<UngTuyen?> layDonUngTuyenTheoJobVaFreelancerAsync(string maJob, int maFreelancerStudent);
+
+        Task<bool> capNhatDonUngTuyenAsync(UngTuyen ungTuyen);
+
+        Task<UngTuyen?> layUngTuyenTheoMaAsync(int maUngTuyen);
     }
 }

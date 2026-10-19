@@ -14,17 +14,23 @@ namespace FreelancerStudent.Web.Controllers
         private readonly INhaTuyenDungWebService _ntdService;
         private readonly IFreelancerStudentWebService _freelancerService;
         private readonly IJobPostWebService _jobPostService;
+        private readonly IWalletWebService _walletWebService;
+        private readonly ITaskCongViecWebService _taskWebService;
 
         public HopDongController(
             IHopDongWebService hopDongService,
             INhaTuyenDungWebService ntdService,
             IFreelancerStudentWebService freelancerService,
-            IJobPostWebService jobPostService)
+            IJobPostWebService jobPostService,
+            IWalletWebService walletWebService,
+            ITaskCongViecWebService taskWebService)
         {
             _hopDongService = hopDongService;
             _ntdService = ntdService;
             _freelancerService = freelancerService;
             _jobPostService = jobPostService;
+            _walletWebService = walletWebService;
+            _taskWebService = taskWebService;
         }
 
         [HttpGet]
@@ -372,27 +378,55 @@ namespace FreelancerStudent.Web.Controllers
                 }
             }
 
-            // Kiểm tra xem user hiện tại có phải là Nhà tuyển dụng của hợp đồng này không
-            if (hopDong.maUserNhaTuyenDung.HasValue && hopDong.maUserNhaTuyenDung.Value == maUser.Value)
+            // Kiểm tra quyền sở hữu hợp đồng của Nhà tuyển dụng
+            bool laChuHopDong =
+                hopDong.maUserNhaTuyenDung.HasValue &&
+                hopDong.maUserNhaTuyenDung.Value == maUser.Value;
+
+            // Chỉ nhà tuyển dụng sở hữu hợp đồng mới có quyền ký quỹ
+            hopDong.LaNhaTuyenDungCuaHopDong = laChuHopDong;
+
+            hopDong.CoQuyenKyQuy =
+                laChuHopDong &&
+                hopDong.trangThai == "ChoKyQuy";
+            if (!hopDong.LaFreelancerCuaHopDong &&
+                !hopDong.LaNhaTuyenDungCuaHopDong)
             {
-                hopDong.LaNhaTuyenDungCuaHopDong = true;
-                if (hopDong.trangThai == "ChoKyQuy")
+                TempData["ErrorMessage"] =
+                    "Bạn không có quyền xem hợp đồng này.";
+
+                return RedirectToAction("Index");
+            }
+
+            // và hợp đồng đang chờ ký quỹ
+            if (hopDong.CoQuyenKyQuy &&
+                hopDong.maUserNhaTuyenDung == maUser.Value &&
+                hopDong.trangThai == "ChoKyQuy")
+            {
+                var ketQuaVi = await _walletWebService
+                    .layViTheoUser(maUser.Value);
+
+                if (ketQuaVi != null &&
+                    ketQuaVi.success &&
+                    ketQuaVi.data != null)
                 {
-                    hopDong.CoQuyenKyQuy = true;
+                    hopDong.SoDuKhaDung =
+                        ketQuaVi.data.soDuKhaDung;
+
+                    hopDong.DaTaiThongTinVi = true;
                 }
             }
-            else
+
+            // Tải thông tin tiến độ dự án
+            try
             {
-                var role = HttpContext.Session.GetString("tenRole");
-                if (role == "NhaTuyenDung")
+                var tienDoRes = await _taskWebService.LayTienDoDuAnAsync(maHD, maUser.Value);
+                if (tienDoRes.success && tienDoRes.data != null)
                 {
-                    hopDong.LaNhaTuyenDungCuaHopDong = true;
-                    if (hopDong.trangThai == "ChoKyQuy")
-                    {
-                        hopDong.CoQuyenKyQuy = true;
-                    }
+                    hopDong.TienDoDuAn = tienDoRes.data;
                 }
             }
+            catch { }
 
             return View(hopDong);
         }
@@ -433,30 +467,173 @@ namespace FreelancerStudent.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> KyQuy(string maHD)
         {
+            // 1. Kiểm tra đăng nhập
             var maUser = HttpContext.Session.GetInt32("maUser");
+
             if (maUser == null)
             {
                 return RedirectToAction("DangNhap", "Account");
             }
 
+            // 2. Kiểm tra mã hợp đồng
             if (string.IsNullOrWhiteSpace(maHD))
             {
                 TempData["ErrorMessage"] = "Mã hợp đồng không hợp lệ.";
                 return RedirectToAction("Index");
             }
 
-            var response = await _hopDongService.KyQuyHopDongAsync(maHD, maUser.Value);
-
-            if (response.success)
+            try
             {
-                TempData["SuccessMessage"] = response.message;
+                // 3. Lấy thông tin hợp đồng
+                var hopDong = await _hopDongService
+                    .LayChiTietTheoMaAsync(maHD);
+
+                if (hopDong == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "Không tìm thấy hợp đồng.";
+
+                    return RedirectToAction("Index");
+                }
+
+                // 4. Kiểm tra quyền sở hữu hợp đồng
+                if (!hopDong.maUserNhaTuyenDung.HasValue ||
+                    hopDong.maUserNhaTuyenDung.Value != maUser.Value)
+                {
+                    TempData["ErrorMessage"] =
+                        "Bạn không có quyền ký quỹ hợp đồng này.";
+
+                    return RedirectToAction("Index");
+                }
+
+                // 5. Kiểm tra trạng thái hợp đồng
+                if (hopDong.trangThai != "ChoKyQuy")
+                {
+                    TempData["ErrorMessage"] =
+                        "Hợp đồng không ở trạng thái chờ ký quỹ.";
+
+                    return RedirectToAction("ChiTiet", new { maHD });
+                }
+
+                // 6. Gọi Service để thực hiện ký quỹ
+                var response = await _hopDongService
+                    .KyQuyHopDongAsync(maHD, maUser.Value);
+
+                // 7. Xử lý kết quả
+                if (response != null && response.success)
+                {
+                    TempData["SuccessMessage"] =
+                        string.IsNullOrWhiteSpace(response.message)
+                            ? "Ký quỹ hợp đồng thành công."
+                            : response.message;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] =
+                        response?.message
+                        ?? "Ký quỹ thất bại. Vui lòng thử lại.";
+                }
             }
-            else
+            catch (Exception)
             {
-                TempData["ErrorMessage"] = response.message;
+                // Không hiển thị chi tiết lỗi hệ thống cho người dùng
+                TempData["ErrorMessage"] =
+                    "Không thể xử lý yêu cầu ký quỹ. " +
+                    "Vui lòng kiểm tra lại trạng thái hợp đồng và số dư ví.";
             }
 
+            // 8. Quay lại trang chi tiết hợp đồng
             return RedirectToAction("ChiTiet", new { maHD });
+        }
+
+        // ================= Quản lý Tiến độ Dự án (FRL-UC-09) =================
+
+        // POST: /HopDong/ThemTask
+        [HttpPost]
+        public async Task<IActionResult> ThemTask([FromBody] TaoTaskCongViecViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            var result = await _taskWebService.TaoTaskAsync(model, maUser.Value);
+            return Json(result);
+        }
+
+        // POST: /HopDong/CapNhatTask
+        [HttpPost]
+        public async Task<IActionResult> CapNhatTask([FromBody] CapNhatTaskCongViecViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            var result = await _taskWebService.CapNhatTaskAsync(model, maUser.Value);
+            return Json(result);
+        }
+
+        // POST: /HopDong/CapNhatTrangThaiTask
+        [HttpPost]
+        public async Task<IActionResult> CapNhatTrangThaiTask([FromBody] CapNhatTrangThaiTaskViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            var result = await _taskWebService.CapNhatTrangThaiTaskAsync(model, maUser.Value);
+            return Json(result);
+        }
+
+        // POST: /HopDong/XoaTask
+        [HttpPost]
+        public async Task<IActionResult> XoaTask([FromBody] int maTask)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            var result = await _taskWebService.XoaTaskAsync(maTask, maUser.Value);
+            return Json(result);
+        }
+
+        // GET: /HopDong/LayTienDoDuAn?maHD=...
+        [HttpGet]
+        public async Task<IActionResult> LayTienDoDuAn(string maHD)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn." });
+            }
+
+            var result = await _taskWebService.LayTienDoDuAnAsync(maHD, maUser.Value);
+            return Json(result);
         }
     }
 }

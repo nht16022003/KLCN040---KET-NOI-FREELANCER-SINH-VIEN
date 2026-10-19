@@ -1,0 +1,27 @@
+feat(mobile): đồng bộ giao diện Nhà Tuyển Dụng, tìm kiếm và Avatar từ Web sang Mobile
+
+1. Khám phá & Tìm kiếm Nhà Tuyển Dụng trên Mobile (Đồng bộ từ Search.cshtml bên Web):
+   - Xây dựng Model NhaTuyenDungModel, Service NhaTuyenDungService và ViewModel NhaTuyenDungViewModel.
+   - Nâng cấp HomeScreen làm màn hình mặc định sau khi FreelancerStudent đăng nhập:
+     + Hiển thị số lượng tổng cộng Nhà Tuyển Dụng.
+     + Thanh tìm kiếm từ khóa real-time (tên công ty, người liên hệ, địa chỉ).
+     + Bộ lọc lĩnh vực hoạt động (ChoiceChips) tự động trích xuất danh sách lĩnh vực.
+     + Thẻ Nhà Tuyển Dụng chuẩn Web: Logo/Avatar, Tên công ty, Lĩnh vực, Giới thiệu 2 dòng, Khu vực, Đại diện.
+     + Nút Xem hồ sơ: Mở NhaTuyenDungDetailBottomSheet hiển thị đầy đủ thông tin liên hệ, email, SĐT, giới thiệu chi tiết.
+     + Nút Nhắn tin: Chuyển hướng trực tiếp sang ChatDetailScreen với đúng maUser và tên đối tác.
+     + Tab chuyển đổi linh hoạt giữa Nhà tuyển dụng và Việc làm.
+   - Đăng ký Provider NhaTuyenDungViewModel trong main.dart.
+
+2. Đồng bộ Avatar giữa Web và Mobile:
+   - Thêm helper ApiEndpoints.dinhDangUrlAnh() để tự động chuyển đổi đường dẫn tương đối (/uploads/avatars/...) trong DB thành URL tuyệt đối có thể tải được trên Mobile (kèm fallback UI-Avatars).
+   - Bổ sung cấu hình webBaseUrl (5290), apiBaseUrl (5152) và cấu hình StaticFiles trong FreelancerStudent.API/Program.cs phục vụ thư mục wwwroot của Web.
+   - Cập nhật hiển thị Avatar đồng bộ trên: Header HomeScreen, ProfileScreen, NhaTuyenDungModel, AuthResponseModel, StudentPostModel và JobPostModel.
+
+3. Chuẩn hóa Tiếng Việt toàn bộ tầng Mobile (ViewModel, Service, Model):
+   - Refactor toàn bộ biến, hàm và DTO của Mobile sang tiếng Việt không dấu khớp 100% với Controllers & DTOs của ASP.NET Core Web/API.
+   - Bổ sung HopDongModel, HopDongService, HopDongViewModel phục vụ luồng Hợp đồng và Ký quỹ.
+
+4. Khắc phục lỗi Build Gradle & Tài liệu:
+   - Thêm kotlin.incremental=false vào gradle.properties xử lý lỗi cross-drive root exception khi chạy trên Windows.
+   - Tạo file tài liệu Mobile/MAPPING_CHUC_NANG_WEB_SANG_MOBILE.md chi tiết 9 module từ Web UI sang API và Mobile.
+   - Bổ sung test tự động test/nha_tuyen_dung_test.dart (đã vượt qua 100% flutter analyze và flutter test).

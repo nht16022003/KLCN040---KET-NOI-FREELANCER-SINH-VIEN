@@ -30,5 +30,8 @@ namespace FreelancerStudent.API.Services.Interfaces
 
         //Tuấn
         Task<bool> capNhatJobPostAsync(JobPost_RequestDTO reqeuest);
+
+        // Gợi ý việc làm phù hợp theo kỹ năng của Freelancer
+        Task<List<JobPost_ReponseDTO>> layDanhSachJobGoiYChoUserAsync(int maUser);
     }
 }

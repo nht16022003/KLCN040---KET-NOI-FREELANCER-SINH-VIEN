@@ -50,6 +50,7 @@ builder.Services.AddScoped<IChatWebService, ChatWebService>();
 builder.Services.AddScoped<IWalletWebService, WalletWebService>();
 builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
 builder.Services.AddScoped<IHopDongWebService, HopDongWebService>();
+builder.Services.AddScoped<ITaskCongViecWebService, TaskCongViecWebService>();
 
 var app = builder.Build();
 

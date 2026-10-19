@@ -33,6 +33,8 @@ builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 builder.Services.AddScoped<HopDongRepository>();
 builder.Services.AddScoped<IHopDongService, HopDongService>();
+builder.Services.AddScoped<ITaskCongViecRepository, TaskCongViecRepository>();
+builder.Services.AddScoped<ITaskCongViecService, TaskCongViecService>();
 
 
 

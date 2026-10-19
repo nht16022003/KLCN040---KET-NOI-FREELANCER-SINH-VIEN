@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'package:freelancerstudent/models/auth_response_model.dart';
-import 'package:freelancerstudent/models/nha_tuyen_dung_model.dart';
-import 'package:freelancerstudent/viewmodels/auth_viewmodel.dart';
-import 'package:freelancerstudent/viewmodels/job_viewmodel.dart';
-import 'package:freelancerstudent/viewmodels/nha_tuyen_dung_viewmodel.dart';
-import 'package:freelancerstudent/views/home/home_screen.dart';
+import 'package:freelancerstudent/models/mo_hinh_phan_hoi_xac_thuc.dart';
+import 'package:freelancerstudent/models/mo_hinh_nha_tuyen_dung.dart';
+import 'package:freelancerstudent/viewmodels/viewmodel_xac_thuc.dart';
+import 'package:freelancerstudent/viewmodels/viewmodel_cong_viec.dart';
+import 'package:freelancerstudent/viewmodels/viewmodel_nha_tuyen_dung.dart';
+import 'package:freelancerstudent/views/home/man_hinh_trang_chu.dart';
 
 class FakeAuthViewModel extends AuthViewModel {
   @override
