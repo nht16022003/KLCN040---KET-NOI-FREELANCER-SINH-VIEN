@@ -46,5 +46,8 @@ namespace FreelancerStudent.API.Models
 
         // Danh sách các giai đoạn / mốc bàn giao của hợp đồng
         public virtual ICollection<GiaiDoan_HopDong>? GiaiDoan_HopDongs { get; set; } = new List<GiaiDoan_HopDong>();
+
+        // Danh sách các đầu việc / task tiến độ của hợp đồng
+        public virtual ICollection<Task_CongViec>? Tasks { get; set; } = new List<Task_CongViec>();
     }
 }

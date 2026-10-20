@@ -37,8 +37,6 @@ namespace FreelancerStudent.Web.ViewModels
         public DateTime? ngayBatDau { get; set; }
         public DateTime? ngayKetThuc { get; set; }
         public decimal? sotienkyquy { get; set; }
-        public decimal SoDuKhaDung { get; set; } = 0;
-        public bool DaTaiThongTinVi { get; set; } = false;
         public string? hinhthuclamviec { get; set; }
         public string? dieuKhoan { get; set; }
         public string trangThai { get; set; } = string.Empty;
@@ -49,6 +47,12 @@ namespace FreelancerStudent.Web.ViewModels
         public bool LaFreelancerCuaHopDong { get; set; } = false;
         public bool CoQuyenKyQuy { get; set; } = false;
         public bool LaNhaTuyenDungCuaHopDong { get; set; } = false;
+
+        public decimal? SoDuKhaDung { get; set; }
+        public bool DaTaiThongTinVi { get; set; } = false;
+
+        // Tiến độ dự án (FRL-UC-09)
+        public TienDoDuAnViewModel? TienDoDuAn { get; set; }
     }
 
     public class DanhSachHopDongViewModel
@@ -115,5 +119,83 @@ namespace FreelancerStudent.Web.ViewModels
 
         // Mốc bàn giao (Milestones)
         public List<TaoGiaiDoanHopDongViewModel> giaiDoans { get; set; } = new List<TaoGiaiDoanHopDongViewModel>();
+    }
+
+    public class TaskCongViecViewModel
+    {
+        public int maTask { get; set; }
+        public string maHD { get; set; } = string.Empty;
+        public int? maGiaiDoan { get; set; }
+        public string? tenGiaiDoan { get; set; }
+        public string tenTask { get; set; } = string.Empty;
+        public string moTa { get; set; } = string.Empty;
+        public DateTime? hanHoanThanh { get; set; }
+        public string trangThai { get; set; } = "ChuaThucHien";
+        public DateTime ngayCapNhat { get; set; } = DateTime.Now;
+    }
+
+    public class TienDoDuAnViewModel
+    {
+        public string maHD { get; set; } = string.Empty;
+        public string trangThaiHopDong { get; set; } = string.Empty;
+        public DateTime? ngayBatDauHopDong { get; set; }
+        public DateTime? ngayKetThucHopDong { get; set; }
+        public int tongSoTask { get; set; }
+        public int soTaskChuaThucHien { get; set; }
+        public int soTaskDangThucHien { get; set; }
+        public int soTaskHoanThanh { get; set; }
+        public decimal tyLeHoanThanh { get; set; }
+        public bool coQuyenCapNhat { get; set; }
+        public List<TaskCongViecViewModel> danhSachTask { get; set; } = new List<TaskCongViecViewModel>();
+    }
+
+    public class TaoTaskCongViecViewModel
+    {
+        [Required(ErrorMessage = "Mã hợp đồng là bắt buộc.")]
+        public string maHD { get; set; } = string.Empty;
+
+        public int? maGiaiDoan { get; set; }
+
+        [Required(ErrorMessage = "Tiêu đề đầu việc không được để trống.")]
+        [MaxLength(500, ErrorMessage = "Tiêu đề không được vượt quá 500 ký tự.")]
+        public string tenTask { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Mô tả công việc không được để trống.")]
+        [MaxLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự.")]
+        public string moTa { get; set; } = string.Empty;
+
+        public DateTime? hanHoanThanh { get; set; }
+    }
+
+    public class CapNhatTaskCongViecViewModel
+    {
+        [Required]
+        public int maTask { get; set; }
+
+        public string maHD { get; set; } = string.Empty;
+
+        public int? maGiaiDoan { get; set; }
+
+        [Required(ErrorMessage = "Tiêu đề đầu việc không được để trống.")]
+        [MaxLength(500, ErrorMessage = "Tiêu đề không được vượt quá 500 ký tự.")]
+        public string tenTask { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Mô tả công việc không được để trống.")]
+        [MaxLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự.")]
+        public string moTa { get; set; } = string.Empty;
+
+        public DateTime? hanHoanThanh { get; set; }
+
+        [Required(ErrorMessage = "Trạng thái công việc không được để trống.")]
+        public string trangThai { get; set; } = "ChuaThucHien";
+    }
+
+    public class CapNhatTrangThaiTaskViewModel
+    {
+        [Required]
+        public int maTask { get; set; }
+
+        [Required(ErrorMessage = "Trạng thái mới không được để trống.")]
+        public string trangThai { get; set; } = string.Empty;
     }
 }

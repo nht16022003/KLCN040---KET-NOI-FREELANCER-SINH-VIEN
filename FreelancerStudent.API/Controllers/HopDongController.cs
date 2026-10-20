@@ -296,5 +296,38 @@ namespace FreelancerStudent.API.Controllers
                 });
             }
         }
+
+        // DELETE: api/HopDong/{maHD}
+        [HttpDelete("{maHD}")]
+        public async Task<IActionResult> XoaHopDong(string maHD, [FromQuery] int? maUserNTD)
+        {
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                return BadRequest(new { success = false, message = "Mã hợp đồng không hợp lệ." });
+            }
+
+            try
+            {
+                var ketQua = await _hopDongService.XoaHopDongAsync(maHD, maUserNTD);
+                if (!ketQua)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy hợp đồng để xóa." });
+                }
+
+                return Ok(new { success = true, message = "Đã xóa hợp đồng thành công." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi khi xóa hợp đồng: " + ex.Message });
+            }
+        }
     }
 }

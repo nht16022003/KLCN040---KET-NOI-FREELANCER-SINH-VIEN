@@ -41,6 +41,27 @@ namespace FreelancerStudent.API.Services
         public async Task<List<JobPost_ReponseDTO>> layDanhSachJobPostAsync()
         {
             var layDS_JobSQL = await _jopPostRepository.layTatCaJobPostAsync(); //Đang trả về là Models
+            
+            var maJobsDaNghiemThu = await _context.HopDongs
+                .AsNoTracking()
+                .Where(h => h.trangThai == "DaHoanThanh"
+                    && _context.BanGiao_SanPhams.Any(bg =>
+                        bg.maHD == h.maHD &&
+                        bg.trangThai == "DaNghiemThu"))
+                .Select(h => new
+                {
+                    h.maJob,
+                    h.maFreelancerStudent
+                })
+                .Distinct()
+                .ToListAsync();
+
+            var soDaNghiemThuTheoJob = maJobsDaNghiemThu
+                .GroupBy(x => x.maJob)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Count());
+
             var dsResult = layDS_JobSQL.Select(job => new JobPost_ReponseDTO
             {
                 maJob = job.maJob,
@@ -56,7 +77,8 @@ namespace FreelancerStudent.API.Services
                 status = job.status,
                 soluongtuyen = job.soluongtuyen,
                 tenCongTy = job.NhaTuyenDung?.tencongty ?? job.NhaTuyenDung?.User?.hotenUser ?? string.Empty,
-                avatarNhaTuyenDung = job.NhaTuyenDung?.User?.avatarUrl ?? job.NhaTuyenDung?.logo ?? string.Empty
+                avatarNhaTuyenDung = job.NhaTuyenDung?.User?.avatarUrl ?? job.NhaTuyenDung?.logo ?? string.Empty,
+                DaTuyenDu = job.soluongtuyen > 0 && soDaNghiemThuTheoJob.GetValueOrDefault(job.maJob) >= job.soluongtuyen,
             }).ToList();
 
             return dsResult;
@@ -299,28 +321,36 @@ namespace FreelancerStudent.API.Services
                 namThu = u.FreelamcerStudents?.namThu ?? 1,
                 tenChuyenNganh = u.FreelamcerStudents?.ChuyenNganh?.tenChuyenNganh ?? string.Empty,
                 TrangThaiHopDong =
-                    u.trangThaiUngTuyen == "TuChoi"
-                        ? (dsHopDong.Any(h =>
+                    dsHopDong
+                        .Where(h =>
+                            h.maJob == u.maJob &&
+                            h.maFreelancerStudent == u.maFreelancerStudent &&
+                            h.trangThai != "DaHuy")
+                        .Select(h => h.trangThai)
+                        .FirstOrDefault()
+                    ?? dsHopDong
+                        .Where(h =>
                             h.maJob == u.maJob &&
                             h.maFreelancerStudent == u.maFreelancerStudent &&
                             h.trangThai == "DaHuy")
-                            ? "DaHuy"
-                            : null)
-                        : dsHopDong
-                            .Where(h =>
-                                h.maJob == u.maJob &&
-                                h.maFreelancerStudent == u.maFreelancerStudent &&
-                                h.trangThai != "DaHuy")
-                            .Select(h => h.trangThai)
-                            .FirstOrDefault(),
+                        .Select(h => h.trangThai)
+                        .FirstOrDefault(),
 
-                MaHopDong = dsHopDong
-                    .Where(h =>
-                        h.maJob == u.maJob &&
-                        h.maFreelancerStudent == u.maFreelancerStudent &&
-                        h.trangThai != "DaHuy")
-                    .Select(h => h.maHD)
-                    .FirstOrDefault(),
+                MaHopDong =
+                    dsHopDong
+                        .Where(h =>
+                            h.maJob == u.maJob &&
+                            h.maFreelancerStudent == u.maFreelancerStudent &&
+                            h.trangThai != "DaHuy")
+                        .Select(h => h.maHD)
+                        .FirstOrDefault()
+                    ?? dsHopDong
+                        .Where(h =>
+                            h.maJob == u.maJob &&
+                            h.maFreelancerStudent == u.maFreelancerStudent &&
+                            h.trangThai == "DaHuy")
+                        .Select(h => h.maHD)
+                        .FirstOrDefault(),
             }).ToList();
 
         }
@@ -368,6 +398,35 @@ namespace FreelancerStudent.API.Services
             {
                 throw new ArgumentException("Thông tin ứng tuyển không hợp lệ.");
             }
+            
+            var job = await _context.JobPosts
+                .FirstOrDefaultAsync(x => x.maJob == request.maJob);
+
+            if (job == null)
+            {
+                throw new KeyNotFoundException(
+                    "Không tìm thấy bài đăng tuyển dụng.");
+            }
+
+            // Đếm Freelancer đã hoàn thành và được nghiệm thu
+            var soDaNghiemThu = await _context.HopDongs
+                .Where(h => h.maJob == request.maJob
+                    && h.trangThai == "DaHoanThanh"
+                    && _context.BanGiao_SanPhams.Any(bg =>
+                        bg.maHD == h.maHD &&
+                        bg.trangThai == "DaNghiemThu"))
+                .Select(h => h.maFreelancerStudent)
+                .Distinct()
+                .CountAsync();
+
+            // Đã nghiệm thu đủ số lượng thì chặn ứng tuyển
+            if (job.soluongtuyen > 0 &&
+                soDaNghiemThu >= job.soluongtuyen)
+            {
+                throw new InvalidOperationException(
+                    "Công việc đã tuyển đủ số lượng Freelancer.");
+            }
+
 
             var sinhvien = await _free.layFreelancerStudent_TheoMaUser(
                 request.maUser);
@@ -496,5 +555,191 @@ namespace FreelancerStudent.API.Services
             return await _jopPostRepository.capNhatJobPostAsync(job);
         }
 
+        // Gợi ý việc làm phù hợp theo kỹ năng của Freelancer
+        public async Task<List<JobPost_ReponseDTO>> layDanhSachJobGoiYChoUserAsync(int maUser)
+        {
+            // 1. Tìm thông tin FreelancerStudent kèm kỹ năng & chuyên ngành
+            var freelancer = await _context.FreelancerStudents
+                .Include(f => f.ChuyenNganh)
+                .Include(f => f.FreelancerStudent_KyNangs)
+                    .ThenInclude(k => k.KyNang)
+                .FirstOrDefaultAsync(f => f.maUser == maUser || f.maFreelancerStudents == maUser);
+
+            var danhSachKyNangUser = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            string? tenChuyenNganh = freelancer?.ChuyenNganh?.tenChuyenNganh;
+
+            if (freelancer != null)
+            {
+                if (freelancer.FreelancerStudent_KyNangs != null)
+                {
+                    foreach (var k in freelancer.FreelancerStudent_KyNangs)
+                    {
+                        if (k.KyNang != null && !string.IsNullOrWhiteSpace(k.KyNang.tenKyNang))
+                        {
+                            danhSachKyNangUser.Add(k.KyNang.tenKyNang.Trim());
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(freelancer.kyNangCoBan))
+                {
+                    var splitCoBan = freelancer.kyNangCoBan.Split(new[] { ',', ';', '|', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var s in splitCoBan)
+                    {
+                        if (!string.IsNullOrWhiteSpace(s))
+                        {
+                            danhSachKyNangUser.Add(s.Trim());
+                        }
+                    }
+                }
+            }
+
+            // 2. Lấy danh sách các công việc đang tuyển
+            var dsJobSQL = await _context.JobPosts
+                .Include(j => j.NhaTuyenDung)
+                    .ThenInclude(ntd => ntd.User)
+                .Include(j => j.UngTuyens)
+                .Where(j => j.status == "DangTuyen")
+                .ToListAsync();
+
+            // 3. Tính toán độ phù hợp CHỈ DỰA VÀO KỸ NĂNG CỦA FREELANCER (Tối đa 100%)
+            var ketQua = new List<JobPost_ReponseDTO>();
+
+            foreach (var job in dsJobSQL)
+            {
+                // Tách danh sách kỹ năng yêu cầu của công việc
+                var kyNangJob = new List<string>();
+                if (!string.IsNullOrWhiteSpace(job.kynangyeucau))
+                {
+                    var splitKyNang = job.kynangyeucau.Split(
+                        new[] { ',', ';', '|', '\n', '/' },
+                        StringSplitOptions.RemoveEmptyEntries
+                    );
+                    foreach (var kn in splitKyNang)
+                    {
+                        var trimmed = kn.Trim();
+                        if (!string.IsNullOrWhiteSpace(trimmed) &&
+                            !kyNangJob.Any(x => string.Equals(x, trimmed, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            kyNangJob.Add(trimmed);
+                        }
+                    }
+                }
+
+                var textJob = $"{job.tieude} {job.mota} {job.kynangyeucau}".ToLowerInvariant();
+                var kyNangKhop = new List<string>();
+
+                if (kyNangJob.Count > 0)
+                {
+                    // Trường hợp 1: Công việc có khai báo cụ thể danh sách kỹ năng yêu cầu
+                    foreach (var knJob in kyNangJob)
+                    {
+                        var knJobLower = knJob.ToLowerInvariant();
+                        // Kiểm tra sinh viên có kỹ năng này không
+                        var khop = danhSachKyNangUser.Any(knUser =>
+                        {
+                            var knUserLower = knUser.ToLowerInvariant();
+                            return knUserLower == knJobLower ||
+                                   knJobLower.Contains(knUserLower) ||
+                                   knUserLower.Contains(knJobLower);
+                        });
+
+                        if (khop && !kyNangKhop.Contains(knJob))
+                        {
+                            kyNangKhop.Add(knJob);
+                        }
+                    }
+                }
+                else
+                {
+                    // Trường hợp 2: Công việc không phân tách kỹ năng cụ thể, tìm từ khóa kỹ năng của user trong mô tả/tiêu đề
+                    foreach (var knUser in danhSachKyNangUser)
+                    {
+                        if (textJob.Contains(knUser.ToLowerInvariant()) && !kyNangKhop.Contains(knUser))
+                        {
+                            kyNangKhop.Add(knUser);
+                        }
+                    }
+                }
+
+                // Tính toán tỷ lệ % phù hợp (Maximum 100%) dựa trên số kỹ năng đáp ứng được
+                double phanTramPhuHop = 0;
+                string lyDo = string.Empty;
+
+                if (danhSachKyNangUser.Count == 0)
+                {
+                    phanTramPhuHop = 0;
+                    lyDo = "Bạn chưa cập nhật kỹ năng vào hồ sơ nên chưa thể tính toán độ phù hợp.";
+                }
+                else if (kyNangJob.Count > 0)
+                {
+                    // Công thức: (Số kỹ năng đáp ứng / Tổng số kỹ năng yêu cầu) * 100
+                    int tongKyNangYeuCau = kyNangJob.Count;
+                    int soKyNangDapUng = kyNangKhop.Count;
+
+                    phanTramPhuHop = Math.Min(100.0, Math.Round(((double)soKyNangDapUng / tongKyNangYeuCau) * 100.0, 0));
+
+                    if (soKyNangDapUng == tongKyNangYeuCau && tongKyNangYeuCau > 0)
+                    {
+                        lyDo = $"Phù hợp 100%: Bạn đáp ứng đầy đủ tất cả {tongKyNangYeuCau}/{tongKyNangYeuCau} kỹ năng yêu cầu ({string.Join(", ", kyNangKhop)}).";
+                    }
+                    else if (soKyNangDapUng > 0)
+                    {
+                        lyDo = $"Phù hợp {phanTramPhuHop:0}%: Bạn đáp ứng {soKyNangDapUng}/{tongKyNangYeuCau} kỹ năng yêu cầu ({string.Join(", ", kyNangKhop)}).";
+                    }
+                    else
+                    {
+                        lyDo = $"0% phù hợp: Bạn chưa có kỹ năng nào trong số {tongKyNangYeuCau} kỹ năng công việc yêu cầu ({string.Join(", ", kyNangJob)}).";
+                    }
+                }
+                else
+                {
+                    // Công việc không ghi trường kỹ năng rõ ràng
+                    if (kyNangKhop.Count > 0)
+                    {
+                        int tongKyNangUser = Math.Max(1, danhSachKyNangUser.Count);
+                        phanTramPhuHop = Math.Min(100.0, Math.Round(((double)kyNangKhop.Count / tongKyNangUser) * 100.0, 0));
+                        lyDo = $"Phù hợp {phanTramPhuHop:0}%: Công việc có yêu cầu {kyNangKhop.Count} kỹ năng bạn sở hữu ({string.Join(", ", kyNangKhop)}).";
+                    }
+                    else
+                    {
+                        phanTramPhuHop = 0;
+                        lyDo = "Không tìm thấy kỹ năng phù hợp với công việc này.";
+                    }
+                }
+
+                // Chỉ gợi ý công việc có ít nhất 1 kỹ năng trùng khớp (> 0%)
+                if (phanTramPhuHop > 0)
+                {
+                    ketQua.Add(new JobPost_ReponseDTO
+                    {
+                        maJob = job.maJob,
+                        maNhaTuyenDung = job.maNhaTuyenDung,
+                        tieude = job.tieude,
+                        mota = job.mota,
+                        kynangyeucau = job.kynangyeucau,
+                        thulao = job.thulao,
+                        fileDinhKem = job.fileDinhKem,
+                        phiDangBai = job.phiDangBai,
+                        thoigiandangtuyen = job.thoigiandangtuyen,
+                        thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                        status = job.status,
+                        soluongtuyen = job.soluongtuyen,
+                        soLuongUngTuyen = job.UngTuyens?.Count ?? 0,
+                        tenCongTy = job.NhaTuyenDung?.tencongty ?? job.NhaTuyenDung?.User?.hotenUser ?? string.Empty,
+                        avatarNhaTuyenDung = job.NhaTuyenDung?.User?.avatarUrl ?? job.NhaTuyenDung?.logo ?? string.Empty,
+                        doPhuHop = phanTramPhuHop,
+                        lyDoGoiY = lyDo,
+                        kyNangTrungKhop = kyNangKhop
+                    });
+                }
+            }
+
+            // Sắp xếp: Tỷ lệ phù hợp cao nhất (tối đa 100%) lên đầu, sau đó đến thời gian đăng mới nhất
+            return ketQua
+                .OrderByDescending(j => j.doPhuHop)
+                .ThenByDescending(j => j.thoigiandangtuyen)
+                .ToList();
+        }
     }
 }

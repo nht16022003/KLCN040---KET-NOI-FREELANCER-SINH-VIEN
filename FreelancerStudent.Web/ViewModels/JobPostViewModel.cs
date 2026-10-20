@@ -41,6 +41,7 @@ namespace FreelancerStudent.Web.ViewModels
         public string? avatarNhaTuyenDung { get; set; }
 
         public int maUser { get; set; }
+        public bool DaTuyenDu { get; set; }
 
         [JsonIgnore]
         public string MaJob => maJob;

@@ -25,46 +25,6 @@ namespace FreelancerStudent.API.Repositories
 
             return ketqua!;
         }
-//         public async Task<Wallet> themViChoUserTheoMaUser(int maUser)
-// {
-//     // 1. Kiểm tra mã người dùng hợp lệ
-//     if (maUser <= 0)
-//     {
-//         throw new ArgumentException("Mã người dùng không hợp lệ.");
-//     }
-
-//     // 2. Kiểm tra người dùng có tồn tại không
-//     var userTonTai = await _context.Users
-//         .AnyAsync(u => u.maUser == maUser);
-
-//     if (!userTonTai)
-//     {
-//         throw new ArgumentException("Người dùng không tồn tại.");
-//     }
-
-//     // 3. Kiểm tra người dùng đã có ví chưa
-//     var kiemTraVi = await _context.Wallets
-//         .FirstOrDefaultAsync(w => w.maUser == maUser);
-
-//     if (kiemTraVi != null)
-//     {
-//         return kiemTraVi;
-//     }
-
-//     // 4. Tạo ví mới và liên kết đúng người dùng
-//     var viMoi = new Wallet
-//     {
-//         maUser = maUser,
-//         soDuKhaDung = 0,
-//         soDuDongBang = 0
-//     };
-
-//     // 5. Lưu ví vào Database
-//     await _context.Wallets.AddAsync(viMoi);
-//     await _context.SaveChangesAsync();
-
-//     return viMoi;
-// }
         // Thêm ví cho User vừa được tạo theo mã user
         public async Task<Wallet> themViChoUserTheoMaUser(int maUser)
         {
@@ -80,7 +40,8 @@ namespace FreelancerStudent.API.Repositories
 
             var viMoi = new Wallet
             {
-
+                maUser = maUser,
+                soDuKhaDung = 0,
                 soDuDongBang = 0
             };
 

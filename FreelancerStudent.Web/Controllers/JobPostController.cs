@@ -246,6 +246,15 @@ namespace FreelancerStudent.Web.Controllers
                 TempData["ErrorMessage"] = "Không tìm thấy công việc này!";
                 return RedirectToAction("Index");
             }
+            
+            if (job.DaTuyenDu)
+            {
+                TempData["ErrorMessage"] =
+                    "Công việc đã nghiệm thu đủ số lượng Freelancer, không thể ứng tuyển thêm.";
+
+                return RedirectToAction("Index");
+            }
+
 
             // Lấy danh sách Nhà tuyển dụng để tìm người đăng bài Job này
             var dsNTD = await _nhaTuyenDungService.layDanhSachNhaTuyenDungAsync();

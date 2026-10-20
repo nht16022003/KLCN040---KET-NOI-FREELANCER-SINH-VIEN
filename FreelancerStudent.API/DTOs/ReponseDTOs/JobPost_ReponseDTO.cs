@@ -38,6 +38,10 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string? tenCongTy { get; set; }
         public string? avatarNhaTuyenDung { get; set; }
 
-
+        // Thông tin gợi ý phù hợp cho Freelancer
+        public double? doPhuHop { get; set; }
+        public string? lyDoGoiY { get; set; }
+        public List<string>? kyNangTrungKhop { get; set; }
+        public bool DaTuyenDu { get; set; }
     }
 }

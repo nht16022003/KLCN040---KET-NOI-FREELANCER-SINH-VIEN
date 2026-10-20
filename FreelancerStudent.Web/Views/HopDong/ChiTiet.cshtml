@@ -1,4 +1,5 @@
 @model FreelancerStudent.Web.ViewModels.HopDongViewModel
+@using System.Text.Encodings.Web
 @{
     ViewData["Title"] = "Chi tiết hợp đồng " + Model.maHD;
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -127,7 +128,7 @@
     }
 
     <!-- BANNER HÀNH ĐỘNG CHO NHÀ TUYỂN DỤNG (KHI HỢP ĐỒNG ĐANG Ở TRẠNG THÁI CHỜ KÝ QUỸ) -->
-    @if (Model.CoQuyenKyQuy && Model.LaNhaTuyenDungCuaHopDong && Model.maUserNhaTuyenDung.HasValue && Model.trangThai == "ChoKyQuy")
+    @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
     {
         <div class="card border-primary bg-primary bg-opacity-10 rounded-0 shadow-sm mb-4">
             <div class="card-body p-4">
@@ -175,69 +176,7 @@
                                 <h2 class="text-primary fw-bold mt-1 mb-0">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</h2>
                                 <span class="badge bg-light text-muted border mt-2">Áp dụng cho Hợp đồng #@Model.maHD</span>
                             </div>
-                            @{
-                                decimal soTienCanKyQuy = Model.sotienkyquy ?? 0;
-                                decimal soDuHienTai = Model.SoDuKhaDung;
 
-                                bool duTien = Model.DaTaiThongTinVi
-                                    && soTienCanKyQuy > 0
-                                    && soDuHienTai >= soTienCanKyQuy;
-
-                                decimal soTienConThieu = Math.Max(
-                                    0,
-                                    soTienCanKyQuy - soDuHienTai
-                                );
-                            }
-
-                            <div class="border p-3 mb-3 bg-light">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-semibold">
-                                        <i class="bi bi-wallet2 me-1"></i>
-                                        Số dư khả dụng:
-                                    </span>
-
-                                    <strong class="text-success">
-                                        @Model.SoDuKhaDung.ToString("N0") VNĐ
-                                    </strong>
-                                </div>
-                            </div>
-
-                            @if (!Model.DaTaiThongTinVi)
-                            {
-                                <div class="alert alert-warning rounded-0">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                    Không thể tải thông tin ví.
-                                    Vui lòng tải lại trang trước khi ký quỹ.
-                                </div>
-                            }
-                            else if (duTien)
-                            {
-                                <div class="alert alert-success rounded-0">
-                                    <i class="bi bi-check-circle-fill me-1"></i>
-                                    Số dư ví đủ để ký quỹ hợp đồng.
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-danger rounded-0">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                    Số dư ví không đủ để ký quỹ.
-
-                                    <div class="mt-2">
-                                        Cần nạp thêm:
-                                        <strong>
-                                            @soTienConThieu.ToString("N0") VNĐ
-                                        </strong>
-                                    </div>
-                                </div>
-
-                                <a asp-controller="Wallet"
-                                asp-action="Index"
-                                class="btn btn-outline-primary rounded-0 mb-3">
-                                    <i class="bi bi-plus-circle me-1"></i>
-                                    Nạp tiền vào ví
-                                </a>
-                            }
                             <div class="alert alert-info rounded-0 small mb-3">
                                 <i class="bi bi-info-circle-fill me-1"></i>
                                 Tiền ký quỹ sẽ được bảo lưu an toàn tại hệ thống cho tới khi bạn kiểm tra và xác nhận nghiệm thu các mốc sản phẩm bàn giao từ Freelancer.
@@ -251,8 +190,8 @@
                         </div>
                         <div class="modal-footer bg-light">
                             <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
-                            <button type="submit" class="btn btn-primary rounded-0 fw-bold px-4" disabled="@(!duTien)">
-                                <i class="bi bi-check2-circle me-1"></i>Xác nhận Ký quỹ & Kích hoạt
+                            <button type="submit" class="btn btn-primary rounded-0 fw-bold px-4">
+                                <i class="bi bi-check2-circle me-1"></i> Xác nhận Ký quỹ & Kích hoạt
                             </button>
                         </div>
                     </form>
@@ -275,7 +214,7 @@
                         <span class="badge @badgeClass px-3 py-2 fs-6 rounded-0">
                             @tenTrangThai
                         </span>
-                        @if (Model.CoQuyenKyQuy && Model.LaNhaTuyenDungCuaHopDong && Model.maUserNhaTuyenDung.HasValue && Model.trangThai == "ChoKyQuy")
+                        @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
                         {
                             <button type="button" class="btn btn-primary rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
                                 <i class="bi bi-wallet2 me-1"></i> Tiến hành ký quỹ
@@ -473,6 +412,251 @@
         </div>
     </div>
 
+    <!-- ================= KHU VỰC TIẾN ĐỘ DỰ ÁN (FRL-UC-09) ================= -->
+    @{
+        var tienDo = Model.TienDoDuAn;
+        var coTheCapNhat = Model.LaFreelancerCuaHopDong && Model.trangThai == "DangThucHien";
+        var tongTask = tienDo?.tongSoTask ?? 0;
+        var hoanThanh = tienDo?.soTaskHoanThanh ?? 0;
+        var dangThucHien = tienDo?.soTaskDangThucHien ?? 0;
+        var chuaThucHien = tienDo?.soTaskChuaThucHien ?? 0;
+        var tyLe = tienDo?.tyLeHoanThanh ?? 0;
+    }
+
+    <div class="card border-0 shadow-sm rounded-0 mb-4" id="sectionTienDoDuAn">
+        <div class="card-header bg-light border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-kanban text-success me-2"></i>Tiến độ dự án (Project Progress)
+                </h5>
+                @if (tongTask > 0)
+                {
+                    <span class="badge @(tyLe == 100 ? "bg-success" : (tyLe >= 50 ? "bg-primary" : "bg-warning text-dark")) rounded-pill px-3 py-1">
+                        @tyLe% hoàn thành (@hoanThanh/@tongTask việc)
+                    </span>
+                }
+            </div>
+
+            @if (coTheCapNhat)
+            {
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-success rounded-0 px-3 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalThemTask" style="background-color: #1B5E36; border-color: #1B5E36;">
+                        <i class="bi bi-plus-circle me-1"></i> Cập nhật tiến độ dự án
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Thanh tiến trình tổng thể -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small fw-semibold text-uppercase">Tỷ lệ hoàn thành tổng thể</span>
+                    <span class="fw-bold text-success fs-5">@tyLe%</span>
+                </div>
+                <div class="progress rounded-0" style="height: 14px; background-color: #e9ecef;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                         role="progressbar"
+                         style="width: @tyLe%; background-color: #1B5E36 !important;"
+                         aria-valuenow="@tyLe"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thống kê đầu việc -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border bg-light text-center">
+                        <div class="text-muted small text-uppercase fw-semibold">Tổng đầu việc</div>
+                        <div class="fs-4 fw-bold text-dark mt-1">@tongTask</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border bg-light text-center">
+                        <div class="text-muted small text-uppercase fw-semibold">Chưa thực hiện</div>
+                        <div class="fs-4 fw-bold text-secondary mt-1">@chuaThucHien</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border bg-light text-center">
+                        <div class="text-muted small text-uppercase fw-semibold">Đang thực hiện</div>
+                        <div class="fs-4 fw-bold text-primary mt-1">@dangThucHien</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border bg-light text-center">
+                        <div class="text-muted small text-uppercase fw-semibold">Đã hoàn thành</div>
+                        <div class="fs-4 fw-bold text-success mt-1">@hoanThanh</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông báo trạng thái nếu không ở DangThucHien -->
+            @if (Model.trangThai != "DangThucHien")
+            {
+                <div class="alert alert-secondary rounded-0 py-2 px-3 small mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Hợp đồng hiện tại đang ở trạng thái <strong>@tenTrangThai</strong>.
+                    @if (Model.LaFreelancerCuaHopDong)
+                    {
+                        <span>Bạn chỉ có thể tạo và quản lý đầu việc khi hợp đồng đã được ký quỹ và chuyển sang trạng thái <strong>Đang thực hiện</strong>.</span>
+                    }
+                    else
+                    {
+                        <span>Tiến độ đang được hiển thị ở chế độ theo dõi dành cho Nhà tuyển dụng.</span>
+                    }
+                </div>
+            }
+
+            <!-- Danh sách đầu việc -->
+            @if (tienDo != null && tienDo.danhSachTask.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 border">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 45px;" class="text-center">#</th>
+                                <th>Đầu việc & Chi tiết / Minh chứng</th>
+                                <th style="width: 170px;">Mốc giai đoạn</th>
+                                <th style="width: 150px;">Hạn chót</th>
+                                <th style="width: 160px;">Trạng thái</th>
+                                <th class="text-end" style="width: 110px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < tienDo.danhSachTask.Count; i++)
+                            {
+                                var task = tienDo.danhSachTask[i];
+                                var taskStatusBadge = task.trangThai switch
+                                {
+                                    "HoanThanh" => "bg-success text-white",
+                                    "DangThucHien" => "bg-primary text-white",
+                                    _ => "bg-secondary text-white"
+                                };
+                                var taskStatusText = task.trangThai switch
+                                {
+                                    "HoanThanh" => "Hoàn thành",
+                                    "DangThucHien" => "Đang thực hiện",
+                                    _ => "Chưa thực hiện"
+                                };
+
+                                <tr>
+                                    <td class="text-center fw-bold text-muted">@(i + 1)</td>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6">@task.tenTask</div>
+                                        @if (!string.IsNullOrWhiteSpace(task.moTa))
+                                        {
+                                            <div class="text-muted small mt-1" style="white-space: pre-line;">@task.moTa</div>
+                                        }
+                                        <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                            <i class="bi bi-clock me-1"></i>Cập nhật: @task.ngayCapNhat.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(task.tenGiaiDoan))
+                                        {
+                                            <span class="badge bg-light text-dark border">@task.tenGiaiDoan</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Toàn bộ dự án</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (task.hanHoanThanh.HasValue)
+                                        {
+                                            var isOverdue = task.trangThai != "HoanThanh" && task.hanHoanThanh.Value.Date < DateTime.Now.Date;
+                                            <div class="@(isOverdue ? "text-danger fw-bold" : "text-dark") small">
+                                                <i class="bi bi-calendar-event me-1"></i>@task.hanHoanThanh.Value.ToString("dd/MM/yyyy")
+                                            </div>
+                                            @if (isOverdue)
+                                            {
+                                                <span class="badge bg-danger mt-1" style="font-size: 0.7rem;">Quá hạn</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (coTheCapNhat)
+                                        {
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm dropdown-toggle rounded-0 @taskStatusBadge border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    @taskStatusText
+                                                </button>
+                                                <ul class="dropdown-menu shadow-sm rounded-0">
+                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "ChuaThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'ChuaThucHien')"><i class="bi bi-hourglass me-2"></i>Chưa thực hiện</a></li>
+                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "DangThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'DangThucHien')"><i class="bi bi-arrow-repeat me-2"></i>Đang thực hiện</a></li>
+                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "HoanThanh" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'HoanThanh')"><i class="bi bi-check-circle me-2"></i>Hoàn thành</a></li>
+                                                </ul>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge @taskStatusBadge rounded-0 px-2 py-1">@taskStatusText</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (coTheCapNhat)
+                                        {
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-primary rounded-0 me-1" 
+                                                    title="Chỉnh sửa đầu việc"
+                                                    onclick="moModalSuaTask(@task.maTask, '@Html.Raw(JavaScriptEncoder.Default.Encode(task.tenTask))', '@Html.Raw(JavaScriptEncoder.Default.Encode(task.moTa ?? ""))', '@(task.hanHoanThanh?.ToString("yyyy-MM-dd") ?? "")', '@task.trangThai', '@(task.maGiaiDoan?.ToString() ?? "")')">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger rounded-0" 
+                                                    title="Xóa đầu việc"
+                                                    onclick="xacNhanXoaTask(@task.maTask, '@Html.Raw(JavaScriptEncoder.Default.Encode(task.tenTask))')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small"><i class="bi bi-lock me-1"></i>Chỉ xem</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <!-- Trạng thái chưa có đầu việc nào -->
+                <div class="text-center py-5 border bg-light">
+                    <div class="text-muted mb-2">
+                        <i class="bi bi-clipboard2-x display-5 text-secondary"></i>
+                    </div>
+                    @if (Model.LaFreelancerCuaHopDong)
+                    {
+                        <h6 class="fw-bold text-dark mb-1">Chưa có đầu việc nào được tạo cho dự án này</h6>
+                        <p class="text-muted small mb-3">
+                            Hãy chia nhỏ công việc và thêm các đầu việc để quản lý tiến độ hiệu quả cũng như giúp Nhà tuyển dụng theo dõi sát sao.
+                        </p>
+                        @if (coTheCapNhat)
+                        {
+                            <button type="button" class="btn btn-success rounded-0 px-4 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalThemTask" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                <i class="bi bi-plus-circle me-1"></i> Thêm đầu việc ngay
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <h6 class="fw-bold text-muted mb-1">Freelancer chưa cập nhật tiến độ dự án</h6>
+                        <p class="text-muted small mb-0">Khi Freelancer cập nhật các đầu việc của hợp đồng, tiến độ chi tiết sẽ được hiển thị tại đây.</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
     <!-- Điều khoản giao kết cụ thể -->
     <div class="card border-0 shadow-sm rounded-0 mb-4">
         <div class="card-header bg-light border-bottom py-3">
@@ -517,4 +701,356 @@
             </div>
         }
     </div>
+    
+    @if ((Model.LaFreelancerCuaHopDong ||
+        Model.LaNhaTuyenDungCuaHopDong) &&
+        (Model.trangThai == "DangThucHien" ||
+        Model.trangThai == "DaHoanThanh"))
+    {
+        <div class="card shadow-sm rounded-0 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold">
+                    <i class="bi bi-box-seam me-2"></i>
+                    Bàn giao và nghiệm thu sản phẩm
+                </h5>
+
+                <p class="text-muted">
+                    Quản lý các phiên bản bàn giao,
+                    yêu cầu chỉnh sửa và nghiệm thu.
+                </p>
+
+                <a asp-controller="BanGiaoSanPham"
+                asp-action="Index"
+                asp-route-maHD="@Model.maHD"
+                class="btn btn-success rounded-0">
+                    Xem bàn giao sản phẩm
+                </a>
+            </div>
+        </div>
+    }
+
 </div>
+
+<!-- Modal Thêm Đầu Việc -->
+<div class="modal fade" id="modalThemTask" tabindex="-1" aria-labelledby="modalThemTaskLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-success" id="modalThemTaskLabel">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm đầu việc tiến độ dự án
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="alertThemTask" class="alert alert-danger d-none py-2 px-3 small mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tiêu đề đầu việc <span class="text-danger">*</span></label>
+                    <input type="text" id="tenTaskThem" class="form-control rounded-0" placeholder="Ví dụ: Thiết kế cơ sở dữ liệu, Thiết kế giao diện Figma, Xây dựng API..." maxlength="500" />
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mốc giai đoạn liên kết (tùy chọn)</label>
+                        <select id="maGiaiDoanThem" class="form-select rounded-0">
+                            <option value="">-- Toàn bộ dự án / Không phân giai đoạn --</option>
+                            @if (Model.giaiDoans != null && Model.giaiDoans.Count > 0)
+                            {
+                                @foreach (var gd in Model.giaiDoans)
+                                {
+                                    <option value="@gd.maGiaiDoan">@gd.tenGiaiDoan (Hạn: @gd.hanChot.ToString("dd/MM/yyyy"))</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Hạn hoàn thành (Deadline) <span class="text-danger">*</span></label>
+                        <input type="date" id="hanHoanThanhThem" class="form-control rounded-0" max="@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")" />
+                        <div class="form-text small text-muted">
+                            Hạn chót hợp đồng: <strong class="text-danger">@(Model.ngayKetThuc?.ToString("dd/MM/yyyy") ?? "-")</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mô tả công việc & Minh chứng / Đường dẫn tệp đính kèm <span class="text-danger">*</span></label>
+                    <textarea id="moTaThem" class="form-control rounded-0" rows="4" placeholder="Mô tả cụ thể nội dung cần thực hiện, tiêu chí nghiệm thu và có thể kèm link Google Drive, Github PR hoặc link demo sản phẩm..." maxlength="1000"></textarea>
+                    <div class="form-text small text-muted">Tối đa 1000 ký tự. Có thể đính kèm URL tài liệu hoặc link minh chứng.</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-success rounded-0 fw-bold px-4" id="btnLuuThemTask" onclick="luuThemTask()" style="background-color: #1B5E36; border-color: #1B5E36;">
+                    <i class="bi bi-save me-1"></i> Lưu đầu việc
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉnh Sửa Đầu Việc -->
+<div class="modal fade" id="modalSuaTask" tabindex="-1" aria-labelledby="modalSuaTaskLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-primary" id="modalSuaTaskLabel">
+                    <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa đầu việc
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="alertSuaTask" class="alert alert-danger d-none py-2 px-3 small mb-3"></div>
+                <input type="hidden" id="maTaskSua" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tiêu đề đầu việc <span class="text-danger">*</span></label>
+                    <input type="text" id="tenTaskSua" class="form-control rounded-0" maxlength="500" />
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Mốc giai đoạn</label>
+                        <select id="maGiaiDoanSua" class="form-select rounded-0">
+                            <option value="">-- Toàn bộ dự án --</option>
+                            @if (Model.giaiDoans != null && Model.giaiDoans.Count > 0)
+                            {
+                                @foreach (var gd in Model.giaiDoans)
+                                {
+                                    <option value="@gd.maGiaiDoan">@gd.tenGiaiDoan</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Hạn hoàn thành <span class="text-danger">*</span></label>
+                        <input type="date" id="hanHoanThanhSua" class="form-control rounded-0" max="@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")" />
+                        <div class="form-text small text-muted">
+                            Deadline hợp đồng: <strong class="text-danger">@(Model.ngayKetThuc?.ToString("dd/MM/yyyy") ?? "-")</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Trạng thái công việc <span class="text-danger">*</span></label>
+                        <select id="trangThaiSua" class="form-select rounded-0">
+                            <option value="ChuaThucHien">Chưa thực hiện</option>
+                            <option value="DangThucHien">Đang thực hiện</option>
+                            <option value="HoanThanh">Hoàn thành</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mô tả công việc & Minh chứng / Đường dẫn tệp <span class="text-danger">*</span></label>
+                    <textarea id="moTaSua" class="form-control rounded-0" rows="4" maxlength="1000"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary rounded-0 fw-bold px-4" id="btnLuuSuaTask" onclick="luuSuaTask()">
+                    <i class="bi bi-save me-1"></i> Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const contractEndDateStr = '@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")';
+        const maHDHienTai = '@Model.maHD';
+
+        function showAlert(alertId, message) {
+            const alertEl = document.getElementById(alertId);
+            if (alertEl) {
+                alertEl.textContent = message;
+                alertEl.classList.remove('d-none');
+            }
+        }
+
+        function hideAlert(alertId) {
+            const alertEl = document.getElementById(alertId);
+            if (alertEl) {
+                alertEl.classList.add('d-none');
+                alertEl.textContent = '';
+            }
+        }
+
+        async function luuThemTask() {
+            hideAlert('alertThemTask');
+            const tenTask = document.getElementById('tenTaskThem').value.trim();
+            const moTa = document.getElementById('moTaThem').value.trim();
+            const hanHoanThanh = document.getElementById('hanHoanThanhThem').value;
+            const maGiaiDoanVal = document.getElementById('maGiaiDoanThem').value;
+
+            if (!tenTask) {
+                showAlert('alertThemTask', 'Tiêu đề đầu việc không được để trống.');
+                return;
+            }
+
+            if (!moTa) {
+                showAlert('alertThemTask', 'Mô tả công việc không được để trống.');
+                return;
+            }
+
+            if (hanHoanThanh && contractEndDateStr) {
+                if (hanHoanThanh > contractEndDateStr) {
+                    showAlert('alertThemTask', 'Deadline của công việc phải trước hoặc trùng với hạn chót bàn giao của hợp đồng.');
+                    return;
+                }
+            }
+
+            const payload = {
+                maHD: maHDHienTai,
+                tenTask: tenTask,
+                moTa: moTa,
+                hanHoanThanh: hanHoanThanh ? hanHoanThanh : null,
+                maGiaiDoan: maGiaiDoanVal ? parseInt(maGiaiDoanVal) : null
+            };
+
+            const btn = document.getElementById('btnLuuThemTask');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+            try {
+                const res = await fetch('/HopDong/ThemTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    showAlert('alertThemTask', data.message || 'Có lỗi xảy ra khi thêm đầu việc.');
+                }
+            } catch (err) {
+                showAlert('alertThemTask', 'Lỗi kết nối máy chủ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-save me-1"></i> Lưu đầu việc';
+            }
+        }
+
+        function moModalSuaTask(maTask, tenTask, moTa, hanHoanThanh, trangThai, maGiaiDoan) {
+            hideAlert('alertSuaTask');
+            document.getElementById('maTaskSua').value = maTask;
+            document.getElementById('tenTaskSua').value = tenTask;
+            document.getElementById('moTaSua').value = moTa;
+            document.getElementById('hanHoanThanhSua').value = hanHoanThanh;
+            document.getElementById('trangThaiSua').value = trangThai;
+            document.getElementById('maGiaiDoanSua').value = maGiaiDoan || '';
+
+            const modalEl = document.getElementById('modalSuaTask');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        async function luuSuaTask() {
+            hideAlert('alertSuaTask');
+            const maTask = parseInt(document.getElementById('maTaskSua').value);
+            const tenTask = document.getElementById('tenTaskSua').value.trim();
+            const moTa = document.getElementById('moTaSua').value.trim();
+            const hanHoanThanh = document.getElementById('hanHoanThanhSua').value;
+            const trangThai = document.getElementById('trangThaiSua').value;
+            const maGiaiDoanVal = document.getElementById('maGiaiDoanSua').value;
+
+            if (!tenTask) {
+                showAlert('alertSuaTask', 'Tiêu đề đầu việc không được để trống.');
+                return;
+            }
+
+            if (!moTa) {
+                showAlert('alertSuaTask', 'Mô tả công việc không được để trống.');
+                return;
+            }
+
+            if (hanHoanThanh && contractEndDateStr) {
+                if (hanHoanThanh > contractEndDateStr) {
+                    showAlert('alertSuaTask', 'Deadline của công việc phải trước hoặc trùng với hạn chót bàn giao của hợp đồng.');
+                    return;
+                }
+            }
+
+            const payload = {
+                maTask: maTask,
+                maHD: maHDHienTai,
+                tenTask: tenTask,
+                moTa: moTa,
+                hanHoanThanh: hanHoanThanh ? hanHoanThanh : null,
+                trangThai: trangThai,
+                maGiaiDoan: maGiaiDoanVal ? parseInt(maGiaiDoanVal) : null
+            };
+
+            const btn = document.getElementById('btnLuuSuaTask');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang cập nhật...';
+
+            try {
+                const res = await fetch('/HopDong/CapNhatTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    showAlert('alertSuaTask', data.message || 'Có lỗi xảy ra khi cập nhật.');
+                }
+            } catch (err) {
+                showAlert('alertSuaTask', 'Lỗi kết nối máy chủ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-save me-1"></i> Cập nhật';
+            }
+        }
+
+        async function doiTrangThaiTask(maTask, trangThai) {
+            try {
+                const payload = {
+                    maTask: maTask,
+                    trangThai: trangThai
+                };
+
+                const res = await fetch('/HopDong/CapNhatTrangThaiTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Không thể cập nhật trạng thái.');
+                }
+            } catch (err) {
+                alert('Lỗi kết nối máy chủ: ' + err.message);
+            }
+        }
+
+        async function xacNhanXoaTask(maTask, tenTask) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa đầu việc "${tenTask}" không?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/HopDong/XoaTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(maTask)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Không thể xóa đầu việc.');
+                }
+            } catch (err) {
+                alert('Lỗi kết nối máy chủ: ' + err.message);
+            }
+        }
+    </script>
+}

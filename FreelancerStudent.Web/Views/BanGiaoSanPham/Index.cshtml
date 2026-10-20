@@ -1,0 +1,355 @@
+
+@model FreelancerStudent.Web.ViewModels.ChiTietBanGiaoViewModel
+
+@{
+    ViewData["Title"] = "Bàn giao sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var danhSach = Model.DanhSachBanGiao
+        .OrderByDescending(x => x.MaBanGiao)
+        .ToList();
+
+    var moiNhat = danhSach.FirstOrDefault();
+
+    var coTheNop = Model.LaFreelancer
+        && Model.TrangThaiHopDong == "DangThucHien"
+        && (moiNhat == null
+            || moiNhat.TrangThai == "YeuCauChinhSua");
+
+    var coTheDanhGia = Model.LaKhachHang
+        && Model.TrangThaiHopDong == "DangThucHien"
+        && moiNhat?.TrangThai == "ChoNghiemThu";
+}
+
+<div class="container py-4">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="HopDong"
+                   asp-action="ChiTiet"
+                   asp-route-maHD="@Model.MaHD">
+                    Chi tiết hợp đồng
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                Bàn giao sản phẩm
+            </li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm rounded-0 mb-4">
+        <div class="card-body p-4">
+            <h4 class="fw-bold text-success mb-2">
+                <i class="bi bi-box-seam me-2"></i>
+                Bàn giao và nghiệm thu sản phẩm
+            </h4>
+
+            <div class="text-muted">
+                Hợp đồng:
+                <strong>#@Model.MaHD</strong>
+            </div>
+
+            <div class="mt-2">
+                @if (Model.TrangThaiHopDong == "DaHoanThanh")
+                {
+                    <span class="badge bg-success">
+                        Hợp đồng đã hoàn thành
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-primary">
+                        Hợp đồng đang thực hiện
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @* FORM FREELANCER BÀN GIAO *@
+    @if (coTheNop)
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4">
+            <div class="card-header bg-light py-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-cloud-upload text-success me-2"></i>
+                    @(moiNhat == null
+                        ? "Bàn giao sản phẩm lần đầu"
+                        : "Nộp lại sản phẩm sau chỉnh sửa")
+                </h5>
+            </div>
+
+            <div class="card-body p-4">
+                <form asp-controller="BanGiaoSanPham"
+                      asp-action="TaoBanGiao"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="MaHD"
+                           value="@Model.MaHD" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Đường dẫn sản phẩm
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="url"
+                               name="FileSanPhamUrl"
+                               class="form-control rounded-0"
+                               placeholder="https://drive.google.com/..."
+                               required />
+
+                        <div class="form-text">
+                            Nhập đường dẫn Google Drive, GitHub
+                            hoặc nơi lưu trữ sản phẩm.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Link Demo (tùy chọn)
+                        </label>
+
+                        <input type="url"
+                               name="LinkDemo"
+                               class="form-control rounded-0"
+                               placeholder="https://..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Mô tả bàn giao
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <textarea name="MoTaBanGiao"
+                                  class="form-control rounded-0"
+                                  rows="4"
+                                  required
+                                  placeholder="Mô tả những nội dung đã hoàn thành..."></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success rounded-0 px-4"
+                            onclick="return confirm('Xác nhận bàn giao sản phẩm?');">
+                        <i class="bi bi-send me-1"></i>
+                        Gửi bàn giao
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+
+    @* DANH SÁCH PHIÊN BẢN BÀN GIAO *@
+    <div class="card border-0 shadow-sm rounded-0 mb-4">
+        <div class="card-header bg-light py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-clock-history text-success me-2"></i>
+                Lịch sử bàn giao sản phẩm
+            </h5>
+        </div>
+
+        <div class="card-body p-4">
+            @if (!danhSach.Any())
+            {
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Chưa có sản phẩm nào được bàn giao.
+                </div>
+            }
+            else
+            {
+                @foreach (var item in danhSach)
+                {
+                    var laBanMoiNhat =
+                        moiNhat?.MaBanGiao == item.MaBanGiao;
+
+                    var yeuCau = Model.DanhSachYeuCau
+                        .Where(x => x.MaBanGiao == item.MaBanGiao)
+                        .OrderByDescending(x => x.NgayYeuCau)
+                        .ToList();
+
+                    <div class="border rounded-0 p-3 mb-3">
+                        <div class="d-flex justify-content-between
+                                    align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    Phiên bản @item.PhienBan
+                                </h6>
+
+                                <small class="text-muted">
+                                    Ngày nộp:
+                                    @item.NgayNop.ToString("dd/MM/yyyy HH:mm")
+                                </small>
+                            </div>
+
+                            @if (item.TrangThai == "DaNghiemThu")
+                            {
+                                <span class="badge bg-success">
+                                    Đã nghiệm thu
+                                </span>
+                            }
+                            else if (item.TrangThai == "YeuCauChinhSua")
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Yêu cầu chỉnh sửa
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary">
+                                    Chờ nghiệm thu
+                                </span>
+                            }
+                        </div>
+
+                        <p class="mb-2">
+                            <strong>Mô tả:</strong>
+                            @item.MoTaBanGiao
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>Sản phẩm:</strong>
+                            <a href="@item.FileSanPhamUrl"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                Xem sản phẩm
+                            </a>
+                        </p>
+
+                        @if (!string.IsNullOrWhiteSpace(item.LinkDemo))
+                        {
+                            <p class="mb-2">
+                                <strong>Demo:</strong>
+                                <a href="@item.LinkDemo"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    Xem demo
+                                </a>
+                            </p>
+                        }
+
+                        @if (yeuCau.Any())
+                        {
+                            <div class="mt-3">
+                                <h6 class="fw-semibold">
+                                    Yêu cầu chỉnh sửa
+                                </h6>
+
+                                @foreach (var yc in yeuCau)
+                                {
+                                    <div class="alert alert-warning mb-2">
+                                        <div>
+                                            @yc.NoiDungYeuCau
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @yc.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")
+                                            - @yc.TrangThai
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @* KHÁCH HÀNG ĐÁNH GIÁ BẢN MỚI NHẤT *@
+                        @if (coTheDanhGia && laBanMoiNhat)
+                        {
+                            <hr />
+
+                            <div class="row g-3">
+                                <div class="col-md-7">
+                                    <form asp-controller="BanGiaoSanPham"
+                                          asp-action="GuiYeuCau"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="maHD"
+                                               value="@Model.MaHD" />
+
+                                        <input type="hidden"
+                                               name="MaBanGiao"
+                                               value="@item.MaBanGiao" />
+
+                                        <label class="form-label fw-semibold">
+                                            Nội dung cần chỉnh sửa
+                                        </label>
+
+                                        <textarea name="NoiDungYeuCau"
+                                                  class="form-control rounded-0 mb-2"
+                                                  rows="3"
+                                                  required></textarea>
+
+                                        <button type="submit"
+                                                class="btn btn-warning rounded-0"
+                                                onclick="return confirm('Gửi yêu cầu chỉnh sửa?');">
+                                            <i class="bi bi-pencil-square me-1"></i>
+                                            Yêu cầu chỉnh sửa
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <form asp-controller="BanGiaoSanPham"
+                                          asp-action="NghiemThu"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="maHD"
+                                               value="@Model.MaHD" />
+
+                                        <input type="hidden"
+                                               name="maBanGiao"
+                                               value="@item.MaBanGiao" />
+
+                                        <div class="alert alert-info small">
+                                            Chỉ nghiệm thu khi sản phẩm
+                                            đã đáp ứng yêu cầu hợp đồng.
+                                        </div>
+
+                                        <button type="submit"
+                                                class="btn btn-success rounded-0"
+                                                onclick="return confirm('Xác nhận nghiệm thu sản phẩm?');">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Nghiệm thu sản phẩm
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <a asp-controller="HopDong"
+       asp-action="ChiTiet"
+       asp-route-maHD="@Model.MaHD"
+       class="btn btn-outline-secondary rounded-0">
+        <i class="bi bi-arrow-left me-1"></i>
+        Quay lại hợp đồng
+    </a>
+</div>

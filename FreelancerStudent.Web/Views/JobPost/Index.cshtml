@@ -65,7 +65,15 @@
                                     out var trangThaiDon);
                             }
 
-                            @if (trangThaiDon == "ChoDuyet")
+                            
+                            @if (jobPostViewModel.DaTuyenDu)
+                            {
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    Đã tuyển đủ
+                                </button>
+                            }
+                            else if (trangThaiDon == "ChoDuyet")
                             {
                                 <button class="btn btn-secondary" disabled>
                                     Đã nộp đơn
@@ -95,6 +103,7 @@
                                     Ứng tuyển
                                 </a>
                             }
+
                         </div>
                     </div>
                 </div>

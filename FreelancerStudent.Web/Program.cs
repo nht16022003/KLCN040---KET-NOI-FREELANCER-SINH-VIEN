@@ -39,7 +39,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
 });
 
-
+builder.Services.AddHttpContextAccessor();
 //Đăng ký web service
 builder.Services.AddScoped<IAuthWebService, AuthWebService>();
 builder.Services.AddScoped<INhaTuyenDungWebService, NhaTuyenDungWebService>();
@@ -50,6 +50,8 @@ builder.Services.AddScoped<IChatWebService, ChatWebService>();
 builder.Services.AddScoped<IWalletWebService, WalletWebService>();
 builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
 builder.Services.AddScoped<IHopDongWebService, HopDongWebService>();
+builder.Services.AddScoped<ITaskCongViecWebService, TaskCongViecWebService>();
+builder.Services.AddScoped<IBanGiaoSanPhamWebService,BanGiaoSanPhamWebService>();
 
 var app = builder.Build();
 

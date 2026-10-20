@@ -110,6 +110,9 @@ namespace FreelancerStudent.API.Services
                     "Bạn không có quyền tạo hợp đồng cho bài tuyển dụng này.");
             }
 
+            // Tự động xóa các hợp đồng cũ đã bị từ chối / hủy của Job và Freelancer này khỏi SQL
+            await _repository.XoaCacHopDongDaHuyTheoJobVaFreelancerAsync(request.maJob, request.maFreelancerStudent);
+
             // Kiểm tra xem Job đã có hợp đồng chưa
             var hopDongHienCo = await _repository.LayHopDongMoiNhatTheoJobVaFreelancerAsync(request.maJob, request.maFreelancerStudent);
 
@@ -119,19 +122,25 @@ namespace FreelancerStudent.API.Services
                     $"Freelancer này đã có hợp đồng {hopDongHienCo.maHD} " +
                     $"ở trạng thái '{hopDongHienCo.trangThai}'.");
             }
-            if (!request.maUngTuyen.HasValue || request.maUngTuyen.Value <= 0)
+            UngTuyen? donUngTuyen = null;
+            if (request.maUngTuyen.HasValue && request.maUngTuyen.Value > 0)
             {
-                throw new InvalidOperationException("Phải chọn một đơn ứng tuyển đã được duyệt.");
+                donUngTuyen = await _context.UngTuyens
+                    .FirstOrDefaultAsync(u => u.maUngTuyen == request.maUngTuyen.Value);
             }
-            var donUngTuyen = await _context.UngTuyens
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u =>
-                    u.maUngTuyen == request.maUngTuyen.Value);
+            else
+            {
+                donUngTuyen = await _context.UngTuyens
+                    .FirstOrDefaultAsync(u => u.maJob == request.maJob && u.maFreelancerStudent == request.maFreelancerStudent);
+                if (donUngTuyen != null)
+                {
+                    request.maUngTuyen = donUngTuyen.maUngTuyen;
+                }
+            }
 
             if (donUngTuyen == null)
             {
-                throw new InvalidOperationException(
-                    "Không tìm thấy đơn ứng tuyển.");
+                throw new InvalidOperationException("Không tìm thấy đơn ứng tuyển tương ứng với Freelancer và công việc này.");
             }
 
             if (donUngTuyen.maJob != request.maJob ||
@@ -143,8 +152,9 @@ namespace FreelancerStudent.API.Services
 
             if (donUngTuyen.trangThaiUngTuyen != "ChapNhan")
             {
-                throw new InvalidOperationException(
-                    "Chỉ được tạo hợp đồng cho đơn ứng tuyển đã được duyệt.");
+                // Nếu đơn ứng tuyển từng bị đổi sang TuChoi do code cũ, tự động phục hồi về ChapNhan
+                donUngTuyen.trangThaiUngTuyen = "ChapNhan";
+                await _context.SaveChangesAsync();
             }
 
             // Kiểm tra Freelancer
@@ -225,7 +235,39 @@ namespace FreelancerStudent.API.Services
             if (string.IsNullOrWhiteSpace(maHD)) return null;
 
             var hopDong = await _repository.LayChiTietHopDongTheoMaAsync(maHD);
-            return hopDong != null ? MapToResponseDTO(hopDong) : null;
+            if (hopDong == null) return null;
+
+            var dto = MapToResponseDTO(hopDong);
+
+            // Nếu hợp đồng đã hủy mà chưa có lý do từ chối trích xuất được từ điều khoản, tìm trong Thông báo gần nhất
+            if (hopDong.trangThai == "DaHuy" && string.IsNullOrWhiteSpace(dto.lyDoTuChoi))
+            {
+                var tb = await _context.ThongBaos
+                    .AsNoTracking()
+                    .Where(t => t.loaiThongBao == "HopDong" && t.noiDung != null && t.noiDung.Contains(maHD) && t.noiDung.Contains("từ chối"))
+                    .OrderByDescending(t => t.ngayTao)
+                    .FirstOrDefaultAsync();
+
+                if (tb != null && !string.IsNullOrWhiteSpace(tb.noiDung))
+                {
+                    int idx = tb.noiDung.IndexOf("Lý do: ", StringComparison.OrdinalIgnoreCase);
+                    if (idx >= 0)
+                    {
+                        dto.lyDoTuChoi = tb.noiDung.Substring(idx + 7).Trim().TrimEnd('.');
+                    }
+                }
+            }
+
+            var donUngTuyen = await _context.UngTuyens
+                .AsNoTracking()
+                .Where(u => u.maJob == hopDong.maJob && u.maFreelancerStudent == hopDong.maFreelancerStudent)
+                .FirstOrDefaultAsync();
+            if (donUngTuyen != null)
+            {
+                dto.maUngTuyen = donUngTuyen.maUngTuyen;
+            }
+
+            return dto;
         }
 
         public async Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaJobAsync(string maJob)
@@ -297,7 +339,7 @@ namespace FreelancerStudent.API.Services
                 };
             }
 
-            return await _repository.CapNhatTrangThaiHopDongAsync(request.maHD, trangThaiMoi, thongBao);
+            return await _repository.CapNhatTrangThaiHopDongAsync(request.maHD, trangThaiMoi, thongBao, request.lyDoTuChoi);
         }
 
         public async Task<bool> KyQuyHopDongAsync(string maHD, int? maUserNhaTuyenDung)
@@ -473,8 +515,49 @@ namespace FreelancerStudent.API.Services
             }
         }
 
+        public async Task<bool> XoaHopDongAsync(string maHD, int? maUserNTD)
+        {
+            if (string.IsNullOrWhiteSpace(maHD))
+            {
+                throw new ArgumentException("Mã hợp đồng không hợp lệ.");
+            }
+
+            var hopDong = await _repository.LayChiTietHopDongTheoMaAsync(maHD);
+            if (hopDong == null)
+            {
+                return false;
+            }
+
+            if (!maUserNTD.HasValue || maUserNTD.Value <= 0)
+            {
+                throw new UnauthorizedAccessException("Bạn cần đăng nhập bằng tài khoản Nhà tuyển dụng.");
+            }
+
+            if (hopDong.JobPost?.NhaTuyenDung?.User == null ||
+                hopDong.JobPost.NhaTuyenDung.User.maUser != maUserNTD.Value)
+            {
+                throw new UnauthorizedAccessException("Bạn không có quyền xóa hợp đồng này.");
+            }
+
+            return await _repository.XoaHopDongAsync(maHD);
+        }
+
         private static HopDongResponseDTO MapToResponseDTO(HopDong h)
         {
+            string? lyDoTuChoi = null;
+            string? dieuKhoanSach = h.dieuKhoan;
+
+            if (!string.IsNullOrWhiteSpace(h.dieuKhoan))
+            {
+                const string tag = "[LY_DO_TU_CHOI]:";
+                int idx = h.dieuKhoan.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    lyDoTuChoi = h.dieuKhoan.Substring(idx + tag.Length).Trim();
+                    dieuKhoanSach = h.dieuKhoan.Substring(0, idx).Trim();
+                }
+            }
+
             return new HopDongResponseDTO
             {
                 maHD = h.maHD,
@@ -499,7 +582,8 @@ namespace FreelancerStudent.API.Services
                 ngayKetThuc = h.ngayKetThuc,
                 sotienkyquy = h.sotienkyquy,
                 hinhthuclamviec = h.hinhthuclamviec,
-                dieuKhoan = h.dieuKhoan,
+                dieuKhoan = dieuKhoanSach,
+                lyDoTuChoi = lyDoTuChoi,
                 trangThai = h.trangThai ?? string.Empty,
                 giaiDoans = h.GiaiDoan_HopDongs?.Select(g => new GiaiDoanHopDong_ResponseDTO
                 {

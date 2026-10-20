@@ -211,8 +211,28 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
-
-
-
+        // GET: api/JobPost/GoiYChoFreelancer/{maUser}
+        [HttpGet("GoiYChoFreelancer/{maUser}")]
+        public async Task<IActionResult> layDanhSachJobGoiY(int maUser)
+        {
+            try
+            {
+                var data = await _jobPostService.layDanhSachJobGoiYChoUserAsync(maUser);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy danh sách việc làm gợi ý thành công!",
+                    data = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Lỗi khi lấy việc làm gợi ý: " + ex.Message
+                });
+            }
+        }
     }
 }

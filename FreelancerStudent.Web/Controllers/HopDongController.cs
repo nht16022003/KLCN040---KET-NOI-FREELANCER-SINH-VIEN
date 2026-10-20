@@ -15,19 +15,22 @@ namespace FreelancerStudent.Web.Controllers
         private readonly IFreelancerStudentWebService _freelancerService;
         private readonly IJobPostWebService _jobPostService;
         private readonly IWalletWebService _walletWebService;
+        private readonly ITaskCongViecWebService _taskWebService;
 
         public HopDongController(
             IHopDongWebService hopDongService,
             INhaTuyenDungWebService ntdService,
             IFreelancerStudentWebService freelancerService,
             IJobPostWebService jobPostService,
-            IWalletWebService walletWebService)
+            IWalletWebService walletWebService,
+            ITaskCongViecWebService taskWebService)
         {
             _hopDongService = hopDongService;
             _ntdService = ntdService;
             _freelancerService = freelancerService;
             _jobPostService = jobPostService;
             _walletWebService = walletWebService;
+            _taskWebService = taskWebService;
         }
 
         [HttpGet]
@@ -413,6 +416,18 @@ namespace FreelancerStudent.Web.Controllers
                     hopDong.DaTaiThongTinVi = true;
                 }
             }
+
+            // Tải thông tin tiến độ dự án
+            try
+            {
+                var tienDoRes = await _taskWebService.LayTienDoDuAnAsync(maHD, maUser.Value);
+                if (tienDoRes.success && tienDoRes.data != null)
+                {
+                    hopDong.TienDoDuAn = tienDoRes.data;
+                }
+            }
+            catch { }
+
             return View(hopDong);
         }
 
@@ -529,6 +544,96 @@ namespace FreelancerStudent.Web.Controllers
 
             // 8. Quay lại trang chi tiết hợp đồng
             return RedirectToAction("ChiTiet", new { maHD });
+        }
+
+        // ================= Quản lý Tiến độ Dự án (FRL-UC-09) =================
+
+        // POST: /HopDong/ThemTask
+        [HttpPost]
+        public async Task<IActionResult> ThemTask([FromBody] TaoTaskCongViecViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            var result = await _taskWebService.TaoTaskAsync(model, maUser.Value);
+            return Json(result);
+        }
+
+        // POST: /HopDong/CapNhatTask
+        [HttpPost]
+        public async Task<IActionResult> CapNhatTask([FromBody] CapNhatTaskCongViecViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            var result = await _taskWebService.CapNhatTaskAsync(model, maUser.Value);
+            return Json(result);
+        }
+
+        // POST: /HopDong/CapNhatTrangThaiTask
+        [HttpPost]
+        public async Task<IActionResult> CapNhatTrangThaiTask([FromBody] CapNhatTrangThaiTaskViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errorMsg = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = errorMsg });
+            }
+
+            var result = await _taskWebService.CapNhatTrangThaiTaskAsync(model, maUser.Value);
+            return Json(result);
+        }
+
+        // POST: /HopDong/XoaTask
+        [HttpPost]
+        public async Task<IActionResult> XoaTask([FromBody] int maTask)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            var result = await _taskWebService.XoaTaskAsync(maTask, maUser.Value);
+            return Json(result);
+        }
+
+        // GET: /HopDong/LayTienDoDuAn?maHD=...
+        [HttpGet]
+        public async Task<IActionResult> LayTienDoDuAn(string maHD)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn." });
+            }
+
+            var result = await _taskWebService.LayTienDoDuAnAsync(maHD, maUser.Value);
+            return Json(result);
         }
     }
 }

@@ -17,7 +17,7 @@
 
     var maUser = Context.Session.GetInt32("maUser");
 
-    if (maUser.HasValue && role == "NhaTuyenDung")
+    if (maUser.HasValue && (role == "NhaTuyenDung" || role == "FreelancerStudent"))
     {
         var ketQuaVi = await WalletWebService.layViTheoUser(maUser.Value);
 
@@ -899,10 +899,19 @@
                                     <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
-                                        <div class="portal-user-info d-none d-lg-block">
+                                        
+                                        <div class="portal-user-info d-none d-lg-flex">
                                             <span class="portal-user-name">@userName</span>
+
                                             <span class="portal-user-tag">@userRoleTitle</span>
+
+                                            <span class="portal-user-tag">
+                                                Số dư: @soDuKhaDung.ToString("N0",
+                                                    new System.Globalization.CultureInfo("vi-VN"))đ
+                                            </span>
                                         </div>
+
+
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                                         <li>
@@ -915,7 +924,7 @@
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
-                                        <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
+                                        <!-- <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li> -->
                                         <li><a class="dropdown-item" href="/Account/MinhChung">Minh chứng sinh viên</a>
                                         </li>
                                         @if (maUserDangNhap.HasValue)
@@ -952,7 +961,7 @@
                                         <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
                                         <a href="/Freelancer/LoiMoiNhanViec" class="subnav-link">Lời mời nhận việc</a>
                                         <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link">NTD quan tâm</a>
-                                        <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
+                                        <!-- <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a> -->
                                         <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
                                         <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
                                         <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>

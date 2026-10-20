@@ -13,6 +13,8 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
 
         public int maFreelancerStudent { get; set; }
 
+        public int? maUngTuyen { get; set; }
+
         public string tenFreelancer { get; set; } = string.Empty;
 
         public string? emailFreelancer { get; set; }
@@ -44,6 +46,7 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
         public string? hinhthuclamviec { get; set; }
 
         public string? dieuKhoan { get; set; }
+        public string? lyDoTuChoi { get; set; }
 
         public string trangThai { get; set; } = string.Empty;
 

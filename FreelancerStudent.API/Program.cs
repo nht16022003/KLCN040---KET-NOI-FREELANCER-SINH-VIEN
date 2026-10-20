@@ -5,8 +5,45 @@ using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
 using FreelancerStudent.API.Services;
 using FreelancerStudent.API.Hubs;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var sharedKeysPath = Path.GetFullPath(
+    Path.Combine(
+        builder.Environment.ContentRootPath,
+        "..",
+        "FreelancerStudent.Web",
+        "temp-keys"));
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(
+        new DirectoryInfo(sharedKeysPath))
+    .SetApplicationName("FreelancerStudentApp");
+
+builder.Services
+    .AddAuthentication(
+        CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "FreelancerStudent.Cookie";
+
+        // API trả 401/403 thay vì chuyển đến trang đăng nhập.
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = 403;
+            return Task.CompletedTask;
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // 1. Đăng ký DbContext kết nối SQL Server
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
@@ -33,7 +70,11 @@ builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 builder.Services.AddScoped<HopDongRepository>();
 builder.Services.AddScoped<IHopDongService, HopDongService>();
-
+builder.Services.AddScoped<ITaskCongViecRepository, TaskCongViecRepository>();
+builder.Services.AddScoped<ITaskCongViecService, TaskCongViecService>();
+builder.Services.AddScoped<BanGiaoSanPhamRepository>();
+builder.Services.AddScoped<YeuCauChinhSuaRepository>();
+builder.Services.AddScoped<BanGiaoSanPhamService>();
 
 
 
@@ -74,8 +115,20 @@ if (app.Environment.IsDevelopment())
 // 1. BẬT CORS CHO PHÉP WEB MVC GỌI SANG VÀ KẾT NỐI SIGNALR
 app.UseCors("AllowWebClient");
 
+// 1.5. PHỤC VỤ FILE TĨNH (AVATAR, LOGO) TỪ THƯ MỤC WWWROOT CỦA WEB ĐỂ MOBILE TẢI ĐƯỢC ẢNH
+var webWwwRoot = Path.Combine(builder.Environment.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot");
+if (Directory.Exists(webWwwRoot))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.GetFullPath(webWwwRoot)),
+        RequestPath = ""
+    });
+}
+
 // app.UseHttpsRedirection(); // Bỏ qua HTTPS redirect trong local dev để tránh lỗi 307 cho kết nối SignalR
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

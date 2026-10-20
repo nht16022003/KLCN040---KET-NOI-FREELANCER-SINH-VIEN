@@ -45,8 +45,13 @@ namespace FreelancerStudent.API.Data
 
         public DbSet<GiaiDoan_HopDong> GiaiDoan_HopDongs { get; set; }
 
-        public DbSet<ThongBao> ThongBaos { get; set; }
+        public DbSet<Task_CongViec> Task_CongViecs { get; set; }
 
+        public DbSet<ThongBao> ThongBaos { get; set; }
+        
+        public DbSet<BanGiao_SanPham> BanGiao_SanPhams { get; set; }
+
+        public DbSet<YeuCauChinhSua> YeuCauChinhSuas { get; set; }
 
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
@@ -288,6 +293,48 @@ namespace FreelancerStudent.API.Data
                      .HasForeignKey(t => t.maUser)
                      .OnDelete(DeleteBehavior.Cascade);
              });
+
+             modelBuilder.Entity<Task_CongViec>(entity =>
+             {
+                 entity.ToTable("Task_CongViec");
+                 entity.HasKey(t => t.maTask);
+
+                 entity.HasOne(t => t.HopDong)
+                     .WithMany(h => h.Tasks)
+                     .HasForeignKey(t => t.maHD)
+                     .OnDelete(DeleteBehavior.Cascade);
+
+                 entity.HasOne(t => t.GiaiDoan_HopDong)
+                     .WithMany()
+                     .HasForeignKey(t => t.maGiaiDoan)
+                     .OnDelete(DeleteBehavior.SetNull);
+             });
+
+             
+            modelBuilder.Entity<BanGiao_SanPham>(entity =>
+            {
+                entity.ToTable("BanGiao_SanPham");
+
+                entity.HasKey(x => x.maBanGiao);
+
+                entity.HasOne(x => x.HopDong)
+                    .WithMany()
+                    .HasForeignKey(x => x.maHD)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<YeuCauChinhSua>(entity =>
+            {
+                entity.ToTable("YeuCauChinhSua");
+
+                entity.HasKey(x => x.maYeuCauChinhSua);
+
+                entity.HasOne(x => x.BanGiaoSanPham)
+                    .WithMany(x => x.YeuCauChinhSuas)
+                    .HasForeignKey(x => x.maBanGiao)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
         }
     }
 }
