@@ -14,6 +14,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string? avatar { get; set; }
         public string? logo { get; set; }
         public double? sosaodanhgia { get; set; }
+        public int soLuotDanhGia { get; set; }
         public string trangthai { get; set; } = string.Empty;
         public DateTime ngayDangKy { get; set; }
     }

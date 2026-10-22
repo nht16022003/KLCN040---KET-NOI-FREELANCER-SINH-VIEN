@@ -10,8 +10,10 @@
         { "ChoKyKet", "Chờ ký kết" },
         { "ChoKyQuy", "Chờ ký quỹ" },
         { "DangThucHien", "Đang thực hiện" },
-        { "DaHoanThanh", "Đã hoàn thành" },
+        { "DaHoanThanh", "Đã hoàn thành – chờ thanh toán" },
+        { "DaThanhToan", "Đã thanh toán" },
         { "DaHuy", "Đã hủy" },
+        { "DaHuyHoanTien", "Đã hủy – đã hoàn tiền" },
         { "DangTranhChap", "Đang tranh chấp" }
     };
 
@@ -24,7 +26,9 @@
         "ChoKyQuy" => "bg-primary text-white",
         "DangThucHien" => "bg-success text-white",
         "DaHoanThanh" => "bg-dark text-white",
+        "DaThanhToan" => "bg-success text-white",
         "DaHuy" => "bg-danger text-white",
+        "DaHuyHoanTien" => "bg-danger text-white",
         _ => "bg-secondary text-white"
     };
 }
@@ -371,7 +375,7 @@
                                 <th>Tên giai đoạn / Mốc bàn giao</th>
                                 <th>Mô tả & Tiêu chí nghiệm thu</th>
                                 <th>Hạn chót mốc</th>
-                                <th class="text-end">Trạng thái</th>
+                                <th class="text-end">Trạng thái &amp; nghiệm thu</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -384,17 +388,32 @@
                                     <td class="text-muted small">@(string.IsNullOrWhiteSpace(gd.moTa) ? "Theo yêu cầu chung" : gd.moTa)</td>
                                     <td class="fw-medium text-dark">@gd.hanChot.ToString("dd/MM/yyyy")</td>
                                     <td class="text-end">
-                                        @if (gd.trangThai == "DaNghiemThu")
+                                        @if (gd.trangThai == "Dat")
                                         {
-                                            <span class="badge bg-success rounded-0">Đã nghiệm thu</span>
-                                        }
-                                        else if (gd.trangThai == "ChoDuyet")
-                                        {
-                                            <span class="badge bg-warning text-dark rounded-0">Chờ duyệt</span>
+                                            <span class="badge bg-success rounded-0">Đạt</span>
                                         }
                                         else
                                         {
                                             <span class="badge bg-light text-secondary border rounded-0">Chưa đạt</span>
+                                        }
+                                        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                                        {
+                                            <div class="d-flex justify-content-end gap-1 mt-2">
+                                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                    <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                    <input type="hidden" name="trangThai" value="Dat" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" disabled="@(gd.trangThai == "Dat")">Đạt</button>
+                                                </form>
+                                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                    <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                    <input type="hidden" name="trangThai" value="ChuaDat" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" disabled="@(gd.trangThai != "Dat")">Chưa đạt</button>
+                                                </form>
+                                            </div>
                                         }
                                     </td>
                                 </tr>
@@ -402,6 +421,25 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                {
+                    <div class="d-flex justify-content-end gap-2 p-3 border-top">
+                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" onsubmit="return confirm('Đánh dấu tất cả giai đoạn là Chưa đạt?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="trangThai" value="ChuaDat" />
+                            <button type="submit" class="btn btn-outline-danger">Đánh dấu tất cả chưa đạt</button>
+                        </form>
+                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" onsubmit="return confirm('Xác nhận tất cả giai đoạn đều đạt yêu cầu?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="trangThai" value="Dat" />
+                            <button type="submit" class="btn btn-success">Đánh dấu tất cả đạt</button>
+                        </form>
+                    </div>
+                }
+
             }
             else
             {
@@ -411,6 +449,56 @@
             }
         </div>
     </div>
+
+    @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien" && Model.giaiDoans.Count > 0 && Model.giaiDoans.All(g => g.trangThai == "Dat"))
+    {
+        <div class="alert alert-success d-flex justify-content-between align-items-center gap-3">
+            <span>Tất cả các giai đoạn đã được nghiệm thu đạt.</span>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNghiemThu">Xác nhận nghiệm thu &amp; Hoàn thành</button>
+        </div>
+        <div class="modal fade" id="modalNghiemThu" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <form asp-controller="HopDong" asp-action="NghiemThu" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                    <div class="modal-header"><h5 class="modal-title">Xác nhận nghiệm thu</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body"><p>Việc xác nhận đồng nghĩa với việc chấp thuận toàn bộ sản phẩm và hợp đồng chuyển sang bước thanh toán.</p></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Quay lại</button><button type="submit" class="btn btn-success">Xác nhận nghiệm thu</button></div>
+                </form>
+            </div></div>
+        </div>
+    }
+
+    @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+    {
+        <div class="alert alert-primary d-flex justify-content-between align-items-center gap-3">
+            <span>Hợp đồng đã nghiệm thu và đang chờ thanh toán.</span>
+            <a asp-controller="HopDong" asp-action="ThanhToan" asp-route-maHD="@Model.maHD" class="btn btn-primary">Thanh toán cho Freelancer</a>
+        </div>
+    }
+
+    @if (Model.trangThai is "DaThanhToan" or "DaHuyHoanTien")
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4">
+            <div class="card-body d-flex justify-content-between align-items-center gap-3">
+                <div><h5 class="mb-1">Đánh giá đối tác</h5><span class="text-muted">@(Model.trangThaiDanhGia == "DaDanhGia" ? "Bạn đã gửi đánh giá." : "Chia sẻ trải nghiệm làm việc của bạn.")</span></div>
+                @if (Model.trangThaiDanhGia == "DaDanhGia")
+                {
+                    if (Model.coTheChinhSuaDanhGia)
+                    {
+                        <button type="button" class="btn btn-outline-primary" onclick="moFormDanhGia('@Model.maHD', @Model.maDanhGia)">Chỉnh sửa đánh giá</button>
+                    }
+                    else { <span class="badge text-bg-success">Đã đánh giá</span> }
+                }
+                else if (Model.coTheDanhGia)
+                {
+                    <button type="button" class="btn btn-outline-primary" onclick="moFormDanhGia('@Model.maHD')">Đánh giá</button>
+                }
+                else { <span class="text-muted small">Đã hết thời hạn gửi đánh giá.</span> }
+            </div>
+        </div>
+        <div id="danhGiaModalContainer"></div>
+    }
 
     <!-- ================= KHU VỰC TIẾN ĐỘ DỰ ÁN (FRL-UC-09) ================= -->
     @{
@@ -829,6 +917,117 @@
     <script>
         const contractEndDateStr = '@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")';
         const maHDHienTai = '@Model.maHD';
+
+        async function moFormDanhGia(maHD, maDanhGia) {
+            const container = document.getElementById('danhGiaModalContainer');
+            if (!container) return;
+            try {
+                const url = `/DanhGia/Form?maHD=${encodeURIComponent(maHD)}`;
+                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!response.ok) throw new Error('Không thể tải biểu mẫu đánh giá.');
+                container.innerHTML = await response.text();
+                const modalElement = container.querySelector('.modal');
+                if (!modalElement) throw new Error('Biểu mẫu đánh giá không hợp lệ.');
+                if (maDanhGia) modalElement.dataset.maDanhGia = maDanhGia;
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+            } catch (error) {
+                alert(error.message || 'Không thể tải biểu mẫu đánh giá.');
+            }
+        }
+
+        async function guiDanhGia(form, event) {
+            event.preventDefault();
+            const modalElement = form.closest('.modal');
+            const tongSao = Number(form.querySelector('[name="soSaoTongThe"]').value);
+            if (!tongSao) {
+                const message = form.querySelector('[data-review-message]');
+                if (message) {
+                    message.textContent = 'Vui lòng chọn số sao đánh giá tổng thể.';
+                    message.classList.remove('d-none');
+                }
+                return;
+            }
+            const payload = {
+                maHD: form.querySelector('[name="maHD"]').value,
+                soSaoTongThe: tongSao,
+                soSaoChatLuong: Number(form.querySelector('[name="soSaoChatLuong"]').value) || null,
+                soSaoDungHan: Number(form.querySelector('[name="soSaoDungHan"]').value) || null,
+                soSaoGiaoTiep: Number(form.querySelector('[name="soSaoGiaoTiep"]').value) || null,
+                nhanXet: form.querySelector('[name="nhanXet"]').value
+            };
+            const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const maDanhGia = modalElement.dataset.maDanhGia;
+            const url = maDanhGia ? `/DanhGia/CapNhat?maDanhGia=${encodeURIComponent(maDanhGia)}` : '/DanhGia/Gui';
+            const message = form.querySelector('[data-review-message]');
+            const button = form.querySelector('[type="submit"]');
+            button.disabled = true;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'Không thể lưu đánh giá.');
+                location.reload();
+            } catch (error) {
+                if (message) { message.textContent = error.message; message.classList.remove('d-none'); }
+                button.disabled = false;
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const starButton = event.target.closest('[data-rating-group][data-rating-value]');
+            if (starButton) {
+                const form = starButton.closest('form');
+                const groupName = starButton.dataset.ratingGroup;
+                const selectedValue = Number(starButton.dataset.ratingValue);
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+
+                valueInput.value = selectedValue;
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    const value = Number(button.dataset.ratingValue);
+                    const selected = value === selectedValue;
+                    button.setAttribute('aria-checked', selected ? 'true' : 'false');
+                    button.classList.toggle('text-warning', value <= selectedValue);
+                    button.classList.toggle('text-secondary', value > selectedValue);
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-star-fill', value <= selectedValue);
+                        icon.classList.toggle('bi-star', value > selectedValue);
+                    }
+                });
+
+                const label = form.querySelector(`[data-rating-label="${groupName}"]`);
+                if (label) label.textContent = `${selectedValue} trên 5`;
+                return;
+            }
+
+            const clearButton = event.target.closest('[data-rating-clear]');
+            if (clearButton) {
+                const form = clearButton.closest('form');
+                const groupName = clearButton.dataset.ratingClear;
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+                valueInput.value = '';
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    button.setAttribute('aria-checked', 'false');
+                    button.classList.remove('text-warning');
+                    button.classList.add('text-secondary');
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-star-fill');
+                        icon.classList.add('bi-star');
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const reviewContract = '@(TempData["MoPopupDanhGia"] as string ?? "")';
+            if (reviewContract) moFormDanhGia(reviewContract);
+        });
 
         function showAlert(alertId, message) {
             const alertEl = document.getElementById(alertId);

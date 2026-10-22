@@ -45,6 +45,9 @@ namespace FreelancerStudent.API.Models
 
         public decimal? chiPhiTu { get; set; }
 
+        public decimal diemDanhGiaTrungBinh { get; set; }
+        public int soLuotDanhGia { get; set; }
+
 
     }
 }

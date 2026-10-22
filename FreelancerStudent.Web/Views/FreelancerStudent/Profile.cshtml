@@ -886,28 +886,28 @@
                     <!-- Stat 1: Rating -->
                     <div class="col metric-col">
                         <div>
-                            <div class="metric-main-value text-warning">4.8 / 5.0</div>
-                            <div class="metric-sub-label">24 đánh giá</div>
+                            @if (Model.FreelancerStudent.SoLuotDanhGia > 0)
+                            {
+                                <div class="metric-main-value text-warning">@Model.FreelancerStudent.DiemDanhGiaTrungBinh.ToString("0.0") / 5.0</div>
+                                <div class="metric-sub-label">@Model.FreelancerStudent.SoLuotDanhGia đánh giá</div>
+                            }
+                            else
+                            {
+                                <div class="metric-main-value text-muted">—</div>
+                                <div class="metric-sub-label">Chưa có đánh giá</div>
+                            }
                         </div>
                     </div>
 
                     <!-- Stat 2: Projects completed -->
                     <div class="col metric-col">
                         <div>
-                            <div class="metric-main-value">@(Model.DuAns.Count > 0 ? Model.DuAns.Count * 4 : 12)</div>
+                            <div class="metric-main-value">@Model.FreelancerStudent.SoDuAnHoanThanh</div>
                             <div class="metric-sub-label">Dự án hoàn thành</div>
                         </div>
                     </div>
 
-                    <!-- Stat 3: Completion rate -->
-                    <div class="col metric-col">
-                        <div>
-                            <div class="metric-main-value text-success">98%</div>
-                            <div class="metric-sub-label">Tỷ lệ hoàn thành</div>
-                        </div>
-                    </div>
-
-                    <!-- Stat 4: Experience -->
+                    <!-- Stat 3: Experience -->
                     <div class="col metric-col">
                         <div>
                             <div class="metric-main-value">@Model.FreelancerStudent.NamThu năm</div>
@@ -915,18 +915,25 @@
                         </div>
                     </div>
 
-                    <!-- Stat 5: Clients -->
+                    <!-- Stat 4: Clients -->
                     <div class="col metric-col">
                         <div>
-                            <div class="metric-main-value">15</div>
+                            <div class="metric-main-value">@Model.FreelancerStudent.SoKhachHang</div>
                             <div class="metric-sub-label">Khách hàng</div>
                         </div>
                     </div>
 
-                    <!-- Stat 6: Satisfaction -->
+                    <!-- Stat 5: Satisfaction -->
                     <div class="col metric-col">
                         <div>
-                            <div class="metric-main-value text-success">100%</div>
+                            @if (Model.FreelancerStudent.SoLuotDanhGia > 0)
+                            {
+                                <div class="metric-main-value text-success">@((double)Model.FreelancerStudent.TyLeHaiLong).ToString("0.#")%</div>
+                            }
+                            else
+                            {
+                                <div class="metric-main-value text-muted">—</div>
+                            }
                             <div class="metric-sub-label">Khách hàng hài lòng</div>
                         </div>
                     </div>
@@ -942,22 +949,22 @@
                 <a href="#portfolio-content" class="profile-tab-item" data-profile-tab="portfolio">
                     <i class="bi bi-folder"></i> Dự án (@Model.DuAns.Count)
                 </a>
-                <a href="#danhgia" class="profile-tab-item">
+                <a href="#reviews-content" class="profile-tab-item" data-profile-tab="reviews">
                     Đánh giá
                 </a>
-                <a href="#kynang" class="profile-tab-item">
+                        <a href="#kynang" class="profile-tab-item" data-profile-tab="overview">
                     Kỹ năng
                 </a>
-                <a href="#hocvan" class="profile-tab-item">
+                        <a href="#hocvan" class="profile-tab-item" data-profile-tab="overview">
                     Học vấn
                 </a>
-                <a href="#chungchi" class="profile-tab-item">
+                        <a href="#chungchi" class="profile-tab-item" data-profile-tab="overview">
                     Chứng chỉ
                 </a>
-                <a href="#dichvu" class="profile-tab-item">
+                        <a href="#dichvu" class="profile-tab-item" data-profile-tab="overview">
                     Dịch vụ
                 </a>
-                <a href="#hoatdong" class="profile-tab-item">
+                        <a href="#hoatdong" class="profile-tab-item" data-profile-tab="overview">
                     Hoạt động
                 </a>
             </div>
@@ -965,6 +972,43 @@
             <!-- ==================== PORTFOLIO CONTENT ==================== -->
             <div id="portfolio-content" class="d-none mb-4">
                 <partial name="_portfolio" model="Model" view-data="ViewData" />
+            </div>
+
+            <div id="reviews-content" class="d-none mb-4">
+                <div class="section-card">
+                    <h5 class="section-card-title">Đánh giá Freelancer</h5>
+                    @if (Model.ThongKeDanhGia?.tongLuotDanhGia > 0)
+                    {
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3"><strong>@Model.ThongKeDanhGia.diemTrungBinh.ToString("0.0") / 5</strong><div class="text-muted small">@Model.ThongKeDanhGia.tongLuotDanhGia đánh giá</div></div>
+                            <div class="col-md-3"><strong>@Model.ThongKeDanhGia.trungBinhChatLuong.ToString("0.0")</strong><div class="text-muted small">Chất lượng sản phẩm</div></div>
+                            <div class="col-md-3"><strong>@Model.ThongKeDanhGia.trungBinhDungHan.ToString("0.0")</strong><div class="text-muted small">Đúng hạn deadline</div></div>
+                            <div class="col-md-3"><strong>@Model.ThongKeDanhGia.trungBinhGiaoTiep.ToString("0.0")</strong><div class="text-muted small">Thái độ giao tiếp</div></div>
+                        </div>
+                        @for (var star = 5; star >= 1; star--)
+                        {
+                            var count = Model.ThongKeDanhGia.phanBoSao.Count >= star ? Model.ThongKeDanhGia.phanBoSao[star - 1] : 0;
+                            <div class="d-flex align-items-center gap-2 mb-1"><span>@star ★</span><div class="progress flex-grow-1" style="height:8px"><div class="progress-bar bg-warning" style="width:@(Model.ThongKeDanhGia.tongLuotDanhGia == 0 ? 0 : count * 100d / Model.ThongKeDanhGia.tongLuotDanhGia)%"></div></div><small>@count</small></div>
+                        }
+                        <hr />
+                        @foreach (var review in Model.ThongKeDanhGia.danhSach)
+                        {
+                            <div class="review-item-box">
+                                <div class="d-flex justify-content-between"><strong>@review.tenNguoiDanhGia</strong><span class="text-warning">@review.soSaoTongThe ★</span></div>
+                                <div class="text-muted small">@review.tenCongViec · @review.ngayDanhGia.ToString("dd/MM/yyyy")</div>
+                                @if (!string.IsNullOrWhiteSpace(review.nhanXet)) { <p class="mb-0 mt-2">@review.nhanXet</p> }
+                            </div>
+                        }
+                        @if (Model.ThongKeDanhGia.tongSoTrang > 1)
+                        {
+                            <div class="text-muted small">Trang @Model.ThongKeDanhGia.trang / @Model.ThongKeDanhGia.tongSoTrang</div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted">Chưa có đánh giá</div>
+                    }
+                </div>
             </div>
 
             <!-- ==================== 4. MAIN 3-COLUMN CONTENT GRID ==================== -->
@@ -1230,29 +1274,24 @@
                                         <div class="section-card">
                                             <h5 class="section-card-title">Đánh giá gần đây</h5>
                     
-                                            <!-- Review item 1 -->
-                                            <div class="review-item-box">
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <span class="fw-bold text-dark small">Công ty Công Nghệ ABC</span>
-                                                    <span class="text-warning small fw-bold">5.0 ★</span>
-                                                </div>
-                                                <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
-                                                    "Bạn sinh viên làm việc rất có trách nhiệm, bàn giao đúng hẹn và code chuẩn cấu trúc."
-                                                </p>
-                                                <span class="text-secondary" style="font-size: 0.7rem;">2 tuần trước</span>
-                                            </div>
-
-                                            <!-- Review item 2 -->
-                                            <div class="review-item-box">
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <span class="fw-bold text-dark small">Startup EduTech</span>
-                                                    <span class="text-warning small fw-bold">4.8 ★</span>
-                                                </div>
-                                                <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">
-                                                    "Giao tiếp nhanh nhẹn, tiếp thu yêu cầu tốt và hỗ trợ nhiệt tình."
-                                                </p>
-                                                <span class="text-secondary" style="font-size: 0.7rem;">1 tháng trước</span>
-                                            </div>
+                                            @if (Model.FreelancerStudent.DanhGiaGanDay.Count == 0)
+                                            {
+                                                <div class="text-muted small">Chưa có đánh giá</div>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var review in Model.FreelancerStudent.DanhGiaGanDay)
+                                                {
+                                                    <div class="review-item-box">
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="fw-bold text-dark small">@review.tenNguoiDanhGia</span>
+                                                            <span class="text-warning small fw-bold">@review.soSaoTongThe ★</span>
+                                                        </div>
+                                                        <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">@(review.nhanXet ?? "")</p>
+                                                        <span class="text-secondary" style="font-size: 0.7rem;">@review.ngayDanhGia.ToString("dd/MM/yyyy")</span>
+                                                    </div>
+                                                }
+                                            }
 
                                         </div>
 
@@ -1267,24 +1306,54 @@
                             document.addEventListener('DOMContentLoaded', function () {
                                 const overviewContent = document.getElementById('profile-overview-content');
                                 const portfolioContent = document.getElementById('portfolio-content');
+                                const reviewsContent = document.getElementById('reviews-content');
                                 const overviewTab = document.querySelector('.profile-tab-item[href="#tongquan"]');
+                                const overviewTabs = document.querySelectorAll('[data-profile-tab="overview"]');
                                 const portfolioTab = document.querySelector('[data-profile-tab="portfolio"]');
+                                const reviewsTab = document.querySelector('[data-profile-tab="reviews"]');
                                 if (overviewTab && overviewContent && portfolioContent) {
                                     overviewTab.addEventListener('click', function (event) {
                                         event.preventDefault();
                                         overviewContent.classList.remove('d-none');
                                         portfolioContent.classList.add('d-none');
+                                        if (reviewsContent) reviewsContent.classList.add('d-none');
                                         overviewTab.classList.add('active');
                                         if (portfolioTab) portfolioTab.classList.remove('active');
+                                        if (reviewsTab) reviewsTab.classList.remove('active');
                                     });
                                 }
+                                overviewTabs.forEach(function (tab) {
+                                    tab.addEventListener('click', function () {
+                                        overviewContent?.classList.remove('d-none');
+                                        portfolioContent?.classList.add('d-none');
+                                        reviewsContent?.classList.add('d-none');
+                                        overviewTabs.forEach(item => item.classList.remove('active'));
+                                        overviewTab?.classList.remove('active');
+                                        portfolioTab?.classList.remove('active');
+                                        reviewsTab?.classList.remove('active');
+                                        tab.classList.add('active');
+                                    });
+                                });
                                 if (portfolioTab && overviewContent && portfolioContent) {
                                     portfolioTab.addEventListener('click', function (event) {
                                         event.preventDefault();
                                         overviewContent.classList.add('d-none');
                                         portfolioContent.classList.remove('d-none');
+                                        if (reviewsContent) reviewsContent.classList.add('d-none');
                                         if (overviewTab) overviewTab.classList.remove('active');
                                         portfolioTab.classList.add('active');
+                                        if (reviewsTab) reviewsTab.classList.remove('active');
+                                    });
+                                }
+                                if (reviewsTab && reviewsContent && overviewContent && portfolioContent) {
+                                    reviewsTab.addEventListener('click', function (event) {
+                                        event.preventDefault();
+                                        overviewContent.classList.add('d-none');
+                                        portfolioContent.classList.add('d-none');
+                                        reviewsContent.classList.remove('d-none');
+                                        if (overviewTab) overviewTab.classList.remove('active');
+                                        if (portfolioTab) portfolioTab.classList.remove('active');
+                                        reviewsTab.classList.add('active');
                                     });
                                 }
 

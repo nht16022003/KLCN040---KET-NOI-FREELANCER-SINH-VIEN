@@ -1,5 +1,6 @@
 @using FreelancerStudent.Web.Services.Interfaces
 @inject IWalletWebService WalletWebService
+@inject IThongBaoWebService ThongBaoWebService
 @using Microsoft.AspNetCore.Http
 @{
     var role = Context.Session.GetString("tenRole");
@@ -14,6 +15,7 @@
     var maUserDangNhap = Context.Session.GetInt32("maUser");
 
     decimal soDuKhaDung = 0;
+    var soThongBaoChuaDoc = 0;
 
     var maUser = Context.Session.GetInt32("maUser");
 
@@ -24,6 +26,14 @@
         if (ketQuaVi.success && ketQuaVi.data != null)
         {
             soDuKhaDung = ketQuaVi.data.soDuKhaDung;
+        }
+    }
+    if (maUser.HasValue && (role == "NhaTuyenDung" || role == "FreelancerStudent"))
+    {
+        var ketQuaThongBao = await ThongBaoWebService.DemChuaDocAsync(maUser.Value);
+        if (ketQuaThongBao.success)
+        {
+            soThongBaoChuaDoc = ketQuaThongBao.data;
         }
     }
 }
@@ -758,7 +768,7 @@
                             <a href="/JobPost/QuanLyTinTuyenDung" class="portal-nav-link">
                                 <span>Quản lý tuyển dụng</span>
                             </a>
-                            <a href="/HopDong" class="portal-nav-link">
+                            <a asp-controller="HopDong" asp-action="Index" class="portal-nav-link">
                                 <span>Hợp đồng</span>
                             </a>
                             <a href="/Wallet" class="portal-nav-link">
@@ -770,8 +780,12 @@
                     <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài + Profile User -->
                     <div class="d-flex align-items-center gap-3">
                         <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
-                        <a href="/ThongBao" class="portal-nav-link" title="Thông báo">
-                            <span>Thông báo</span>
+                        <a href="/ThongBao" class="portal-nav-link position-relative" title="Thông báo">
+                            <i class="bi bi-bell"></i><span>Thông báo</span>
+                            @if (soThongBaoChuaDoc > 0)
+                            {
+                                <span class="badge rounded-pill text-bg-danger">@(soThongBaoChuaDoc > 99 ? "99+" : soThongBaoChuaDoc)</span>
+                            }
                         </a>
 
                         <!-- Nút Tin Nhắn (FRL-UC-07) -->
@@ -813,7 +827,7 @@
                                     </li>
                                     <li><a class="dropdown-item" href="/Employer/FreelancerYeuThich">Freelancer quan tâm</a>
                                     </li>
-                                    <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
+                                    <li><a class="dropdown-item" asp-controller="HopDong" asp-action="Index">Quản lý hợp đồng</a></li>
                                     <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
                                     </li>
                                     <li>
@@ -838,7 +852,7 @@
                             <a href="/Employer/FreelancerYeuThich" class="subnav-link">Freelancer quan tâm</a>
                             <a href="/Wallet" class="subnav-link">Ví điện tử</a>
                             <a href="/JobPost/Create" class="subnav-link text-success fw-bold">Đăng tin mới</a>
-                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                            <a asp-controller="HopDong" asp-action="Index" class="subnav-link">Hợp đồng & Ký quỹ</a>
                             <a href="/Employer/Profile/1" class="subnav-link">Hồ sơ công ty</a>
                         </div>
                     </div>
@@ -868,7 +882,7 @@
                                     <a href="/FreelancerStudent/QuanLyTimViec" class="portal-nav-link">
                                         <span>Quản lý tìm việc</span>
                                     </a>
-                                    <a href="/HopDong" class="portal-nav-link">
+                                    <a asp-controller="HopDong" asp-action="Index" class="portal-nav-link">
                                         <span>Hợp đồng</span>
                                     </a>
                                     <a href="/Wallet" class="portal-nav-link">
@@ -880,8 +894,12 @@
                             <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài tìm việc + Profile User -->
                             <div class="d-flex align-items-center gap-3">
                                 <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
-                                <a href="/ThongBao" class="portal-nav-link" title="Thông báo">
-                                    <span>Thông báo</span>
+                                <a href="/ThongBao" class="portal-nav-link position-relative" title="Thông báo">
+                                    <i class="bi bi-bell"></i><span>Thông báo</span>
+                                    @if (soThongBaoChuaDoc > 0)
+                                    {
+                                        <span class="badge rounded-pill text-bg-danger">@(soThongBaoChuaDoc > 99 ? "99+" : soThongBaoChuaDoc)</span>
+                                    }
                                 </a>
 
                                 <!-- Nút Tin Nhắn (FRL-UC-07) -->
@@ -955,7 +973,7 @@
                                         <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
                                         <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
                                         <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
-                                        <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                        <a asp-controller="HopDong" asp-action="Index" class="subnav-link">Hợp đồng & Ký quỹ</a>
                                         <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
                                     </div>
                                 </div>

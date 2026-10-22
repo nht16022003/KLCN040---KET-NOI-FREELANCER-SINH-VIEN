@@ -49,6 +49,11 @@ namespace FreelancerStudent.API.Data
 
         public DbSet<ThongBao> ThongBaos { get; set; }
 
+        public DbSet<DanhGia_NhanXet> DanhGia_NhanXets { get; set; }
+        public DbSet<DanhGia_NhanXet_LichSu> DanhGia_NhanXet_LichSus { get; set; }
+        public DbSet<CauHinhPhiHoaHong> CauHinhPhiHoaHongs { get; set; }
+        public DbSet<TranhChap> TranhChaps { get; set; }
+
 
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
@@ -84,9 +89,47 @@ namespace FreelancerStudent.API.Data
 
             });
 
+            modelBuilder.Entity<DanhGia_NhanXet>(entity =>
+            {
+                entity.ToTable("DanhGia_NhanXet");
+                entity.HasKey(d => d.maDanhGia);
+                entity.HasIndex(d => new { d.maHD, d.maNguoiDanhGia }).IsUnique();
+                entity.HasIndex(d => d.maNguoiDuocDanhGia);
+                entity.HasOne(d => d.HopDong)
+                    .WithMany()
+                    .HasForeignKey(d => d.maHD)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(d => d.NguoiDanhGia)
+                    .WithMany()
+                    .HasForeignKey(d => d.maNguoiDanhGia)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(d => d.NguoiDuocDanhGia)
+                    .WithMany()
+                    .HasForeignKey(d => d.maNguoiDuocDanhGia)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(d => d.nhanXet).HasMaxLength(1000);
+            });
+
+            modelBuilder.Entity<DanhGia_NhanXet_LichSu>(entity =>
+            {
+                entity.ToTable("DanhGia_NhanXet_LichSu");
+                entity.HasKey(d => d.maLichSu);
+                entity.HasOne(d => d.DanhGia)
+                    .WithMany()
+                    .HasForeignKey(d => d.maDanhGia)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CauHinhPhiHoaHong>(entity =>
+            {
+                entity.ToTable("CauHinhPhiHoaHong_PhiDangBai");
+                entity.HasKey(c => c.maCauHinh);
+            });
+
             modelBuilder.Entity<FreelancerStudents>(entity =>
             {
                 entity.HasKey(f => f.maFreelancerStudents);
+                entity.Property(f => f.chiPhiTu).HasPrecision(18, 2);
 
                 entity.HasOne(f => f.User).WithOne(u => u.FreelancerStudents).HasForeignKey<FreelancerStudents>(f => f.maUser);
                 //Một freelancer có một user, ở phía user cũng chỉ có 1 freelancerstudent ở freelancer thì có khóa ngoại là f.mauuser
@@ -133,6 +176,8 @@ namespace FreelancerStudent.API.Data
             modelBuilder.Entity<JobPost>(entity =>
             {
                 entity.HasKey(j => j.maJob);
+                entity.Property(j => j.thulao).HasPrecision(18, 2);
+                entity.Property(j => j.phiDangBai).HasPrecision(18, 2);
 
                 entity.HasOne(j => j.NhaTuyenDung).WithMany(n => n.JobPosts).HasForeignKey(f => f.maNhaTuyenDung)
                 .OnDelete(DeleteBehavior.Cascade); //Nếu xóa nhà tuyển dụng thì xóa luôn bài đăng của ẻm
@@ -141,6 +186,8 @@ namespace FreelancerStudent.API.Data
             modelBuilder.Entity<Wallet>(entity =>
             {
                 entity.HasKey(w => w.maWallet);
+                entity.Property(w => w.soDuKhaDung).HasPrecision(18, 2);
+                entity.Property(w => w.soDuDongBang).HasPrecision(18, 2);
 
                 entity.HasOne(w => w.User)
                 .WithOne(u => u.Wallet)
@@ -151,6 +198,7 @@ namespace FreelancerStudent.API.Data
             modelBuilder.Entity<UngTuyen>(entity =>
             {
                 entity.HasKey(u => u.maUngTuyen);
+                entity.Property(u => u.thulaoDeXuat).HasPrecision(18, 2);
 
                 //1 JobPost có nhiều đơn ứng tuyển
                 entity.HasOne(u => u.JobPosts).WithMany(j => j.UngTuyens).HasForeignKey(u => u.maJob).OnDelete(DeleteBehavior.Cascade);
@@ -172,6 +220,7 @@ namespace FreelancerStudent.API.Data
            {
                entity.ToTable("GiaoDichNapTien");
                entity.HasKey(g => g.maNapTien);
+               entity.Property(g => g.soTien).HasPrecision(18, 2);
 
                entity.HasIndex(g => g.maGiaoDich)
                 .IsUnique();

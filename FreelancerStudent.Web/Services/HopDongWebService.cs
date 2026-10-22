@@ -157,6 +157,50 @@ namespace FreelancerStudent.Web.Services
             return result;
         }
 
+        public async Task<ApiReponse<bool>> NghiemThuAsync(string maHD, int maUserNTD)
+        {
+            try
+            {
+                using var response = await _httpClient.PostAsJsonAsync($"api/HopDong/nghiem-thu?maUser={maUserNTD}", new { maHD });
+                return await ReadApiResponseAsync<bool>(response);
+            }
+            catch (Exception ex) { return new ApiReponse<bool> { success = false, message = "Không thể kết nối đến máy chủ: " + ex.Message }; }
+        }
+
+        public async Task<ApiReponse<HopDongThanhToanViewModel>> LayThongTinThanhToanAsync(string maHD, int maUserNTD)
+        {
+            try
+            {
+                using var response = await _httpClient.GetAsync($"api/HopDong/thanh-toan/{Uri.EscapeDataString(maHD)}?maUser={maUserNTD}");
+                return await ReadApiResponseAsync<HopDongThanhToanViewModel>(response);
+            }
+            catch (Exception ex) { return new ApiReponse<HopDongThanhToanViewModel> { success = false, message = "Không thể kết nối đến máy chủ: " + ex.Message }; }
+        }
+
+        public async Task<ApiReponse<bool>> ThanhToanAsync(string maHD, int maUserNTD)
+        {
+            try
+            {
+                using var response = await _httpClient.PostAsJsonAsync($"api/HopDong/thanh-toan?maUser={maUserNTD}", new { maHD });
+                return await ReadApiResponseAsync<bool>(response);
+            }
+            catch (Exception ex) { return new ApiReponse<bool> { success = false, message = "Không thể kết nối đến máy chủ: " + ex.Message }; }
+        }
+
+        private static async Task<ApiReponse<T>> ReadApiResponseAsync<T>(HttpResponseMessage response)
+        {
+            try
+            {
+                var result = await response.Content.ReadFromJsonAsync<ApiReponse<T>>();
+                if (result != null)
+                    return result;
+            }
+            catch
+            {
+            }
+            return new ApiReponse<T> { success = false, message = $"Lỗi từ máy chủ ({(int)response.StatusCode})." };
+        }
+
         public async Task<HopDongViewModel?> LayChiTietTheoJobAsync(string maJob)
         {
             try
@@ -275,21 +319,18 @@ namespace FreelancerStudent.Web.Services
                     return result;
                 }
 
+                var errorBody = await response.Content.ReadAsStringAsync();
                 try
                 {
-                    var errorObj = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-                    if (errorObj != null && errorObj.TryGetValue("message", out var msg))
-                    {
-                        result.message = msg.ToString() ?? "Có lỗi xảy ra khi ký quỹ hợp đồng.";
-                    }
+                    using var document = System.Text.Json.JsonDocument.Parse(errorBody);
+                    if (document.RootElement.TryGetProperty("message", out var messageElement))
+                        result.message = messageElement.GetString() ?? $"Lỗi từ máy chủ ({(int)response.StatusCode}).";
                     else
-                    {
-                        result.message = $"Lỗi từ máy chủ ({(int)response.StatusCode})";
-                    }
+                        result.message = $"Lỗi từ máy chủ ({(int)response.StatusCode}).";
                 }
-                catch
+                catch (System.Text.Json.JsonException)
                 {
-                    result.message = $"Lỗi từ máy chủ ({(int)response.StatusCode})";
+                    result.message = $"Lỗi từ máy chủ ({(int)response.StatusCode}).";
                 }
 
                 result.success = false;
@@ -297,7 +338,7 @@ namespace FreelancerStudent.Web.Services
             catch (Exception ex)
             {
                 result.success = false;
-                result.message = "Không thể kết nối đến máy chủ: " + ex.Message;
+                result.message = "Không thể kết nối đến API ký quỹ. Vui lòng kiểm tra API đang chạy và nhật ký máy chủ.";
             }
 
             return result;

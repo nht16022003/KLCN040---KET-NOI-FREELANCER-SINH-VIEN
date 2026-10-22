@@ -5,12 +5,14 @@ using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
 using FreelancerStudent.API.Services;
 using FreelancerStudent.API.Hubs;
+using FreelancerStudent.API.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Đăng ký DbContext kết nối SQL Server
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<NghiepVuOptions>(builder.Configuration.GetSection("NghiepVu"));
 
 // ĐĂNG KÝ DEPENDENCY INJECTION CHO REPOSITORY TẠI ĐÂY:
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -35,6 +37,13 @@ builder.Services.AddScoped<HopDongRepository>();
 builder.Services.AddScoped<IHopDongService, HopDongService>();
 builder.Services.AddScoped<ITaskCongViecRepository, TaskCongViecRepository>();
 builder.Services.AddScoped<ITaskCongViecService, TaskCongViecService>();
+builder.Services.AddScoped<IDanhGiaRepository, DanhGiaRepository>();
+builder.Services.AddScoped<IDanhGiaService, DanhGiaService>();
+builder.Services.AddScoped<IThongBaoRepository, ThongBaoRepository>();
+builder.Services.AddScoped<IThongBaoService, ThongBaoService>();
+builder.Services.AddScoped<DanhGiaPolicy>();
+builder.Services.AddSingleton<NoiDungValidator>();
+builder.Services.AddHostedService<NghiepVuNenHostedService>();
 
 
 

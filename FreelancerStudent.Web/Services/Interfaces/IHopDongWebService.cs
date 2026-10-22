@@ -32,5 +32,11 @@ namespace FreelancerStudent.Web.Services.Interfaces
         Task<ApiReponse<bool>> KyQuyHopDongAsync(
             string maHD,
             int maUserNhaTuyenDung);
+
+        Task<ApiReponse<bool>> NghiemThuAsync(string maHD, int maUserNTD);
+
+        Task<ApiReponse<HopDongThanhToanViewModel>> LayThongTinThanhToanAsync(string maHD, int maUserNTD);
+
+        Task<ApiReponse<bool>> ThanhToanAsync(string maHD, int maUserNTD);
     }
 }

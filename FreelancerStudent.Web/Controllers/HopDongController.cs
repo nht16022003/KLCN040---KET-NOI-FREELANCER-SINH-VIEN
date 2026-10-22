@@ -16,6 +16,8 @@ namespace FreelancerStudent.Web.Controllers
         private readonly IJobPostWebService _jobPostService;
         private readonly IWalletWebService _walletWebService;
         private readonly ITaskCongViecWebService _taskWebService;
+        private readonly IDanhGiaWebService _danhGiaWebService;
+        private readonly ILogger<HopDongController> _logger;
 
         public HopDongController(
             IHopDongWebService hopDongService,
@@ -23,7 +25,9 @@ namespace FreelancerStudent.Web.Controllers
             IFreelancerStudentWebService freelancerService,
             IJobPostWebService jobPostService,
             IWalletWebService walletWebService,
-            ITaskCongViecWebService taskWebService)
+            ITaskCongViecWebService taskWebService,
+            IDanhGiaWebService danhGiaWebService,
+            ILogger<HopDongController> logger)
         {
             _hopDongService = hopDongService;
             _ntdService = ntdService;
@@ -31,6 +35,8 @@ namespace FreelancerStudent.Web.Controllers
             _jobPostService = jobPostService;
             _walletWebService = walletWebService;
             _taskWebService = taskWebService;
+            _danhGiaWebService = danhGiaWebService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -398,6 +404,18 @@ namespace FreelancerStudent.Web.Controllers
                 return RedirectToAction("Index");
             }
 
+            if (hopDong.trangThai is "DaThanhToan" or "DaHuyHoanTien")
+            {
+                var danhGia = await _danhGiaWebService.LayFormAsync(maHD, maUser.Value);
+                if (danhGia.success && danhGia.data != null)
+                {
+                    hopDong.trangThaiDanhGia = danhGia.data.trangThaiDanhGia;
+                    hopDong.maDanhGia = danhGia.data.danhGiaHienTai?.maDanhGia;
+                    hopDong.coTheDanhGia = danhGia.data.coTheDanhGia;
+                    hopDong.coTheChinhSuaDanhGia = danhGia.data.danhGiaHienTai?.coTheChinhSua == true;
+                }
+            }
+
             // và hợp đồng đang chờ ký quỹ
             if (hopDong.CoQuyenKyQuy &&
                 hopDong.maUserNhaTuyenDung == maUser.Value &&
@@ -534,8 +552,9 @@ namespace FreelancerStudent.Web.Controllers
                         ?? "Ký quỹ thất bại. Vui lòng thử lại.";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Lỗi khi xử lý ký quỹ hợp đồng {MaHopDong} cho tài khoản {MaUser}.", maHD, maUser.Value);
                 // Không hiển thị chi tiết lỗi hệ thống cho người dùng
                 TempData["ErrorMessage"] =
                     "Không thể xử lý yêu cầu ký quỹ. " +
@@ -543,6 +562,87 @@ namespace FreelancerStudent.Web.Controllers
             }
 
             // 8. Quay lại trang chi tiết hợp đồng
+            return RedirectToAction("ChiTiet", new { maHD });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> NghiemThu(string maHD)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+                return RedirectToAction("DangNhap", "Account");
+            if (HttpContext.Session.GetString("tenRole") != "NhaTuyenDung")
+                return Forbid();
+
+            var result = await _hopDongService.NghiemThuAsync(maHD, maUser.Value);
+            TempData[result.success ? "SuccessMessage" : "ErrorMessage"] = result.message;
+            return RedirectToAction("ChiTiet", new { maHD });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DanhGiaGiaiDoan(string maHD, int? maGiaiDoan, string trangThai)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+                return RedirectToAction("DangNhap", "Account");
+            if (HttpContext.Session.GetString("tenRole") != "NhaTuyenDung")
+                return Forbid();
+            if (string.IsNullOrWhiteSpace(maHD) || trangThai is not ("Dat" or "ChuaDat"))
+            {
+                TempData["ErrorMessage"] = "Thông tin nghiệm thu giai đoạn không hợp lệ.";
+                return RedirectToAction("ChiTiet", new { maHD });
+            }
+
+            var result = await _taskWebService.DanhGiaGiaiDoanAsync(maHD, maGiaiDoan, trangThai, maUser.Value);
+            TempData[result.success ? "SuccessMessage" : "ErrorMessage"] = result.message;
+            return RedirectToAction("ChiTiet", new { maHD });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ThanhToan(string maHD)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+                return RedirectToAction("DangNhap", "Account");
+            if (HttpContext.Session.GetString("tenRole") != "NhaTuyenDung")
+                return Forbid();
+
+            var result = await _hopDongService.LayThongTinThanhToanAsync(maHD, maUser.Value);
+            if (!result.success || result.data == null)
+            {
+                TempData["ErrorMessage"] = result.message;
+                return RedirectToAction("ChiTiet", new { maHD });
+            }
+            return View(result.data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XacNhanThanhToan(string maHD)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+                return RedirectToAction("DangNhap", "Account");
+            if (HttpContext.Session.GetString("tenRole") != "NhaTuyenDung")
+                return Forbid();
+
+            var result = await _hopDongService.ThanhToanAsync(maHD, maUser.Value);
+            if (!result.success && result.message?.Contains("Số dư không đủ để giải ngân", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                TempData["ErrorMessage"] = result.message;
+                return RedirectToAction("Index", "Wallet");
+            }
+            if (result.success)
+            {
+                TempData["MoPopupDanhGia"] = maHD;
+                TempData["SuccessMessage"] = result.message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.message;
+            }
             return RedirectToAction("ChiTiet", new { maHD });
         }
 
