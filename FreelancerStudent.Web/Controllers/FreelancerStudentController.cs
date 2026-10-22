@@ -13,13 +13,15 @@ namespace FreelancerStudent.Web.Controllers
         private readonly IJobPostWebService _jobPostWebService;
 
         private readonly IBaiDangTimViecWebService _baiDangWebService;
+        private readonly IDanhGiaWebService _danhGiaWebService;
 
         public FreelancerStudentController(IFreelancerStudentWebService freelancerStudentWebService, IJobPostWebService jobPostWebService,
-        IBaiDangTimViecWebService baiDangTimViecWebService)
+        IBaiDangTimViecWebService baiDangTimViecWebService, IDanhGiaWebService danhGiaWebService)
         {
             _freelancerStudentWebService = freelancerStudentWebService;
             _jobPostWebService = jobPostWebService;
             _baiDangWebService = baiDangTimViecWebService;
+            _danhGiaWebService = danhGiaWebService;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -64,6 +66,12 @@ namespace FreelancerStudent.Web.Controllers
 
             var result = await _freelancerStudentWebService
                 .layProfileFreelancerStudentAsync(freelancer.maFreelancerStudents);
+
+            if (result.data != null)
+            {
+                var stats = await _danhGiaWebService.LayFreelancerAsync(freelancer.maFreelancerStudents, 1, 10);
+                result.data.ThongKeDanhGia = stats.data;
+            }
 
 
             return View(result.data);

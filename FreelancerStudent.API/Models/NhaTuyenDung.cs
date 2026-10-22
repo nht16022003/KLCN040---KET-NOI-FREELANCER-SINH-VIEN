@@ -36,6 +36,8 @@ namespace FreelancerStudent.API.Models
 
         public double? sosaodanhgia { get; set; }
 
+        public int soLuotDanhGia { get; set; }
+
         [ForeignKey("maUser")]
         public Users? User { get; set; }
 

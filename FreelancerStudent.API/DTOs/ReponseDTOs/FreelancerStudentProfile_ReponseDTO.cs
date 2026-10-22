@@ -1,3 +1,5 @@
+using FreelancerStudent.API.DTOs.ReponseDTOs;
+
 namespace FreelancerStudent.API.DTOs.ReponsesDTO
 {
     public class FreelancerStudentProfile_ReponseDTO
@@ -36,6 +38,12 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string? Gioithieu { get; set; }
         public bool TrangthaiNhanViec { get; set; }
         public decimal? ChiPhiTu { get; set; }
+        public decimal DiemDanhGiaTrungBinh { get; set; }
+        public int SoLuotDanhGia { get; set; }
+        public double TyLeHaiLong { get; set; }
+        public int SoDuAnHoanThanh { get; set; }
+        public int SoKhachHang { get; set; }
+        public List<DanhGia_ReponseDTO> DanhGiaGanDay { get; set; } = new();
     }
 
     public class ProfileMajorResponse

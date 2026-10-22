@@ -5,6 +5,8 @@ using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
+using FreelancerStudent.API.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 
 namespace FreelancerStudent.API.Services
@@ -14,11 +16,13 @@ namespace FreelancerStudent.API.Services
         private readonly IFreelancerStudentRepository _freelancerStudentRepository; //Sử dụng để gọi các dữ liệu đucợ laays từ database để service xử lý
 
         private readonly IPortfolioService _portfolioService;
+        private readonly ApplicationDBContext _context;
 
-        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository, IPortfolioService portfolioService)
+        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository, IPortfolioService portfolioService, ApplicationDBContext context)
         {
             _freelancerStudentRepository = freelancerStudentRepository;
             _portfolioService = portfolioService;
+            _context = context;
         }
 
 
@@ -81,7 +85,9 @@ namespace FreelancerStudent.API.Services
                 gioithieu = free.gioithieu,
                 avatar = free.User?.avatarUrl,
                 trangthaiNhanViec = free.trangthaiNhanViec,
-                chiPhiTu = free.chiPhiTu
+                chiPhiTu = free.chiPhiTu,
+                diemDanhGiaTrungBinh = free.diemDanhGiaTrungBinh,
+                soLuotDanhGia = free.soLuotDanhGia
             }).ToList();
 
             return dsResult;
@@ -159,6 +165,20 @@ namespace FreelancerStudent.API.Services
 
             var portfolio = await _portfolioService.layPortfolioAsync(maFreelancerStudents);
             var tatCaKyNang = await _freelancerStudentRepository.layTatCaKyNangAsync();
+            var reviewsQuery = _context.DanhGia_NhanXets.AsNoTracking()
+                .Where(d => d.maNguoiDuocDanhGia == freelancer.maUser);
+            var tongDanhGia = await reviewsQuery.CountAsync();
+            var danhGiaTot = await reviewsQuery.CountAsync(d => d.soSao >= 4);
+            var soDuAnHoanThanh = await _context.HopDongs.AsNoTracking()
+                .CountAsync(h => h.maFreelancerStudent == maFreelancerStudents && h.trangThai == "DaThanhToan");
+            var soKhachHang = await _context.HopDongs.AsNoTracking()
+                .Where(h => h.maFreelancerStudent == maFreelancerStudents && h.trangThai == "DaThanhToan")
+                .Select(h => h.JobPost!.maNhaTuyenDung).Distinct().CountAsync();
+            var danhGiaGanDay = await _context.DanhGia_NhanXets.AsNoTracking()
+                .Where(d => d.maNguoiDuocDanhGia == freelancer.maUser)
+                .Include(d => d.NguoiDanhGia).ThenInclude(u => u!.NhaTuyenDung)
+                .Include(d => d.HopDong).ThenInclude(h => h!.JobPost)
+                .OrderByDescending(d => d.ngayDanhGia).Take(5).ToListAsync();
 
             return new FreelancerStudentProfile_ReponseDTO
             {
@@ -184,7 +204,28 @@ namespace FreelancerStudent.API.Services
                     NienKhoa = freelancer.nienKhoa,
                     Gioithieu = freelancer.gioithieu,
                     TrangthaiNhanViec = freelancer.trangthaiNhanViec,
-                    ChiPhiTu = freelancer.chiPhiTu
+                    ChiPhiTu = freelancer.chiPhiTu,
+                    DiemDanhGiaTrungBinh = freelancer.diemDanhGiaTrungBinh,
+                    SoLuotDanhGia = freelancer.soLuotDanhGia,
+                    TyLeHaiLong = tongDanhGia == 0 ? 0 : Math.Round(danhGiaTot * 100d / tongDanhGia, 1),
+                    SoDuAnHoanThanh = soDuAnHoanThanh,
+                    SoKhachHang = soKhachHang,
+                    DanhGiaGanDay = danhGiaGanDay.Select(d => new DanhGia_ReponseDTO
+                    {
+                        maDanhGia = d.maDanhGia,
+                        maHD = d.maHD,
+                        tenNguoiDanhGia = d.NguoiDanhGia?.NhaTuyenDung?.tencongty ?? d.NguoiDanhGia?.hotenUser ?? "Nhà tuyển dụng",
+                        avatar = d.NguoiDanhGia?.avatarUrl,
+                        tenCongViec = d.HopDong?.JobPost?.tieude ?? string.Empty,
+                        soSaoTongThe = d.soSao,
+                        soSaoChatLuong = d.soSaoChatLuong,
+                        soSaoDungHan = d.soSaoDungHan,
+                        soSaoGiaoTiep = d.soSaoGiaoTiep,
+                        nhanXet = d.nhanXet,
+                        ngayDanhGia = d.ngayDanhGia,
+                        ngayCapNhat = d.ngayCapNhat,
+                        daChinhSua = d.soLanChinhSua > 0
+                    }).ToList()
                 },
                 ChuyenNganh = freelancer.ChuyenNganh == null ? null : new ProfileMajorResponse
                 {

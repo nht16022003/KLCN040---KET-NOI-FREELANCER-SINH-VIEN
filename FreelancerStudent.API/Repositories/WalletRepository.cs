@@ -40,7 +40,8 @@ namespace FreelancerStudent.API.Repositories
 
             var viMoi = new Wallet
             {
-
+                maUser = maUser,
+                soDuKhaDung = 0,
                 soDuDongBang = 0
             };
 

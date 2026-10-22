@@ -134,5 +134,37 @@ namespace FreelancerStudent.Web.Services
                 return result;
             }
         }
+
+        public async Task<ApiReponse<bool>> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThai, int maUser)
+        {
+            try
+            {
+                var url = $"api/TaskCongViec/hop-dong/{Uri.EscapeDataString(maHD)}/danh-gia-giai-doan?maUser={maUser}";
+                using var response = await _httpClient.PostAsJsonAsync(url, new
+                {
+                    maHD,
+                    maGiaiDoan,
+                    trangThai
+                });
+
+                var apiResult = await response.Content.ReadFromJsonAsync<ApiReponse<bool>>();
+                return apiResult ?? new ApiReponse<bool>
+                {
+                    success = response.IsSuccessStatusCode,
+                    data = response.IsSuccessStatusCode,
+                    message = response.IsSuccessStatusCode
+                        ? "Cập nhật nghiệm thu giai đoạn thành công."
+                        : $"Lỗi từ máy chủ ({(int)response.StatusCode})."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Không thể kết nối đến máy chủ: " + ex.Message
+                };
+            }
+        }
     }
 }

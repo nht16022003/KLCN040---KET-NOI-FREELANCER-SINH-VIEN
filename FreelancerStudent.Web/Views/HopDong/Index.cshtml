@@ -9,8 +9,10 @@
         { "ChoKyKet", "Chờ ký kết" },
         { "ChoKyQuy", "Chờ ký quỹ" },
         { "DangThucHien", "Đang thực hiện" },
-        { "DaHoanThanh", "Đã hoàn thành" },
+        { "DaHoanThanh", "Đã hoàn thành – chờ thanh toán" },
+        { "DaThanhToan", "Đã thanh toán" },
         { "DaHuy", "Đã hủy" },
+        { "DaHuyHoanTien", "Đã hủy – đã hoàn tiền" },
         { "DangTranhChap", "Đang tranh chấp" }
     };
 }
@@ -173,11 +175,12 @@
                                                 "ChoKyQuy" => "bg-primary",
                                                 "DangThucHien" => "bg-success",
                                                 "DaHoanThanh" => "bg-dark",
+                                                "DaThanhToan" => "bg-success",
                                                 "DaHuy" => "bg-danger",
+                                                "DaHuyHoanTien" => "bg-danger",
                                                 _ => "bg-secondary"
                                             };
                                         }
-
                                         <div class="d-flex align-items-center flex-wrap gap-2">
                                             <span class="badge @badgeClass rounded-0">
                                                 @tenTrangThai
@@ -196,6 +199,10 @@
                                     </td>
 
                                     <td class="text-end">
+                                        @if (!Model.LaFreelancer && hd.trangThai == "DaHoanThanh")
+                                        {
+                                            <a asp-controller="HopDong" asp-action="ThanhToan" asp-route-maHD="@hd.maHD" class="btn btn-sm btn-primary rounded-0 me-1">Thanh toán</a>
+                                        }
                                         <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@hd.maHD"
                                            class="btn btn-sm btn-outline-success rounded-0">
                                             <i class="bi bi-file-earmark-text me-1"></i> Chi tiết

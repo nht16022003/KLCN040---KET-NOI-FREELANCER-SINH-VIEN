@@ -51,6 +51,8 @@ builder.Services.AddScoped<IWalletWebService, WalletWebService>();
 builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
 builder.Services.AddScoped<IHopDongWebService, HopDongWebService>();
 builder.Services.AddScoped<ITaskCongViecWebService, TaskCongViecWebService>();
+builder.Services.AddScoped<IDanhGiaWebService, DanhGiaWebService>();
+builder.Services.AddScoped<IThongBaoWebService, ThongBaoWebService>();
 
 var app = builder.Build();
 
