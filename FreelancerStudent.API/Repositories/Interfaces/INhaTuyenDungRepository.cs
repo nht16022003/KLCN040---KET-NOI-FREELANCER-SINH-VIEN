@@ -14,5 +14,6 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //Tuan Anh
         Task<NhaTuyenDung?> layNhaTuyenDungTheoMaUserAsync(int maUser);
 
+        Task<NhaTuyenDung?> layNhaTuyenDungTheoMaAsync(int maNhaTuyenDung);
     }
 }

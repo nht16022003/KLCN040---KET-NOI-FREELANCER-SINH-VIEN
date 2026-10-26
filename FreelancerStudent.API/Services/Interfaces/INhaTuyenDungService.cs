@@ -6,5 +6,9 @@ namespace FreelancerStudent.API.Services.Interfaces
     {
         //Lấy danh sách nhà tuyển dụng
         Task<List<NhaTuyenDung_ResponseDTO>> layDanhSachNhaTuyenDungAsync();
+
+        //Lấy thông tin hồ sơ nhà tuyển dụng
+        Task<NhaTuyenDungProfile_ReponseDTO?> layProfileNhaTuyenDung(int maNhaTuyenDung);
+        Task<NhaTuyenDungProfile_ReponseDTO?> layProfileNhaTuyenDungTheoMaUser(int maUser);
     }
 }

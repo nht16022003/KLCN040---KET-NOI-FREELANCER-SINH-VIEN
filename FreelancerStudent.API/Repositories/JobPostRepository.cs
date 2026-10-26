@@ -21,6 +21,8 @@ namespace FreelancerStudent.API.Repositories
             var dsJobPost = await _context.JobPosts
                 .Include(j => j.NhaTuyenDung)
                     .ThenInclude(ntd => ntd!.User)
+                .OrderByDescending(j => j.thoigiandangtuyen)
+                .ThenByDescending(j => j.maJob)
                 .ToListAsync();
             return dsJobPost;
         }

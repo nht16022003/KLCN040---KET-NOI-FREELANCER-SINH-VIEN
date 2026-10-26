@@ -42,5 +42,11 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public double? doPhuHop { get; set; }
         public string? lyDoGoiY { get; set; }
         public List<string>? kyNangTrungKhop { get; set; }
+        public bool DaTuyenDu { get; set; }
+
+        public double? soSaoDanhGiaNhaTuyenDung { get; set; }
+        public int soLuotDanhGiaNhaTuyenDung { get; set; }
+        public string? diaChiNhaTuyenDung { get; set; }
+        public string? linhVucNhaTuyenDung { get; set; }
     }
 }

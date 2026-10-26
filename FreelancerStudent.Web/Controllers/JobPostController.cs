@@ -13,28 +13,138 @@ namespace FreelancerStudent.Web.Controllers
         private readonly IJobPostWebService _jobPostService; //Khai báo để sử dụng serviceswweb
 
         private readonly INhaTuyenDungWebService _nhaTuyenDungService;
+        private readonly IMinhChungWebService _minhChungWebService;
 
-        public JobPostController(IJobPostWebService jobPostWebService, INhaTuyenDungWebService nhaTuyenDungWebService)
+        public JobPostController(
+            IJobPostWebService jobPostWebService,
+            INhaTuyenDungWebService nhaTuyenDungWebService,
+            IMinhChungWebService minhChungWebService)
         {
             _jobPostService = jobPostWebService;
             _nhaTuyenDungService = nhaTuyenDungWebService;
+            _minhChungWebService = minhChungWebService;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index(
+            string? tuKhoa,
+            int? maNhaTuyenDung,
+            string? mucLuong,
+            string? kyNang,
+            string? trangThai,
+            double? soSaoMin,
+            string? sapXep)
         {
             var ketQuaJob = await _jobPostService.layDanhSachJobPost();
+            var rawList = ketQuaJob.data ?? new List<JobPostViewModel>();
 
-            var dsJob = ketQuaJob.data ?? new List<JobPostViewModel>();
+            // Lấy danh sách dropdown NTD và Kỹ năng trước khi lọc
+            var allNtd = rawList
+                .Where(j => j.maNhaTuyenDung > 0 && !string.IsNullOrWhiteSpace(j.tenCongTy))
+                .GroupBy(j => j.maNhaTuyenDung)
+                .Select(g => new KeyValuePair<int, string>(g.Key, g.First().tenCongTy!))
+                .OrderBy(x => x.Value)
+                .ToList();
 
+            var allSkills = rawList
+                .Where(j => !string.IsNullOrWhiteSpace(j.kynangyeucau))
+                .SelectMany(j => j.kynangyeucau!.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(s => s.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s)
+                .ToList();
+
+            // Áp dụng bộ lọc
+            var query = rawList.AsEnumerable();
+
+            // 1. Tìm theo từ khóa (tiêu đề, mô tả, tên công ty, kỹ năng)
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var kw = tuKhoa.Trim();
+                query = query.Where(j =>
+                    (j.tieude != null && j.tieude.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (j.mota != null && j.mota.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (j.tenCongTy != null && j.tenCongTy.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (j.kynangyeucau != null && j.kynangyeucau.Contains(kw, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // 2. Lọc theo Nhà tuyển dụng
+            if (maNhaTuyenDung.HasValue && maNhaTuyenDung.Value > 0)
+            {
+                query = query.Where(j => j.maNhaTuyenDung == maNhaTuyenDung.Value);
+            }
+
+            // 3. Lọc theo mức thù lao
+            if (!string.IsNullOrWhiteSpace(mucLuong))
+            {
+                switch (mucLuong)
+                {
+                    case "duoi-1tr":
+                        query = query.Where(j => j.thulao.HasValue && j.thulao.Value > 0 && j.thulao.Value < 1000000);
+                        break;
+                    case "1tr-3tr":
+                        query = query.Where(j => j.thulao.HasValue && j.thulao.Value >= 1000000 && j.thulao.Value <= 3000000);
+                        break;
+                    case "3tr-10tr":
+                        query = query.Where(j => j.thulao.HasValue && j.thulao.Value > 3000000 && j.thulao.Value <= 10000000);
+                        break;
+                    case "tren-10tr":
+                        query = query.Where(j => j.thulao.HasValue && j.thulao.Value > 10000000);
+                        break;
+                    case "thoa-thuan":
+                        query = query.Where(j => !j.thulao.HasValue || j.thulao.Value <= 0);
+                        break;
+                }
+            }
+
+            // 4. Lọc theo kỹ năng
+            if (!string.IsNullOrWhiteSpace(kyNang))
+            {
+                var kn = kyNang.Trim();
+                query = query.Where(j => j.kynangyeucau != null && j.kynangyeucau.Contains(kn, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // 5. Lọc theo trạng thái công việc
+            if (!string.IsNullOrWhiteSpace(trangThai) && trangThai != "TatCa")
+            {
+                query = query.Where(j => string.Equals(j.status, trangThai, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // 6. Lọc theo số sao đánh giá của Nhà tuyển dụng
+            if (soSaoMin.HasValue && soSaoMin.Value > 0)
+            {
+                query = query.Where(j => j.soSaoDanhGiaNhaTuyenDung.HasValue && j.soSaoDanhGiaNhaTuyenDung.Value >= soSaoMin.Value);
+            }
+
+            // 7. Sắp xếp (Mặc định bắt buộc: Mới nhất trước)
+            string sortOrder = string.IsNullOrWhiteSpace(sapXep) ? "moi-nhat" : sapXep;
+            switch (sortOrder)
+            {
+                case "luong-cao":
+                    query = query.OrderByDescending(j => j.thulao ?? 0).ThenByDescending(j => j.thoigiandangtuyen);
+                    break;
+                case "luong-thap":
+                    query = query.OrderBy(j => j.thulao ?? 0).ThenByDescending(j => j.thoigiandangtuyen);
+                    break;
+                case "sao-cao":
+                    query = query.OrderByDescending(j => j.soSaoDanhGiaNhaTuyenDung ?? 0).ThenByDescending(j => j.thoigiandangtuyen);
+                    break;
+                case "moi-nhat":
+                default:
+                    query = query.OrderByDescending(j => j.thoigiandangtuyen).ThenByDescending(j => j.maJob);
+                    break;
+            }
+
+            var dsJob = query.ToList();
+
+            // Lấy trạng thái ứng tuyển nếu là Freelancer
             var trangThaiTheoJob = new Dictionary<string, string>();
-
             var maUser = HttpContext.Session.GetInt32("maUser");
             var role = HttpContext.Session.GetString("tenRole");
 
             if (maUser.HasValue && role == "FreelancerStudent")
             {
-                var ketQuaDon = await _jobPostService
-                    .layDSUngTuyenTheoMaUser(maUser.Value);
+                var ketQuaDon = await _jobPostService.layDSUngTuyenTheoMaUser(maUser.Value);
 
                 if (ketQuaDon.success && ketQuaDon.data != null)
                 {
@@ -50,7 +160,21 @@ namespace FreelancerStudent.Web.Controllers
 
             ViewBag.TrangThaiUngTuyen = trangThaiTheoJob;
 
-            return View(dsJob);
+            var model = new JobPostFilterViewModel
+            {
+                DanhSachJobPost = dsJob,
+                TuKhoa = tuKhoa,
+                MaNhaTuyenDung = maNhaTuyenDung,
+                MucLuong = mucLuong,
+                KyNang = kyNang,
+                TrangThai = trangThai ?? "TatCa",
+                SoSaoMin = soSaoMin,
+                SapXep = sortOrder,
+                DanhSachNhaTuyenDung = allNtd,
+                DanhSachKyNang = allSkills
+            };
+
+            return View(model);
         }
 
         //XS
@@ -218,6 +342,15 @@ namespace FreelancerStudent.Web.Controllers
             {
                 return RedirectToAction("DangNhap", "Account");
             }
+
+            // Kiểm tra trạng thái xác thực minh chứng sinh viên
+            var checkXacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            if (checkXacThuc?.data != null && !checkXacThuc.data.DaXacMinh)
+            {
+                TempData["ErrorMessage"] = "Bạn cần hoàn tất xác thực minh chứng sinh viên (trạng thái 'Đã xác minh') trước khi nộp đơn ứng tuyển!";
+                return RedirectToAction("MinhChung", "Account");
+            }
+
             var ketQuaDon = await _jobPostService.layDSUngTuyenTheoMaUser(maUser.Value);
 
             if (ketQuaDon.success && ketQuaDon.data != null)
@@ -244,6 +377,14 @@ namespace FreelancerStudent.Web.Controllers
             if (job == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy công việc này!";
+                return RedirectToAction("Index");
+            }
+            
+            if (job.DaTuyenDu)
+            {
+                TempData["ErrorMessage"] =
+                    "Công việc đã nghiệm thu đủ số lượng Freelancer, không thể ứng tuyển thêm.";
+
                 return RedirectToAction("Index");
             }
 
@@ -283,6 +424,14 @@ namespace FreelancerStudent.Web.Controllers
             if (maUser == null)
             {
                 return RedirectToAction("DangNhap", "Account");
+            }
+
+            // Kiểm tra trạng thái xác thực minh chứng sinh viên
+            var checkXacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            if (checkXacThuc?.data != null && !checkXacThuc.data.DaXacMinh)
+            {
+                TempData["ErrorMessage"] = "Bạn cần hoàn tất xác thực minh chứng sinh viên (trạng thái 'Đã xác minh') trước khi nộp đơn ứng tuyển!";
+                return RedirectToAction("MinhChung", "Account");
             }
 
             model.maUser = maUser.Value;
@@ -390,6 +539,12 @@ namespace FreelancerStudent.Web.Controllers
             return RedirectToAction("QuanLyTinTuyenDung");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GoiYKyNang(string? tieuDe, string? moTa)
+        {
+            var res = await _jobPostService.layGoiYKyNangTheoTieuDe(tieuDe, moTa);
+            return Json(res);
+        }
 
     }
 }

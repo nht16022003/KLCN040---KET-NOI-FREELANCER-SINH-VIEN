@@ -1,3 +1,5 @@
+using FreelancerStudent.API.DTOs.ReponseDTOs;
+
 namespace FreelancerStudent.API.DTOs.ReponsesDTO
 {
     public class FreelancerStudentProfile_ReponseDTO
@@ -16,6 +18,8 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
     {
         public string TenTaiKhoanUser { get; set; } = string.Empty;
         public string HotenUser { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string? Sodienthoai { get; set; }
         public string? AvatarUrl { get; set; }
         public DateTime? Ngaysinh { get; set; }
         public DateTime NgayTao { get; set; }
@@ -36,6 +40,12 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string? Gioithieu { get; set; }
         public bool TrangthaiNhanViec { get; set; }
         public decimal? ChiPhiTu { get; set; }
+        public decimal DiemDanhGiaTrungBinh { get; set; }
+        public int SoLuotDanhGia { get; set; }
+        public double TyLeHaiLong { get; set; }
+        public int SoDuAnHoanThanh { get; set; }
+        public int SoKhachHang { get; set; }
+        public List<DanhGia_ReponseDTO> DanhGiaGanDay { get; set; } = new();
     }
 
     public class ProfileMajorResponse
@@ -72,5 +82,6 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
     {
         public string LoaiMinhChung { get; set; } = string.Empty;
         public string TrangThaiGuiMinhChung { get; set; } = string.Empty;
+        public string? FileMinhChung { get; set; }
     }
 }

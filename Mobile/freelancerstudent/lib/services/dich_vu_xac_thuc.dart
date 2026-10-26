@@ -1,4 +1,4 @@
-﻿import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
@@ -198,6 +198,40 @@ class AuthService {
       return await _apiClient.handleResponse(response, (_) => true);
     } catch (e) {
       return ApiResponse<bool>(isSuccess: false, message: e.toString());
+    }
+  }
+
+  /// Đổi mật khẩu (AuthController.DoiMatKhau - PUT api/Auth/DoiMatKhau)
+  Future<ApiResponse<bool>> doiMatKhau({
+    required int maUser,
+    required String matKhauHienTai,
+    required String matKhauMoi,
+    required String xacNhanMatKhauMoi,
+  }) async {
+    try {
+      final response = await _apiClient.put<Map<String, dynamic>>(
+        ApiEndpoints.doiMatKhau,
+        {
+          'maUser': maUser,
+          'matKhauHienTai': matKhauHienTai,
+          'matKhauMoi': matKhauMoi,
+          'xacNhanMatKhauMoi': xacNhanMatKhauMoi,
+        },
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+
+      return ApiResponse<bool>(
+        isSuccess: body['success'] == true || response.statusCode == 200,
+        data: true,
+        message: body['message']?.toString() ?? 'Đổi mật khẩu thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi đổi mật khẩu: ${e.toString()}',
+      );
     }
   }
 

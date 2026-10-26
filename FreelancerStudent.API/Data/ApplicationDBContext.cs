@@ -48,7 +48,21 @@ namespace FreelancerStudent.API.Data
         public DbSet<Task_CongViec> Task_CongViecs { get; set; }
 
         public DbSet<ThongBao> ThongBaos { get; set; }
+        
+        public DbSet<BanGiao_SanPham> BanGiao_SanPhams { get; set; }
 
+        public DbSet<YeuCauChinhSua> YeuCauChinhSuas { get; set; }
+ 
+        public DbSet<LichSu_XuLyTaiKhoan> LichSu_XuLyTaiKhoans { get; set; }
+
+        public DbSet<DieuChinhSoDu> DieuChinhSoDus { get; set; }
+
+        public DbSet<DanhGia_NhanXet> DanhGia_NhanXets { get; set; }
+        public DbSet<DanhGia_NhanXet_LichSu> DanhGia_NhanXet_LichSus { get; set; }
+        public DbSet<CauHinhPhiHoaHong> CauHinhPhiHoaHongs { get; set; }
+        public DbSet<TranhChap> TranhChaps { get; set; }
+        public DbSet<YeuCauRutTien> YeuCauRutTiens { get; set; }
+        public DbSet<MinhChung_FreelancerStudents> MinhChung_FreelancerStudents { get; set; }
 
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
@@ -306,6 +320,95 @@ namespace FreelancerStudent.API.Data
                      .HasForeignKey(t => t.maGiaiDoan)
                      .OnDelete(DeleteBehavior.SetNull);
              });
+
+             
+            modelBuilder.Entity<BanGiao_SanPham>(entity =>
+            {
+                entity.ToTable("BanGiao_SanPham");
+
+                entity.HasKey(x => x.maBanGiao);
+
+                entity.HasOne(x => x.HopDong)
+                    .WithMany()
+                    .HasForeignKey(x => x.maHD)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<YeuCauChinhSua>(entity =>
+            {
+                entity.ToTable("YeuCauChinhSua");
+
+                entity.HasKey(x => x.maYeuCauChinhSua);
+
+                entity.HasOne(x => x.BanGiaoSanPham)
+                    .WithMany(x => x.YeuCauChinhSuas)
+                    .HasForeignKey(x => x.maBanGiao)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<LichSu_XuLyTaiKhoan>(entity =>
+            {
+                entity.ToTable("LichSu_XuLyTaiKhoan");
+                entity.HasKey(x => x.maLichSu);
+
+                entity.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.maUser)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(x => x.Admin)
+                    .WithMany()
+                    .HasForeignKey(x => x.maAdmin)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<DieuChinhSoDu>(entity =>
+            {
+                entity.ToTable("DieuChinhSoDu");
+                entity.HasKey(x => x.maDieuChinh);
+
+                entity.HasOne(x => x.Wallet)
+                    .WithMany()
+                    .HasForeignKey(x => x.maWallet)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(x => x.Admin)
+                    .WithMany()
+                    .HasForeignKey(x => x.maAdmin)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<YeuCauRutTien>(entity =>
+            {
+                entity.ToTable("YeuCauRutTien");
+                entity.HasKey(x => x.maRutTien);
+
+                entity.HasOne(x => x.Wallet)
+                    .WithMany()
+                    .HasForeignKey(x => x.maWallet)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Admin)
+                    .WithMany()
+                    .HasForeignKey(x => x.maAdminXuLy)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<MinhChung_FreelancerStudents>(entity =>
+            {
+                entity.ToTable("MinhChung_FreelancerStudents");
+                entity.HasKey(x => x.maMinhChung);
+
+                entity.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.maUser)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.Admin)
+                    .WithMany()
+                    .HasForeignKey(x => x.nguoiXacMinh)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
         }
     }
 }

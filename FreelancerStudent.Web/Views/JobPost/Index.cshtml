@@ -1,110 +1,598 @@
 @using FreelancerStudent.Web.ViewModels
-@model List<FreelancerStudent.Web.ViewModels.JobPostViewModel>
+@model FreelancerStudent.Web.ViewModels.JobPostFilterViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Danh sách bài đăng tuyển dụng";
-    var trangThaiTheoJob =
-    ViewBag.TrangThaiUngTuyen as Dictionary<string, string>
-    ?? new Dictionary<string, string>();
+    ViewData["Title"] = "Cơ hội việc làm - Freelancer Students";
+    var trangThaiTheoJob = ViewBag.TrangThaiUngTuyen as Dictionary<string, string> ?? new Dictionary<string, string>();
 }
 
-<div class="container py-4">
-    <h4 class="mb-4 text-success fw-bold">Các bài đăng tuyển dụng</h4>
+<style>
+    .job-board-wrapper {
+        --accent: #3E7D56;
+        --accent-hover: #2F6445;
+        --ink: #2B2B2B;
+        --muted: #707070;
+        --border: #E3E3E3;
+        --card-bg: #FFFFFF;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+        color: var(--ink);
+        background-color: #F7F7F7;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
 
-    <div class="row g-4">
-        @if (Model != null && Model.Count > 0)
+    /* Tiêu đề trang */
+    .page-header-box {
+        background: #FFFFFF;
+        border-bottom: 1px solid var(--border);
+        padding: 28px 0;
+        margin-bottom: 28px;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-bottom: 0;
+    }
+
+    /* Khung bộ lọc */
+    .filter-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .filter-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-control-custom,
+    .form-select-custom {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.88rem;
+        color: var(--ink);
+        padding: 8px 12px;
+        background-color: #FFFFFF;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control-custom:focus,
+    .form-select-custom:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Nút bấm thuần văn bản, không dùng icon */
+    .btn-search-main {
+        background-color: var(--accent);
+        color: #FFFFFF;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        padding: 8px 20px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-search-main:hover {
+        background-color: var(--accent-hover);
+        color: #FFFFFF;
+    }
+
+    .btn-reset-filter {
+        background-color: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-reset-filter:hover {
+        background-color: #F0F0F0;
+        color: var(--ink);
+        border-color: #D0D0D0;
+    }
+
+    /* Thẻ thống kê kết quả */
+    .results-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        font-size: 0.9rem;
+    }
+
+    .results-count {
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    /* Card công việc */
+    .job-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        transition: border-color 0.2s ease;
+    }
+
+    .job-card:hover {
+        border-color: var(--accent);
+    }
+
+    .employer-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #F3F3F3;
+    }
+
+    .employer-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: #FFFFFF;
+        flex-shrink: 0;
+    }
+
+    .employer-name {
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: var(--ink);
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .employer-name:hover {
+        color: var(--accent);
+    }
+
+    .employer-rating-text {
+        font-size: 0.76rem;
+        color: #B45309;
+        font-weight: 600;
+    }
+
+    .employer-rating-none {
+        font-size: 0.76rem;
+        color: var(--muted);
+    }
+
+    .job-title-heading {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 8px;
+        line-height: 1.35;
+    }
+
+    .job-title-heading a {
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    .job-title-heading a:hover {
+        color: var(--accent);
+    }
+
+    .job-desc-snippet {
+        font-size: 0.85rem;
+        color: var(--muted);
+        line-height: 1.45;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .skill-badge-item {
+        background-color: #F4F4F4;
+        color: var(--ink);
+        border: 1px solid #E8E8E8;
+        border-radius: 4px;
+        font-size: 0.74rem;
+        padding: 2px 8px;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .job-metrics-box {
+        background-color: #FAFAFA;
+        border: 1px solid #EEEEEE;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin: 12px 0;
+        font-size: 0.82rem;
+    }
+
+    .salary-highlight {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .job-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 12px;
+        border-top: 1px solid #F5F5F5;
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: auto;
+    }
+
+    /* Nhãn trạng thái */
+    .status-tag {
+        font-size: 0.74rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .status-open {
+        background-color: #E8F5E9;
+        color: #1E6E38;
+        border: 1px solid #C8E6C9;
+    }
+
+    .status-closed {
+        background-color: #F5F5F5;
+        color: #616161;
+        border: 1px solid #E0E0E0;
+    }
+
+    .status-done {
+        background-color: #EDE7F6;
+        color: #512DA8;
+        border: 1px solid #D1C4E9;
+    }
+
+    .btn-detail-link {
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        background: transparent;
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+
+    .btn-detail-link:hover {
+        background-color: var(--accent);
+        color: #FFFFFF;
+    }
+
+    .btn-applied-badge {
+        background: #F0F0F0;
+        color: #555555;
+        border: 1px solid #DDDDDD;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Empty state */
+    .empty-state-box {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 48px 24px;
+        text-align: center;
+    }
+</style>
+
+<div class="job-board-wrapper">
+
+    <!-- HEADER TIÊU ĐỀ -->
+    <div class="page-header-box">
+        <div class="container-fluid px-lg-5">
+            <h1 class="page-title">Cơ hội việc làm dành cho Sinh viên</h1>
+            <p class="page-subtitle">Khám phá các dự án Freelance thực tế từ các doanh nghiệp và nhà tuyển dụng uy tín</p>
+        </div>
+    </div>
+
+    <div class="container-fluid px-lg-5">
+
+        <!-- KHUNG BỘ LỌC TÌM KIẾM -->
+        <form method="get" action="/JobPost" class="filter-card">
+            
+            <!-- Hàng 1: Ô tìm kiếm từ khóa + Sắp xếp + Nút bấm -->
+            <div class="row g-2 align-items-end mb-3">
+                <div class="col-12 col-md-6 col-lg-5">
+                    <label class="filter-label">Từ khóa tìm kiếm</label>
+                    <input type="text" name="tuKhoa" class="form-control form-control-custom"
+                           value="@Model.TuKhoa"
+                           placeholder="Nhập tiêu đề công việc, công nghệ, tên công ty..." />
+                </div>
+
+                <div class="col-12 col-md-3 col-lg-3">
+                    <label class="filter-label">Thứ tự sắp xếp</label>
+                    <select name="sapXep" class="form-select form-select-custom">
+                        <option value="moi-nhat" selected="@(Model.SapXep == "moi-nhat" ? "selected" : null)">Mới nhất trước (Mặc định)</option>
+                        <option value="luong-cao" selected="@(Model.SapXep == "luong-cao" ? "selected" : null)">Thù lao cao nhất</option>
+                        <option value="luong-thap" selected="@(Model.SapXep == "luong-thap" ? "selected" : null)">Thù lao thấp nhất</option>
+                        <option value="sao-cao" selected="@(Model.SapXep == "sao-cao" ? "selected" : null)">Đánh giá NTD cao nhất</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3 col-lg-4 d-flex gap-2">
+                    <button type="submit" class="btn-search-main flex-grow-1">
+                        Tìm kiếm
+                    </button>
+                    <a href="/JobPost" class="btn-reset-filter">
+                        Xóa bộ lọc
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hàng 2: Các tiêu chí lọc chi tiết -->
+            <div class="row g-2">
+                
+                <!-- Lọc theo Nhà tuyển dụng -->
+                <div class="col-6 col-md-4 col-lg-3">
+                    <label class="filter-label">Nhà tuyển dụng</label>
+                    <select name="maNhaTuyenDung" class="form-select form-select-custom">
+                        <option value="">Tất cả nhà tuyển dụng</option>
+                        @foreach (var ntd in Model.DanhSachNhaTuyenDung)
+                        {
+                            <option value="@ntd.Key" selected="@(Model.MaNhaTuyenDung == ntd.Key ? "selected" : null)">
+                                @ntd.Value
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Lọc theo mức thù lao -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="filter-label">Mức thù lao</label>
+                    <select name="mucLuong" class="form-select form-select-custom">
+                        <option value="">Tất cả mức lương</option>
+                        <option value="duoi-1tr" selected="@(Model.MucLuong == "duoi-1tr" ? "selected" : null)">Dưới 1 triệu</option>
+                        <option value="1tr-3tr" selected="@(Model.MucLuong == "1tr-3tr" ? "selected" : null)">1 triệu - 3 triệu</option>
+                        <option value="3tr-10tr" selected="@(Model.MucLuong == "3tr-10tr" ? "selected" : null)">3 triệu - 10 triệu</option>
+                        <option value="tren-10tr" selected="@(Model.MucLuong == "tren-10tr" ? "selected" : null)">Trên 10 triệu</option>
+                        <option value="thoa-thuan" selected="@(Model.MucLuong == "thoa-thuan" ? "selected" : null)">Thỏa thuận</option>
+                    </select>
+                </div>
+
+                <!-- Lọc theo kỹ năng -->
+                <div class="col-6 col-md-4 col-lg-3">
+                    <label class="filter-label">Kỹ năng yêu cầu</label>
+                    <select name="kyNang" class="form-select form-select-custom">
+                        <option value="">Tất cả kỹ năng</option>
+                        @foreach (var kn in Model.DanhSachKyNang)
+                        {
+                            <option value="@kn" selected="@(string.Equals(Model.KyNang, kn, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                                @kn
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Lọc theo trạng thái -->
+                <div class="col-6 col-md-6 col-lg-2">
+                    <label class="filter-label">Trạng thái công việc</label>
+                    <select name="trangThai" class="form-select form-select-custom">
+                        <option value="DangTuyen" selected="@(Model.TrangThai == "DangTuyen" ? "selected" : null)">Đang mở tuyển</option>
+                        <option value="DangThucHien" selected="@(Model.TrangThai == "DangThucHien" ? "selected" : null)">Đang thực hiện</option>
+                        <option value="TatCa" selected="@(Model.TrangThai == "TatCa" ? "selected" : null)">Tất cả trạng thái</option>
+                    </select>
+                </div>
+
+                <!-- Lọc theo sao đánh giá NTD -->
+                <div class="col-12 col-md-6 col-lg-2">
+                    <label class="filter-label">Đánh giá NTD</label>
+                    <select name="soSaoMin" class="form-select form-select-custom">
+                        <option value="">Tất cả đánh giá</option>
+                        <option value="4" selected="@(Model.SoSaoMin == 4 ? "selected" : null)">Từ 4.0 điểm trở lên</option>
+                        <option value="4.5" selected="@(Model.SoSaoMin == 4.5 ? "selected" : null)">Từ 4.5 điểm trở lên</option>
+                        <option value="5" selected="@(Model.SoSaoMin == 5 ? "selected" : null)">5.0 điểm tuyệt đối</option>
+                    </select>
+                </div>
+
+            </div>
+
+        </form>
+
+        <!-- THANH BÁO SỐ LƯỢNG KẾT QUẢ -->
+        <div class="results-bar">
+            <span class="results-count">
+                Tìm thấy @Model.TongSoCongViec công việc phù hợp
+            </span>
+            <span class="text-muted small">
+                Thứ tự: @(Model.SapXep == "luong-cao" ? "Thù lao cao nhất" : Model.SapXep == "luong-thap" ? "Thù lao thấp nhất" : Model.SapXep == "sao-cao" ? "Đánh giá NTD cao nhất" : "Mới nhất trước")
+            </span>
+        </div>
+
+        <!-- DANH SÁCH CARD CÔNG VIỆC -->
+        @if (Model.DanhSachJobPost != null && Model.DanhSachJobPost.Any())
         {
-            foreach (var jobPostViewModel in Model)
-            {
-                <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border rounded-3 bg-white">
-                        <div class="card-body">
-                            @{
-                                var tenNTD = !string.IsNullOrEmpty(jobPostViewModel.tenCongTy) ? jobPostViewModel.tenCongTy : "Nhà tuyển dụng";
-                                var avatarNTD = !string.IsNullOrEmpty(jobPostViewModel.avatarNhaTuyenDung)
-                                    ? jobPostViewModel.avatarNhaTuyenDung
-                                    : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenNTD)}&background=E8F5E9&color=1B5E36";
-                            }
-                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                                <img src="@avatarNTD" alt="@tenNTD" class="rounded-circle border" style="width: 36px; height: 36px; object-fit: cover; flex-shrink: 0;" />
-                                <div class="overflow-hidden">
-                                    <span class="text-muted small fw-semibold text-truncate d-block">@tenNTD</span>
+            <div class="row g-3">
+                @foreach (var job in Model.DanhSachJobPost)
+                {
+                    var tenNTD = !string.IsNullOrWhiteSpace(job.tenCongTy) ? job.tenCongTy : "Nhà tuyển dụng";
+                    var avatarUrl = !string.IsNullOrEmpty(job.avatarNhaTuyenDung)
+                        ? (job.avatarNhaTuyenDung.StartsWith("http", StringComparison.OrdinalIgnoreCase) || job.avatarNhaTuyenDung.StartsWith("/")
+                            ? job.avatarNhaTuyenDung
+                            : "/" + job.avatarNhaTuyenDung)
+                        : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenNTD)}&background=E8F5E9&color=1B5E36";
+
+                    var isDangTuyen = string.Equals(job.status, "DangTuyen", StringComparison.OrdinalIgnoreCase) || string.Equals(job.status, "Opening", StringComparison.OrdinalIgnoreCase);
+
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="job-card">
+                            
+                            <div>
+                                <!-- Header card: Thông tin Nhà tuyển dụng + Đánh giá sao -->
+                                <div class="employer-meta-row">
+                                    <img src="@avatarUrl" alt="@tenNTD" class="employer-avatar"
+                                         onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(tenNTD)&background=E8F5E9&color=1B5E36';" />
+                                    
+                                    <div class="overflow-hidden flex-grow-1">
+                                        <a href="/Employer/Profile/@job.maNhaTuyenDung" class="employer-name text-truncate" title="@tenNTD">
+                                            @tenNTD
+                                        </a>
+
+                                        @if (job.soSaoDanhGiaNhaTuyenDung.HasValue && job.soSaoDanhGiaNhaTuyenDung > 0)
+                                        {
+                                            <span class="employer-rating-text">
+                                                ★ @job.soSaoDanhGiaNhaTuyenDung.Value.ToString("0.0")/5.0 @(job.soLuotDanhGiaNhaTuyenDung > 0 ? $"({job.soLuotDanhGiaNhaTuyenDung} đánh giá)" : "")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="employer-rating-none">Chưa có đánh giá</span>
+                                        }
+                                    </div>
+
+                                    <div>
+                                        <span class="status-tag @(isDangTuyen ? "status-open" : "status-closed")">
+                                            @(isDangTuyen ? "Đang tuyển" : (!string.IsNullOrWhiteSpace(job.status) ? job.status : "Đã đóng"))
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Tiêu đề công việc -->
+                                <h2 class="job-title-heading">
+                                    <a href="/JobPost/Detail?maJob=@job.maJob">
+                                        @job.tieude
+                                    </a>
+                                </h2>
+
+                                <!-- Trích đoạn mô tả -->
+                                @if (!string.IsNullOrWhiteSpace(job.mota))
+                                {
+                                    <p class="job-desc-snippet">
+                                        @job.mota
+                                    </p>
+                                }
+
+                                <!-- Kỹ năng yêu cầu -->
+                                @if (!string.IsNullOrWhiteSpace(job.kynangyeucau))
+                                {
+                                    <div class="mb-2">
+                                        @foreach (var kn in job.kynangyeucau.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="skill-badge-item">@kn.Trim()</span>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- Thông số chi phí & thời hạn -->
+                                <div class="job-metrics-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted">Thù lao:</span>
+                                        <span class="salary-highlight">
+                                            @(job.thulao.HasValue && job.thulao > 0
+                                                ? job.thulao.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ"
+                                                : "Thỏa thuận")
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Hạn hoàn thành:</span>
+                                        <span class="fw-semibold text-dark">
+                                            @(job.thoigiandukienhoanthanh != DateTime.MinValue
+                                                ? job.thoigiandukienhoanthanh.ToString("dd/MM/yyyy")
+                                                : "Linh hoạt")
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <h5 class="card-title mb-2 fw-bold text-dark">@jobPostViewModel.tieude</h5>
 
-                            <p class="small">@jobPostViewModel.mota</p>
-                            <p class="fw-bold">
-                                Kỹ năng yêu cầu:
-                                <span class="fw-normal">@jobPostViewModel.kynangyeucau</span>
-                            </p>
-                            <p class="fw-bold text-danger">
-                                Thù lao:
-                                <span class="fw-normal text-dark">
-                                    @(jobPostViewModel.thulao.HasValue
-                                        ? jobPostViewModel.thulao.Value.ToString("N0") + " VNĐ"
-                                        : "Thỏa thuận")
+                            <!-- Footer card: Ngày đăng & Nút thao tác -->
+                            <div class="job-card-footer">
+                                <span>
+                                    Đăng @job.thoigiandangtuyen.ToString("dd/MM/yyyy")
                                 </span>
-                            </p>
-                            <p>
-                                Thời gian đăng tuyển:
-                                @jobPostViewModel.thoigiandangtuyen.ToString("dd/MM/yyyy HH:mm")
-                            </p>
-                        </div>
 
-                        <div
-                            class="card-footer bg-transparent border-0 d-flex justify-content-evenly align-items-center gap-3 mb-3">
-                            <a asp-controller="JobPost" asp-action="Detail" asp-route-maJob="@jobPostViewModel.maJob"
-                               class="btn btn-outline-success">
-                                Xem Chi Tiết
-                            </a>
+                                <div class="d-flex align-items-center gap-2">
+                                    @{
+                                        trangThaiTheoJob.TryGetValue(job.maJob, out var trangThaiDon);
+                                    }
 
-                            @{
-                                trangThaiTheoJob.TryGetValue(
-                                    jobPostViewModel.maJob,
-                                    out var trangThaiDon);
-                            }
+                                    @if (job.DaTuyenDu)
+                                    {
+                                        <span class="btn-applied-badge">Đã tuyển đủ</span>
+                                    }
+                                    else if (trangThaiDon == "ChoDuyet")
+                                    {
+                                        <span class="btn-applied-badge">Đã nộp đơn</span>
+                                    }
+                                    else if (trangThaiDon == "ChapNhan")
+                                    {
+                                        <span class="status-tag status-open">Đã duyệt</span>
+                                    }
 
-                            @if (trangThaiDon == "ChoDuyet")
-                            {
-                                <button class="btn btn-secondary" disabled>
-                                    Đã nộp đơn
-                                </button>
-                            }
-                            else if (trangThaiDon == "ChapNhan")
-                            {
-                                <button class="btn btn-success" disabled>
-                                    Đã được duyệt
-                                </button>
-                            }
-                            else if (trangThaiDon == "TuChoi")
-                            {
-                                <a asp-controller="JobPost"
-                                asp-action="UngTuyen"
-                                asp-route-maJob="@jobPostViewModel.maJob"
-                                class="btn btn-warning">
-                                    Ứng tuyển lại
-                                </a>
-                            }
-                            else
-                            {
-                                <a asp-controller="JobPost"
-                                asp-action="UngTuyen"
-                                asp-route-maJob="@jobPostViewModel.maJob"
-                                class="btn btn-success">
-                                    Ứng tuyển
-                                </a>
-                            }
+                                    <a href="/JobPost/Detail?maJob=@job.maJob" class="btn-detail-link">
+                                        Xem chi tiết
+                                    </a>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         }
         else
         {
-            <div class="col-12">
-                <div class="alert alert-info">Chưa có bài đăng tuyển dụng nào.</div>
+            <div class="empty-state-box">
+                <h3 class="fw-bold mb-2" style="font-size: 1.15rem; color: var(--ink);">
+                    Không tìm thấy công việc phù hợp
+                </h3>
+                <p class="text-muted small mb-4">
+                    Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại các tiêu chí bộ lọc của bạn.
+                </p>
+                <a href="/JobPost" class="btn-search-main">
+                    Xóa bộ lọc để xem tất cả công việc
+                </a>
             </div>
         }
+
     </div>
+
 </div>

@@ -127,6 +127,7 @@ class GiaiDoanHopDongModel {
   final String maHD;
   final String tenGiaiDoan;
   final String? moTa;
+  final String? linkSanPham;
   final DateTime? hanChot;
   final String trangThai;
 
@@ -135,6 +136,7 @@ class GiaiDoanHopDongModel {
     required this.maHD,
     required this.tenGiaiDoan,
     this.moTa,
+    this.linkSanPham,
     this.hanChot,
     this.trangThai = 'ChuaHoanThanh',
   });
@@ -145,6 +147,7 @@ class GiaiDoanHopDongModel {
       maHD: (json['maHD'] ?? '').toString(),
       tenGiaiDoan: (json['tenGiaiDoan'] ?? '').toString(),
       moTa: json['moTa']?.toString(),
+      linkSanPham: json['linkSanPham']?.toString(),
       hanChot: json['hanChot'] != null ? DateTime.tryParse(json['hanChot'].toString()) : null,
       trangThai: (json['trangThai'] ?? 'ChuaHoanThanh').toString(),
     );
@@ -155,6 +158,7 @@ class GiaiDoanHopDongModel {
     'maHD': maHD,
     'tenGiaiDoan': tenGiaiDoan,
     'moTa': moTa,
+    'linkSanPham': linkSanPham,
     'hanChot': hanChot?.toIso8601String(),
     'trangThai': trangThai,
   };

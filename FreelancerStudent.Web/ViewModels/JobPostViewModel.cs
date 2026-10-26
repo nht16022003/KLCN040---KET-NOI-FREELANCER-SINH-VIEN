@@ -41,6 +41,12 @@ namespace FreelancerStudent.Web.ViewModels
         public string? avatarNhaTuyenDung { get; set; }
 
         public int maUser { get; set; }
+        public bool DaTuyenDu { get; set; }
+
+        public double? soSaoDanhGiaNhaTuyenDung { get; set; }
+        public int soLuotDanhGiaNhaTuyenDung { get; set; }
+        public string? diaChiNhaTuyenDung { get; set; }
+        public string? linhVucNhaTuyenDung { get; set; }
 
         [JsonIgnore]
         public string MaJob => maJob;
@@ -74,5 +80,25 @@ namespace FreelancerStudent.Web.ViewModels
 
         [JsonIgnore]
         public string? AvatarNhaTuyenDung => avatarNhaTuyenDung;
+    }
+
+    public class JobPostFilterViewModel
+    {
+        public List<JobPostViewModel> DanhSachJobPost { get; set; } = new();
+
+        // Tiêu chí tìm kiếm & lọc
+        public string? TuKhoa { get; set; }
+        public int? MaNhaTuyenDung { get; set; }
+        public string? MucLuong { get; set; } // "duoi-1tr", "1tr-3tr", "3tr-10tr", "tren-10tr", "thoa-thuan"
+        public string? KyNang { get; set; }
+        public string? TrangThai { get; set; } = "DangTuyen"; // Mặc định hiển thị tin đang tuyển
+        public double? SoSaoMin { get; set; }
+        public string? SapXep { get; set; } = "moi-nhat"; // Mặc định sắp xếp mới nhất
+
+        // Danh sách lựa chọn cho dropdown
+        public List<KeyValuePair<int, string>> DanhSachNhaTuyenDung { get; set; } = new();
+        public List<string> DanhSachKyNang { get; set; } = new();
+
+        public int TongSoCongViec => DanhSachJobPost.Count;
     }
 }

@@ -17,7 +17,7 @@
 
     var maUser = Context.Session.GetInt32("maUser");
 
-    if (maUser.HasValue && role == "NhaTuyenDung")
+    if (maUser.HasValue && (role == "NhaTuyenDung" || role == "FreelancerStudent"))
     {
         var ketQuaVi = await WalletWebService.layViTheoUser(maUser.Value);
 
@@ -808,12 +808,13 @@
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
-                                    <li><a class="dropdown-item" href="/Employer/Profile/1">Hồ sơ công ty</a></li>
+                                    <li><a class="dropdown-item" href="/Employer/Profile">Hồ sơ công ty</a></li>
                                     <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a>
                                     </li>
                                     <li><a class="dropdown-item" href="/Employer/FreelancerYeuThich">Freelancer quan tâm</a>
                                     </li>
                                     <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
+                                    <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
                                     <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
                                     </li>
                                     <li>
@@ -839,7 +840,8 @@
                             <a href="/Wallet" class="subnav-link">Ví điện tử</a>
                             <a href="/JobPost/Create" class="subnav-link text-success fw-bold">Đăng tin mới</a>
                             <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
-                            <a href="/Employer/Profile/1" class="subnav-link">Hồ sơ công ty</a>
+                            <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
+                            <a href="/Employer/Profile" class="subnav-link">Hồ sơ công ty</a>
                         </div>
                     </div>
                 </nav>
@@ -899,9 +901,15 @@
                                     <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
-                                        <div class="portal-user-info d-none d-lg-block">
+                                        <div class="portal-user-info d-none d-lg-flex">
                                             <span class="portal-user-name">@userName</span>
+
                                             <span class="portal-user-tag">@userRoleTitle</span>
+
+                                            <span class="portal-user-tag">
+                                                Số dư: @soDuKhaDung.ToString("N0",
+                                                    new System.Globalization.CultureInfo("vi-VN"))đ
+                                            </span>
                                         </div>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
@@ -928,6 +936,8 @@
                                                 <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich">NTD quan tâm (Đã
                                                     lưu)</a>
                                                 </li>
+                                                <li><a class="dropdown-item" href="/HopDong">Hợp đồng của tôi</a></li>
+                                                <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
                                                 <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
                                                 </li>
                                                 <li>
@@ -956,6 +966,7 @@
                                         <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
                                         <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
                                         <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                                        <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
                                         <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
                                     </div>
                                 </div>
@@ -988,29 +999,17 @@
                                                 <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link">
                                                     <span>Người dùng</span>
                                                 </a>
-                                                <a href="/Admin/QuanLyGiaoDich" class="portal-nav-link">
-                                                    <span>Giao dịch & Ký quỹ</span>
+                                                <a href="/Admin/DuyetRutTien" class="portal-nav-link">
+                                                    <span>Duyệt rút tiền</span>
                                                 </a>
-                                                <a href="/Admin/XuLyTranhChap" class="portal-nav-link">
-                                                    <span>Tranh chấp</span>
+                                                <a href="/Admin/QuanLyHopDong" class="portal-nav-link">
+                                                    <span>Hợp đồng</span>
                                                 </a>
                                             </nav>
                                         </div>
 
-                                        <!-- Cột Phải: Thông báo + Nút Giám sát Live + Profile Admin -->
+                                        <!-- Cột Phải: Thông báo + Profile Admin -->
                                         <div class="d-flex align-items-center gap-3">
-                                            <!-- Nút Chuông Thông Báo -->
-                                            <a href="/ThongBao" class="portal-icon-btn position-relative" title="Thông báo hệ thống">
-                                                <span
-                                                class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
-                                                style="width: 8px; height: 8px;"></span>
-                                            </a>
-
-                                            <!-- Nút Giám sát Live -->
-                                            <a href="/Admin/GiamSatHeThong" class="btn-portal-action-green">
-                                                Giám sát Live
-                                            </a>
-
                                             <!-- User Profile Dropdown -->
                                             <div class="dropdown">
                                                 <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
@@ -1023,59 +1022,43 @@
                                                     </div>
                                                 </a>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                                                    <li><a class="dropdown-item" href="/Admin">Bảng điều khiển Quản trị</a>
-                                                    </li>
-                                                    <li><a class="dropdown-item" href="/Admin/CauHinhPhi">Cấu hình phí & Doanh thu</a></li>
-                                                    <li><a class="dropdown-item" href="/Admin/QuanLyHopDong">Cấu hình Mẫu hợp đồng</a>
-                                                    </li>
-                                                    <li><a class="dropdown-item" href="/Admin/QuanLyPhiDangBai">Cấu hình Phí đăng bài</a></li>
-                                                    <li><a class="dropdown-item" href="/Admin/GiamSatHeThong">Giám sát thời gian thực</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin">Bảng điều khiển Quản trị</a></li>
+                                                    <li><a class="dropdown-item fw-bold text-success" href="/Admin/DuyetMinhChung"><i class="bi bi-person-badge me-1"></i>Duyệt thẻ sinh viên</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DanhSachNguoiDung">Quản lý người dùng</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetRutTien">Duyệt yêu cầu rút tiền</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DieuChinhSoDu">Điều chỉnh số dư ví</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/QuanLyHopDong">Quản lý hợp đồng</a></li>
                                                     <li>
                                                         <hr class="dropdown-divider">
                                                     </li>
-                                                    <li><a class="dropdown-item text-primary" href="/JobPost/QuanLyTinTuyenDung">Chuyển sang
-                                                        giao diện Tuyển dụng</a></li>
-                                                        <li><a class="dropdown-item text-success" href="/Freelancer/QuanLyTimViec">Chuyển sang giao
-                                                            diện Freelancer</a></li>
-                                                            <li>
-                                                                <hr class="dropdown-divider">
-                                                            </li>
-                                                            <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng
-                                                                xuất</a></li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                    <li><a class="dropdown-item text-primary" href="/JobPost/QuanLyTinTuyenDung">Giao diện Tuyển dụng</a></li>
+                                                    <li><a class="dropdown-item text-success" href="/FreelancerStudent/Index">Giao diện Freelancer</a></li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                                </ul>
                                             </div>
-                                        </header>
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
 
-                                        <!-- SUBNAVBAR CHO ADMIN (Đồng bộ styling với toàn bộ hệ thống) -->
-                                        <nav class="portal-subnav">
-                                            <div class="container-fluid px-lg-5">
-                                                <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
-                                                    <a href="/Admin" class="subnav-link">Tổng quan</a>
-                                                    <a href="/Admin/DanhSachNguoiDung" class="subnav-link">QL Người
-                                                        dùng</a>
-                                                        <a href="/Admin/XuLyTaiKhoan" class="subnav-link">Khóa/Mở TK</a>
-                                                        <a href="/Admin/YeuCauNapTien" class="subnav-link">Duyệt nạp
-                                                            tiền</a>
-                                                            <a href="/Admin/DieuChinhSoDu" class="subnav-link">Điều
-                                                                chỉnh số dư</a>
-                                                                <a href="/Admin/QuanLyGiaoDich" class="subnav-link">Ký quỹ & Giao
-                                                                    dịch</a>
-                                                                    <a href="/Admin/CauHinhPhi" class="subnav-link">Cấu hình phí</a>
-                                                                    <a href="/Admin/XuLyTranhChap" class="subnav-link">Xử lý tranh
-                                                                        chấp</a>
-                                                                        <a href="/Admin/XuLyHoTro" class="subnav-link">Xử lý hỗ trợ</a>
-                                                                        <a href="/Admin/GiamSatHeThong" class="subnav-link">Giám sát hệ thống</a>
-                                                                        <a href="/Admin/QuanLyHopDong" class="subnav-link">Mẫu hợp
-                                                                            đồng</a>
-                                                                            <a href="/Admin/QuanLyPhiDangBai" class="subnav-link">Phí đăng
-                                                                                bài</a>
-                                                                            </div>
-                                                                        </div>
-                                                                    </nav>
-                                                                }
+                            <!-- SUBNAVBAR CHO ADMIN (Chỉ chứa liên kết chức năng thực tế đã triển khai) -->
+                            <nav class="portal-subnav">
+                                <div class="container-fluid px-lg-5">
+                                    <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                                        <a href="/Admin" class="subnav-link">Tổng quan</a>
+                                        <a href="/Admin/DuyetMinhChung" class="subnav-link text-success fw-bold"><i class="bi bi-person-badge me-1"></i>Duyệt thẻ SV</a>
+                                        <a href="/Admin/DanhSachNguoiDung" class="subnav-link">Quản lý người dùng</a>
+                                        <a href="/Admin/XuLyTaiKhoan" class="subnav-link">Khóa và mở tài khoản</a>
+                                        <a href="/Admin/DuyetRutTien" class="subnav-link">Duyệt yêu cầu rút tiền</a>
+                                        <a href="/Admin/DieuChinhSoDu" class="subnav-link">Điều chỉnh số dư ví</a>
+                                        <a href="/Admin/QuanLyHopDong" class="subnav-link">Quản lý hợp đồng</a>
+                                    </div>
+                                </div>
+                            </nav>
+                        }
     else
                                                                 {
                                                                     <!-- ==================== HEADER DEFAULT / GUEST ==================== -->

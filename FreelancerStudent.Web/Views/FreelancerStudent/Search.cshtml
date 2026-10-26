@@ -1,112 +1,578 @@
-@model List<FreelancerStudent.Web.ViewModels.BaiDangTimViecViewModel>
+@using FreelancerStudent.Web.ViewModels
+@model FreelancerStudent.Web.ViewModels.FreelancerFilterViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Khám phá Freelancer Sinh viên";
 }
 
-<div class="container py-4">
-    <!-- TIÊU ĐỀ & TỔNG SỐ BÀI -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="text-success fw-bold mb-1">
-                Khám phá Freelancer Sinh viên
-            </h4>
-            <span class="text-muted small">Tìm kiếm các bạn sinh viên tài năng và dịch vụ phù hợp với dự án của
-                bạn</span>
+<style>
+    .freelancer-search-wrapper {
+        --accent: #3E7D56;
+        --accent-hover: #2F6445;
+        --ink: #2B2B2B;
+        --muted: #707070;
+        --border: #E3E3E3;
+        --card-bg: #FFFFFF;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+        color: var(--ink);
+        background-color: #F7F7F7;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    /* Tiêu đề trang */
+    .page-header-box {
+        background: #FFFFFF;
+        border-bottom: 1px solid var(--border);
+        padding: 28px 0;
+        margin-bottom: 28px;
+    }
+
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-bottom: 0;
+    }
+
+    /* Khung bộ lọc */
+    .filter-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .filter-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-control-custom,
+    .form-select-custom {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.88rem;
+        color: var(--ink);
+        padding: 8px 12px;
+        background-color: #FFFFFF;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control-custom:focus,
+    .form-select-custom:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Nút bấm thuần văn bản, không dùng icon */
+    .btn-search-main {
+        background-color: var(--accent);
+        color: #FFFFFF;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        padding: 8px 20px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-search-main:hover {
+        background-color: var(--accent-hover);
+        color: #FFFFFF;
+    }
+
+    .btn-reset-filter {
+        background-color: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-reset-filter:hover {
+        background-color: #F0F0F0;
+        color: var(--ink);
+        border-color: #D0D0D0;
+    }
+
+    /* Thẻ thống kê kết quả */
+    .results-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        font-size: 0.9rem;
+    }
+
+    .results-count {
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    /* Card Freelancer */
+    .freelancer-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        transition: border-color 0.2s ease;
+    }
+
+    .freelancer-card:hover {
+        border-color: var(--accent);
+    }
+
+    .card-top-profile {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+
+    .student-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: #FFFFFF;
+        flex-shrink: 0;
+    }
+
+    .student-name-link {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--ink);
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .student-name-link:hover {
+        color: var(--accent);
+    }
+
+    .student-major-sub {
+        color: var(--accent);
+        font-size: 0.84rem;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .student-school-sub {
+        color: var(--muted);
+        font-size: 0.8rem;
+    }
+
+    /* Khối chỉ số học tập & sao */
+    .metrics-grid-compact {
+        background-color: #FAFAFA;
+        border: 1px solid #EEEEEE;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+
+    .metric-compact-val {
+        font-weight: 700;
+        color: var(--ink);
+        display: block;
+    }
+
+    .metric-compact-val.rating {
+        color: #B45309;
+    }
+
+    .metric-compact-val.rating-none {
+        color: var(--muted);
+        font-weight: 500;
+    }
+
+    .student-bio-text {
+        font-size: 0.84rem;
+        color: #4A4A4A;
+        line-height: 1.45;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .skill-tag-item {
+        background-color: #F4F4F4;
+        color: var(--ink);
+        border: 1px solid #E8E8E8;
+        border-radius: 4px;
+        font-size: 0.74rem;
+        padding: 2px 8px;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .card-bottom-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 14px;
+        border-top: 1px solid #F5F5F5;
+        margin-top: auto;
+    }
+
+    .fee-refer-text {
+        font-size: 0.82rem;
+        color: var(--muted);
+    }
+
+    .fee-refer-amount {
+        font-weight: 700;
+        color: var(--ink);
+    }
+
+    .btn-view-profile {
+        background-color: transparent;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+
+    .btn-view-profile:hover {
+        background-color: var(--accent);
+        color: #FFFFFF;
+    }
+
+    /* Nhãn trạng thái */
+    .status-badge-inline {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .status-available {
+        background-color: #E8F5E9;
+        color: #1E6E38;
+        border: 1px solid #C8E6C9;
+    }
+
+    .status-busy {
+        background-color: #F5F5F5;
+        color: #616161;
+        border: 1px solid #E0E0E0;
+    }
+
+    /* Empty state */
+    .empty-state-box {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 48px 24px;
+        text-align: center;
+    }
+</style>
+
+<div class="freelancer-search-wrapper">
+
+    <!-- HEADER TIÊU ĐỀ -->
+    <div class="page-header-box">
+        <div class="container-fluid px-lg-5">
+            <h1 class="page-title">Khám phá Freelancer Sinh viên</h1>
+            <p class="page-subtitle">Tìm kiếm các bạn sinh viên tài năng, chuyên môn vững vàng và hồ sơ năng lực thực tế</p>
+        </div>
+    </div>
+
+    <div class="container-fluid px-lg-5">
+
+        <!-- KHUNG BỘ LỌC TÌM KIẾM -->
+        <form method="get" class="filter-card">
+            
+            <!-- Hàng 1: Từ khóa + Sắp xếp + Nút bấm -->
+            <div class="row g-2 align-items-end mb-3">
+                <div class="col-12 col-md-6 col-lg-5">
+                    <label class="filter-label">Tìm theo tên hoặc kỹ năng</label>
+                    <input type="text" name="tuKhoa" class="form-control form-control-custom"
+                           value="@Model.TuKhoa"
+                           placeholder="Nhập họ tên sinh viên, trường học, kỹ năng..." />
+                </div>
+
+                <div class="col-12 col-md-3 col-lg-3">
+                    <label class="filter-label">Thứ tự sắp xếp</label>
+                    <select name="sapXep" class="form-select form-select-custom">
+                        <option value="moi-nhat" selected="@(Model.SapXep == "moi-nhat" ? "selected" : null)">Hồ sơ mới nhất (Mặc định)</option>
+                        <option value="sao-cao" selected="@(Model.SapXep == "sao-cao" ? "selected" : null)">Đánh giá cao nhất</option>
+                        <option value="gpa-cao" selected="@(Model.SapXep == "gpa-cao" ? "selected" : null)">Điểm GPA cao nhất</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3 col-lg-4 d-flex gap-2">
+                    <button type="submit" class="btn-search-main flex-grow-1">
+                        Tìm kiếm
+                    </button>
+                    <a href="@Context.Request.Path" class="btn-reset-filter">
+                        Xóa bộ lọc
+                    </a>
+                </div>
             </div>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
-                Tổng cộng: @(Model?.Count ?? 0) dịch vụ
+
+            <!-- Hàng 2: Các tiêu chí lọc nâng cao -->
+            <div class="row g-2">
+                
+                <!-- Chuyên ngành -->
+                <div class="col-6 col-md-4 col-lg-3">
+                    <label class="filter-label">Chuyên ngành đào tạo</label>
+                    <select name="chuyenNganh" class="form-select form-select-custom">
+                        <option value="">Tất cả chuyên ngành</option>
+                        @foreach (var cn in Model.DanhSachChuyenNganh)
+                        {
+                            <option value="@cn" selected="@(string.Equals(Model.ChuyenNganh, cn, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                                @cn
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Kỹ năng -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="filter-label">Kỹ năng chuyên môn</label>
+                    <select name="kyNang" class="form-select form-select-custom">
+                        <option value="">Tất cả kỹ năng</option>
+                        @foreach (var kn in Model.DanhSachKyNang)
+                        {
+                            <option value="@kn" selected="@(string.Equals(Model.KyNang, kn, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                                @kn
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Đánh giá sao -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="filter-label">Mức đánh giá sao</label>
+                    <select name="soSaoMin" class="form-select form-select-custom">
+                        <option value="">Tất cả đánh giá</option>
+                        <option value="3" selected="@(Model.SoSaoMin == 3 ? "selected" : null)">Từ 3.0 sao trở lên</option>
+                        <option value="4" selected="@(Model.SoSaoMin == 4 ? "selected" : null)">Từ 4.0 sao trở lên</option>
+                        <option value="5" selected="@(Model.SoSaoMin == 5 ? "selected" : null)">5.0 sao tuyệt đối</option>
+                    </select>
+                </div>
+
+                <!-- Điểm GPA -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="filter-label">Điểm học tập (GPA)</label>
+                    <select name="gpaMin" class="form-select form-select-custom">
+                        <option value="">Tất cả mức GPA</option>
+                        <option value="3.0" selected="@(Model.GpaMin == 3.0 ? "selected" : null)">GPA từ 3.0 trở lên</option>
+                        <option value="3.2" selected="@(Model.GpaMin == 3.2 ? "selected" : null)">GPA từ 3.2 trở lên</option>
+                        <option value="3.5" selected="@(Model.GpaMin == 3.5 ? "selected" : null)">GPA từ 3.5 (Giỏi/Xuất sắc)</option>
+                    </select>
+                </div>
+
+                <!-- Năm học -->
+                <div class="col-6 col-md-4 col-lg-1">
+                    <label class="filter-label">Năm thứ</label>
+                    <select name="namThu" class="form-select form-select-custom">
+                        <option value="">Tất cả</option>
+                        <option value="1" selected="@(Model.NamThu == 1 ? "selected" : null)">Năm 1</option>
+                        <option value="2" selected="@(Model.NamThu == 2 ? "selected" : null)">Năm 2</option>
+                        <option value="3" selected="@(Model.NamThu == 3 ? "selected" : null)">Năm 3</option>
+                        <option value="4" selected="@(Model.NamThu == 4 ? "selected" : null)">Năm 4</option>
+                    </select>
+                </div>
+
+                <!-- Trạng thái nhận việc -->
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="filter-label">Trạng thái nhận việc</label>
+                    <select name="trangThaiNhanViec" class="form-select form-select-custom">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="true" selected="@(Model.TrangThaiNhanViec == true ? "selected" : null)">Sẵn sàng nhận việc</option>
+                        <option value="false" selected="@(Model.TrangThaiNhanViec == false ? "selected" : null)">Tạm ngưng nhận việc</option>
+                    </select>
+                </div>
+
+            </div>
+
+        </form>
+
+        <!-- THANH BÁO SỐ LƯỢNG KẾT QUẢ -->
+        <div class="results-bar">
+            <span class="results-count">
+                Tìm thấy @Model.TongSoFreelancer sinh viên phù hợp
+            </span>
+            <span class="text-muted small">
+                Thứ tự: @(Model.SapXep == "sao-cao" ? "Đánh giá cao nhất" : Model.SapXep == "gpa-cao" ? "Điểm GPA cao nhất" : "Hồ sơ mới nhất trước")
             </span>
         </div>
 
-        <!-- DANH SÁCH BÀI ĐĂNG TÌM VIỆC DẠNG GRID CARD -->
-        <div class="row g-3">
-            @if (Model != null && Model.Count > 0)
-            {
-                @foreach (var item in Model)
+        <!-- DANH SÁCH CARD FREELANCER -->
+        @if (Model.DanhSachFreelancer != null && Model.DanhSachFreelancer.Any())
+        {
+            <div class="row g-3">
+                @foreach (var item in Model.DanhSachFreelancer)
                 {
+                    var tenUser = !string.IsNullOrWhiteSpace(item.tenUser) ? item.tenUser : "Sinh viên";
                     var rawAvt = item.avatar;
-                    var avatarSinhVien = !string.IsNullOrEmpty(rawAvt)
+                    var avatarUrl = !string.IsNullOrEmpty(rawAvt)
                         ? (rawAvt.StartsWith("http", StringComparison.OrdinalIgnoreCase) || rawAvt.StartsWith("/") ? rawAvt : "/" + rawAvt)
-                        : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenUser ?? "Student")}&background=E8F5E9&color=2E7D32";
+                        : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenUser)}&background=E8F5E9&color=1B5E36";
 
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 border rounded-3 p-3 bg-white shadow-sm d-flex flex-column">
-                        
-                            <!-- Header Card: Avatar + Tên sinh viên + Trường học -->
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <img src="@avatarSinhVien" alt="@item.tenUser" class="rounded-circle border"
-                                     style="width: 52px; height: 52px; object-fit: cover; flex-shrink: 0;"
-                                     onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(item.tenUser ?? "Student")&background=E8F5E9&color=2E7D32';" />
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="freelancer-card">
+                            
+                            <div>
+                                <!-- Top card: Avatar, Tên, Chuyên ngành, Trường -->
+                                <div class="card-top-profile">
+                                    <img src="@avatarUrl" alt="@tenUser" class="student-avatar"
+                                         onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(tenUser)&background=E8F5E9&color=1B5E36';" />
+                                    
+                                    <div class="overflow-hidden flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start gap-1">
+                                            <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" class="student-name-link text-truncate" title="@tenUser">
+                                                @tenUser
+                                            </a>
+                                            <span class="status-badge-inline @(item.trangthaiNhanViec ? "status-available" : "status-busy")">
+                                                @(item.trangthaiNhanViec ? "Nhận việc" : "Tạm ngưng")
+                                            </span>
+                                        </div>
 
-                                <div class="overflow-hidden">
-                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="@item.tenUser">
-                                        @(item.tenUser ?? "Sinh viên")
-                                    </h6>
-                                    <span class="text-muted small d-block text-truncate" style="font-size: 0.78rem;">
-                                        @(item.tenTruong ?? "Đại học") - Năm @item.namThu
-                                    </span>
-                                    <span class="badge bg-light text-success border border-success-subtle"
-                                          style="font-size: 0.72rem;">
-                                        @(string.IsNullOrEmpty(item.tenChuyenNganh) ? "Đa ngành" : item.tenChuyenNganh)
-                                    </span>
+                                        <div class="student-major-sub text-truncate">
+                                            @(string.IsNullOrWhiteSpace(item.tenChuyenNganh) ? "Công nghệ thông tin" : item.tenChuyenNganh)
+                                        </div>
+
+                                        <div class="student-school-sub text-truncate">
+                                            @(string.IsNullOrWhiteSpace(item.tenTruong) ? "Đại học" : item.tenTruong) · Năm @item.namThu
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Khối chỉ số học tập, đánh giá và vị trí -->
+                                <div class="metrics-grid-compact">
+                                    <div>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Điểm đánh giá:</span>
+                                        @if (item.soLuotDanhGia > 0)
+                                        {
+                                            <span class="metric-compact-val rating">
+                                                ★ @item.diemDanhGiaTrungBinh.ToString("0.0")/5.0 (@item.soLuotDanhGia)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="metric-compact-val rating-none">Chưa có đánh giá</span>
+                                        }
+                                    </div>
+
+                                    <div>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Điểm học tập:</span>
+                                        <span class="metric-compact-val">
+                                            @(item.GPA > 0 ? $"GPA {item.GPA:0.00}/4.0" : "Đang cập nhật")
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Giới thiệu bản thân -->
+                                <p class="student-bio-text">
+                                    @(string.IsNullOrWhiteSpace(item.gioithieu) 
+                                        ? "Sinh viên chuyên ngành nhiệt tình, chủ động học hỏi và cam kết hoàn thành dự án đúng tiến độ bàn giao." 
+                                        : item.gioithieu)
+                                </p>
+
+                                <!-- Kỹ năng chuyên môn -->
+                                <div class="mb-3">
+                                    @{
+                                        var skills = item.danhSachKyNang != null && item.danhSachKyNang.Any()
+                                            ? item.danhSachKyNang
+                                            : (!string.IsNullOrWhiteSpace(item.kyNangCoBan) 
+                                                ? item.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList() 
+                                                : new List<string>());
+                                    }
+                                    @if (skills.Any())
+                                    {
+                                        @foreach (var sk in skills.Take(4))
+                                        {
+                                            <span class="skill-tag-item">@sk</span>
+                                        }
+                                        @if (skills.Count > 4)
+                                        {
+                                            <span class="skill-tag-item text-muted">+@(skills.Count - 4)</span>
+                                        }
+                                    }
                                 </div>
                             </div>
 
-                            <!-- Tiêu đề bài đăng tìm việc -->
-                            <h6 class="fw-bold text-dark mb-2" style="min-height: 42px; line-height: 1.4;">
-                                @item.tieude
-                            </h6>
+                            <!-- Footer card: Chi phí & Nút xem hồ sơ -->
+                            <div class="card-bottom-actions">
+                                <div>
+                                    <span class="fee-refer-text d-block" style="font-size: 0.72rem;">Thù lao từ:</span>
+                                    <span class="fee-refer-amount">
+                                        @(item.chiPhiTu.HasValue && item.chiPhiTu > 0 
+                                            ? item.chiPhiTu.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" 
+                                            : "Thỏa thuận")
+                                    </span>
+                                </div>
 
-                            <!-- Mức thù lao đề xuất -->
-                            <div class="p-2 mb-2 bg-light rounded border">
-                                <span class="text-muted small d-block" style="font-size: 0.72rem;">Thù lao mong muốn từ:</span>
-                                <span class="text-danger fw-bold fs-6">
-                                    @((item.mucGiaTu ?? 0).ToString("#,##0")) VNĐ
-                                </span>
-                            </div>
-
-                            <!-- Mô tả dịch vụ / Năng lực -->
-                            <p class="text-secondary small mb-2"
-                               style="font-size: 0.8rem; line-height: 1.4; max-height: 38px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                @(string.IsNullOrEmpty(item.mota) ? "Chưa có mô tả chi tiết." : item.mota)
-                            </p>
-
-                            <!-- Kỹ năng chuyên môn -->
-                            <div class="mb-3">
-                                @if (!string.IsNullOrEmpty(item.kynang))
-                                {
-                                    <div class="d-flex flex-wrap gap-1">
-                                        @foreach (var kn in item.kynang.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                        {
-                                            <span class="badge bg-light text-dark border" style="font-size: 0.72rem;">@kn.Trim()</span>
-                                        }
-                                    </div>
-                                }
-                            </div>
-
-                            <!-- Footer Card: Ngày đăng & Nút liên hệ / thuê -->
-                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
-                                <span class="text-muted small" style="font-size: 0.75rem;">
-                                    @item.thoigiandang.ToString("dd/MM/yyyy")
-                                </span>
-
-                                <a href="mailto:@(item.tenUser)" class="btn btn-sm btn-success px-3 fw-semibold">
-                                    Thuê ngay
+                                <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" class="btn-view-profile">
+                                    Xem hồ sơ
                                 </a>
                             </div>
 
                         </div>
                     </div>
                 }
-            }
-            else
-            {
-                <div class="col-12">
-                    <div class="alert alert-light border text-center py-5 text-muted">
-                        Hiện tại chưa có bài đăng tìm việc nào từ sinh viên.
-                    </div>
-                </div>
-            }
-        </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state-box">
+                <h3 class="fw-bold mb-2" style="font-size: 1.15rem; color: var(--ink);">
+                    Không tìm thấy Freelancer phù hợp
+                </h3>
+                <p class="text-muted small mb-4">
+                    Thử điều chỉnh lại từ khóa hoặc xóa bớt tiêu chí lọc để xem thêm nhiều hồ sơ sinh viên khác.
+                </p>
+                <a href="@Context.Request.Path" class="btn-search-main">
+                    Xóa bộ lọc để xem tất cả
+                </a>
+            </div>
+        }
+
     </div>
+
+</div>

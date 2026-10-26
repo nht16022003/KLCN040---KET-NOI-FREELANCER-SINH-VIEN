@@ -5,8 +5,50 @@ using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
 using FreelancerStudent.API.Services;
 using FreelancerStudent.API.Hubs;
+using FreelancerStudent.API.Options;
+
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Cấu hình Data Protection dùng chung key với FreelancerStudent.Web để giải mã Cookie
+var sharedKeysPath = Path.GetFullPath(
+    Path.Combine(
+        builder.Environment.ContentRootPath,
+        "..",
+        "FreelancerStudent.Web",
+        "temp-keys"));
+
+if (!Directory.Exists(sharedKeysPath))
+{
+    Directory.CreateDirectory(sharedKeysPath);
+}
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
+    .SetApplicationName("FreelancerStudentApp");
+
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "FreelancerStudent.Cookie";
+
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = 403;
+            return Task.CompletedTask;
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // 1. Đăng ký DbContext kết nối SQL Server
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
@@ -21,6 +63,7 @@ builder.Services.AddScoped<IFreelancerStudentRepository, FreelancerStudentReposi
 builder.Services.AddScoped<IFreelancerStudentService, FreelancerStudentService>();
 builder.Services.AddScoped<IJobPostRepository, JobPostRepository>();
 builder.Services.AddScoped<IJobPostService, JobPostService>();
+builder.Services.AddScoped<IKyNangGoiYService, KyNangGoiYService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IBaiDangTimViecRepository, BaiDangTimViecRepository>();
@@ -35,9 +78,20 @@ builder.Services.AddScoped<HopDongRepository>();
 builder.Services.AddScoped<IHopDongService, HopDongService>();
 builder.Services.AddScoped<ITaskCongViecRepository, TaskCongViecRepository>();
 builder.Services.AddScoped<ITaskCongViecService, TaskCongViecService>();
-
-
-
+builder.Services.AddScoped<BanGiaoSanPhamRepository>();
+builder.Services.AddScoped<YeuCauChinhSuaRepository>();
+builder.Services.AddScoped<BanGiaoSanPhamService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IThongBaoRepository, ThongBaoRepository>();
+builder.Services.AddScoped<IThongBaoService, ThongBaoService>();
+builder.Services.Configure<NghiepVuOptions>(builder.Configuration.GetSection("NghiepVu"));
+builder.Services.AddScoped<IDanhGiaRepository, DanhGiaRepository>();
+builder.Services.AddScoped<IDanhGiaService, DanhGiaService>();
+builder.Services.AddScoped<IMinhChungService, MinhChungService>();
+builder.Services.AddScoped<DanhGiaPolicy>();
+builder.Services.AddSingleton<NoiDungValidator>();
+builder.Services.AddHostedService<NghiepVuNenHostedService>();
 
 //  ĐĂNG KÝ SIGNALR VÀ CẤU HÌNH CORS CHO WEB GỌI SANG
 builder.Services.AddSignalR();
@@ -89,6 +143,7 @@ if (Directory.Exists(webWwwRoot))
 
 // app.UseHttpsRedirection(); // Bỏ qua HTTPS redirect trong local dev để tránh lỗi 307 cho kết nối SignalR
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

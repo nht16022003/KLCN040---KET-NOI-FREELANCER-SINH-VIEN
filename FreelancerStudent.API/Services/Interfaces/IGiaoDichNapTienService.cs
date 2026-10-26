@@ -19,5 +19,8 @@ namespace FreelancerStudent.API.Services.Interfaces
             string maGiaoDich
         );
         Task xuLyWebhookSePayAsync(string maGiaoDich, decimal soTien, string maGiaoDichNganHang);
+
+        // Xác nhận nạp tiền mô phỏng (dành cho Demo và kiểm thử)
+        Task<GiaoDichNapTien_ReponseDTO> xacNhanNapTienMoPhongAsync(string maGiaoDich, int maUser);
     }
 }

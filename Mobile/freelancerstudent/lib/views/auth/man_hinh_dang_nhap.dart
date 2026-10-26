@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
@@ -6,6 +6,7 @@ import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../employer/man_hinh_trang_chu_nha_tuyen_dung.dart';
 import '../home/man_hinh_trang_chu.dart';
 import 'man_hinh_dang_ky.dart';
+import 'man_hinh_quen_mat_khau.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -147,7 +148,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 12),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
                       style: TextButton.styleFrom(foregroundColor: AppColors.primary),
                       child: const Text('Quên mật khẩu?'),
                     ),

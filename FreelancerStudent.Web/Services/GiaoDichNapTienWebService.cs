@@ -129,5 +129,42 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+        // =====================================================
+        // XÁC NHẬN NẠP TIỀN MÔ PHỎNG (DEMO)
+        // =====================================================
+        public async Task<ApiReponse<GiaoDichNapTienViewModel>> xacNhanNapTienMoPhong(string maGiaoDich, int maUser)
+        {
+            try
+            {
+                var response = await _guiRequest.PostAsync(
+                    $"api/GiaoDichNapTien/XacNhanMoPhong/{maGiaoDich}?maUser={maUser}",
+                    null
+                );
+
+                var noiDungJson = await response.Content.ReadAsStringAsync();
+
+                var ketQua = JsonSerializer.Deserialize<ApiReponse<GiaoDichNapTienViewModel>>(noiDungJson, _jsonOptions);
+
+                if (ketQua == null)
+                {
+                    return new ApiReponse<GiaoDichNapTienViewModel>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu phản hồi xác nhận nạp tiền."
+                    };
+                }
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<GiaoDichNapTienViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
     }
 }

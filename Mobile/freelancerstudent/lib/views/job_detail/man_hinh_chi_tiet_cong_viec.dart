@@ -1,10 +1,16 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_bai_dang_tuyen_dung.dart';
 import '../../services/dich_vu_cong_viec.dart';
+import '../../services/dich_vu_minh_chung.dart';
+import '../../viewmodels/viewmodel_xac_thuc.dart';
+import '../applications/man_hinh_danh_sach_ung_vien.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
+import '../employer/man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
+import '../profile/man_hinh_minh_chung_the_sv.dart';
 import 'bang_ung_tuyen_cong_viec.dart';
 
 /// Chi tiết công việc: dữ liệu thật từ `GET api/JobPost/ChiTietJobPost/{maJob}`.
@@ -84,6 +90,52 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _ungTuyen() async {
+    final currentUser = context.read<AuthViewModel>().currentUser;
+    if (currentUser != null && currentUser.userId > 0) {
+      final minhChungService = MinhChungService();
+      final xacThuc = await minhChungService.kiemTraTrangThaiXacThuc(currentUser.userId);
+      if (xacThuc.isSuccess && xacThuc.data != null && xacThuc.data!['daXacMinh'] != true) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.shield_outlined, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Text(
+              xacThuc.data!['thongBao']?.toString() ??
+                  'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi ứng tuyển công việc!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Để sau'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
+                  );
+                },
+                child: const Text('Xác thực ngay', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
     final daUngTuyen = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -108,6 +160,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = context.watch<AuthViewModel>().currentUser;
+    final isOwner = currentUser != null &&
+        currentUser.userId > 0 &&
+        (currentUser.userId.toString() == _job.maNhaTuyenDung ||
+            currentUser.userId == _job.maUser);
+    final isEmployer = currentUser != null &&
+        currentUser.role.toLowerCase() == 'nhatuyendung';
+
     final statusStr = _job.trangThai.toLowerCase();
     final dangTuyen = statusStr == 'dangtuyen' || statusStr.isEmpty;
     final tenNtd = _job.tenNhaTuyenDung ?? 'Doanh nghiệp tuyển dụng';
@@ -482,27 +542,100 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ),
             ],
           ),
-          child: SizedBox(
-            height: 48,
-            child: ElevatedButton(
-              onPressed: dangTuyen ? _ungTuyen : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                dangTuyen ? 'Ứng tuyển công việc này' : 'Công việc đã đóng tuyển',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-          ),
+          child: isOwner
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final capNhat = await Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditJobPostScreen(job: _job),
+                            ),
+                          );
+                          if (capNhat == true) {
+                            _taiChiTiet();
+                          }
+                        },
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('Chỉnh sửa tin'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ApplicantListScreen(
+                              maJob: _job.maJob,
+                              tieuDeJob: _job.tieude,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.people_outline, size: 18),
+                        label: const Text('Xem ứng viên'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : isEmployer
+                  ? Container(
+                      height: 48,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: const Text(
+                        'Tài khoản Doanh nghiệp không thể ứng tuyển',
+                        style: TextStyle(
+                          color: AppColors.bodyText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )
+                  : SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: dangTuyen ? _ungTuyen : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          dangTuyen
+                              ? 'Ứng tuyển công việc này'
+                              : 'Công việc đã đóng tuyển',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
         ),
       ),
     );

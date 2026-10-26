@@ -1,0 +1,971 @@
+@model FreelancerStudent.Web.ViewModels.NhaTuyenDungProfileViewModel
+@{
+    var tenHienThi = !string.IsNullOrWhiteSpace(Model.NhaTuyenDung?.Tencongty) 
+        ? Model.NhaTuyenDung.Tencongty 
+        : (!string.IsNullOrWhiteSpace(Model.User?.HotenUser) ? Model.User.HotenUser : "Nhà tuyển dụng");
+    
+    ViewData["Title"] = "Hồ sơ Nhà tuyển dụng - " + tenHienThi;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var isProfileOwner = (ViewData["IsProfileOwner"] as bool? == true);
+    
+    // Xử lý logo / avatar
+    var avatarUrl = !string.IsNullOrEmpty(Model.NhaTuyenDung?.Logo)
+        ? (Model.NhaTuyenDung.Logo.StartsWith("http", StringComparison.OrdinalIgnoreCase) || Model.NhaTuyenDung.Logo.StartsWith("/")
+            ? Model.NhaTuyenDung.Logo
+            : "/" + Model.NhaTuyenDung.Logo)
+        : (!string.IsNullOrEmpty(Model.User?.AvatarUrl)
+            ? (Model.User.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase) || Model.User.AvatarUrl.StartsWith("/")
+                ? Model.User.AvatarUrl
+                : "/" + Model.User.AvatarUrl)
+            : $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.EscapeDataString(tenHienThi)}");
+
+    var ntd = Model.NhaTuyenDung ?? new FreelancerStudent.Web.ViewModels.ProfileNhaTuyenDungViewModel();
+    var usr = Model.User ?? new FreelancerStudent.Web.ViewModels.ProfileUserViewModel();
+    var dsJobs = Model.DanhSachTinTuyenDung ?? new List<FreelancerStudent.Web.ViewModels.ProfileJobPostViewModel>();
+    var thongKe = Model.ThongKeDanhGia;
+}
+
+<style>
+    /* Bảng màu và quy ước giao diện tối giản, thanh lịch, hạn chế tối đa icon */
+    .employer-profile-wrapper {
+        --accent: #3E7D56;
+        --accent-hover: #2F6445;
+        --ink: #2B2B2B;
+        --muted: #707070;
+        --border: #E3E3E3;
+        --card-bg: #FFFFFF;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+        color: var(--ink);
+        background-color: #F7F7F7;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    .employer-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: none;
+        margin-bottom: 24px;
+    }
+
+    .cover-strip {
+        height: 64px;
+        background: #E8EEE9;
+        border-top-left-radius: 7px;
+        border-top-right-radius: 7px;
+    }
+
+    .header-content-inner {
+        padding: 0 28px 24px;
+    }
+
+    .avatar-wrapper {
+        margin-top: -42px;
+        width: 84px;
+        height: 84px;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .avatar-img {
+        width: 84px;
+        height: 84px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 3px solid #FFFFFF;
+        background-color: #FFFFFF;
+    }
+
+    .company-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+
+    .company-subline {
+        color: var(--accent);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    .company-meta-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 6px;
+    }
+
+    .company-meta-item {
+        display: inline-block;
+    }
+
+    /* Nút bấm thuần chữ, không dùng icon */
+    .btn-action-primary {
+        background-color: var(--accent);
+        color: #FFFFFF;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-action-primary:hover {
+        background-color: var(--accent-hover);
+        color: #FFFFFF;
+    }
+
+    .btn-action-outline {
+        background-color: transparent;
+        color: var(--ink);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-action-outline:hover {
+        background-color: #F0F0F0;
+        color: var(--ink);
+        border-color: #D0D0D0;
+    }
+
+    /* Strip số liệu thống kê */
+    .metrics-bar {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px 24px;
+        margin-bottom: 24px;
+    }
+
+    .metric-item {
+        border-right: 1px solid var(--border);
+        padding: 0 16px;
+    }
+
+    .metric-item:last-child {
+        border-right: none;
+    }
+
+    .metric-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1.2;
+    }
+
+    .metric-value.accent {
+        color: var(--accent);
+    }
+
+    .metric-value.warning {
+        color: #B45309;
+    }
+
+    .metric-label {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    /* Tabs điều hướng */
+    .profile-tabs-nav {
+        display: flex;
+        gap: 24px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px;
+        background: #FFFFFF;
+        padding: 0 24px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .profile-tab-btn {
+        padding: 14px 4px;
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+    }
+
+    .profile-tab-btn:hover {
+        color: var(--accent);
+    }
+
+    .profile-tab-btn.active {
+        color: var(--accent);
+        border-bottom: 2px solid var(--accent);
+    }
+
+    /* Card tiêu đề & danh sách thông tin cơ bản */
+    .section-box {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 24px;
+    }
+
+    .section-heading {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 18px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #F0F0F0;
+    }
+
+    .info-table-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 9px 0;
+        border-bottom: 1px solid #F5F5F5;
+        font-size: 0.88rem;
+    }
+
+    .info-table-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: var(--muted);
+        font-weight: 500;
+        width: 40%;
+    }
+
+    .info-value {
+        color: var(--ink);
+        font-weight: 600;
+        width: 60%;
+        text-align: right;
+        word-break: break-word;
+    }
+
+    /* Card tin tuyển dụng */
+    .job-item-card {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 18px 20px;
+        margin-bottom: 14px;
+        transition: border-color 0.15s ease;
+    }
+
+    .job-item-card:hover {
+        border-color: var(--accent);
+    }
+
+    .job-title-link {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    .job-title-link:hover {
+        color: var(--accent);
+    }
+
+    .job-meta-line {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin: 8px 0;
+    }
+
+    .badge-status {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .badge-active {
+        background-color: #E8F5E9;
+        color: #1E6E38;
+        border: 1px solid #C8E6C9;
+    }
+
+    .badge-inactive {
+        background-color: #F5F5F5;
+        color: #616161;
+        border: 1px solid #E0E0E0;
+    }
+
+    /* Phần đánh giá */
+    .review-row {
+        padding: 14px 0;
+        border-bottom: 1px solid #F0F0F0;
+    }
+
+    .review-row:last-child {
+        border-bottom: none;
+    }
+
+    .review-author {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--ink);
+    }
+
+    .review-rating-score {
+        color: #B45309;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .review-meta {
+        color: var(--muted);
+        font-size: 0.78rem;
+        margin: 2px 0 6px;
+    }
+
+    .review-body {
+        font-size: 0.86rem;
+        color: #404040;
+        line-height: 1.45;
+        margin: 0;
+    }
+
+    .star-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="employer-profile-wrapper">
+    <div class="container-fluid px-lg-5 pt-4">
+
+        @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-2 mb-3" role="alert">
+                @(TempData["SuccessMessage"] ?? TempData["Success"])
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null || TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-2 mb-3" role="alert">
+                @(TempData["ErrorMessage"] ?? TempData["Error"])
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        }
+
+        <!-- ==================== 1. TOP HEADER BANNER ==================== -->
+        <div class="employer-card">
+            <div class="cover-strip"></div>
+            
+            <div class="header-content-inner">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    
+                    <!-- Thông tin đại diện & thương hiệu -->
+                    <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-3">
+                        <div class="avatar-wrapper">
+                            <img src="@avatarUrl" alt="@tenHienThi" class="avatar-img"
+                                 onerror="this.src='https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name=@Uri.EscapeDataString(tenHienThi)';" />
+                        </div>
+
+                        <div class="pt-2">
+                            <h1 class="company-title">
+                                @tenHienThi
+                                <span class="badge-status badge-active ms-2">Đang hoạt động</span>
+                            </h1>
+
+                            <div class="company-subline">
+                                @(!string.IsNullOrWhiteSpace(ntd.Linhvuc) ? ntd.Linhvuc : "Đơn vị tuyển dụng Freelancer")
+                            </div>
+
+                            <div class="company-meta-tags">
+                                @if (!string.IsNullOrWhiteSpace(ntd.Diachi))
+                                {
+                                    <span class="company-meta-item">Khu vực: @ntd.Diachi</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(usr.HotenUser))
+                                {
+                                    <span class="company-meta-item">Người đại diện: @usr.HotenUser</span>
+                                }
+                                <span class="company-meta-item">
+                                    Thành viên từ: @ntd.NgayDangKy.ToString("MM/yyyy")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Các nút hành động chính (Chỉ dùng chữ, không dùng icon) -->
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        @if (isProfileOwner)
+                        {
+                            <a href="/Account/ThietLapTaiKhoan?tab=thongtin" class="btn-action-primary">
+                                Chỉnh sửa hồ sơ
+                            </a>
+                            <a href="/JobPost/Create" class="btn-action-outline">
+                                Đăng tin tuyển dụng
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/NhaTuyenDung/Search" class="btn-action-outline">
+                                Quay lại danh sách
+                            </a>
+                            <button type="button" class="btn-action-primary" onclick="chonTab('jobs')">
+                                Xem tin tuyển dụng (@dsJobs.Count)
+                            </button>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 2. CHỈ SỐ THỐNG KÊ (METRICS STRIP) ==================== -->
+        <div class="metrics-bar">
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 text-center text-sm-start">
+                
+                <div class="col metric-item">
+                    <div class="metric-value warning">
+                        @(ntd.Sosaodanhgia > 0 ? ntd.Sosaodanhgia.ToString("0.0") + " / 5.0" : "Chưa có")
+                    </div>
+                    <div class="metric-label">
+                        @(ntd.SoLuotDanhGia > 0 ? $"{ntd.SoLuotDanhGia} lượt đánh giá" : "Đánh giá trung bình")
+                    </div>
+                </div>
+
+                <div class="col metric-item">
+                    <div class="metric-value">@ntd.TongTinTuyenDung</div>
+                    <div class="metric-label">Tổng tin đã đăng</div>
+                </div>
+
+                <div class="col metric-item">
+                    <div class="metric-value accent">@ntd.TinDangTuyen</div>
+                    <div class="metric-label">Tin đang tuyển</div>
+                </div>
+
+                <div class="col metric-item">
+                    <div class="metric-value">@ntd.SoHopDongHoanThanh</div>
+                    <div class="metric-label">Hợp đồng hoàn thành</div>
+                </div>
+
+                <div class="col metric-item">
+                    <div class="metric-value">@ntd.SoFreelancerHopTac</div>
+                    <div class="metric-label">Freelancer hợp tác</div>
+                </div>
+
+                <div class="col metric-item">
+                    <div class="metric-value accent">
+                        @(ntd.TyLeHaiLong > 0 ? ntd.TyLeHaiLong.ToString("0.#") + "%" : "100%")
+                    </div>
+                    <div class="metric-label">Mức độ hài lòng</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== 3. TABS ĐIỀU HƯỚNG NỘI DUNG ==================== -->
+        <div class="profile-tabs-nav">
+            <button type="button" class="profile-tab-btn active" id="tabBtn-overview" onclick="chonTab('overview')">
+                Tổng quan
+            </button>
+            <button type="button" class="profile-tab-btn" id="tabBtn-jobs" onclick="chonTab('jobs')">
+                Tin tuyển dụng (@dsJobs.Count)
+            </button>
+            <button type="button" class="profile-tab-btn" id="tabBtn-reviews" onclick="chonTab('reviews')">
+                Đánh giá từ Freelancer (@(thongKe?.tongLuotDanhGia ?? ntd.SoLuotDanhGia))
+            </button>
+        </div>
+
+        <!-- ==================== 4. NỘI DUNG TỪNG TAB ==================== -->
+
+        <!-- TAB 1: TỔNG QUAN -->
+        <div id="tabContent-overview" class="tab-pane-container">
+            <div class="row g-4">
+                
+                <!-- Cột trái: Thông tin doanh nghiệp (Dữ liệu SQL thực tế) -->
+                <div class="col-12 col-lg-4">
+                    <div class="section-box">
+                        <h2 class="section-heading">Thông tin liên hệ & Pháp lý</h2>
+                        
+                        <div class="info-table-row">
+                            <span class="info-label">Tên đơn vị</span>
+                            <span class="info-value">@(string.IsNullOrWhiteSpace(ntd.Tencongty) ? "Chưa cập nhật" : ntd.Tencongty)</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Người đại diện</span>
+                            <span class="info-value">@(string.IsNullOrWhiteSpace(usr.HotenUser) ? "Chưa cập nhật" : usr.HotenUser)</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Tài khoản</span>
+                            <span class="info-value">@usr.TenTaiKhoanUser</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Email liên hệ</span>
+                            <span class="info-value">@(string.IsNullOrWhiteSpace(usr.Email) ? "Chưa cập nhật" : usr.Email)</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Số điện thoại</span>
+                            <span class="info-value">@(string.IsNullOrWhiteSpace(usr.Sodienthoai) ? "Chưa cập nhật" : usr.Sodienthoai)</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Lĩnh vực</span>
+                            <span class="info-value">@(string.IsNullOrWhiteSpace(ntd.Linhvuc) ? "Chưa cập nhật" : ntd.Linhvuc)</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Địa chỉ trụ sở</span>
+                            <span class="info-value">@(string.IsNullOrWhiteSpace(ntd.Diachi) ? "Chưa cập nhật" : ntd.Diachi)</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Trang web</span>
+                            <span class="info-value">
+                                @if (!string.IsNullOrWhiteSpace(ntd.Link))
+                                {
+                                    <a href="@ntd.Link" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: var(--accent);">
+                                        @ntd.Link
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span>Chưa cập nhật</span>
+                                }
+                            </span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Ngày tham gia</span>
+                            <span class="info-value">@ntd.NgayDangKy.ToString("dd/MM/yyyy")</span>
+                        </div>
+
+                        <div class="info-table-row">
+                            <span class="info-label">Trạng thái</span>
+                            <span class="info-value text-success">@ntd.Trangthai</span>
+                        </div>
+                    </div>
+
+                    <!-- Cam kết uy tín & Quy chuẩn làm việc -->
+                    <div class="section-box">
+                        <h2 class="section-heading">Cam kết tuyển dụng</h2>
+                        <p class="text-muted small mb-2" style="line-height: 1.5;">
+                            Nhà tuyển dụng cam kết thanh toán đúng hạn qua tài khoản ký quỹ của hệ thống và tuân thủ các quy định bảo vệ quyền lợi sinh viên.
+                        </p>
+                        <div class="info-table-row">
+                            <span class="info-label">Hình thức ký quỹ</span>
+                            <span class="info-value">100% qua hệ thống</span>
+                        </div>
+                        <div class="info-table-row">
+                            <span class="info-label">Nghiệm thu</span>
+                            <span class="info-value">Thanh toán sau khi duyệt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Giới thiệu & Việc làm mới nhất -->
+                <div class="col-12 col-lg-8">
+                    <!-- Giới thiệu công ty -->
+                    <div class="section-box">
+                        <h2 class="section-heading">Giới thiệu về đơn vị tuyển dụng</h2>
+                        @if (!string.IsNullOrWhiteSpace(ntd.Gioithieu))
+                        {
+                            <div class="text-dark" style="line-height: 1.6; font-size: 0.92rem; white-space: pre-line;">
+                                @ntd.Gioithieu
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                                Đơn vị chưa bổ sung mô tả giới thiệu chi tiết. Các dự án và hợp đồng tuyển dụng được quản lý trực tiếp qua hệ thống Freelancer Students.
+                            </p>
+                        }
+                    </div>
+
+                    <!-- Tin tuyển dụng nổi bật đang mở -->
+                    <div class="section-box">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h2 class="section-heading mb-0 border-bottom-0 pb-0">
+                                Vị trí đang tuyển dụng (@dsJobs.Count(j => j.Status == "DangTuyen" || j.Status == "Opening"))
+                            </h2>
+                            @if (dsJobs.Any())
+                            {
+                                <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" style="color: var(--accent); font-weight: 600;" onclick="chonTab('jobs')">
+                                    Xem tất cả tin
+                                </button>
+                            }
+                        </div>
+
+                        @{
+                            var openJobs = dsJobs.Where(j => j.Status == "DangTuyen" || j.Status == "Opening").Take(3).ToList();
+                        }
+
+                        @if (openJobs.Any())
+                        {
+                            @foreach (var job in openJobs)
+                            {
+                                <div class="job-item-card">
+                                    <div class="d-flex justify-content-between align-items-start gap-2">
+                                        <a href="/JobPost/Detail?maJob=@job.MaJob" class="job-title-link">
+                                            @job.Tieude
+                                        </a>
+                                        <span class="badge-status badge-active">Đang tuyển</span>
+                                    </div>
+
+                                    <div class="job-meta-line">
+                                        <span>
+                                            Thù lao: 
+                                            <strong class="text-dark">
+                                                @(job.Thulao.HasValue && job.Thulao > 0 
+                                                    ? job.Thulao.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" 
+                                                    : "Thỏa thuận")
+                                            </strong>
+                                        </span>
+                                        @if (job.Thoigiandukienhoanthanh.HasValue)
+                                        {
+                                            <span>Hạn tuyển: @job.Thoigiandukienhoanthanh.Value.ToString("dd/MM/yyyy")</span>
+                                        }
+                                        @if (job.Soluongtuyen.HasValue && job.Soluongtuyen > 0)
+                                        {
+                                            <span>Số lượng: @job.Soluongtuyen người</span>
+                                        }
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(job.Mota))
+                                    {
+                                        <p class="text-muted small mb-3" style="line-height: 1.45;">
+                                            @(job.Mota.Length > 160 ? job.Mota.Substring(0, 160) + "..." : job.Mota)
+                                        </p>
+                                    }
+
+                                    <div>
+                                        <a href="/JobPost/Detail?maJob=@job.MaJob" class="btn-action-outline py-1 px-3" style="font-size: 0.8rem;">
+                                            Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="p-3 text-center text-muted" style="font-size: 0.9rem;">
+                                Hiện tại đơn vị chưa có vị trí mới đang mở tuyển. Vui lòng quay lại sau hoặc xem toàn bộ danh mục tin tuyển dụng.
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Tóm tắt đánh giá gần đây -->
+                    <div class="section-box">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h2 class="section-heading mb-0 border-bottom-0 pb-0">Phản hồi từ Freelancer sinh viên</h2>
+                            @if ((thongKe?.tongLuotDanhGia ?? 0) > 0 || ntd.DanhGiaGanDay.Any())
+                            {
+                                <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" style="color: var(--accent); font-weight: 600;" onclick="chonTab('reviews')">
+                                    Xem toàn bộ đánh giá
+                                </button>
+                            }
+                        </div>
+
+                        @{
+                            var recentReviews = (thongKe?.danhSach != null && thongKe.danhSach.Any())
+                                ? thongKe.danhSach.Take(3).ToList()
+                                : null;
+                        }
+
+                        @if (recentReviews != null && recentReviews.Any())
+                        {
+                            @foreach (var rev in recentReviews)
+                            {
+                                <div class="review-row">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="review-author">@rev.tenNguoiDanhGia</span>
+                                        <span class="review-rating-score">@rev.soSaoTongThe.ToString("0.0") / 5.0 điểm</span>
+                                    </div>
+                                    <div class="review-meta">
+                                        Dự án: @rev.tenCongViec — Ngày: @rev.ngayDanhGia.ToString("dd/MM/yyyy")
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(rev.nhanXet))
+                                    {
+                                        <p class="review-body">@rev.nhanXet</p>
+                                    }
+                                </div>
+                            }
+                        }
+                        else if (ntd.DanhGiaGanDay != null && ntd.DanhGiaGanDay.Any())
+                        {
+                            @foreach (var rev in ntd.DanhGiaGanDay.Take(3))
+                            {
+                                <div class="review-row">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="review-author">@rev.tenNguoiDanhGia</span>
+                                        <span class="review-rating-score">@rev.soSaoTongThe.ToString("0.0") / 5.0 điểm</span>
+                                    </div>
+                                    <div class="review-meta">
+                                        Dự án: @rev.tenCongViec — Ngày: @rev.ngayDanhGia.ToString("dd/MM/yyyy")
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(rev.nhanXet))
+                                    {
+                                        <p class="review-body">@rev.nhanXet</p>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted small mb-0">Chưa có đánh giá nào được ghi nhận cho đơn vị này.</p>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 2: TOÀN BỘ DANH SÁCH TIN TUYỂN DỤNG -->
+        <div id="tabContent-jobs" class="tab-pane-container d-none">
+            <div class="section-box">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <div>
+                        <h2 class="section-heading mb-1 border-bottom-0 pb-0">
+                            Danh sách tin tuyển dụng (@dsJobs.Count)
+                        </h2>
+                        <span class="text-muted small">Tất cả các cơ hội làm việc do @tenHienThi đăng tuyển</span>
+                    </div>
+
+                    @if (isProfileOwner)
+                    {
+                        <a href="/JobPost/Create" class="btn-action-primary">
+                            Đăng tin mới
+                        </a>
+                    }
+                </div>
+
+                @if (dsJobs.Any())
+                {
+                    @foreach (var job in dsJobs)
+                    {
+                        var isOpening = (job.Status == "DangTuyen" || job.Status == "Opening");
+                        <div class="job-item-card">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2">
+                                <div>
+                                    <a href="/JobPost/Detail?maJob=@job.MaJob" class="job-title-link">
+                                        @job.Tieude
+                                    </a>
+                                    
+                                    <div class="job-meta-line">
+                                        <span>
+                                            Thù lao: 
+                                            <strong class="text-dark">
+                                                @(job.Thulao.HasValue && job.Thulao > 0 
+                                                    ? job.Thulao.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" 
+                                                    : "Thỏa thuận")
+                                            </strong>
+                                        </span>
+                                        <span>Đăng ngày: @job.Thoigiandangtuyen.ToString("dd/MM/yyyy")</span>
+                                        @if (job.Thoigiandukienhoanthanh.HasValue)
+                                        {
+                                            <span>Hạn hoàn thành: @job.Thoigiandukienhoanthanh.Value.ToString("dd/MM/yyyy")</span>
+                                        }
+                                        @if (job.Soluongtuyen.HasValue && job.Soluongtuyen > 0)
+                                        {
+                                            <span>Số lượng tuyển: @job.Soluongtuyen người</span>
+                                        }
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(job.Kynangyeucau))
+                                    {
+                                        <div class="mb-2">
+                                            <span class="text-muted small">Yêu cầu: </span>
+                                            <span class="badge bg-light text-dark border small fw-normal">@job.Kynangyeucau</span>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(job.Mota))
+                                    {
+                                        <p class="text-muted small mb-0" style="line-height: 1.45;">
+                                            @(job.Mota.Length > 200 ? job.Mota.Substring(0, 200) + "..." : job.Mota)
+                                        </p>
+                                    }
+                                </div>
+
+                                <div class="d-flex flex-column align-items-md-end gap-2 flex-shrink-0 mt-2 mt-md-0">
+                                    <span class="badge-status @(isOpening ? "badge-active" : "badge-inactive")">
+                                        @(isOpening ? "Đang mở tuyển" : (!string.IsNullOrWhiteSpace(job.Status) ? job.Status : "Đã đóng"))
+                                    </span>
+                                    
+                                    <a href="/JobPost/Detail?maJob=@job.MaJob" class="btn-action-outline py-1 px-3" style="font-size: 0.82rem;">
+                                        Xem chi tiết công việc
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <p class="mb-3">Hiện tại Nhà tuyển dụng chưa đăng tin tuyển dụng nào trên hệ thống.</p>
+                        @if (isProfileOwner)
+                        {
+                            <a href="/JobPost/Create" class="btn-action-primary">
+                                Đăng tin đầu tiên ngay
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- TAB 3: ĐÁNH GIÁ TỪ FREELANCER -->
+        <div id="tabContent-reviews" class="tab-pane-container d-none">
+            <div class="section-box">
+                <h2 class="section-heading">Đánh giá và phản hồi từ Freelancer sinh viên</h2>
+
+                @if (thongKe != null && thongKe.tongLuotDanhGia > 0)
+                {
+                    <!-- Bảng tóm tắt chỉ số đánh giá -->
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-2 border">
+                        <div class="col-6 col-md-3 text-center border-end">
+                            <div class="fs-4 fw-bold text-dark">@thongKe.diemTrungBinh.ToString("0.0") / 5.0</div>
+                            <div class="text-muted small">@thongKe.tongLuotDanhGia lượt đánh giá</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center border-end">
+                            <div class="fs-5 fw-bold text-dark">@thongKe.trungBinhChatLuong.ToString("0.0") / 5.0</div>
+                            <div class="text-muted small">Mức độ rõ ràng yêu cầu</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center border-end">
+                            <div class="fs-5 fw-bold text-dark">@thongKe.trungBinhDungHan.ToString("0.0") / 5.0</div>
+                            <div class="text-muted small">Thanh toán & Nghiệm thu</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <div class="fs-5 fw-bold text-dark">@thongKe.trungBinhGiaoTiep.ToString("0.0") / 5.0</div>
+                            <div class="text-muted small">Thái độ tôn trọng & Hỗ trợ</div>
+                        </div>
+                    </div>
+
+                    <!-- Phân bổ sao đánh giá -->
+                    <div class="mb-4">
+                        <div class="text-muted small fw-semibold mb-2">Phân bổ đánh giá:</div>
+                        @for (var star = 5; star >= 1; star--)
+                        {
+                            var count = (thongKe.phanBoSao != null && thongKe.phanBoSao.Count >= star) ? thongKe.phanBoSao[star - 1] : 0;
+                            var pct = thongKe.tongLuotDanhGia > 0 ? (count * 100d / thongKe.tongLuotDanhGia) : 0;
+                            <div class="star-bar-row">
+                                <span style="width: 45px;">@star sao</span>
+                                <div class="progress flex-grow-1" style="height: 6px; background-color: #E9ECEF;">
+                                    <div class="progress-bar" style="width: @pct%; background-color: #3E7D56;"></div>
+                                </div>
+                                <span class="text-muted" style="width: 30px; text-align: right;">@count</span>
+                            </div>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <!-- Danh sách phản hồi chi tiết -->
+                    <div class="mt-4">
+                        <div class="text-muted small fw-semibold mb-3">Tất cả nhận xét:</div>
+                        @foreach (var review in thongKe.danhSach)
+                        {
+                            <div class="review-row">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="review-author">@review.tenNguoiDanhGia</span>
+                                    <span class="review-rating-score">@review.soSaoTongThe.ToString("0.0") / 5.0 điểm</span>
+                                </div>
+                                <div class="review-meta">
+                                    Công việc: @review.tenCongViec — Ngày đánh giá: @review.ngayDanhGia.ToString("dd/MM/yyyy")
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(review.nhanXet))
+                                {
+                                    <p class="review-body mt-2">@review.nhanXet</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else if (ntd.DanhGiaGanDay != null && ntd.DanhGiaGanDay.Any())
+                {
+                    <div class="mt-3">
+                        @foreach (var review in ntd.DanhGiaGanDay)
+                        {
+                            <div class="review-row">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="review-author">@review.tenNguoiDanhGia</span>
+                                    <span class="review-rating-score">@review.soSaoTongThe.ToString("0.0") / 5.0 điểm</span>
+                                </div>
+                                <div class="review-meta">
+                                    Công việc: @review.tenCongViec — Ngày đánh giá: @review.ngayDanhGia.ToString("dd/MM/yyyy")
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(review.nhanXet))
+                                {
+                                    <p class="review-body mt-2">@review.nhanXet</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <p class="mb-0">Đơn vị chưa có lượt đánh giá nào từ freelancer sinh viên.</p>
+                        <small>Các đánh giá sẽ xuất hiện khi các hợp đồng dịch vụ được hoàn thành và nghiệm thu thành công.</small>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function chonTab(tabName) {
+        // Ẩn tất cả các container tab
+        document.getElementById('tabContent-overview').classList.add('d-none');
+        document.getElementById('tabContent-jobs').classList.add('d-none');
+        document.getElementById('tabContent-reviews').classList.add('d-none');
+
+        // Bỏ active tất cả nút tab
+        document.getElementById('tabBtn-overview').classList.remove('active');
+        document.getElementById('tabBtn-jobs').classList.remove('active');
+        document.getElementById('tabBtn-reviews').classList.remove('active');
+
+        // Hiển thị tab được chọn
+        if (tabName === 'jobs') {
+            document.getElementById('tabContent-jobs').classList.remove('d-none');
+            document.getElementById('tabBtn-jobs').classList.add('active');
+        } else if (tabName === 'reviews') {
+            document.getElementById('tabContent-reviews').classList.remove('d-none');
+            document.getElementById('tabBtn-reviews').classList.add('active');
+        } else {
+            document.getElementById('tabContent-overview').classList.remove('d-none');
+            document.getElementById('tabBtn-overview').classList.add('active');
+        }
+    }
+</script>

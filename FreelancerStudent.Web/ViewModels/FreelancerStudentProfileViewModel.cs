@@ -10,6 +10,7 @@ namespace FreelancerStudent.Web.ViewModels
         public List<ProfileProjectViewModel> DuAns { get; set; } = new();
         public ProfileEvidenceViewModel? MinhChung { get; set; }
         public List<string> TatCaKyNangGoiY { get; set; } = new();
+        public DanhGiaThongKeViewModel? ThongKeDanhGia { get; set; }
 
         public string tenUser => User.HotenUser;
         public string MaChuyenNganh => FreelancerStudent.MaChuyenNganh;
@@ -19,6 +20,8 @@ namespace FreelancerStudent.Web.ViewModels
     {
         public string TenTaiKhoanUser { get; set; } = string.Empty;
         public string HotenUser { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string? Sodienthoai { get; set; }
         public string? AvatarUrl { get; set; }
         public DateTime? Ngaysinh { get; set; }
         public DateTime NgayTao { get; set; } = DateTime.UtcNow;
@@ -39,6 +42,12 @@ namespace FreelancerStudent.Web.ViewModels
         public string? Gioithieu { get; set; }
         public bool TrangthaiNhanViec { get; set; }
         public decimal? ChiPhiTu { get; set; }
+        public decimal DiemDanhGiaTrungBinh { get; set; }
+        public int SoLuotDanhGia { get; set; }
+        public double TyLeHaiLong { get; set; }
+        public int SoDuAnHoanThanh { get; set; }
+        public int SoKhachHang { get; set; }
+        public List<DanhGiaItemViewModel> DanhGiaGanDay { get; set; } = new();
     }
 
     public class ProfileMajorViewModel

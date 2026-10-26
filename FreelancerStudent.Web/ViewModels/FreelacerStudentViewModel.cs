@@ -43,6 +43,30 @@ namespace FreelancerStudent.Web.ViewModels
 
         public decimal? chiPhiTu { get; set; }
 
+        public double diemDanhGiaTrungBinh { get; set; }
+        public int soLuotDanhGia { get; set; }
+        public DateTime ngayTao { get; set; } = DateTime.UtcNow;
+        public List<string> danhSachKyNang { get; set; } = new();
+    }
 
+    public class FreelancerFilterViewModel
+    {
+        public List<FreelacerStudentViewModel> DanhSachFreelancer { get; set; } = new();
+
+        // Tiêu chí tìm kiếm & lọc
+        public string? TuKhoa { get; set; }
+        public string? ChuyenNganh { get; set; }
+        public string? KyNang { get; set; }
+        public double? SoSaoMin { get; set; }
+        public double? GpaMin { get; set; }
+        public int? NamThu { get; set; }
+        public bool? TrangThaiNhanViec { get; set; }
+        public string? SapXep { get; set; } = "moi-nhat"; // Mặc định sắp xếp hồ sơ mới nhất
+
+        // Danh sách lựa chọn cho dropdown
+        public List<string> DanhSachChuyenNganh { get; set; } = new();
+        public List<string> DanhSachKyNang { get; set; } = new();
+
+        public int TongSoFreelancer => DanhSachFreelancer.Count;
     }
 }

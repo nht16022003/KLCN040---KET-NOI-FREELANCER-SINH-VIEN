@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
@@ -12,22 +13,22 @@ import '../hop_dong/man_hinh_chi_tiet_hop_dong.dart';
 class _MocBanGiaoItem {
   final TextEditingController tenController;
   final TextEditingController moTaController;
-  final TextEditingController tyLeController;
+  final TextEditingController linkController;
   DateTime hanChot;
 
   _MocBanGiaoItem({
     required String ten,
     required String moTa,
-    required double tyLe,
+    String link = '',
     required this.hanChot,
   })  : tenController = TextEditingController(text: ten),
         moTaController = TextEditingController(text: moTa),
-        tyLeController = TextEditingController(text: tyLe.toStringAsFixed(0));
+        linkController = TextEditingController(text: link);
 
   void dispose() {
     tenController.dispose();
     moTaController.dispose();
-    tyLeController.dispose();
+    linkController.dispose();
   }
 }
 
@@ -90,7 +91,6 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
       _MocBanGiaoItem(
         ten: 'Giai đoạn 1: Bàn giao toàn bộ sản phẩm và nghiệm thu',
         moTa: 'Hoàn thành và bàn giao sản phẩm hoàn chỉnh theo đúng yêu cầu đã mô tả.',
-        tyLe: 100,
         hanChot: _ngayKetThuc,
       ),
     );
@@ -113,7 +113,6 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
         _MocBanGiaoItem(
           ten: 'Giai đoạn $stt: Bàn giao sản phẩm đợt $stt',
           moTa: 'Nghiệm thu các hạng mục theo tiến độ thỏa thuận đợt $stt.',
-          tyLe: 0,
           hanChot: _ngayKetThuc,
         ),
       );
@@ -186,12 +185,6 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
     }
   }
 
-  double get _tongTyLeGiaiNgan {
-    return _danhSachMoc.fold(0.0, (sum, m) {
-      return sum + (double.tryParse(m.tyLeController.text) ?? 0.0);
-    });
-  }
-
   double get _soTienThuLao {
     return double.tryParse(_thuLaoController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
   }
@@ -235,15 +228,15 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
     setState(() => _dangXuLy = true);
 
     // Chuẩn bị danh sách mốc bàn giao (giaiDoans) để lưu về database table GiaiDoan_HopDong
+    // Toàn bộ thù lao được giải ngân thanh toán 1 lần sau khi nghiệm thu toàn bộ dự án (đồng nhất với Web)
     final giaiDoansPayload = _danhSachMoc.map((m) {
-      final tyLe = double.tryParse(m.tyLeController.text) ?? 0.0;
-      final soTienMoc = tyLe > 0 ? (soTien * tyLe / 100).roundToDouble() : 0.0;
       return {
         'tenGiaiDoan': m.tenController.text.trim(),
         'moTa': m.moTaController.text.trim(),
+        'linkSanPham': m.linkController.text.trim(),
         'hanChot': m.hanChot.toIso8601String(),
-        'tyLeGiaiNgan': tyLe,
-        'soTien': soTienMoc > 0 ? soTienMoc : soTien,
+        'tyLeGiaiNgan': 100.0,
+        'soTien': soTien,
       };
     }).toList();
 
@@ -293,9 +286,6 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
     final tenUngVien = widget.applicant.tenUser?.trim().isNotEmpty == true
         ? widget.applicant.tenUser!
         : 'Freelancer #${widget.applicant.applicantId}';
-
-    final tongTyLe = _tongTyLeGiaiNgan;
-    final hopLeTyLe = (tongTyLe - 100.0).abs() < 0.01;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -501,7 +491,7 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
               const SizedBox(height: 20),
 
               // ====================================================
-              // KHU VỰC: CÁC MỐC BÀN GIAO & TỶ LỆ GIẢI NGÂN (Milestones)
+              // KHU VỰC: CÁC MỐC BÀN GIAO TIẾN ĐỘ (Milestones) - ĐỒNG NHẤT VỚI WEB
               // ====================================================
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -511,7 +501,7 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Các mốc bàn giao & giải ngân',
+                          'Các mốc bàn giao tiến độ (Milestones)',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -520,7 +510,7 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Lộ trình nghiệm thu sản phẩm bàn giao',
+                          'Thiết lập các mốc bàn giao sản phẩm để theo dõi tiến độ.',
                           style: TextStyle(fontSize: 12, color: AppColors.bodyText),
                         ),
                       ],
@@ -540,66 +530,28 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Thanh hiển thị tổng tỷ lệ giải ngân
+              // Thông báo thanh toán 1 lần (Đồng nhất với Web)
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: hopLeTyLe ? AppColors.lightGreenSurface : Colors.amber.shade50,
+                  color: AppColors.lightGreenSurface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: hopLeTyLe ? AppColors.border : Colors.amber.shade300,
-                  ),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Tổng tỷ lệ giải ngân các mốc:',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: hopLeTyLe ? AppColors.primary : AppColors.warning,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '${tongTyLe.toStringAsFixed(0)}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: (tongTyLe / 100).clamp(0.0, 1.0),
-                        backgroundColor: Colors.grey.shade300,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          hopLeTyLe ? AppColors.primary : AppColors.warning,
-                        ),
-                        minHeight: 8,
-                      ),
-                    ),
-                    if (!hopLeTyLe) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Lưu ý: Tổng tỷ lệ giải ngân hiện tại là ${tongTyLe.toStringAsFixed(0)}% (nên đạt đúng 100% để phân bổ đầy đủ thù lao hợp đồng).',
-                        style: TextStyle(
+                    const Icon(Icons.shield_outlined, color: AppColors.primary, size: 24),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Toàn bộ thù lao (${AppFormatters.formatCurrency(_soTienThuLao)}) sẽ được ký quỹ đảm bảo và giải ngân thanh toán 1 lần cho Freelancer sau khi hoàn thành và nghiệm thu dự án.',
+                        style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.amber.shade900,
+                          color: AppColors.primaryDark,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
@@ -609,8 +561,6 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
               ..._danhSachMoc.asMap().entries.map((entry) {
                 final index = entry.key;
                 final moc = entry.value;
-                final tyLeMoc = double.tryParse(moc.tyLeController.text) ?? 0.0;
-                final soTienUocTinh = tyLeMoc > 0 ? (_soTienThuLao * tyLeMoc / 100) : 0.0;
 
                 return Card(
                   elevation: 0,
@@ -666,48 +616,26 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
                         ),
                         const SizedBox(height: 10),
 
-                        // Hạn chót & Tỷ lệ giải ngân
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: InkWell(
-                                onTap: () => _chonHanChotMoc(index),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(color: Colors.grey.shade400),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Hạn: ${moc.hanChot.day}/${moc.hanChot.month}/${moc.hanChot.year}',
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                        // Hạn chót mốc
+                        InkWell(
+                          onTap: () => _chonHanChotMoc(index),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.grey.shade400),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: moc.tyLeController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Giải ngân (%)',
-                                  suffixText: '%',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Hạn chót mốc: ${moc.hanChot.day.toString().padLeft(2, '0')}/${moc.hanChot.month.toString().padLeft(2, '0')}/${moc.hanChot.year}',
+                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                                 ),
-                                onChanged: (_) => setState(() {}),
-                              ),
+                                const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                         const SizedBox(height: 10),
 
@@ -722,28 +650,28 @@ class _TaoHopDongScreenState extends State<TaoHopDongScreen> {
                             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
 
-                        // Số tiền ước tính cho mốc
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.background,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Số tiền giải ngân ước tính:', style: TextStyle(fontSize: 12, color: AppColors.bodyText)),
-                              Text(
-                                AppFormatters.formatCurrency(soTienUocTinh),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
+                        // Link sản phẩm bàn giao (nếu có)
+                        TextFormField(
+                          controller: moc.linkController,
+                          keyboardType: TextInputType.url,
+                          decoration: InputDecoration(
+                            labelText: 'Link sản phẩm bàn giao (nếu có)',
+                            hintText: 'https://drive.google.com/... hoặc GitHub, Figma, Demo',
+                            prefixIcon: const Icon(Icons.link_rounded, size: 20, color: AppColors.primary),
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.paste_outlined, size: 18),
+                              tooltip: 'Dán từ bộ nhớ tạm',
+                              onPressed: () async {
+                                final data = await Clipboard.getData(Clipboard.kTextPlain);
+                                if (data?.text != null && data!.text!.isNotEmpty) {
+                                  setState(() => moc.linkController.text = data.text!.trim());
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ],

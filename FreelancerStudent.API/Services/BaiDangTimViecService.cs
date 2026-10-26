@@ -10,11 +10,13 @@ namespace FreelancerStudent.API.Services
     {
         private readonly IBaiDangTimViecRepository _repo;
         private readonly IFreelancerStudentRepository _freeRepo;
+        private readonly IMinhChungService _minhChungService;
 
-        public BaiDangTimViecService(IBaiDangTimViecRepository repo, IFreelancerStudentRepository freeRepo)
+        public BaiDangTimViecService(IBaiDangTimViecRepository repo, IFreelancerStudentRepository freeRepo, IMinhChungService minhChungService)
         {
             _repo = repo;
             _freeRepo = freeRepo;
+            _minhChungService = minhChungService;
         }
 
         //Tuấn
@@ -23,6 +25,12 @@ namespace FreelancerStudent.API.Services
             if (string.IsNullOrWhiteSpace(request.tieude))
             {
                 throw new Exception("Tiêu đề bài đăng không được để trống!");
+            }
+
+            var checkXacThuc = await _minhChungService.KiemTraTrangThaiXacThucAsync(request.maUser);
+            if (!checkXacThuc.DaXacMinh)
+            {
+                throw new InvalidOperationException("Bạn cần hoàn tất xác thực minh chứng sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!");
             }
 
             var sinhVien = await _freeRepo.layFreelancerStudent_TheoMaUser(request.maUser);

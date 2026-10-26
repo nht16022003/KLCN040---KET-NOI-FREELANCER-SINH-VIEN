@@ -1,0 +1,227 @@
+@model FreelancerStudent.Web.ViewModels.AdminContractTemplateViewModel
+@{
+    ViewData["Title"] = "Quản lý hợp đồng";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Quản lý hợp đồng</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">Quản lý hợp đồng</h3>
+            <p class="text-muted small mb-0">Theo dõi toàn bộ hợp đồng giao kết giữa Sinh viên và Nhà tuyển dụng, giá trị ký quỹ và mẫu điều khoản tiêu chuẩn.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/DieuChinhSoDu" class="btn btn-outline-secondary btn-sm px-3">
+                Điều chỉnh ví
+            </a>
+            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm px-3">
+                Người dùng
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border mb-4" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border mb-4" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border rounded-3 bg-white p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase">Tổng số hợp đồng</div>
+                <h3 class="fw-bold text-dark mt-2 mb-0">@Model.DanhSachHopDongHeThong.Count</h3>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border rounded-3 bg-white p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase">Đang thực hiện</div>
+                <h3 class="fw-bold text-primary mt-2 mb-0">@Model.DanhSachHopDongHeThong.Count(c => c.TrangThai == "DangThucHien" || c.TrangThai == "DANG_THUC_HIEN")</h3>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border rounded-3 bg-white p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase">Đã hoàn thành</div>
+                <h3 class="fw-bold text-success mt-2 mb-0">@Model.DanhSachHopDongHeThong.Count(c => c.TrangThai == "DaHoanThanh" || c.TrangThai == "HoanThanh" || c.TrangThai == "HOAN_THANH")</h3>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border rounded-3 bg-white p-3 h-100">
+                <div class="text-muted small fw-semibold text-uppercase">Tổng giá trị ký quỹ</div>
+                <h3 class="fw-bold text-dark mt-2 mb-0">@Model.DanhSachHopDongHeThong.Sum(c => c.SoTienKyQuy).ToString("N0") <small class="fs-6 fw-normal text-muted">đ</small></h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Repository Table Full Width -->
+    <div class="card border rounded-3 bg-white p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h5 class="fw-bold text-dark mb-0">Danh sách hợp đồng trên hệ thống</h5>
+                <p class="text-muted small mb-0">Danh sách các hợp đồng dịch vụ đã ký kết và giá trị ký quỹ bảo chứng.</p>
+            </div>
+            <div>
+                <input type="text" id="filterContractInput" class="form-control form-control-sm bg-light" style="width: 280px;" placeholder="Tìm theo mã HĐ, tên sinh viên, NTD..." />
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="contractsTable">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th class="py-3">Mã HĐ</th>
+                        <th class="py-3">Công việc</th>
+                        <th class="py-3">Nhà tuyển dụng (Bên A)</th>
+                        <th class="py-3">Freelancer sinh viên (Bên B)</th>
+                        <th class="py-3 text-end">Giá trị ký quỹ</th>
+                        <th class="py-3 text-center">Hình thức</th>
+                        <th class="py-3 text-center">Trạng thái</th>
+                        <th class="py-3 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.DanhSachHopDongHeThong.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Chưa có hợp đồng nào được giao kết trên hệ thống.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.DanhSachHopDongHeThong)
+                        {
+                            var statusClass = item.TrangThai switch
+                            {
+                                "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "bg-success-subtle text-success border border-success-subtle",
+                                "DangThucHien" or "DANG_THUC_HIEN" => "bg-primary-subtle text-primary border border-primary-subtle",
+                                "DaHuy" or "DA_HUY" => "bg-danger-subtle text-danger border border-danger-subtle",
+                                _ => "bg-warning-subtle text-warning border border-warning-subtle"
+                            };
+                            var statusText = item.TrangThai switch
+                            {
+                                "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "Đã hoàn thành",
+                                "DangThucHien" or "DANG_THUC_HIEN" => "Đang thực hiện",
+                                "DaHuy" or "DA_HUY" => "Đã hủy",
+                                _ => item.TrangThai
+                            };
+
+                            <tr>
+                                <td class="fw-bold text-dark">
+                                    <span class="badge bg-light text-dark border">#@item.MaHD</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark text-truncate" style="max-width: 240px;" title="@item.TenCongViec">
+                                        @item.TenCongViec
+                                    </div>
+                                    <div class="small text-muted">
+                                        Bắt đầu: @(item.NgayBatDau?.ToString("dd/MM/yyyy") ?? "-")
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark small">@item.TenNhaTuyenDung</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Mã NTD: #@item.MaNhaTuyenDung</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark small">@item.TenFreelancer</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Mã SV: #@item.MaFreelancer</div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="fw-bold text-dark">@item.SoTienKyQuy.ToString("N0") đ</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Ký quỹ bảo chứng</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-secondary border small">
+                                        @(item.HinhThucLamViec ?? "Remote")
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @statusClass px-2 py-1 small fw-semibold">
+                                        @statusText
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/Admin/ChiTietHopDong/@item.MaHD" class="btn btn-sm btn-outline-dark px-3 fw-semibold">
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Contract Template Form -->
+    <div class="card border rounded-3 bg-white p-4">
+        <h5 class="fw-bold text-dark mb-2">Cấu hình mẫu điều khoản hợp đồng</h5>
+        <p class="text-muted small mb-4">Các điều khoản này được áp dụng làm khung thỏa thuận tiêu chuẩn khi Nhà tuyển dụng và Freelancer tạo hợp đồng mới.</p>
+
+        <form method="post" asp-action="CapNhatMauHopDong">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold text-dark">Tiêu đề mẫu hợp đồng <span class="text-danger">*</span></label>
+                    <input type="text" name="tieuDe" value="@Model.TenMauHopDong" class="form-control bg-light" required />
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-semibold text-dark">Thời hạn nghiệm thu (Ngày) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" name="thoiHan" value="@Model.ThoiHanNghiemThuNgay" class="form-control bg-light" min="1" max="30" required />
+                        <span class="input-group-text bg-light">Ngày</span>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-semibold text-dark">Tỷ lệ giải ngân mặc định (%) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" name="tyLe" value="@Model.TyLeGiaiNganMacDinh" class="form-control bg-light" min="1" max="100" required />
+                        <span class="input-group-text bg-light">%</span>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label small fw-semibold text-dark">Nội dung điều khoản tiêu chuẩn <span class="text-danger">*</span></label>
+                    <textarea name="dieuKhoan" class="form-control bg-light font-monospace small" rows="6" required>@Model.DieuKhoanChung</textarea>
+                </div>
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-dark px-4 py-2 fw-semibold">
+                        Lưu mẫu hợp đồng
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('filterContractInput')?.addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#contractsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    </script>
+}

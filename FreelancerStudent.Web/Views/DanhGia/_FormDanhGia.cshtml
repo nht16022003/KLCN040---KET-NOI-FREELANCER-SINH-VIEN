@@ -1,0 +1,77 @@
+@model FreelancerStudent.Web.ViewModels.DanhGiaFormViewModel
+
+<div class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form onsubmit="guiDanhGia(this, event)">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="maHD" value="@Model.maHD" />
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">Đánh giá đối tác</h5>
+                        <div class="small text-muted">@Model.tenDoiTac · @Model.tenCongViec</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" data-review-message></div>
+                    @if (!string.IsNullOrWhiteSpace(Model.thongBaoLoi))
+                    {
+                        <div class="alert alert-warning">@Model.thongBaoLoi</div>
+                    }
+                    @{
+                        var review = Model.danhGiaHienTai;
+                        var canEdit = review?.coTheChinhSua == true;
+                        var canSubmit = Model.coTheDanhGia || canEdit;
+                    }
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold d-block">Đánh giá tổng thể <span class="text-danger">*</span></label>
+                        <input type="hidden" name="soSaoTongThe" value="@(review?.soSaoTongThe > 0 ? review.soSaoTongThe : "")" />
+                        <div class="d-flex align-items-center gap-1" role="radiogroup" aria-label="Đánh giá tổng thể">
+                            @for (var star = 1; star <= 5; star++)
+                            {
+                                <button type="button" class="btn btn-link p-1 fs-3 text-decoration-none @(review?.soSaoTongThe >= star ? "text-warning" : "text-secondary")" data-rating-group="soSaoTongThe" data-rating-value="@star" role="radio" aria-checked="@(review?.soSaoTongThe == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><i class="bi @(review?.soSaoTongThe >= star ? "bi-star-fill" : "bi-star")"></i></button>
+                            }
+                            <span class="small text-muted ms-2" data-rating-label="soSaoTongThe">@(review?.soSaoTongThe > 0 ? $"{review.soSaoTongThe} trên 5" : "Chọn mức đánh giá")</span>
+                        </div>
+                    </div>
+
+                    <div class="border rounded p-3 mb-3">
+                        <div class="fw-semibold mb-2">Đánh giá chi tiết <span class="text-muted fw-normal small">(không bắt buộc)</span></div>
+                        @foreach (var criterion in new[] {
+                            (Name: "soSaoChatLuong", Label: "Chất lượng công việc", Value: review?.soSaoChatLuong),
+                            (Name: "soSaoDungHan", Label: "Đúng hạn", Value: review?.soSaoDungHan),
+                            (Name: "soSaoGiaoTiep", Label: "Giao tiếp", Value: review?.soSaoGiaoTiep)
+                        })
+                        {
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-1">
+                                <span class="small">@criterion.Label</span>
+                                <div class="d-flex align-items-center gap-1" role="radiogroup" aria-label="@criterion.Label">
+                                    <input type="hidden" name="@criterion.Name" value="@(criterion.Value?.ToString() ?? "")" />
+                                    @for (var star = 1; star <= 5; star++)
+                                    {
+                                        <button type="button" class="btn btn-link p-0 fs-5 text-decoration-none @(criterion.Value >= star ? "text-warning" : "text-secondary")" data-rating-group="@criterion.Name" data-rating-value="@star" role="radio" aria-checked="@(criterion.Value == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><i class="bi @(criterion.Value >= star ? "bi-star-fill" : "bi-star")"></i></button>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none" data-rating-clear="@criterion.Name" disabled="@(!canSubmit)">Bỏ chọn</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <label class="form-label fw-semibold" for="nhanXet">Nhận xét</label>
+                    <textarea class="form-control" id="nhanXet" name="nhanXet" rows="4" maxlength="2000" disabled="@(!canSubmit)">@review?.nhanXet</textarea>
+                    @if (review?.hanChinhSua.HasValue == true)
+                    {
+                        <small class="text-muted d-block mt-2">Có thể chỉnh sửa đến @review.hanChinhSua.Value.ToString("dd/MM/yyyy HH:mm").</small>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    @if (canSubmit)
+                    {
+                        <button type="submit" class="btn btn-primary">@(canEdit ? "Lưu chỉnh sửa" : "Gửi đánh giá")</button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

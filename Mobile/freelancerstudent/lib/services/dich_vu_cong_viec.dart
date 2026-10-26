@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
 import '../core/network/phan_hoi_api.dart';
 import '../models/mo_hinh_bai_dang_tuyen_dung.dart';
@@ -89,6 +89,36 @@ class JobService {
       return ApiResponse<List<JobPostModel>>(
         isSuccess: false,
         message: 'Lỗi khi tải việc làm gợi ý: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Gợi ý kỹ năng theo tiêu đề và mô tả bài đăng (JobPostController.GoiYKyNangTheoTieuDe)
+  Future<ApiResponse<List<Map<String, dynamic>>>> layGoiYKyNangTheoTieuDe(
+    String tieuDe, {
+    String? moTa,
+  }) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.goiYKyNang,
+        queryParameters: {
+          'tieuDe': tieuDe,
+          if (moTa != null && moTa.isNotEmpty) 'moTa': moTa,
+        },
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final rawItems = body['data'] is List ? body['data'] as List : <dynamic>[];
+
+      return ApiResponse<List<Map<String, dynamic>>>(
+        isSuccess: true,
+        data: rawItems.whereType<Map<String, dynamic>>().toList(),
+      );
+    } catch (e) {
+      return ApiResponse<List<Map<String, dynamic>>>(
+        isSuccess: false,
+        message: 'Lỗi khi lấy gợi ý kỹ năng: ${e.toString()}',
       );
     }
   }

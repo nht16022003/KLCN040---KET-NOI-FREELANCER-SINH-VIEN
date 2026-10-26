@@ -1,0 +1,297 @@
+@model List<FreelancerStudent.Web.ViewModels.MinhChungItemViewModel>
+@{
+    ViewData["Title"] = "Phê duyệt Minh chứng Thẻ sinh viên";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-person-badge text-success me-2"></i>Phê duyệt Minh chứng Thẻ sinh viên
+            </h3>
+            <p class="text-muted small mb-0">
+                Thẩm định thẻ sinh viên, đối chiếu thông tin OCR và tự động đồng bộ hồ sơ chính thức của sinh viên.
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a href="/Admin" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                &larr; Tổng quan Quản trị
+            </a>
+            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                Quản lý người dùng
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert / Toast Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat banner -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-warning border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Minh chứng chờ duyệt</div>
+                        <h3 class="fw-bold text-warning mb-0 mt-1">@Model.Count</h3>
+                    </div>
+                    <div class="p-3 bg-warning-subtle text-warning rounded-circle">
+                        <i class="bi bi-hourglass-split fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-8">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 d-flex justify-content-center">
+                <div class="small text-muted">
+                    <i class="bi bi-info-circle text-primary me-1"></i>
+                    <strong>Quy trình đồng bộ:</strong> Khi Admin nhấn <strong>Duyệt & Đồng bộ hồ sơ</strong>, hệ thống sẽ tự động cập nhật các trường <em>Họ và tên, Trường học, Chuyên ngành, Niên khóa, Năm học</em> vào hồ sơ của sinh viên và đồng thời <strong>khóa quyền tự sửa</strong> trên cả Web và Mobile.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content: List of Pending Card Verifications -->
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-5 text-center my-4">
+            <div class="py-4">
+                <i class="bi bi-patch-check text-success" style="font-size: 3.5rem;"></i>
+                <h4 class="fw-bold text-dark mt-3">Tất cả minh chứng đã được xử lý!</h4>
+                <p class="text-muted mb-0">Hiện tại không có thẻ sinh viên nào đang chờ Ban quản trị phê duyệt.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+                        <div class="card-header bg-light border-bottom py-3 px-4 d-flex flex-wrap justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-warning text-dark me-2">#MC-@item.MaMinhChung</span>
+                                <span class="fw-bold text-dark">Sinh viên: @(item.HoTenUserHienTai ?? "Mã User " + item.MaUser)</span>
+                                <span class="text-muted small ms-2">(@item.EmailUserHienTai)</span>
+                            </div>
+                            <div class="small text-muted mt-1 mt-md-0">
+                                <i class="bi bi-calendar3 me-1"></i>Ngày nộp: <strong>@item.NgayNop.ToString("dd/MM/yyyy HH:mm")</strong>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <form asp-action="XuLyMinhChung" method="post" id="form-approve-@item.MaMinhChung">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="MaMinhChung" value="@item.MaMinhChung" />
+                                <input type="hidden" name="ChapNhan" value="true" id="chapNhan-@item.MaMinhChung" />
+                                <input type="hidden" name="LyDoTuChoi" value="" id="lyDoTuChoi-@item.MaMinhChung" />
+
+                                <div class="row g-4">
+                                    <!-- Cột 1: Ảnh thẻ sinh viên -->
+                                    <div class="col-12 col-lg-4 text-center">
+                                        <div class="p-2 border rounded-3 bg-light position-relative">
+                                            <a href="/@item.FileMinhChung" target="_blank" title="Bấm để xem ảnh kích thước gốc">
+                                                <img src="/@item.FileMinhChung" alt="Thẻ sinh viên"
+                                                     class="img-fluid rounded shadow-sm"
+                                                     style="max-height: 280px; object-fit: contain; cursor: zoom-in;"
+                                                     onerror="this.onerror=null; this.src='/images/placeholder-id.png';" />
+                                            </a>
+                                            <div class="mt-2 small text-muted">
+                                                <i class="bi bi-zoom-in me-1"></i>Bấm vào ảnh để xem kích thước gốc
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cột 2: Đối chiếu Thông tin OCR trích xuất & Hồ sơ hiện tại -->
+                                    <div class="col-12 col-lg-8">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-sm align-middle mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th style="width: 25%;">Trường dữ liệu</th>
+                                                                <th style="width: 35%;">Hồ sơ hiện tại (SQL)</th>
+                                                                <th style="width: 40%;" class="text-success">Dữ liệu từ Thẻ SV (Sẽ cập nhật)</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="fw-bold small">Họ và tên</td>
+                                                                <td class="text-muted small">@(item.HoTenUserHienTai ?? "Chưa có")</td>
+                                                                <td>
+                                                                    <input type="text" name="HoVaTen" class="form-control form-control-sm rounded-0 fw-semibold text-success"
+                                                                           value="@(item.HoTenXacNhan ?? item.HoTenUserHienTai)" required />
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold small">MSSV</td>
+                                                                <td class="text-muted small">--</td>
+                                                                <td class="small fw-semibold text-primary">
+                                                                    @(item.MssvXacNhan ?? "Không phát hiện")
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold small">Trường học</td>
+                                                                <td class="text-muted small">@(item.TenTruongHienTai ?? "Chưa cập nhật")</td>
+                                                                <td>
+                                                                    <input type="text" name="TenTruong" class="form-control form-control-sm rounded-0 fw-semibold text-success"
+                                                                           value="@(item.TenTruongXacNhan ?? item.TenTruongHienTai)" required />
+                                                                    <input type="hidden" name="MaTruong" value="@item.MaTruongXacNhan" />
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold small">Chuyên ngành</td>
+                                                                <td class="text-muted small">@(item.TenChuyenNganhHienTai ?? "Chưa cập nhật")</td>
+                                                                <td>
+                                                                    <select name="MaChuyenNganh" class="form-select form-select-sm rounded-0 fw-semibold text-success">
+                                                                        <option value="KTPM" selected="@(item.MaChuyenNganhXacNhan == "KTPM")">Kỹ thuật phần mềm (KTPM)</option>
+                                                                        <option value="TKDH" selected="@(item.MaChuyenNganhXacNhan == "TKDH")">Thiết kế đồ họa (TKDH)</option>
+                                                                        <option value="CNTT" selected="@(item.MaChuyenNganhXacNhan == "CNTT")">Công nghệ thông tin (CNTT)</option>
+                                                                        <option value="MKT" selected="@(item.MaChuyenNganhXacNhan == "MKT")">Digital Marketing</option>
+                                                                        <option value="TMDT" selected="@(item.MaChuyenNganhXacNhan == "TMDT")">Thương mại điện tử</option>
+                                                                        @if (!string.IsNullOrEmpty(item.MaChuyenNganhXacNhan) && !new[] { "KTPM", "TKDH", "CNTT", "MKT", "TMDT" }.Contains(item.MaChuyenNganhXacNhan))
+                                                                        {
+                                                                            <option value="@item.MaChuyenNganhXacNhan" selected>@item.MaChuyenNganhXacNhan</option>
+                                                                        }
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold small">Niên khóa & Năm thứ</td>
+                                                                <td class="text-muted small">--</td>
+                                                                <td>
+                                                                    <div class="row g-2">
+                                                                        <div class="col-7">
+                                                                            <input type="text" name="NienKhoa" class="form-control form-control-sm rounded-0 fw-semibold text-success"
+                                                                                   placeholder="VD: 2021-2025" value="@item.NienKhoaXacNhan" />
+                                                                        </div>
+                                                                        <div class="col-5">
+                                                                            <select name="NamThu" class="form-select form-select-sm rounded-0 fw-semibold text-success">
+                                                                                <option value="1" selected="@(item.NamThuXacNhan == 1)">Năm 1</option>
+                                                                                <option value="2" selected="@(item.NamThuXacNhan == 2)">Năm 2</option>
+                                                                                <option value="3" selected="@(item.NamThuXacNhan == 3)">Năm 3</option>
+                                                                                <option value="4" selected="@(item.NamThuXacNhan == 4)">Năm 4</option>
+                                                                                <option value="5" selected="@(item.NamThuXacNhan == 5)">Đã TN</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            @if (item.NgaySinhXacNhan.HasValue)
+                                                            {
+                                                                <tr>
+                                                                    <td class="fw-bold small">Ngày sinh</td>
+                                                                    <td class="text-muted small">--</td>
+                                                                    <td>
+                                                                        <input type="date" name="NgaySinh" class="form-control form-control-sm rounded-0 text-success"
+                                                                               value="@item.NgaySinhXacNhan.Value.ToString("yyyy-MM-dd")" />
+                                                                    </td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <!-- Các nút hành động -->
+                                            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                                                <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill"
+                                                        onclick="tuChoiMinhChung(@item.MaMinhChung)">
+                                                    <i class="bi bi-x-circle me-1"></i>Từ chối minh chứng
+                                                </button>
+                                                <button type="submit" class="btn btn-success btn-sm px-4 rounded-pill fw-semibold shadow-sm">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Duyệt & Cập nhật hồ sơ
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal nhập lý do từ chối -->
+<div class="modal fade" id="modalTuChoi" tabindex="-1" aria-labelledby="modalTuChoiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="modalTuChoiLabel">
+                    <i class="bi bi-x-circle me-2"></i>Từ chối minh chứng thẻ sinh viên
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="currentRejectId" />
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Lý do từ chối minh chứng <span class="text-danger">*</span></label>
+                    <textarea id="lyDoTuChoiInput" class="form-control rounded-2" rows="3"
+                              placeholder="VD: Ảnh thẻ bị mờ, không nhìn rõ mã sinh viên; hoặc thẻ sinh viên đã hết hạn..."></textarea>
+                </div>
+                <div class="small text-muted">
+                    <i class="bi bi-info-circle me-1"></i>Lý do từ chối sẽ được hiển thị ngay trên ứng dụng Web và Mobile để sinh viên biết và chụp lại thẻ mới.
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" onclick="submitTuChoi()">
+                    Xác nhận từ chối
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let rejectModal = null;
+    document.addEventListener("DOMContentLoaded", function () {
+        const modalEl = document.getElementById('modalTuChoi');
+        if (modalEl) {
+            rejectModal = new bootstrap.Modal(modalEl);
+        }
+    });
+
+    function tuChoiMinhChung(id) {
+        document.getElementById('currentRejectId').value = id;
+        document.getElementById('lyDoTuChoiInput').value = '';
+        if (rejectModal) {
+            rejectModal.show();
+        }
+    }
+
+    function submitTuChoi() {
+        const id = document.getElementById('currentRejectId').value;
+        const reason = document.getElementById('lyDoTuChoiInput').value.trim();
+        if (!reason) {
+            alert('Vui lòng nhập lý do từ chối minh chứng.');
+            return;
+        }
+
+        const form = document.getElementById('form-approve-' + id);
+        if (form) {
+            document.getElementById('chapNhan-' + id).value = 'false';
+            document.getElementById('lyDoTuChoi-' + id).value = reason;
+            form.submit();
+        }
+    }
+</script>

@@ -9,6 +9,7 @@ namespace FreelancerStudent.Web.ViewModels
         public string maHD { get; set; } = string.Empty;
         public string tenGiaiDoan { get; set; } = string.Empty;
         public string? moTa { get; set; }
+        public string? linkSanPham { get; set; }
         public DateTime hanChot { get; set; }
         public string trangThai { get; set; } = string.Empty;
     }
@@ -36,10 +37,18 @@ namespace FreelancerStudent.Web.ViewModels
 
         public DateTime? ngayBatDau { get; set; }
         public DateTime? ngayKetThuc { get; set; }
+        public DateTime? ngayHoanThanh { get; set; }
+        public DateTime? ngayDongHopDong { get; set; }
+        public bool thanhToanTuDong { get; set; }
         public decimal? sotienkyquy { get; set; }
         public string? hinhthuclamviec { get; set; }
         public string? dieuKhoan { get; set; }
         public string trangThai { get; set; } = string.Empty;
+        public string? trangThaiDanhGia { get; set; }
+        public int? maDanhGia { get; set; }
+        public bool coTheChinhSuaDanhGia { get; set; }
+        public bool coTheDanhGia { get; set; }
+        public DanhGiaItemViewModel? ThongTinDanhGiaHienTai { get; set; }
         public List<GiaiDoanHopDongViewModel> giaiDoans { get; set; } = new List<GiaiDoanHopDongViewModel>();
 
         // Thuộc tính tiện ích giao diện
@@ -53,6 +62,19 @@ namespace FreelancerStudent.Web.ViewModels
 
         // Tiến độ dự án (FRL-UC-09)
         public TienDoDuAnViewModel? TienDoDuAn { get; set; }
+    }
+
+    public class HopDongThanhToanViewModel
+    {
+        public string maHD { get; set; } = string.Empty;
+        public string tenCongViec { get; set; } = string.Empty;
+        public string tenFreelancer { get; set; } = string.Empty;
+        public decimal sotienkyquy { get; set; }
+        public decimal soTienHoaHong { get; set; }
+        public decimal soTienFreelancerNhan { get; set; }
+        public decimal soDuKhaDung { get; set; }
+        public decimal soDuDongBang { get; set; }
+        public bool daCoDuLieuEscrow { get; set; }
     }
 
     public class DanhSachHopDongViewModel
@@ -74,6 +96,8 @@ namespace FreelancerStudent.Web.ViewModels
         public string tenGiaiDoan { get; set; } = string.Empty;
 
         public string? moTa { get; set; }
+
+        public string? linkSanPham { get; set; }
 
         public DateTime? hanChot { get; set; }
 
@@ -129,6 +153,7 @@ namespace FreelancerStudent.Web.ViewModels
         public string? tenGiaiDoan { get; set; }
         public string tenTask { get; set; } = string.Empty;
         public string moTa { get; set; } = string.Empty;
+        public string? linkSanPham { get; set; }
         public DateTime? hanHoanThanh { get; set; }
         public string trangThai { get; set; } = "ChuaThucHien";
         public DateTime ngayCapNhat { get; set; } = DateTime.Now;
@@ -146,6 +171,7 @@ namespace FreelancerStudent.Web.ViewModels
         public int soTaskHoanThanh { get; set; }
         public decimal tyLeHoanThanh { get; set; }
         public bool coQuyenCapNhat { get; set; }
+        public List<GiaiDoanHopDongViewModel> danhSachGiaiDoan { get; set; } = new List<GiaiDoanHopDongViewModel>();
         public List<TaskCongViecViewModel> danhSachTask { get; set; } = new List<TaskCongViecViewModel>();
     }
 

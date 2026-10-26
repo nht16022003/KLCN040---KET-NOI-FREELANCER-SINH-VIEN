@@ -170,3 +170,11 @@ D:\KLTN\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\refint\FreelancerSt
 D:\KLTN\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.pdb
 D:\KLTN\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\FreelancerStudent.API.genruntimeconfig.cache
 D:\KLTN\KLTN\Improve\FreelancerStudent.API\obj\Debug\net10.0\ref\FreelancerStudent.API.dll
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\appsettings.Development.json
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\appsettings.json
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\FreelancerStudent.API.staticwebassets.endpoints.json
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\FreelancerStudent.API.exe
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\FreelancerStudent.API.deps.json
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\FreelancerStudent.API.runtimeconfig.json
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\FreelancerStudent.API.dll
+C:\Users\HTuan\.gemini\antigravity-ide\brain\1e7369c5-8f4e-43d1-893d-e2b1e0241af1\scratch\api_bin\FreelancerStudent.API.pdb

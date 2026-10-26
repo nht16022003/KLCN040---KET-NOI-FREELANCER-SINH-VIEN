@@ -58,6 +58,11 @@ namespace FreelancerStudent.API.Models
 
         public decimal? chiPhiTu { get; set; }
 
+        [Column(TypeName = "decimal(3,2)")]
+        public decimal diemDanhGiaTrungBinh { get; set; }
+
+        public int soLuotDanhGia { get; set; }
+
         [ForeignKey("maUser")]
         public virtual Users? User { get; set; }
 

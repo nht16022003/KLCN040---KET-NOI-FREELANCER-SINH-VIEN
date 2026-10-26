@@ -19,7 +19,14 @@ namespace FreelancerStudent.API.Repositories
 
         public async Task<List<FreelancerStudents>> layTatCaFreelancerStudentsAsync()
         {
-            var ketqua = await _context.FreelancerStudents.Include(f => f.User).Include(f => f.ChuyenNganh).ToListAsync();
+            var ketqua = await _context.FreelancerStudents
+                .Include(f => f.User)
+                .Include(f => f.ChuyenNganh)
+                .Include(f => f.FreelancerStudent_KyNangs)
+                    .ThenInclude(fk => fk.KyNang)
+                .OrderByDescending(f => f.User != null ? f.User.ngayTao : DateTime.MinValue)
+                .ThenByDescending(f => f.maFreelancerStudents)
+                .ToListAsync();
             return ketqua;
         }
 
@@ -92,23 +99,39 @@ namespace FreelancerStudent.API.Repositories
                 return false;
             }
 
-            //  Cập nhật thông tin sinh viên (FreelancerStudents)
-            student.maChuyenNganh = dto.maChuyenNganh;
-            student.tenTruong = dto.tenTruong ?? string.Empty;
+            // Kiểm tra xem sinh viên đã có minh chứng thẻ sinh viên được duyệt ("Đã xác minh") hay chưa
+            bool daXacMinhThe = await _context.MinhChung_FreelancerStudents
+                .AsNoTracking()
+                .AnyAsync(m => m.maUser == dto.maUser && m.trangThaiGuiMinhChung == "Đã xác minh");
+
+            // QUY TẮC BẢO VỆ DỮ LIỆU TẠI BACKEND:
+            // Nếu đã xác minh thẻ sinh viên: KHÓA các trường được xác minh từ thẻ (Họ tên, Trường, Chuyên ngành, Năm học, Niên khóa)
+            // Từ chối mọi nỗ lực ghi đè các trường này kể cả khi client tự ý sửa payload.
+            if (!daXacMinhThe)
+            {
+                student.maChuyenNganh = dto.maChuyenNganh;
+                student.tenTruong = dto.tenTruong ?? string.Empty;
+                student.namThu = dto.namThu;
+                student.nienKhoa = dto.nienKhoa ?? string.Empty;
+
+                if (student.User != null && !string.IsNullOrWhiteSpace(dto.tenUser))
+                {
+                    student.User.hotenUser = dto.tenUser.Trim();
+                }
+            }
+
+            // Các trường tự do không thuộc nhóm thẻ sinh viên vẫn cho phép cập nhật theo quyền hạn:
             student.diaDiemFreelancerStudent = dto.diaDiemFreelancerStudent ?? string.Empty;
-            student.namThu = dto.namThu;
             student.GPA = dto.GPA;
-            student.nienKhoa = dto.nienKhoa ?? string.Empty;
             student.gioithieu = dto.gioithieu;
             student.kyNangCoBan = dto.kyNangCoBan;
             student.ngonNgu = dto.ngonNgu;
             student.trangthaiNhanViec = dto.trangthaiNhanViec;
             student.chiPhiTu = dto.chiPhiTu;
 
-            //  Cập nhật thông tin tài khoản (Users)
+            // Cập nhật thông tin tài khoản (Users)
             if (student.User != null)
             {
-                student.User.hotenUser = dto.tenUser;
                 student.User.sdtUser = dto.sdt;
             }
 

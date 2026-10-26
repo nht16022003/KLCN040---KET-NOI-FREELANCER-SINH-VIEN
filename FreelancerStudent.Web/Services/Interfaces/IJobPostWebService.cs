@@ -35,6 +35,8 @@ namespace FreelancerStudent.Web.Services.Interfaces
         //Tuấn
         Task<ApiReponse<bool>> capNhatJobPostAsync(JobPostViewModel model);
 
+        Task<ApiReponse<List<KyNangGoiYViewModel>>> layGoiYKyNangTheoTieuDe(string? tieuDe, string? moTa = null);
+
 
     }
 }

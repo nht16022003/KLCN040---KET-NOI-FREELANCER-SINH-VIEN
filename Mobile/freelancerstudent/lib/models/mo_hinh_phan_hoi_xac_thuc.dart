@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 
 class AuthResponseModel {
   final String token;
@@ -37,6 +37,8 @@ class AuthResponseModel {
         avatarUrl,
         tenMacDinh: fullName.isNotEmpty ? fullName : 'User',
       );
+  bool get isEmployer => role == 'NhaTuyenDung';
+  bool get isStudent => role == 'FreelancerStudent';
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
     final payload = json['data'] is Map<String, dynamic>

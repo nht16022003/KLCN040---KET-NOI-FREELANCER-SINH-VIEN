@@ -34,6 +34,9 @@ class AppColors {
   /// Màu nội dung - Xám trung tính (#526056)
   static const Color bodyText = Color(0xFF526056);
 
+  /// Màu nội dung mờ / phụ (#8C9B90)
+  static const Color mutedText = Color(0xFF8C9B90);
+
   /// Màu trạng thái thành công (#2E7D32)
   static const Color success = Color(0xFF2E7D32);
 

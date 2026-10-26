@@ -45,6 +45,9 @@ namespace FreelancerStudent.API.Models
 
         public decimal? chiPhiTu { get; set; }
 
-
+        public double diemDanhGiaTrungBinh { get; set; }
+        public int soLuotDanhGia { get; set; }
+        public DateTime ngayTao { get; set; } = DateTime.UtcNow;
+        public List<string> danhSachKyNang { get; set; } = new();
     }
 }

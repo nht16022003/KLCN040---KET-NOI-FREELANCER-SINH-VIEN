@@ -58,5 +58,53 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+        public async Task<ApiReponse<NhaTuyenDungProfileViewModel>> layProfileNhaTuyenDungAsync(int maNhaTuyenDung)
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync($"api/NhaTuyenDung/Profile/{maNhaTuyenDung}");
+                var json = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<NhaTuyenDungProfileViewModel>>(json, _jsonOptions)
+                    ?? new ApiReponse<NhaTuyenDungProfileViewModel>
+                    {
+                        success = false,
+                        message = "Không thể đọc dữ liệu hồ sơ nhà tuyển dụng."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<NhaTuyenDungProfileViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<NhaTuyenDungProfileViewModel>> layProfileNhaTuyenDungTheoMaUserAsync(int maUser)
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync($"api/NhaTuyenDung/Profile/ByUser/{maUser}");
+                var json = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<NhaTuyenDungProfileViewModel>>(json, _jsonOptions)
+                    ?? new ApiReponse<NhaTuyenDungProfileViewModel>
+                    {
+                        success = false,
+                        message = "Không thể đọc dữ liệu hồ sơ nhà tuyển dụng."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<NhaTuyenDungProfileViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
     }
 }

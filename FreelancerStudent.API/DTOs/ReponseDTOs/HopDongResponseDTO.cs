@@ -50,6 +50,11 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
 
         public string trangThai { get; set; } = string.Empty;
 
+        public string? trangThaiDanhGia { get; set; }
+        public int? maDanhGia { get; set; }
+        public bool coTheChinhSuaDanhGia { get; set; }
+        public bool coTheDanhGia { get; set; }
+
         public List<GiaiDoanHopDong_ResponseDTO> giaiDoans { get; set; } = new List<GiaiDoanHopDong_ResponseDTO>();
     }
 
@@ -59,6 +64,7 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
         public string maHD { get; set; } = string.Empty;
         public string tenGiaiDoan { get; set; } = string.Empty;
         public string? moTa { get; set; }
+        public string? linkSanPham { get; set; }
         public DateTime hanChot { get; set; }
         public string trangThai { get; set; } = string.Empty;
     }

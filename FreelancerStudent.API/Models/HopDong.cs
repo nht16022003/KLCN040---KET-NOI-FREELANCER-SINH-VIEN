@@ -22,6 +22,12 @@ namespace FreelancerStudent.API.Models
 
         public DateTime? ngayKetThuc { get; set; }
 
+        public DateTime? ngayHoanThanh { get; set; }
+
+        public DateTime? ngayDongHopDong { get; set; }
+
+        public bool thanhToanTuDong { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal? sotienkyquy { get; set; }
 

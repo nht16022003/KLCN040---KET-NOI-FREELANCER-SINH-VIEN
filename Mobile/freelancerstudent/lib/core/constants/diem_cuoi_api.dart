@@ -50,6 +50,7 @@ class ApiEndpoints {
   static const String danhSachUngTuyen = '$baseUrl/JobPost/DanhSachUngTuyen';
   static const String duyetUngTuyen = '$baseUrl/JobPost/DuyetUngTuyen';
   static const String jobGoiY = '$baseUrl/JobPost/GoiYChoFreelancer';
+  static const String goiYKyNang = '$baseUrl/JobPost/GoiYKyNangTheoTieuDe';
 
   // ==========================================
   // BÀI ĐĂNG TÌM VIỆC CỦA SINH VIÊN (STUDENT POSTS)
@@ -67,6 +68,9 @@ class ApiEndpoints {
   static const String layViTheoUser = '$baseUrl/Wallet/LayViTheoUser';
   static const String taoGiaoDichNapTien = '$baseUrl/GiaoDichNapTien/TaoGiaoDich';
   static const String trangThaiGiaoDichNapTien = '$baseUrl/GiaoDichNapTien/TrangThai';
+  static const String lichSuGiaoDichVi = '$baseUrl/Wallet/LichSuGiaoDich';
+  static const String taoYeuCauRutTien = '$baseUrl/Wallet/TaoYeuCauRutTien';
+  static const String danhSachRutTien = '$baseUrl/Wallet/DanhSachRutTien';
 
   // ==========================================
   // HỢP ĐỒNG & KÝ QUỸ (ESCROW CONTRACTS)
@@ -78,6 +82,16 @@ class ApiEndpoints {
   static const String taoHopDong = '$baseUrl/HopDong/tao-hop-dong';
   static const String xacNhanHopDong = '$baseUrl/HopDong/xac-nhan';
   static const String kyQuyHopDong = '$baseUrl/HopDong/KyQuy';
+  static const String nghiemThuHopDong = '$baseUrl/HopDong/nghiem-thu';
+  static const String thanhToanHopDong = '$baseUrl/HopDong/thanh-toan';
+
+  // ==========================================
+  // BÀN GIAO & NGHIỆM THU SẢN PHẨM (PRODUCT DELIVERY)
+  // ==========================================
+  static const String banGiaoSanPham = '$baseUrl/BanGiaoSanPham';
+  static const String banGiaoSanPhamHopDong = '$baseUrl/BanGiaoSanPham/hopdong';
+  static const String yeuCauChinhSua = '$baseUrl/BanGiaoSanPham/yeucauchinhsua';
+  static const String nghiemThuBanGiao = '$baseUrl/BanGiaoSanPham/nghiemthu';
 
   // ==========================================
   // TIẾN ĐỘ DỰ ÁN (TASK CÔNG VIỆC)
@@ -108,6 +122,15 @@ class ApiEndpoints {
   static const String portfolioFreelancer = '$baseUrl/Portfolio';
   static const String duAnPortfolio = '$baseUrl/Portfolio/projects';
   static const String duAnNoiBatPortfolio = '$baseUrl/Portfolio/featured';
+
+  // ==========================================
+  // MINH CHỨNG THẺ SINH VIÊN (OCR)
+  // ==========================================
+  static const String quetTheSinhVien = '$baseUrl/MinhChung/quet-the-sinh-vien';
+  static const String xacNhanTheSinhVien = '$baseUrl/MinhChung/xac-nhan-the-sinh-vien';
+  static const String lichSuMinhChung = '$baseUrl/MinhChung/lich-su';
+  static const String danhSachChuyenNganh = '$baseUrl/MinhChung/chuyen-nganh';
+  static const String thongTinHienTaiMinhChung = '$baseUrl/MinhChung/thong-tin-hien-tai';
 
   // Tương thích ngược (Backward Compatibility)
   static const String authLogin = dangNhap;

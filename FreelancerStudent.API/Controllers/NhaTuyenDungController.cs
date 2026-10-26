@@ -42,6 +42,68 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+        [HttpGet("Profile/{maNhaTuyenDung:int}")]
+        public async Task<IActionResult> layProfile(int maNhaTuyenDung)
+        {
+            try
+            {
+                var profile = await _nhaTuyenDungService.layProfileNhaTuyenDung(maNhaTuyenDung);
+                if (profile == null)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy hồ sơ nhà tuyển dụng!"
+                    });
+                }
 
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy thông tin hồ sơ nhà tuyển dụng thành công!",
+                    data = profile
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi hệ thống khi tải hồ sơ nhà tuyển dụng: " + ex.Message
+                });
+            }
+        }
+
+        [HttpGet("Profile/ByUser/{maUser:int}")]
+        public async Task<IActionResult> layProfileByMaUser(int maUser)
+        {
+            try
+            {
+                var profile = await _nhaTuyenDungService.layProfileNhaTuyenDungTheoMaUser(maUser);
+                if (profile == null)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy hồ sơ nhà tuyển dụng của người dùng này!"
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy thông tin hồ sơ nhà tuyển dụng thành công!",
+                    data = profile
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi hệ thống khi tải hồ sơ nhà tuyển dụng: " + ex.Message
+                });
+            }
+        }
     }
 }

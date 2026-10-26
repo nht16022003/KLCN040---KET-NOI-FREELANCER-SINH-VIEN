@@ -57,36 +57,47 @@ namespace FreelancerStudent.API.Controllers
 
 
         // =====================================================
-        // TEST HOÀN THÀNH GIAO DỊCH NẠP TIỀN
+        // XÁC NHẬN NẠP TIỀN MÔ PHỎNG (DEMO / KIỂM THỬ)
         // =====================================================
-        // [HttpPost("HoanThanhGiaoDich/{maGiaoDich}")]
-        // public async Task<IActionResult> HoanThanhGiaoDich(
-        //     string maGiaoDich)
-        // {
-        //     try
-        //     {
-        //         var ketQua =
-        //             await _giaoDichNapTienService
-        //                 .hoanThanhGiaoDichNapTienAsync(
-        //                     maGiaoDich
-        //                 );
+        [HttpPost("XacNhanMoPhong/{maGiaoDich}")]
+        public async Task<IActionResult> XacNhanMoPhong(
+            string maGiaoDich,
+            [FromQuery] int maUser)
+        {
+            if (string.IsNullOrWhiteSpace(maGiaoDich))
+            {
+                return BadRequest(new { success = false, message = "Mã giao dịch không hợp lệ." });
+            }
 
-        //         return Ok(new
-        //         {
-        //             success = true,
-        //             message = "Giao dịch nạp tiền đã hoàn thành!",
-        //             data = ketQua
-        //         });
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return BadRequest(new
-        //         {
-        //             success = false,
-        //             message = ex.Message
-        //         });
-        //     }
-        // }
+            if (maUser <= 0)
+            {
+                return BadRequest(new { success = false, message = "Không xác định được người dùng." });
+            }
+
+            try
+            {
+                var ketQua = await _giaoDichNapTienService.xacNhanNapTienMoPhongAsync(maGiaoDich, maUser);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Xác nhận nạp tiền mô phỏng thành công! Số dư đã được cộng vào ví.",
+                    data = ketQua
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
         // =====================================================
         // KIỂM TRA TRẠNG THÁI GIAO DỊCH
         // =====================================================

@@ -51,6 +51,7 @@ dependencies:
 
   # Real-time WebSocket Chat (.NET SignalR Hub)
   signalr_netcore: ^1.4.1
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:

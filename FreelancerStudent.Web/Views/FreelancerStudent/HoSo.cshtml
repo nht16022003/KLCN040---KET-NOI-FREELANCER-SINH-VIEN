@@ -68,98 +68,177 @@
                         <div class="section-title">
                             1. Thông tin cá nhân & Liên hệ
                         </div>
+                        @if (ViewBag.DaXacMinh == true)
+                        {
+                            <div class="alert alert-success d-flex align-items-center rounded-0 py-2 px-3 mb-3 border-start border-success border-4" style="background-color: #f0fdf4;">
+                                <i class="bi bi-patch-check-fill text-success fs-5 me-2"></i>
+                                <div class="small">
+                                    <strong>Hồ sơ đã xác minh:</strong> Họ và tên cùng thông tin học vấn đã được xác thực từ Thẻ sinh viên bởi Ban quản trị. Các trường này đã được khóa để bảo đảm tính minh bạch.
+                                </div>
+                            </div>
+                        }
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold small">Họ và tên <span
-                                    class="text-danger">*</span></label>
-                                    <input asp-for="TenUser" class="form-control rounded-0" required />
+                                <label class="form-label fw-bold small">Họ và tên <span class="text-danger">*</span>
+                                    @if (ViewBag.DaXacMinh == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã xác minh</span>
+                                    }
+                                </label>
+                                <input asp-for="TenUser" class="form-control rounded-0" required
+                                       readonly="@(ViewBag.DaXacMinh == true ? "readonly" : null)"
+                                       style="@(ViewBag.DaXacMinh == true ? "background-color: #f1f5f9; cursor: not-allowed;" : "")" />
+                                @if (ViewBag.DaXacMinh == true)
+                                {
+                                    <small class="text-muted" style="font-size: 0.75rem;">Thông tin đã được xác minh từ thẻ sinh viên và không thể tự chỉnh sửa.</small>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Số điện thoại liên hệ</label>
+                                <input asp-for="Sdt" class="form-control rounded-0" placeholder="0901234567" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN 2: THIẾT LẬP NHẬN VIỆC & MỨC THÙ LAO -->
+                    <div class="mb-4">
+                        <div class="section-title">
+                            2. Trạng thái & Mức thù lao khởi điểm
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light border rounded-0 h-100 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold small mb-1">Sẵn sàng nhận việc freelance</div>
+                                        <div class="text-muted" style="font-size: 0.8rem;">Bật để hồ sơ hiển thị trên trang Khám phá Freelancer.</div>
+                                    </div>
+                                    <div class="form-check form-switch fs-4 mb-0">
+                                        <input asp-for="TrangthaiNhanViec" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold small">Số điện thoại liên hệ</label>
-                                    <input asp-for="Sdt" class="form-control rounded-0" placeholder="0901234567" />
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light border rounded-0 h-100">
+                                    <label class="form-label fw-bold small mb-1">Mức giá / thù lao từ (VNĐ/dự án)</label>
+                                    <div class="input-group">
+                                        <input asp-for="ChiPhiTu" type="number" step="50000" class="form-control rounded-0" placeholder="100000" />
+                                        <span class="input-group-text bg-white rounded-0">VNĐ</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- PHẦN 2: THIẾT LẬP NHẬN VIỆC & MỨC THÙ LAO -->
-                        <div class="mb-4">
-                            <div class="section-title">
-                                2. Trạng thái & Mức thù lao khởi điểm
+                    <!-- PHẦN 3: HỌC VẤN & NGÀNH NGHỀ -->
+                    <div class="mb-4">
+                        <div class="section-title">
+                            3. Thông tin học vấn & Chuyên ngành
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Chuyên ngành <span class="text-danger">*</span>
+                                    @if (ViewBag.DaXacMinh == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                    }
+                                </label>
+                                @if (ViewBag.DaXacMinh == true)
+                                {
+                                    <select class="form-select rounded-0" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                                        <option value="KTPM" selected="@(Model.MaChuyenNganh == "KTPM")">Kỹ thuật phần mềm (KTPM)</option>
+                                        <option value="TKDH" selected="@(Model.MaChuyenNganh == "TKDH")">Thiết kế đồ họa (TKDH)</option>
+                                        <option value="CNTT" selected="@(Model.MaChuyenNganh == "CNTT")">Công nghệ thông tin (CNTT)</option>
+                                        <option value="MKT" selected="@(Model.MaChuyenNganh == "MKT")">Digital Marketing</option>
+                                        <option value="TMDT" selected="@(Model.MaChuyenNganh == "TMDT")">Thương mại điện tử</option>
+                                        @if (!string.IsNullOrEmpty(Model.MaChuyenNganh) && !new[] { "KTPM", "TKDH", "CNTT", "MKT", "TMDT" }.Contains(Model.MaChuyenNganh))
+                                        {
+                                            <option value="@Model.MaChuyenNganh" selected>@Model.MaChuyenNganh</option>
+                                        }
+                                    </select>
+                                    <input type="hidden" asp-for="MaChuyenNganh" />
+                                    <small class="text-muted" style="font-size: 0.75rem;">Thông tin chuyên ngành đã được xác minh từ thẻ sinh viên.</small>
+                                }
+                                else
+                                {
+                                    <select asp-for="MaChuyenNganh" class="form-select rounded-0" required>
+                                        <option value="">-- Chọn chuyên ngành --</option>
+                                        <option value="KTPM">Kỹ thuật phần mềm (KTPM)</option>
+                                        <option value="TKDH">Thiết kế đồ họa (TKDH)</option>
+                                        <option value="CNTT">Công nghệ thông tin (CNTT)</option>
+                                        <option value="MKT">Digital Marketing</option>
+                                        <option value="TMDT">Thương mại điện tử</option>
+                                    </select>
+                                }
                             </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div
-                                        class="p-3 bg-light border rounded-0 h-100 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-bold small mb-1">Sẵn sàng nhận việc freelance</div>
-                                            <div class="text-muted" style="font-size: 0.8rem;">Bật để hồ sơ hiển thị trên
-                                                trang Khám phá Freelancer.</div>
-                                            </div>
-                                            <div class="form-check form-switch fs-4 mb-0">
-                                                <input asp-for="TrangthaiNhanViec" class="form-check-input" type="checkbox"
-                                                       role="switch">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="p-3 bg-light border rounded-0 h-100">
-                                            <label class="form-label fw-bold small mb-1">Mức giá / thù lao từ (VNĐ/dự
-                                                án)</label>
-                                                <div class="input-group">
-                                                    <input asp-for="ChiPhiTu" type="number" step="50000"
-                                                           class="form-control rounded-0" placeholder="100000" />
-                                                    <span class="input-group-text bg-white rounded-0">VNĐ</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- PHẦN 3: HỌC VẤN & NGÀNH NGHỀ -->
-                                <div class="mb-4">
-                                    <div class="section-title">
-                                        3. Thông tin học vấn & Chuyên ngành
-                                    </div>
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold small">Chuyên ngành <span
-                                                class="text-danger">*</span></label>
-                                                <select asp-for="MaChuyenNganh" class="form-select rounded-0" required>
-                                                    <option value="">-- Chọn chuyên ngành --</option>
-                                                    <option value="KTPM">Kỹ thuật phần mềm (KTPM)</option>
-                                                    <option value="TKDH">Thiết kế đồ họa (TKDH)</option>
-                                                    <option value="CNTT">Công nghệ thông tin (CNTT)</option>
-                                                    <option value="MKT">Digital Marketing</option>
-                                                    <option value="TMDT">Thương mại điện tử</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-bold small">Trường Đại học / Cao đẳng</label>
-                                                <input asp-for="TenTruong" class="form-control rounded-0"
-                                                       placeholder="VD: Đại học FPT, ĐH Bách Khoa..." />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-bold small">Sinh viên năm thứ</label>
-                                                <select asp-for="NamThu" class="form-select rounded-0">
-                                                    <option value="1">Năm 1</option>
-                                                    <option value="2">Năm 2</option>
-                                                    <option value="3">Năm 3</option>
-                                                    <option value="4">Năm 4</option>
-                                                    <option value="5">Đã tốt nghiệp</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-bold small">Điểm GPA tích lũy (Thang 4.0)</label>
-                                                <input asp-for="GPA" type="number" step="0.01" class="form-control rounded-0"
-                                                       placeholder="VD: 3.5" />
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-bold small">Niên khóa</label>
-                                                <input asp-for="NienKhoa" class="form-control rounded-0"
-                                                       placeholder="VD: 2021 - 2025" />
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Trường Đại học / Cao đẳng
+                                    @if (ViewBag.DaXacMinh == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                    }
+                                </label>
+                                <input asp-for="TenTruong" class="form-control rounded-0"
+                                       placeholder="VD: Đại học FPT, ĐH Bách Khoa..."
+                                       readonly="@(ViewBag.DaXacMinh == true ? "readonly" : null)"
+                                       style="@(ViewBag.DaXacMinh == true ? "background-color: #f1f5f9; cursor: not-allowed;" : "")" />
+                                @if (ViewBag.DaXacMinh == true)
+                                {
+                                    <small class="text-muted" style="font-size: 0.75rem;">Thông tin trường đã được xác minh từ thẻ sinh viên.</small>
+                                }
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Sinh viên năm thứ
+                                    @if (ViewBag.DaXacMinh == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                    }
+                                </label>
+                                @if (ViewBag.DaXacMinh == true)
+                                {
+                                    <select class="form-select rounded-0" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                                        <option value="1" selected="@(Model.NamThu == 1)">Năm 1</option>
+                                        <option value="2" selected="@(Model.NamThu == 2)">Năm 2</option>
+                                        <option value="3" selected="@(Model.NamThu == 3)">Năm 3</option>
+                                        <option value="4" selected="@(Model.NamThu == 4)">Năm 4</option>
+                                        <option value="5" selected="@(Model.NamThu == 5)">Đã tốt nghiệp</option>
+                                    </select>
+                                    <input type="hidden" asp-for="NamThu" />
+                                    <small class="text-muted" style="font-size: 0.75rem;">Đã xác minh theo thẻ SV.</small>
+                                }
+                                else
+                                {
+                                    <select asp-for="NamThu" class="form-select rounded-0">
+                                        <option value="1">Năm 1</option>
+                                        <option value="2">Năm 2</option>
+                                        <option value="3">Năm 3</option>
+                                        <option value="4">Năm 4</option>
+                                        <option value="5">Đã tốt nghiệp</option>
+                                    </select>
+                                }
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Điểm GPA tích lũy (Thang 4.0)</label>
+                                <input asp-for="GPA" type="number" step="0.01" class="form-control rounded-0"
+                                       placeholder="VD: 3.5" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Niên khóa
+                                    @if (ViewBag.DaXacMinh == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                    }
+                                </label>
+                                <input asp-for="NienKhoa" class="form-control rounded-0"
+                                       placeholder="VD: 2021 - 2025"
+                                       readonly="@(ViewBag.DaXacMinh == true ? "readonly" : null)"
+                                       style="@(ViewBag.DaXacMinh == true ? "background-color: #f1f5f9; cursor: not-allowed;" : "")" />
+                                @if (ViewBag.DaXacMinh == true)
+                                {
+                                    <small class="text-muted" style="font-size: 0.75rem;">Đã xác minh theo thẻ SV.</small>
+                                }
+                            </div>
+                        </div>
+                    </div>
 
                                     <!-- PHẦN 4: KỸ NĂNG & GIỚI THIỆU -->
                                     <div class="mb-4">

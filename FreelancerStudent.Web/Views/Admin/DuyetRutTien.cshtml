@@ -1,0 +1,269 @@
+@model FreelancerStudent.Web.ViewModels.AdminDuyetRutTienViewModel
+@{
+    ViewData["Title"] = "Duyệt Yêu cầu Rút tiền";
+}
+
+<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Duyệt Yêu cầu Rút tiền</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold text-dark mb-1">Duyệt và Xử lý Yêu cầu Rút tiền</h3>
+            <p class="text-muted small mb-0">Kiểm tra thông tin tài khoản ngân hàng thụ hưởng, xác nhận giải ngân hoặc từ chối hoàn tiền về ví người dùng.</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a href="/Admin/DieuChinhSoDu" class="btn btn-outline-warning btn-sm rounded-pill px-3 text-dark fw-semibold">
+                Điều chỉnh số dư ví
+            </a>
+            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                Quản lý người dùng
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert / Toast -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Stat KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-warning border-4">
+                <span class="text-muted small fw-semibold text-uppercase">Chờ Quản trị duyệt</span>
+                <h3 class="fw-bold text-warning mt-2 mb-0">@Model.TongSoChoXuLy <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
+                <div class="small text-muted mt-2 pt-2 border-top">Tổng tiền chờ giải ngân: <strong class="text-dark">@Model.TongTienChoXuLy.ToString("N0") VNĐ</strong></div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-success border-4">
+                <span class="text-muted small fw-semibold text-uppercase">Đã duyệt giải ngân</span>
+                <h3 class="fw-bold text-success mt-2 mb-0">@Model.TongSoHoanThanh <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
+                <div class="small text-muted mt-2 pt-2 border-top">Đã tất toán chuyển khoản ngân hàng</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-danger border-4">
+                <span class="text-muted small fw-semibold text-uppercase">Bị từ chối / Hủy</span>
+                <h3 class="fw-bold text-danger mt-2 mb-0">@Model.TongSoTuChoi <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
+                <div class="small text-muted mt-2 pt-2 border-top">Tiền đã hoàn lại ví khả dụng người dùng</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Pills Navigation -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a href="/Admin/DuyetRutTien?trangThai=ChoXuLy" 
+           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "ChoXuLy" ? "btn-warning text-dark shadow-sm" : "btn-outline-secondary bg-white")">
+            Chờ xử lý (@Model.TongSoChoXuLy)
+        </a>
+        <a href="/Admin/DuyetRutTien?trangThai=TatCa" 
+           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "TatCa" ? "btn-dark shadow-sm" : "btn-outline-secondary bg-white")">
+            Tất cả (@(Model.TongSoChoXuLy + Model.TongSoHoanThanh + Model.TongSoTuChoi))
+        </a>
+        <a href="/Admin/DuyetRutTien?trangThai=HoanThanh" 
+           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "HoanThanh" ? "btn-success shadow-sm" : "btn-outline-secondary bg-white")">
+            Đã hoàn thành (@Model.TongSoHoanThanh)
+        </a>
+        <a href="/Admin/DuyetRutTien?trangThai=TuChoi" 
+           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "TuChoi" ? "btn-danger shadow-sm" : "btn-outline-secondary bg-white")">
+            Từ chối (@Model.TongSoTuChoi)
+        </a>
+    </div>
+
+    <!-- Table of Requests -->
+    <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0">Danh sách Yêu cầu Rút tiền</h5>
+            <span class="text-muted small">Hiển thị @Model.DanhSachYeuCau.Count bản ghi</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                    <tr>
+                        <th style="width: 70px;">Mã</th>
+                        <th>Người rút tiền</th>
+                        <th>Số tiền rút</th>
+                        <th>Thông tin thụ hưởng</th>
+                        <th>Ngày yêu cầu</th>
+                        <th>Trạng thái</th>
+                        <th>Thông tin xử lý</th>
+                        <th class="text-end" style="width: 200px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.DanhSachYeuCau.Any())
+                    {
+                        @foreach (var item in Model.DanhSachYeuCau)
+                        {
+                            <tr>
+                                <td class="fw-bold text-dark">#@item.MaRutTien</td>
+                                <td>
+                                    <div class="fw-bold text-dark">@item.HoTenUser</div>
+                                    <div class="small text-muted">
+                                        <span class="badge bg-light text-secondary border small me-1">@item.RoleName</span>
+                                        Ví #@item.MaWallet
+                                    </div>
+                                    <div class="small text-muted">@item.EmailUser @(!string.IsNullOrEmpty(item.SdtUser) ? $"• {item.SdtUser}" : "")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold fs-6 text-danger">@item.SoTienRut.ToString("N0") VNĐ</div>
+                                    <div class="small text-muted">Đóng băng ví: @item.SoDuDongBangVi.ToString("N0") VNĐ</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-primary">@item.TenNganHang</div>
+                                    <div class="small font-monospace fw-bold text-dark">@item.SoTaiKhoan</div>
+                                    <div class="small text-uppercase text-muted">@item.TenChuTaiKhoan</div>
+                                </td>
+                                <td class="small text-muted">
+                                    @(item.NgayYeuCau?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                                </td>
+                                <td>
+                                    @if (item.TrangThai == "ChoXuLy")
+                                    {
+                                        <span class="badge bg-light text-warning border border-warning px-2 py-1">
+                                            Chờ xử lý
+                                        </span>
+                                    }
+                                    else if (item.TrangThai == "HoanThanh")
+                                    {
+                                        <span class="badge bg-light text-success border border-success px-2 py-1">
+                                            Đã hoàn thành
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-danger border border-danger px-2 py-1">
+                                            Từ chối
+                                        </span>
+                                    }
+                                </td>
+                                <td class="small">
+                                    @if (item.NgayXuLy.HasValue)
+                                    {
+                                        <div class="text-muted">Ngày: @item.NgayXuLy.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                                        @if (!string.IsNullOrEmpty(item.TenAdminXuLy))
+                                        {
+                                            <div class="text-muted">Bởi: <strong class="text-dark">@item.TenAdminXuLy</strong></div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.LyDoTuChoi))
+                                        {
+                                            <div class="text-danger small mt-1">Lý do: @item.LyDoTuChoi</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Đang chờ Admin</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (item.TrangThai == "ChoXuLy")
+                                    {
+                                        <div class="d-inline-flex gap-1">
+                                            <!-- Nút Duyệt giải ngân -->
+                                            <form method="post" asp-action="XuLyRutTien" class="d-inline"
+                                                  onsubmit="return confirm('Xác nhận duyệt giải ngân @item.SoTienRut.ToString("N0") VNĐ cho @item.HoTenUser về tài khoản @item.TenNganHang (@item.SoTaiKhoan)?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="MaRutTien" value="@item.MaRutTien" />
+                                                <input type="hidden" name="ChapNhan" value="true" />
+                                                <button type="submit" class="btn btn-success btn-sm px-2 py-1 rounded-2 shadow-sm" title="Duyệt giải ngân">
+                                                    Duyệt
+                                                </button>
+                                            </form>
+
+                                            <!-- Nút Từ chối -->
+                                            <button type="button" class="btn btn-outline-danger btn-sm px-2 py-1 rounded-2"
+                                                    onclick="openTuChoiModal(@item.MaRutTien, '@item.HoTenUser', '@item.SoTienRut.ToString("N0")')">
+                                                Từ chối
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border px-2 py-1 small">Đã giải quyết</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                Không có yêu cầu rút tiền nào trong bộ lọc này.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Từ Chối Yêu Cầu Rút Tiền -->
+<div class="modal fade" id="tuChoiModal" tabindex="-1" aria-labelledby="tuChoiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header border-bottom py-3">
+                <h5 class="modal-title fw-bold text-danger" id="tuChoiModalLabel">
+                    Từ chối Yêu cầu Rút tiền
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-action="XuLyRutTien">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <input type="hidden" name="MaRutTien" id="modalMaRutTien" value="" />
+                    <input type="hidden" name="ChapNhan" value="false" />
+
+                    <div class="alert alert-light border small text-muted mb-3">
+                        Bạn đang từ chối yêu cầu rút tiền <strong id="modalInfoUser" class="text-dark"></strong> với số tiền <strong id="modalInfoSoTien" class="text-danger"></strong>.
+                        Toàn bộ số tiền này sẽ lập tức được hoàn trả về số dư khả dụng của ví người dùng.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Lý do từ chối <span class="text-danger">*</span></label>
+                        <textarea name="LyDoTuChoi" class="form-control" rows="3" required
+                                  placeholder="Ví dụ: Sai tên chủ tài khoản thụ hưởng, số tài khoản không tồn tại, v.v..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4 shadow-sm">Xác nhận Từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openTuChoiModal(maRutTien, hoTen, soTien) {
+            document.getElementById('modalMaRutTien').value = maRutTien;
+            document.getElementById('modalInfoUser').textContent = '#' + maRutTien + ' (' + hoTen + ')';
+            document.getElementById('modalInfoSoTien').textContent = soTien + ' VNĐ';
+
+            var modal = new bootstrap.Modal(document.getElementById('tuChoiModal'));
+            modal.show();
+        }
+    </script>
+}

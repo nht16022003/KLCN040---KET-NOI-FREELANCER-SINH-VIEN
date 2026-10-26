@@ -1,0 +1,428 @@
+@model FreelancerStudent.Web.ViewModels.CongViecDaHoanThanhViewModel
+@{
+    ViewData["Title"] = "Công việc đã hoàn thành & Đánh giá";
+    var tongSo = Model.DanhSach?.Count ?? 0;
+    var daDanhGiaSo = Model.DanhSach?.Count(x => x.trangThaiDanhGia == "DaDanhGia") ?? 0;
+    var choDanhGiaSo = Model.DanhSach?.Count(x => x.trangThaiDanhGia != "DaDanhGia" && x.coTheDanhGia) ?? 0;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Index" class="text-decoration-none">Quản lý hợp đồng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Công việc đã hoàn thành</li>
+        </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark">
+                Công việc đã hoàn thành (Đã nghiệm thu)
+            </h2>
+            <p class="text-muted mb-0">
+                @(Model.LaFreelancer 
+                    ? "Danh sách các công việc đã nghiệm thu, thanh toán và đánh giá đối tác Nhà tuyển dụng." 
+                    : "Danh sách các dự án đã nghiệm thu, thanh toán và đánh giá năng lực Freelancer.")
+            </p>
+        </div>
+        <div>
+            <a asp-controller="HopDong" asp-action="Index" class="btn btn-outline-secondary">
+                Tất cả hợp đồng
+            </a>
+        </div>
+    </div>
+
+    <!-- Error / Notification alert -->
+    @if (!string.IsNullOrWhiteSpace(Model.Loi))
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @Model.Loi
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+
+    <!-- Stat Badges (Clean, Minimalist, No Icons) -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="card border-0 shadow-sm p-3 bg-light">
+                <span class="text-muted small d-block">Tổng công việc hoàn thành</span>
+                <h4 class="fw-bold mb-0 text-dark">@tongSo</h4>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card border-0 shadow-sm p-3 bg-light">
+                <span class="text-muted small d-block">Cần gửi đánh giá</span>
+                <h4 class="fw-bold mb-0 text-warning">@choDanhGiaSo</h4>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card border-0 shadow-sm p-3 bg-light">
+                <span class="text-muted small d-block">Đã hoàn tất đánh giá</span>
+                <h4 class="fw-bold mb-0 text-success">@daDanhGiaSo</h4>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.DanhSach == null || Model.DanhSach.Count == 0)
+    {
+        <div class="card border-0 shadow-sm text-center py-5">
+            <div class="card-body">
+                <h5 class="fw-semibold text-secondary">Chưa có công việc nào đã hoàn thành hoặc nghiệm thu</h5>
+                <p class="text-muted small mb-3">Các hợp đồng sau khi nghiệm thu và giải ngân thanh toán sẽ hiển thị tại đây để bạn có thể gửi đánh giá cho đối tác.</p>
+                <a asp-controller="HopDong" asp-action="Index" class="btn btn-primary btn-sm">Quay về trang Hợp đồng</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Tab Filters -->
+        <ul class="nav nav-pills mb-3 gap-2" id="filterTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active rounded-pill px-3 py-1 small" data-filter="all">Tất cả (@tongSo)</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-3 py-1 small" data-filter="pending">Chờ đánh giá (@choDanhGiaSo)</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-3 py-1 small" data-filter="completed">Đã đánh giá (@daDanhGiaSo)</button>
+            </li>
+        </ul>
+
+        <!-- Contract List -->
+        <div class="d-flex flex-column gap-3" id="contractsContainer">
+            @foreach (var item in Model.DanhSach)
+            {
+                var isDaDanhGia = item.trangThaiDanhGia == "DaDanhGia";
+                var filterClass = isDaDanhGia ? "item-completed" : (item.coTheDanhGia ? "item-pending" : "item-expired");
+
+                <div class="card border shadow-sm contract-card @filterClass">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                            <div>
+                                <span class="badge bg-light text-dark border me-2">Mã HĐ: @item.maHD</span>
+                                @if (item.trangThaiHopDong == "DaThanhToan")
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        Đã nghiệm thu & thanh toán
+                                    </span>
+                                }
+                                else if (item.trangThaiHopDong == "DaHoanThanh")
+                                {
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                        Đã hoàn thành
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                        @item.trangThaiHopDong
+                                    </span>
+                                }
+                            </div>
+                            <div>
+                                <span class="text-muted small">
+                                    @(Model.LaFreelancer ? "Nhà tuyển dụng:" : "Freelancer:")
+                                    <strong class="text-dark">@item.tenDoiTac</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold mb-2">
+                            <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@item.maHD" class="text-decoration-none text-dark hover-primary">
+                                @item.tenCongViec
+                            </a>
+                        </h5>
+
+                        <div class="row g-2 text-muted small my-2 py-2 border-top border-bottom bg-light-subtle rounded px-2">
+                            @if (item.tongTien.HasValue)
+                            {
+                                <div class="col-md-4">
+                                    <span class="d-block text-muted">Giá trị hợp đồng:</span>
+                                    <strong class="text-dark fs-6">@item.tongTien.Value.ToString("N0") VNĐ</strong>
+                                </div>
+                            }
+                            @if (item.ngayHoanThanh.HasValue)
+                            {
+                                <div class="col-md-4">
+                                    <span class="d-block text-muted">Ngày đóng / hoàn thành:</span>
+                                    <span class="text-dark">@item.ngayHoanThanh.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            }
+                            @if (item.hanDanhGia.HasValue)
+                            {
+                                <div class="col-md-4">
+                                    <span class="d-block text-muted">Hạn gửi đánh giá:</span>
+                                    <span class="@(item.coTheDanhGia ? "text-primary fw-semibold" : "text-danger")">
+                                        @item.hanDanhGia.Value.ToString("dd/MM/yyyy")
+                                        @(item.coTheDanhGia ? "(Còn trong hạn)" : "(Hết hạn 30 ngày)")
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Rating Status & Actions -->
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3 pt-1">
+                            <div>
+                                @if (isDaDanhGia)
+                                {
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge text-bg-success py-2 px-3">
+                                            Đã đánh giá
+                                        </span>
+                                        @if (item.soSao.HasValue)
+                                        {
+                                            <span class="text-warning fs-6 fw-bold">
+                                                @for (var s = 1; s <= 5; s++)
+                                                {
+                                                    <span>@(item.soSao >= s ? "★" : "☆")</span>
+                                                }
+                                                <span class="text-dark ms-1 small fw-normal">(@item.soSao/5)</span>
+                                            </span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(item.nhanXet))
+                                        {
+                                            <span class="text-muted small fst-italic ms-2 text-truncate" style="max-width: 320px;" title="@item.nhanXet">
+                                                "@item.nhanXet"
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                                else if (item.coTheDanhGia)
+                                {
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-2 px-3">
+                                        Chưa gửi đánh giá đối tác
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary py-2 px-3">
+                                        Đã quá thời hạn đánh giá
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                @if (isDaDanhGia)
+                                {
+                                    @if (item.coTheChinhSuaDanhGia && item.maDanhGia.HasValue)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="moFormDanhGia('@item.maHD', @item.maDanhGia)">
+                                            Chỉnh sửa đánh giá
+                                        </button>
+                                    }
+                                }
+                                else if (item.coTheDanhGia)
+                                {
+                                    <button type="button" class="btn btn-sm btn-success fw-semibold" onclick="moFormDanhGia('@item.maHD')">
+                                        Đánh giá đối tác
+                                    </button>
+                                }
+                                
+                                <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@item.maHD" class="btn btn-sm btn-outline-secondary">
+                                    Chi tiết hợp đồng
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Hiển thị kết quả đánh giá từ đối tác từ SQL -->
+                        <div class="mt-3 pt-2 border-top">
+                            @if (item.doiTacDaDanhGia)
+                            {
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 bg-light-subtle p-2 rounded border">
+                                    <div>
+                                        <span class="small text-muted me-2">Đối tác (@item.tenDoiTac) đánh giá bạn:</span>
+                                        <span class="text-warning fw-bold small">
+                                            @for (var s = 1; s <= 5; s++)
+                                            {
+                                                <span>@(item.soSaoDoiTac >= s ? "★" : "☆")</span>
+                                            }
+                                            <span class="text-dark fw-normal">(@item.soSaoDoiTac/5)</span>
+                                        </span>
+                                        @if (!string.IsNullOrWhiteSpace(item.nhanXetDoiTac))
+                                        {
+                                            <span class="text-dark small fst-italic ms-2">"@item.nhanXetDoiTac"</span>
+                                        }
+                                    </div>
+                                    @if (item.ngayDanhGiaDoiTac.HasValue)
+                                    {
+                                        <small class="text-muted">@item.ngayDanhGiaDoiTac.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="small text-muted fst-italic py-1">
+                                    Đối tác (@item.tenDoiTac) chưa gửi đánh giá về công việc này.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal Container for Rating Popup -->
+<div id="danhGiaModalContainer"></div>
+
+@section Scripts {
+    <script>
+        // Modal popup logic for rating
+        async function moFormDanhGia(maHD, maDanhGia) {
+            const container = document.getElementById('danhGiaModalContainer');
+            if (!container) return;
+            try {
+                const url = `/DanhGia/Form?maHD=${encodeURIComponent(maHD)}`;
+                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!response.ok) {
+                    let errMsg = 'Không thể tải biểu mẫu đánh giá.';
+                    try {
+                        const errJson = await response.json();
+                        if (errJson && errJson.message) errMsg = errJson.message;
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+                container.innerHTML = await response.text();
+                const modalElement = container.querySelector('.modal');
+                if (!modalElement) throw new Error('Biểu mẫu đánh giá không hợp lệ.');
+                if (maDanhGia) modalElement.dataset.maDanhGia = maDanhGia;
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+            } catch (error) {
+                alert(error.message || 'Không thể tải biểu mẫu đánh giá.');
+            }
+        }
+
+        async function guiDanhGia(form, event) {
+            event.preventDefault();
+            const modalElement = form.closest('.modal');
+            const tongSao = Number(form.querySelector('[name="soSaoTongThe"]').value);
+            if (!tongSao) {
+                const message = form.querySelector('[data-review-message]');
+                if (message) {
+                    message.textContent = 'Vui lòng chọn số sao đánh giá tổng thể.';
+                    message.classList.remove('d-none');
+                }
+                return;
+            }
+            const payload = {
+                maHD: form.querySelector('[name="maHD"]').value,
+                soSaoTongThe: tongSao,
+                soSaoChatLuong: Number(form.querySelector('[name="soSaoChatLuong"]').value) || null,
+                soSaoDungHan: Number(form.querySelector('[name="soSaoDungHan"]').value) || null,
+                soSaoGiaoTiep: Number(form.querySelector('[name="soSaoGiaoTiep"]').value) || null,
+                nhanXet: form.querySelector('[name="nhanXet"]').value
+            };
+            const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const maDanhGia = modalElement.dataset.maDanhGia;
+            const url = maDanhGia ? `/DanhGia/CapNhat?maDanhGia=${encodeURIComponent(maDanhGia)}` : '/DanhGia/Gui';
+            const message = form.querySelector('[data-review-message]');
+            const button = form.querySelector('[type="submit"]');
+            button.disabled = true;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'Không thể lưu đánh giá.');
+                location.reload();
+            } catch (error) {
+                if (message) { message.textContent = error.message; message.classList.remove('d-none'); }
+                button.disabled = false;
+            }
+        }
+
+        // Star rating clicks
+        document.addEventListener('click', event => {
+            const starButton = event.target.closest('[data-rating-group][data-rating-value]');
+            if (starButton) {
+                const form = starButton.closest('form');
+                const groupName = starButton.dataset.ratingGroup;
+                const selectedValue = Number(starButton.dataset.ratingValue);
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+
+                valueInput.value = selectedValue;
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    const value = Number(button.dataset.ratingValue);
+                    const selected = value === selectedValue;
+                    button.setAttribute('aria-checked', selected ? 'true' : 'false');
+                    button.classList.toggle('text-warning', value <= selectedValue);
+                    button.classList.toggle('text-secondary', value > selectedValue);
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-star-fill', value <= selectedValue);
+                        icon.classList.toggle('bi-star', value > selectedValue);
+                    }
+                    const starSpan = button.querySelector('.star-char');
+                    if (starSpan) {
+                        starSpan.textContent = value <= selectedValue ? '★' : '☆';
+                    }
+                });
+
+                const label = form.querySelector(`[data-rating-label="${groupName}"]`);
+                if (label) label.textContent = `${selectedValue} trên 5`;
+                return;
+            }
+
+            const clearButton = event.target.closest('[data-rating-clear]');
+            if (clearButton) {
+                const form = clearButton.closest('form');
+                const groupName = clearButton.dataset.ratingClear;
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+                valueInput.value = '';
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    button.setAttribute('aria-checked', 'false');
+                    button.classList.remove('text-warning');
+                    button.classList.add('text-secondary');
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-star-fill');
+                        icon.classList.add('bi-star');
+                    }
+                    const starSpan = button.querySelector('.star-char');
+                    if (starSpan) {
+                        starSpan.textContent = '☆';
+                    }
+                });
+            }
+        });
+
+        // Filter tab buttons (all, pending, completed)
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('#filterTabs button[data-filter]');
+            const cards = document.querySelectorAll('.contract-card');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const filter = btn.dataset.filter;
+                    cards.forEach(card => {
+                        if (filter === 'all') {
+                            card.classList.remove('d-none');
+                        } else if (filter === 'pending') {
+                            card.classList.toggle('d-none', !card.classList.contains('item-pending'));
+                        } else if (filter === 'completed') {
+                            card.classList.toggle('d-none', !card.classList.contains('item-completed'));
+                        }
+                    });
+                });
+            });
+
+            // Check if URL has ?danhGia=maHD
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoRateHD = urlParams.get('danhGia');
+            if (autoRateHD) {
+                moFormDanhGia(autoRateHD);
+            }
+        });
+    </script>
+}

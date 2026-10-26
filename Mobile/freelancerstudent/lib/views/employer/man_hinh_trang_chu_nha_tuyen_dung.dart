@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
@@ -12,6 +12,7 @@ import '../auth/man_hinh_dang_nhap.dart';
 import '../hop_dong/man_hinh_danh_sach_hop_dong.dart';
 import '../job_detail/man_hinh_chi_tiet_cong_viec.dart';
 import '../wallet/man_hinh_vi_tien.dart';
+import 'man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
 import 'man_hinh_tao_bai_dang_tuyen_dung.dart';
 
 /// Màn hình chính của Nhà tuyển dụng (Employer Dashboard)
@@ -456,6 +457,17 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                           ),
                         ),
                       ),
+                      onChinhSua: () async {
+                        final daCapNhat = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditJobPostScreen(job: job),
+                          ),
+                        );
+                        if (daCapNhat == true) {
+                          _taiDuLieu();
+                        }
+                      },
                       onDoiTrangThai: () => _xacNhanDoiTrangThai(job),
                       onChiTiet: () => Navigator.push(
                         context,
@@ -587,12 +599,14 @@ class _SummaryCard extends StatelessWidget {
 class _EmployerJobItemCard extends StatelessWidget {
   final JobPostModel job;
   final VoidCallback onXemUngVien;
+  final VoidCallback onChinhSua;
   final VoidCallback onDoiTrangThai;
   final VoidCallback onChiTiet;
 
   const _EmployerJobItemCard({
     required this.job,
     required this.onXemUngVien,
+    required this.onChinhSua,
     required this.onDoiTrangThai,
     required this.onChiTiet,
   });
@@ -702,6 +716,17 @@ class _EmployerJobItemCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: onChinhSua,
+                icon: const Icon(Icons.edit_outlined, size: 16),
+                label: const Text('Sửa'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.heading,
+                  side: const BorderSide(color: AppColors.border),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                ),
+              ),
+              const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: onDoiTrangThai,
                 style: OutlinedButton.styleFrom(
@@ -711,7 +736,7 @@ class _EmployerJobItemCard extends StatelessWidget {
                 ),
                 child: Text(dangTuyen ? 'Đóng tin' : 'Mở lại'),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               IconButton(
                 tooltip: 'Xem chi tiết',
                 icon: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primary),

@@ -970,7 +970,7 @@ SELECT * FROM LichSu_XuLyTaiKhoan;
 SELECT * FROM MinhChung_FreelancerStudents;
 SELECT * FROM ChuyenNganh;
 SELECT * FROM FreelancerStudents;
-
+SELECT * FROM KyNang;
 SELECT * FROM BaiDangTimViec_FreelancerStudent;
 SELECT * FROM FreelancerStudent_KyNang;
 SELECT * FROM NhaTuyenDung;
@@ -1003,10 +1003,58 @@ SELECT * FROM Task_CongViec;
 SELECT * FROM GiaoDichNapTien;
 
 
+-- 1. Bổ sung cột điều khoản hợp đồng nếu chưa có
+IF COL_LENGTH('dbo.HopDong', 'dieuKhoan') IS NULL
+BEGIN
+    ALTER TABLE dbo.HopDong
+    ADD dieuKhoan NVARCHAR(MAX) NULL;
+END;
+GO
+
+-- 2. Tạo index ngăn hợp đồng đang hoạt động bị trùng
+-- Hợp đồng DaHuy vẫn được giữ trong lịch sử
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'UX_HopDong_MaJob_Active'
+      AND object_id = OBJECT_ID('dbo.HopDong')
+)
+BEGIN
+    CREATE UNIQUE INDEX UX_HopDong_MaJob_Active
+    ON dbo.HopDong(maJob)
+    WHERE trangThai <> 'DaHuy';
+END;
+GO
 
 
-SELECT * FROM JobPost T, UngTuyen J
-WHERE T.maJob = J.maJob
+
+CREATE TABLE YeuCauChinhSua (
+    maYeuCauChinhSua INT IDENTITY(1,1) PRIMARY KEY,
+    maBanGiao INT NOT NULL,
+    noiDungYeuCau NVARCHAR(MAX) NOT NULL,
+    trangThai NVARCHAR(30) NOT NULL
+        DEFAULT 'ChoChinhSua',
+    ngayYeuCau DATETIME2 NOT NULL
+        DEFAULT SYSDATETIME(),
+    ngayHoanThanh DATETIME2 NULL,
+    CONSTRAINT FK_YeuCauChinhSua_BanGiao
+        FOREIGN KEY (maBanGiao)
+        REFERENCES BanGiao_SanPham(maBanGiao),
+    CONSTRAINT CK_YeuCauChinhSua_TrangThai
+        CHECK (trangThai IN (
+            'ChoChinhSua',
+            'DaNopLai',
+            'DaNghiemThu'
+        ))
+);
+
+SELECT DB_NAME() AS DatabaseHienTai;
+SELECT
+    TABLE_SCHEMA,
+    TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_NAME = 'BanGiao_SanPham';
+
 
 
 DROP TABLE Task_CongViec;

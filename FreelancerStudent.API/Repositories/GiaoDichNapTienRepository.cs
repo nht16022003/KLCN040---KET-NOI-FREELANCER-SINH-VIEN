@@ -162,26 +162,34 @@ namespace FreelancerStudent.API.Repositories
 
 
                 // 9. Cộng tiền
-                wallet.soDuKhaDung =
-                    (wallet.soDuKhaDung ?? 0)
-                    + giaoDich.soTien;
-
+                decimal soDuTruocGD = wallet.soDuKhaDung ?? 0;
+                wallet.soDuKhaDung = soDuTruocGD + giaoDich.soTien;
 
                 // 10. Hoàn thành giao dịch
                 giaoDich.trangThai = "HoanThanh";
+                giaoDich.ngayHoanThanh = DateTime.Now;
+                giaoDich.maGiaoDichNganHang = maGiaoDichNganHang;
 
-                giaoDich.ngayHoanThanh =
-                    DateTime.Now;
+                // 11. Ghi lịch sử giao dịch
+                var lichSu = new LichSuGiaoDich
+                {
+                    maWallet = wallet.maWallet,
+                    loaiGiaoDich = "NapTien",
+                    soTien = giaoDich.soTien,
+                    soDuTruocGD = soDuTruocGD,
+                    soDuSauGD = wallet.soDuKhaDung.Value,
+                    noiDung = $"Nạp tiền vào ví qua chuyển khoản ngân hàng ({giaoDich.maGiaoDich})",
+                    phuongThucThanhToan = "SePay",
+                    maGiaoDichNgoai = maGiaoDichNganHang ?? giaoDich.maGiaoDich,
+                    trangThai = "ThanhCong",
+                    ngayTao = DateTime.Now
+                };
+                await _context.LichSuGiaoDichs.AddAsync(lichSu);
 
-                giaoDich.maGiaoDichNganHang =
-                    maGiaoDichNganHang;
-
-
-                // 11. Chỉ SaveChanges một lần
+                // 12. Lưu thay đổi
                 await _context.SaveChangesAsync();
 
-
-                // 12. Commit transaction
+                // 13. Commit transaction
                 await transaction.CommitAsync();
 
                 return true;

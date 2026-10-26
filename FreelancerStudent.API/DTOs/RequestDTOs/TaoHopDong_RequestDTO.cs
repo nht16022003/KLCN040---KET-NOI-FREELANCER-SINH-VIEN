@@ -11,6 +11,8 @@ namespace FreelancerStudent.API.DTOs.RequestDTOs
 
         public string? moTa { get; set; }
 
+        public string? linkSanPham { get; set; }
+
         public DateTime hanChot { get; set; }
 
         public decimal? tyLeGiaiNgan { get; set; }

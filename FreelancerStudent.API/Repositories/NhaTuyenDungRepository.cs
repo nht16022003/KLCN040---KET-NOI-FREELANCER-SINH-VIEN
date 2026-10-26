@@ -55,5 +55,12 @@ namespace FreelancerStudent.API.Repositories
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.maUser == maUser);
         }
+
+        public async Task<NhaTuyenDung?> layNhaTuyenDungTheoMaAsync(int maNhaTuyenDung)
+        {
+            return await _context.NhaTuyenDungs
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.maNhaTuyenDung == maNhaTuyenDung);
+        }
     }
 }
