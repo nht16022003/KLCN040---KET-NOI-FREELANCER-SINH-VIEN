@@ -297,6 +297,88 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+        [HttpPost("nghiem-thu")]
+        public async Task<IActionResult> NghiemThu([FromBody] MaHopDong_RequestDTO request, [FromQuery] int? maUser)
+        {
+            try
+            {
+                await _hopDongService.NghiemThuAsync(request?.maHD ?? string.Empty, maUser);
+                return Ok(new { success = true, message = "Đã nghiệm thu và hoàn thành hợp đồng." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống khi nghiệm thu hợp đồng." });
+            }
+        }
+
+        [HttpGet("thanh-toan/{maHD}")]
+        public async Task<IActionResult> GetThongTinThanhToan(string maHD, [FromQuery] int? maUser)
+        {
+            try
+            {
+                var data = await _hopDongService.LayThongTinThanhToanAsync(maHD, maUser);
+                return Ok(new { success = true, message = "Lấy thông tin thanh toán thành công.", data });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống khi tải thông tin thanh toán." });
+            }
+        }
+
+        [HttpPost("thanh-toan")]
+        public async Task<IActionResult> ThanhToan([FromBody] MaHopDong_RequestDTO request, [FromQuery] int? maUser)
+        {
+            try
+            {
+                await _hopDongService.ThanhToanAsync(request?.maHD ?? string.Empty, maUser);
+                return Ok(new { success = true, message = "Thanh toán cho Freelancer thành công." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
+            }
+            catch (SoDuGiaiNganKhongDuException ex)
+            {
+                return BadRequest(new { success = false, code = "SO_DU_DONG_BANG_KHONG_DU", message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống khi thanh toán hợp đồng." });
+            }
+        }
+
         // DELETE: api/HopDong/{maHD}
         [HttpDelete("{maHD}")]
         public async Task<IActionResult> XoaHopDong(string maHD, [FromQuery] int? maUserNTD)

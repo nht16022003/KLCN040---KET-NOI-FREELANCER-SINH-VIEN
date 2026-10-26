@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/kiem_tra_du_lieu.dart';
 import '../../models/mo_hinh_chinh_sua_ho_so_freelancer.dart';
+import '../../services/dich_vu_minh_chung.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_ho_so_freelancer.dart';
 
@@ -35,10 +36,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _acceptingWork = true;
   bool _initialized = false;
   bool _requestedLoad = false;
+  bool _isCardVerified = false;
+  bool _checkedVerification = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final userId = context.read<AuthViewModel>().currentUser?.userId ?? 0;
+    if (userId > 0 && !_checkedVerification) {
+      _checkedVerification = true;
+      MinhChungService().kiemTraTrangThaiXacThuc(userId).then((res) {
+        if (mounted && res.isSuccess && res.data != null) {
+          setState(() {
+            _isCardVerified = res.data!['daXacMinh'] == true;
+          });
+        }
+      });
+    }
+
     if (_initialized) return;
     final profile = context.watch<FreelancerProfileViewModel>().profile;
     if (profile == null) {
@@ -216,10 +232,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (_isCardVerified)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF86EFAC)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.verified, color: AppColors.primary, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Hồ sơ đã được xác minh thẻ sinh viên',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF166534),
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Các trường thông tin từ thẻ (Họ và tên, Trường học, Chuyên ngành, Năm học, Niên khóa) đã được khóa và không thể tự chỉnh sửa.',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: Color(0xFF15803D),
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             _sectionTitle('Thông tin cá nhân'),
             _field(
               _nameController,
               'Họ và tên',
+              readOnly: _isCardVerified,
               validator: (value) =>
                   AppValidators.validateRequired(value, 'Họ và tên'),
             ),
@@ -232,13 +290,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _field(_emailController, 'Email', readOnly: true),
             const SizedBox(height: 8),
             _sectionTitle('Học vấn'),
-            _field(_majorCodeController, 'Mã chuyên ngành'),
-            _field(_majorNameController, 'Tên chuyên ngành'),
-            _field(_schoolController, 'Trường'),
+            _field(_majorCodeController, 'Mã chuyên ngành', readOnly: _isCardVerified),
+            _field(_majorNameController, 'Tên chuyên ngành', readOnly: _isCardVerified),
+            _field(_schoolController, 'Trường', readOnly: _isCardVerified),
             _field(_locationController, 'Địa điểm'),
             _field(
               _yearController,
               'Năm học',
+              readOnly: _isCardVerified,
               keyboardType: TextInputType.number,
               validator: (value) => _validateInteger(value, 'Năm học', 1, 8),
             ),
@@ -250,7 +309,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               validator: _validateGpa,
             ),
-            _field(_cohortController, 'Niên khóa'),
+            _field(_cohortController, 'Niên khóa', readOnly: _isCardVerified),
             const SizedBox(height: 8),
             _sectionTitle('Năng lực và mong muốn'),
             _field(_bioController, 'Giới thiệu bản thân', maxLines: 4),
@@ -352,6 +411,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
+        suffixIcon: readOnly ? const Icon(Icons.lock_outline, size: 18, color: Colors.grey) : null,
+        filled: readOnly,
+        fillColor: readOnly ? const Color(0xFFF1F5F9) : null,
         border: const OutlineInputBorder(),
       ),
     ),

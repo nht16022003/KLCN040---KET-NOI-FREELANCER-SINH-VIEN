@@ -40,7 +40,14 @@
 
             <div class="mb-3">
                 <label asp-for="kynangyeucau" class="form-label fw-bold small">Kỹ năng yêu cầu</label>
-                <input asp-for="kynangyeucau" class="form-control rounded-0" placeholder="Cách nhau bởi dấu phẩy..." />
+                <input asp-for="kynangyeucau" id="skillInput" class="form-control rounded-0" placeholder="Cách nhau bởi dấu phẩy..." />
+                <div class="mt-2" id="skillSuggestionsBox">
+                    <span class="small fw-bold text-muted">Gợi ý kỹ năng:</span>
+                    <span id="skillLoadingText" style="display:none; font-size: 12px; color: #198754; margin-left: 6px;">
+                        <span class="spinner-border spinner-border-sm" role="status" style="width: 12px; height: 12px;"></span> Đang tìm gợi ý...
+                    </span>
+                    <div id="skillListContainer" class="d-flex flex-wrap gap-1 mt-1"></div>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -62,3 +69,119 @@
         </form>
     </div>
 </div>
+
+<script>
+    (function () {
+        const titleInput = document.querySelector('input[name="tieude"]');
+        const descInput = document.querySelector('textarea[name="mota"]');
+        const skillInput = document.getElementById("skillInput");
+        const container = document.getElementById("skillListContainer");
+        const loadingIndicator = document.getElementById("skillLoadingText");
+
+        let debounceTimer = null;
+        let currentRequestId = 0;
+
+        function attachSkillClick(btn) {
+            btn.addEventListener("click", function () {
+                const skill = this.dataset.skill;
+                if (!skill) return;
+
+                let skills = skillInput.value
+                    .split(",")
+                    .map(x => x.trim())
+                    .filter(x => x.length > 0);
+
+                const existingIdx = skills.findIndex(s => s.toLowerCase() === skill.toLowerCase());
+                if (existingIdx >= 0) {
+                    skills.splice(existingIdx, 1);
+                    this.classList.remove("btn-success");
+                    this.classList.add("btn-outline-success");
+                } else {
+                    skills.push(skill);
+                    this.classList.remove("btn-outline-success");
+                    this.classList.add("btn-success");
+                }
+
+                skillInput.value = skills.join(", ");
+            });
+        }
+
+        function updateButtonActiveStates() {
+            if (!container || !skillInput) return;
+            const current = skillInput.value
+                .split(",")
+                .map(x => x.trim().toLowerCase())
+                .filter(x => x.length > 0);
+
+            container.querySelectorAll(".skill-btn").forEach(btn => {
+                const sk = (btn.dataset.skill || "").toLowerCase();
+                if (current.includes(sk)) {
+                    btn.classList.remove("btn-outline-success");
+                    btn.classList.add("btn-success");
+                } else {
+                    btn.classList.remove("btn-success");
+                    btn.classList.add("btn-outline-success");
+                }
+            });
+        }
+
+        async function fetchSkillSuggestions() {
+            const tieuDe = titleInput ? titleInput.value.trim() : "";
+            const moTa = descInput ? descInput.value.trim() : "";
+
+            if (!tieuDe && !moTa) return;
+
+            const reqId = ++currentRequestId;
+            if (loadingIndicator) loadingIndicator.style.display = "inline";
+
+            try {
+                const res = await fetch(`/JobPost/GoiYKyNang?tieuDe=${encodeURIComponent(tieuDe)}&moTa=${encodeURIComponent(moTa)}`);
+                if (!res.ok) return;
+                const json = await res.json();
+
+                if (reqId === currentRequestId && json && json.success && Array.isArray(json.data) && json.data.length > 0) {
+                    container.innerHTML = "";
+                    json.data.forEach(item => {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "btn btn-sm btn-outline-success skill-btn rounded-pill px-2 py-0";
+                        btn.style.fontSize = "12px";
+                        btn.dataset.skill = item.tenKyNang;
+                        btn.textContent = `+ ${item.tenKyNang}`;
+                        if (item.lyDo) btn.title = item.lyDo;
+                        attachSkillClick(btn);
+                        container.appendChild(btn);
+                    });
+                    updateButtonActiveStates();
+                }
+            } catch (err) {
+                console.warn("Gợi ý kỹ năng lỗi:", err);
+            } finally {
+                if (reqId === currentRequestId && loadingIndicator) {
+                    loadingIndicator.style.display = "none";
+                }
+            }
+        }
+
+        if (titleInput) {
+            titleInput.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchSkillSuggestions, 350);
+            });
+            // Initial call if title already populated
+            if (titleInput.value.trim().length > 0) {
+                fetchSkillSuggestions();
+            }
+        }
+
+        if (descInput) {
+            descInput.addEventListener("blur", function () {
+                fetchSkillSuggestions();
+            });
+        }
+
+        if (skillInput) {
+            skillInput.addEventListener("input", updateButtonActiveStates);
+        }
+    })();
+</script>

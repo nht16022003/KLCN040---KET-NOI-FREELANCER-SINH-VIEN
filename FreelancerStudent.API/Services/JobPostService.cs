@@ -15,48 +15,84 @@ namespace FreelancerStudent.API.Services
     {
         private readonly IJobPostRepository _jopPostRepository; //Sử dụng để gọi các dữ liệu đucợ laays từ database để service xử lý
         private readonly INhaTuyenDungRepository _ntd;
-
         private readonly IUserRepository _user;
-
         private readonly IFreelancerStudentRepository _free;
-
         private readonly ApplicationDBContext _context;
+        private readonly IKyNangGoiYService _kyNangGoiYService;
 
         public JobPostService(
             IJobPostRepository nhaTuyenDungRepository,
             INhaTuyenDungRepository ntd,
             IUserRepository user,
             IFreelancerStudentRepository free,
-            ApplicationDBContext context)
+            ApplicationDBContext context,
+            IKyNangGoiYService kyNangGoiYService)
         {
             _jopPostRepository = nhaTuyenDungRepository;
             _ntd = ntd;
             _user = user;
             _free = free;
             _context = context;
+            _kyNangGoiYService = kyNangGoiYService;
         }
 
 
         //
         public async Task<List<JobPost_ReponseDTO>> layDanhSachJobPostAsync()
         {
-            var layDS_JobSQL = await _jopPostRepository.layTatCaJobPostAsync(); //Đang trả về là Models
-            var dsResult = layDS_JobSQL.Select(job => new JobPost_ReponseDTO
+            var layDS_JobSQL = await _jopPostRepository.layTatCaJobPostAsync(); // Đã sắp xếp mới nhất trước
+            
+            // Tính toán đánh giá thực tế từ bảng DanhGia_NhanXet
+            var ntdUserIds = layDS_JobSQL
+                .Where(j => j.NhaTuyenDung != null && j.NhaTuyenDung.maUser > 0)
+                .Select(j => j.NhaTuyenDung!.maUser)
+                .Distinct()
+                .ToList();
+
+            var reviewStats = await _context.DanhGia_NhanXets.AsNoTracking()
+                .Where(d => ntdUserIds.Contains(d.maNguoiDuocDanhGia))
+                .GroupBy(d => d.maNguoiDuocDanhGia)
+                .Select(g => new
+                {
+                    MaUser = g.Key,
+                    SoLuot = g.Count(),
+                    DiemTB = g.Average(d => (double)d.soSao)
+                })
+                .ToListAsync();
+
+            var dsResult = layDS_JobSQL.Select(job =>
             {
-                maJob = job.maJob,
-                maNhaTuyenDung = job.maNhaTuyenDung,
-                tieude = job.tieude,
-                mota = job.mota,
-                kynangyeucau = job.kynangyeucau,
-                thulao = job.thulao,
-                fileDinhKem = job.fileDinhKem,
-                phiDangBai = job.phiDangBai,
-                thoigiandangtuyen = job.thoigiandangtuyen,
-                thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
-                status = job.status,
-                soluongtuyen = job.soluongtuyen,
-                tenCongTy = job.NhaTuyenDung?.tencongty ?? job.NhaTuyenDung?.User?.hotenUser ?? string.Empty,
-                avatarNhaTuyenDung = job.NhaTuyenDung?.User?.avatarUrl ?? job.NhaTuyenDung?.logo ?? string.Empty
+                var ntd = job.NhaTuyenDung;
+                var stat = reviewStats.FirstOrDefault(s => ntd != null && s.MaUser == ntd.maUser);
+                
+                double? sao = (stat != null && stat.SoLuot > 0) 
+                    ? stat.DiemTB 
+                    : (ntd?.sosaodanhgia > 0 ? ntd.sosaodanhgia : null);
+                int soLuot = (stat != null && stat.SoLuot > 0) 
+                    ? stat.SoLuot 
+                    : (ntd?.soLuotDanhGia ?? 0);
+
+                return new JobPost_ReponseDTO
+                {
+                    maJob = job.maJob,
+                    maNhaTuyenDung = job.maNhaTuyenDung,
+                    tieude = job.tieude,
+                    mota = job.mota,
+                    kynangyeucau = job.kynangyeucau,
+                    thulao = job.thulao,
+                    fileDinhKem = job.fileDinhKem,
+                    phiDangBai = job.phiDangBai,
+                    thoigiandangtuyen = job.thoigiandangtuyen,
+                    thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                    status = job.status,
+                    soluongtuyen = job.soluongtuyen,
+                    tenCongTy = ntd?.tencongty ?? ntd?.User?.hotenUser ?? string.Empty,
+                    avatarNhaTuyenDung = ntd?.User?.avatarUrl ?? ntd?.logo ?? string.Empty,
+                    soSaoDanhGiaNhaTuyenDung = sao,
+                    soLuotDanhGiaNhaTuyenDung = soLuot,
+                    diaChiNhaTuyenDung = ntd?.diachi,
+                    linhVucNhaTuyenDung = ntd?.linhvuc
+                };
             }).ToList();
 
             return dsResult;
@@ -397,6 +433,17 @@ namespace FreelancerStudent.API.Services
                 }
             }
 
+            // Kiểm tra xác thực minh chứng sinh viên
+            var daXacMinh = await _context.MinhChung_FreelancerStudents
+                .AsNoTracking()
+                .AnyAsync(m => m.maUser == request.maUser && m.trangThaiGuiMinhChung == "Đã xác minh");
+
+            if (!daXacMinh)
+            {
+                throw new InvalidOperationException(
+                    "Bạn cần hoàn tất xác thực minh chứng sinh viên (trạng thái 'Đã xác minh') trước khi nộp đơn ứng tuyển công việc!");
+            }
+
             var donCu = await _jopPostRepository
                 .layDonUngTuyenTheoJobVaFreelancerAsync(
                     request.maJob,
@@ -575,22 +622,24 @@ namespace FreelancerStudent.API.Services
                     }
                 }
 
-                var textJob = $"{job.tieude} {job.mota} {job.kynangyeucau}".ToLowerInvariant();
                 var kyNangKhop = new List<string>();
 
                 if (kyNangJob.Count > 0)
                 {
-                    // Trường hợp 1: Công việc có khai báo cụ thể danh sách kỹ năng yêu cầu
+                    // So khớp trực tiếp giữa kỹ năng sinh viên có và kỹ năng yêu cầu trong bài Job (kynangyeucau)
                     foreach (var knJob in kyNangJob)
                     {
-                        var knJobLower = knJob.ToLowerInvariant();
+                        var knJobLower = knJob.Trim().ToLowerInvariant();
                         // Kiểm tra sinh viên có kỹ năng này không
                         var khop = danhSachKyNangUser.Any(knUser =>
                         {
-                            var knUserLower = knUser.ToLowerInvariant();
-                            return knUserLower == knJobLower ||
-                                   knJobLower.Contains(knUserLower) ||
-                                   knUserLower.Contains(knJobLower);
+                            var knUserLower = knUser.Trim().ToLowerInvariant();
+                            if (knUserLower == knJobLower) return true;
+                            if (knUserLower.Length > 2 && knJobLower.Length > 2)
+                            {
+                                return knJobLower.Contains(knUserLower) || knUserLower.Contains(knJobLower);
+                            }
+                            return false;
                         });
 
                         if (khop && !kyNangKhop.Contains(knJob))
@@ -599,19 +648,8 @@ namespace FreelancerStudent.API.Services
                         }
                     }
                 }
-                else
-                {
-                    // Trường hợp 2: Công việc không phân tách kỹ năng cụ thể, tìm từ khóa kỹ năng của user trong mô tả/tiêu đề
-                    foreach (var knUser in danhSachKyNangUser)
-                    {
-                        if (textJob.Contains(knUser.ToLowerInvariant()) && !kyNangKhop.Contains(knUser))
-                        {
-                            kyNangKhop.Add(knUser);
-                        }
-                    }
-                }
 
-                // Tính toán tỷ lệ % phù hợp (Maximum 100%) dựa trên số kỹ năng đáp ứng được
+                // Tính toán tỷ lệ % phù hợp dựa trên số kỹ năng đáp ứng / tổng số kỹ năng yêu cầu của bài Job
                 double phanTramPhuHop = 0;
                 string lyDo = string.Empty;
 
@@ -622,7 +660,6 @@ namespace FreelancerStudent.API.Services
                 }
                 else if (kyNangJob.Count > 0)
                 {
-                    // Công thức: (Số kỹ năng đáp ứng / Tổng số kỹ năng yêu cầu) * 100
                     int tongKyNangYeuCau = kyNangJob.Count;
                     int soKyNangDapUng = kyNangKhop.Count;
 
@@ -643,18 +680,9 @@ namespace FreelancerStudent.API.Services
                 }
                 else
                 {
-                    // Công việc không ghi trường kỹ năng rõ ràng
-                    if (kyNangKhop.Count > 0)
-                    {
-                        int tongKyNangUser = Math.Max(1, danhSachKyNangUser.Count);
-                        phanTramPhuHop = Math.Min(100.0, Math.Round(((double)kyNangKhop.Count / tongKyNangUser) * 100.0, 0));
-                        lyDo = $"Phù hợp {phanTramPhuHop:0}%: Công việc có yêu cầu {kyNangKhop.Count} kỹ năng bạn sở hữu ({string.Join(", ", kyNangKhop)}).";
-                    }
-                    else
-                    {
-                        phanTramPhuHop = 0;
-                        lyDo = "Không tìm thấy kỹ năng phù hợp với công việc này.";
-                    }
+                    // Công việc không yêu cầu kỹ năng cụ thể
+                    phanTramPhuHop = 0;
+                    lyDo = "Công việc không yêu cầu kỹ năng cụ thể.";
                 }
 
                 // Chỉ gợi ý công việc có ít nhất 1 kỹ năng trùng khớp (> 0%)

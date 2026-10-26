@@ -32,6 +32,14 @@ namespace FreelancerStudent.API.Services
             string maHD,
             int? maUserNhaTuyenDung);
 
+        Task<bool> NghiemThuAsync(string maHD, int? maUserNTD);
+
+        Task<HopDongThanhToan_ReponseDTO?> LayThongTinThanhToanAsync(string maHD, int? maUserNTD);
+
+        Task<bool> ThanhToanAsync(string maHD, int? maUserNTD);
+
+        Task<bool> ThanhToanCoreAsync(string maHD, int? maUserNTD, bool tuDong);
+
         Task<bool> XoaHopDongAsync(
             string maHD,
             int? maUserNTD);

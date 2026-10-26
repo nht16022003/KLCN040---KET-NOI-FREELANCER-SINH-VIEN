@@ -358,32 +358,37 @@
 
                     <span asp-validation-for="kynangyeucau" class="field-error"></span>
 
-                    <div class="skill-suggestions">
-                        <span class="skill-label">Gợi ý:</span>
+                    <div class="skill-suggestions" id="skillSuggestionsBox">
+                        <span class="skill-label">Gợi ý kỹ năng:</span>
+                        <span id="skillLoadingText" style="display:none; font-size: 13px; color: #16864b; margin-left: 6px;">
+                            <span class="spinner-border spinner-border-sm" role="status" style="width: 14px; height: 14px;"></span> Đang tìm kỹ năng phù hợp...
+                        </span>
 
-                        <button type="button" class="skill-btn" data-skill="Photoshop">
-                            + Photoshop
-                        </button>
+                        <div id="skillListContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
+                            <button type="button" class="skill-btn" data-skill="Photoshop">
+                                + Photoshop
+                            </button>
 
-                        <button type="button" class="skill-btn" data-skill="Figma">
-                            + Figma
-                        </button>
+                            <button type="button" class="skill-btn" data-skill="Figma">
+                                + Figma
+                            </button>
 
-                        <button type="button" class="skill-btn" data-skill="ASP.NET Core">
-                            + ASP.NET Core
-                        </button>
+                            <button type="button" class="skill-btn" data-skill="ASP.NET Core">
+                                + ASP.NET Core
+                            </button>
 
-                        <button type="button" class="skill-btn" data-skill="Flutter">
-                            + Flutter
-                        </button>
+                            <button type="button" class="skill-btn" data-skill="Flutter">
+                                + Flutter
+                            </button>
 
-                        <button type="button" class="skill-btn" data-skill="HTML/CSS">
-                            + HTML/CSS
-                        </button>
+                            <button type="button" class="skill-btn" data-skill="HTML/CSS">
+                                + HTML/CSS
+                            </button>
 
-                        <button type="button" class="skill-btn" data-skill="SQL Server">
-                            + SQL Server
-                        </button>
+                            <button type="button" class="skill-btn" data-skill="SQL Server">
+                                + SQL Server
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -481,24 +486,123 @@
 </div>
 
 <script>
-    document.querySelectorAll(".skill-btn").forEach(function (button) {
+    (function () {
+        const titleInput = document.querySelector('input[name="tieude"]');
+        const descInput = document.querySelector('textarea[name="mota"]');
+        const skillInput = document.getElementById("skillInput");
+        const container = document.getElementById("skillListContainer");
+        const loadingIndicator = document.getElementById("skillLoadingText");
 
-        button.addEventListener("click", function () {
+        let debounceTimer = null;
+        let currentRequestId = 0;
 
-            const input = document.getElementById("skillInput");
-            const skill = this.dataset.skill;
+        function attachSkillClick(btn) {
+            btn.addEventListener("click", function () {
+                const skill = this.dataset.skill;
+                if (!skill) return;
 
-            let skills = input.value
+                let skills = skillInput.value
+                    .split(",")
+                    .map(x => x.trim())
+                    .filter(x => x.length > 0);
+
+                const existingIdx = skills.findIndex(s => s.toLowerCase() === skill.toLowerCase());
+                if (existingIdx >= 0) {
+                    // Bỏ chọn nếu đã có
+                    skills.splice(existingIdx, 1);
+                    this.classList.remove("active");
+                    this.style.background = "#eef7f2";
+                    this.style.color = "#176c42";
+                } else {
+                    // Chọn thêm kỹ năng
+                    skills.push(skill);
+                    this.classList.add("active");
+                    this.style.background = "#17864b";
+                    this.style.color = "#ffffff";
+                }
+
+                skillInput.value = skills.join(", ");
+            });
+        }
+
+        function updateButtonActiveStates() {
+            if (!container || !skillInput) return;
+            const current = skillInput.value
                 .split(",")
-                .map(x => x.trim())
+                .map(x => x.trim().toLowerCase())
                 .filter(x => x.length > 0);
 
-            if (!skills.includes(skill)) {
-                skills.push(skill);
+            container.querySelectorAll(".skill-btn").forEach(btn => {
+                const sk = (btn.dataset.skill || "").toLowerCase();
+                if (current.includes(sk)) {
+                    btn.classList.add("active");
+                    btn.style.background = "#17864b";
+                    btn.style.color = "#ffffff";
+                } else {
+                    btn.classList.remove("active");
+                    btn.style.background = "#eef7f2";
+                    btn.style.color = "#176c42";
+                }
+            });
+        }
+
+        async function fetchSkillSuggestions() {
+            const tieuDe = titleInput ? titleInput.value.trim() : "";
+            const moTa = descInput ? descInput.value.trim() : "";
+
+            if (!tieuDe && !moTa) return;
+
+            const reqId = ++currentRequestId;
+            if (loadingIndicator) loadingIndicator.style.display = "inline";
+
+            try {
+                const res = await fetch(`/JobPost/GoiYKyNang?tieuDe=${encodeURIComponent(tieuDe)}&moTa=${encodeURIComponent(moTa)}`);
+                if (!res.ok) return;
+                const json = await res.json();
+
+                if (reqId === currentRequestId && json && json.success && Array.isArray(json.data) && json.data.length > 0) {
+                    container.innerHTML = "";
+                    json.data.forEach(item => {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "skill-btn";
+                        btn.dataset.skill = item.tenKyNang;
+                        btn.textContent = `+ ${item.tenKyNang}`;
+                        if (item.lyDo) btn.title = item.lyDo;
+                        attachSkillClick(btn);
+                        container.appendChild(btn);
+                    });
+                    updateButtonActiveStates();
+                }
+            } catch (err) {
+                console.warn("Gợi ý kỹ năng lỗi:", err);
+            } finally {
+                if (reqId === currentRequestId && loadingIndicator) {
+                    loadingIndicator.style.display = "none";
+                }
             }
+        }
 
-            input.value = skills.join(", ");
-        });
+        if (titleInput) {
+            titleInput.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchSkillSuggestions, 350);
+            });
+        }
 
-    });
+        if (descInput) {
+            descInput.addEventListener("blur", function () {
+                fetchSkillSuggestions();
+            });
+        }
+
+        if (skillInput) {
+            skillInput.addEventListener("input", updateButtonActiveStates);
+        }
+
+        if (container) {
+            container.querySelectorAll(".skill-btn").forEach(attachSkillClick);
+        }
+        updateButtonActiveStates();
+    })();
 </script>

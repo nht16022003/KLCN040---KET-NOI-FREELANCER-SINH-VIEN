@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
@@ -6,6 +6,7 @@ import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../services/dich_vu_vi_tien.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_vi_tien.dart';
+import '../profile/man_hinh_minh_chung_the_sv.dart';
 
 class DepositScreen extends StatefulWidget {
   const DepositScreen({super.key});
@@ -65,13 +66,44 @@ class _DepositScreenState extends State<DepositScreen> {
       // Tải lại số dư ví
       context.read<WalletViewModel>().taiThongTinVi(user.userId);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            res.message.isNotEmpty ? res.message : 'Tạo giao dịch nạp tiền thất bại.',
+      final msg = res.message.isNotEmpty ? res.message : 'Tạo giao dịch nạp tiền thất bại.';
+      if (msg.contains('xác thực') || msg.contains('xác minh')) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.shield_outlined, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Text(msg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Đóng'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
+                  );
+                },
+                child: const Text('Xác thực ngay', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
-        ),
-      );
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
     }
   }
 

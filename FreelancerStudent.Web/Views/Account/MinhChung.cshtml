@@ -1,0 +1,881 @@
+@model FreelancerStudent.Web.ViewModels.MinhChungIndexViewModel
+
+@{
+    ViewData["Title"] = "Minh chứng sinh viên bằng Thẻ sinh viên";
+}
+
+<div class="minhchung-page">
+    <div class="container py-4">
+        <!-- HEADER BREADCRUMB & TITLE -->
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="/FreelancerStudent/HoSo" class="text-decoration-none text-muted">Hồ sơ cá nhân</a></li>
+                    <li class="breadcrumb-item active text-success fw-bold" aria-current="page">Minh chứng sinh viên</li>
+                </ol>
+            </nav>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge text-success"></i> Minh Chứng Thẻ Sinh Viên
+                    </h2>
+                    <p class="text-muted mb-0">Quét ảnh thẻ sinh viên để hệ thống tự động trích xuất thông tin, đối chiếu và cập nhật hồ sơ Freelancer.</p>
+                </div>
+                <div class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-6">
+                    <i class="bi bi-shield-check me-1"></i> Xác thực chuẩn trường cấp
+                </div>
+            </div>
+        </div>
+
+        <!-- THÔNG BÁO TỪ HỆ THỐNG NẾU BỊ CHẶN ĐIỀU HƯỚNG TỚI ĐÂY -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill fs-3 text-danger flex-shrink-0"></i>
+                <div class="flex-grow-1">
+                    <strong class="d-block text-danger fs-6">Yêu cầu xác thực tài khoản sinh viên!</strong>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-3">
+                <i class="bi bi-check-circle-fill fs-3 text-success flex-shrink-0"></i>
+                <div>
+                    <strong class="d-block text-success fs-6">Thành công!</strong>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            </div>
+        }
+
+        <!-- KHỐI TRẠNG THÁI XÁC MINH HIỆN TẠI -->
+        @{
+            var isDaXacMinh = Model.TrangThaiXacThuc?.DaXacMinh == true;
+            var trangThai = Model.TrangThaiXacThuc?.TrangThai ?? "Chưa gửi";
+            var maMCMoiNhat = Model.TrangThaiXacThuc?.MaMinhChungMoiNhat;
+        }
+
+        @if (isDaXacMinh)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 24px;">
+                        <i class="bi bi-check2-all"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-success mb-1">Tài khoản sinh viên: ĐÃ ĐƯỢC XÁC THỰC THÀNH CÔNG</h5>
+                        <p class="text-secondary mb-0 small">Minh chứng thẻ sinh viên đã được phê duyệt hợp lệ. Bạn được toàn quyền sử dụng tất cả tính năng trên hệ thống.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Đăng bài tìm việc</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Nộp đơn ứng tuyển</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Hợp đồng & Bàn giao</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Nạp / rút ví</span>
+                </div>
+            </div>
+        }
+        else if (trangThai == "Đang gửi")
+        {
+            <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 24px;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">Minh chứng thẻ sinh viên: ĐANG CHỜ PHÊ DUYỆT</h5>
+                        <p class="text-secondary mb-0 small">Hồ sơ thẻ sinh viên của bạn đã gửi lên và đang chờ Admin duyệt. Các tính năng đăng bài, ứng tuyển, hợp đồng, ví sẽ tự động mở khóa ngay khi được duyệt.</p>
+                    </div>
+                </div>
+                @if (maMCMoiNhat.HasValue && maMCMoiNhat.Value > 0)
+                {
+                    <div>
+                        <button type="button" class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm" onclick="duyetNhanhDemo(@maMCMoiNhat.Value)">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Duyệt nhanh (Môi trường kiểm thử)
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 24px;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-danger mb-1">Tài khoản sinh viên: CHƯA XÁC THỰC MINH CHỨNG</h5>
+                        <p class="text-secondary mb-0 small">Để bảo đảm an toàn và quyền lợi cho cộng đồng sinh viên, bạn cần quét thẻ sinh viên và được xác thực để sử dụng: <strong>Đăng bài tìm việc, Ứng tuyển dự án, Ký hợp đồng & Bàn giao, Nạp ví & Rút ví</strong>.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa đăng bài</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa ứng tuyển</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa hợp đồng</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa nạp/rút ví</span>
+                </div>
+            </div>
+        }
+
+        <!-- THÔNG BÁO QUY ĐỊNH & BẢO MẬT -->
+        <div class="alert alert-info border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-start gap-3">
+            <i class="bi bi-info-circle-fill fs-3 text-info flex-shrink-0 mt-1"></i>
+            <div>
+                <div class="fw-bold fs-6 mb-1">Lưu ý quan trọng khi tải thẻ sinh viên:</div>
+                <ul class="mb-0 ps-3 text-secondary small">
+                    <li>Chỉ sử dụng <strong>Thẻ sinh viên chính quy</strong> do trường Đại học / Cao đẳng của bạn cấp (không dùng CCCD hay CMND).</li>
+                    <li>Hình ảnh chụp rõ nét, đủ ánh sáng, không bị lóa hoặc mất 4 góc, các dòng chữ Họ tên, MSSV, Khóa/Khoa đọc được rõ ràng.</li>
+                    <li>Hệ thống chạy <strong>nhận diện OCR cục bộ an toàn</strong>, bảo vệ tuyệt đối dữ liệu riêng tư của sinh viên.</li>
+                    <li>Dữ liệu hồ sơ chỉ được cập nhật sau khi bạn đã kiểm tra và bấm nút <strong>Xác nhận</strong>.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- CỘT TRÁI: KHU VỰC QUÉT THẺ SINH VIÊN -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                    <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex align-items-center justify-content-between">
+                        <span class="fw-bold fs-5 text-dark">
+                            <i class="bi bi-camera me-2 text-success"></i> Bước 1 & 2: Tải lên & Quét Thẻ
+                        </span>
+                        <span id="scanStatusBadge" class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1">Chờ tải ảnh</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- UPLOAD DROP ZONE -->
+                        <div id="dropZone" class="upload-dropzone border border-2 border-dashed rounded-4 p-4 text-center position-relative mb-3">
+                            <input type="file" id="studentCardInput" accept="image/jpeg,image/png,image/webp,image/jpg" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" style="z-index: 5;" />
+                            
+                            <div id="uploadPrompt" class="py-3">
+                                <div class="upload-icon-circle mx-auto mb-3">
+                                    <i class="bi bi-cloud-arrow-up text-success fs-1"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1">Kéo thả ảnh thẻ sinh viên vào đây</h6>
+                                <p class="text-muted small mb-3">Hoặc nhấp chuột để chọn ảnh từ máy tính / thư viện</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3" onclick="document.getElementById('studentCardInput').click();">
+                                        <i class="bi bi-folder2-open me-1"></i> Chọn tệp ảnh
+                                    </button>
+                                    <label for="cameraInput" class="btn btn-outline-primary btn-sm rounded-pill px-3 mb-0 cursor-pointer">
+                                        <i class="bi bi-camera me-1"></i> Chụp bằng Camera
+                                    </label>
+                                    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="d-none" />
+                                </div>
+                                <div class="text-muted mt-2" style="font-size: 11px;">Định dạng: JPG, PNG, WEBP (Tối đa 10MB)</div>
+                            </div>
+
+                            <!-- PREVIEW CONTAINER -->
+                            <div id="previewContainer" class="d-none">
+                                <div class="position-relative d-inline-block">
+                                    <img id="imagePreview" src="" alt="Thẻ sinh viên" class="img-fluid rounded-3 shadow-sm border border-2 border-success" style="max-height: 280px; object-fit: contain;" />
+                                    <button type="button" id="btnRemoveImage" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 m-2 shadow" title="Xóa ảnh chọn lại">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-2 text-muted small" id="imageFileName"></div>
+                            </div>
+                        </div>
+
+                        <!-- SCAN ACTION BUTTON -->
+                        <div class="d-grid gap-2">
+                            <button type="button" id="btnStartScan" class="btn btn-success btn-lg rounded-pill fw-bold py-2 shadow-sm" disabled>
+                                <i class="bi bi-upc-scan me-2"></i> Bắt đầu quét & Nhận diện thẻ SV
+                            </button>
+                        </div>
+
+                        <!-- SCANNING SPINNER / PROGRESS -->
+                        <div id="scanLoading" class="text-center py-4 d-none">
+                            <div class="spinner-border text-success mb-2" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Đang quét...</span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Đang trích xuất dữ liệu qua OCR...</h6>
+                            <p class="text-muted small mb-0" id="scanLoadingText">Đang tối ưu độ tương phản và quét mã vạch thẻ sinh viên...</p>
+                        </div>
+
+                        <!-- SCAN ERROR ALERT -->
+                        <div id="scanErrorAlert" class="alert alert-danger rounded-4 mt-3 d-none">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                <span id="scanErrorMessage" class="fw-medium">Lỗi khi nhận diện thẻ sinh viên.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BẢNG ĐỐI CHIẾU VÀ XÁC NHẬN (BƯỚC 3) -->
+                <div id="verificationCard" class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 d-none">
+                    <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex align-items-center justify-content-between">
+                        <span class="fw-bold fs-5 text-dark">
+                            <i class="bi bi-clipboard-check me-2 text-primary"></i> Bước 3: Kiểm tra & Xác nhận thông tin
+                        </span>
+                        <span id="ocrConfidenceBadge" class="badge bg-success rounded-pill px-3 py-1">Độ tin cậy: 95%</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-warning border-0 rounded-3 p-3 mb-3 small d-flex align-items-center gap-2">
+                            <i class="bi bi-pencil-square fs-5 text-warning flex-shrink-0"></i>
+                            <div>Vui lòng kiểm tra lại thông tin nhận diện được dưới đây. Bạn có thể chỉnh sửa lại các trường thông tin trước khi nhấn nút xác nhận cập nhật hồ sơ.</div>
+                        </div>
+
+                        <form id="formConfirmStudentCard">
+                            <input type="hidden" id="confirmedFileUrl" value="" />
+                            
+                            <div class="table-responsive mb-3">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th style="width: 25%;">Trường thông tin</th>
+                                            <th style="width: 35%;">Hồ sơ hiện tại</th>
+                                            <th style="width: 40%;">Dữ liệu trên Thẻ SV (Xác nhận)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- HỌ VÀ TÊN -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Họ và tên <span class="text-danger">*</span>
+                                            </td>
+                                            <td id="cellCurrentName" class="text-muted">
+                                                @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.HoTenHienTai) ? "(Chưa cập nhật)" : Model.ThongTinSinhVien.HoTenHienTai)
+                                            </td>
+                                            <td>
+                                                <input type="text" id="inputHoVaTen" class="form-control form-control-sm rounded-3 fw-bold text-dark" required />
+                                                <div id="diffBadgeName" class="badge bg-primary-subtle text-primary mt-1 d-none">Có thay đổi</div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- MÃ SỐ SINH VIÊN (CHỈ ĐỐI CHIẾU) -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Mã số sinh viên (MSSV)
+                                            </td>
+                                            <td class="text-muted">
+                                                <span class="badge bg-light text-secondary border">Đối chiếu thẻ</span>
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light"><i class="bi bi-upc"></i></span>
+                                                    <input type="text" id="inputMssv" class="form-control rounded-end-3" placeholder="Không đọc được MSSV" readonly />
+                                                </div>
+                                                <small class="text-muted" style="font-size: 11px;">(MSSV dùng để đối chiếu xác minh minh chứng)</small>
+                                            </td>
+                                        </tr>
+
+                                        <!-- TÊN TRƯỜNG ĐH/CĐ -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Trường ĐH / CĐ <span class="text-danger">*</span>
+                                            </td>
+                                            <td id="cellCurrentSchool" class="text-muted">
+                                                @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.TenTruong) ? "(Chưa cập nhật)" : Model.ThongTinSinhVien.TenTruong)
+                                            </td>
+                                            <td>
+                                                <input type="text" id="inputTenTruong" class="form-control form-control-sm rounded-3" placeholder="Nhập tên trường" required />
+                                                <div id="diffBadgeSchool" class="badge bg-primary-subtle text-primary mt-1 d-none">Có thay đổi</div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- CHUYÊN NGÀNH / KHOA -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Chuyên ngành đào tạo <span class="text-danger">*</span>
+                                            </td>
+                                            <td id="cellCurrentMajor" class="text-muted">
+                                                @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.ChuyenNganh) ? "(Chưa cập nhật)" : Model.ThongTinSinhVien.ChuyenNganh)
+                                            </td>
+                                            <td>
+                                                <div class="mb-2">
+                                                    <label class="form-label small text-muted mb-1" style="font-size: 11px;">
+                                                        <i class="bi bi-card-text me-1 text-primary"></i>Dữ liệu đọc từ Thẻ SV:
+                                                    </label>
+                                                    <input type="text" id="inputMajorFromCard" class="form-control form-control-sm rounded-3 bg-light fw-bold text-primary" placeholder="(Chưa nhận diện được ngành từ thẻ)" readonly />
+                                                </div>
+                                                <div>
+                                                    <label class="form-label small text-muted mb-1" style="font-size: 11px;">
+                                                        <i class="bi bi-check2-circle me-1 text-success"></i>Chuyên ngành hệ thống (Xác nhận):
+                                                    </label>
+                                                    <select id="selectChuyenNganh" class="form-select form-select-sm rounded-3">
+                                                        <option value="">-- Chọn chuyên ngành phù hợp --</option>
+                                                        @foreach (var cn in Model.DanhSachChuyenNganh)
+                                                        {
+                                                            <option value="@cn.MaChuyenNganh">@cn.TenChuyenNganh (@cn.MaChuyenNganh)</option>
+                                                        }
+                                                    </select>
+                                                    <div id="ocrDetectedMajorText" class="text-muted small mt-1" style="font-size: 11px;"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- NIÊN KHÓA -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Niên khóa
+                                            </td>
+                                            <td class="text-muted">
+                                                <span class="badge bg-light text-secondary border">Hồ sơ</span>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="inputNienKhoa" class="form-control form-control-sm rounded-3" placeholder="VD: 2021-2025" />
+                                            </td>
+                                        </tr>
+
+                                        <!-- NĂM THỨ -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Sinh viên năm thứ
+                                            </td>
+                                            <td class="text-muted">
+                                                <span class="badge bg-light text-secondary border">1 - 6</span>
+                                            </td>
+                                            <td>
+                                                <select id="selectNamThu" class="form-select form-select-sm rounded-3">
+                                                    <option value="">-- Chưa chọn --</option>
+                                                    <option value="1">Năm 1</option>
+                                                    <option value="2">Năm 2</option>
+                                                    <option value="3">Năm 3</option>
+                                                    <option value="4">Năm 4</option>
+                                                    <option value="5">Năm 5</option>
+                                                    <option value="6">Năm 6</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+
+                                        <!-- NGÀY SINH -->
+                                        <tr>
+                                            <td class="fw-bold text-secondary">
+                                                Ngày sinh
+                                            </td>
+                                            <td id="cellCurrentDob" class="text-muted">
+                                                @(Model.ThongTinSinhVien.NgaySinhHienTai.HasValue ? Model.ThongTinSinhVien.NgaySinhHienTai.Value.ToString("dd/MM/yyyy") : "(Chưa có)")
+                                            </td>
+                                            <td>
+                                                <input type="date" id="inputNgaySinh" class="form-control form-control-sm rounded-3" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- CHECKBOX ĐỒNG Ý CẬP NHẬT -->
+                            <div class="form-check p-3 bg-light rounded-3 mb-4">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="checkConsent" checked>
+                                <label class="form-check-label fw-bold text-dark small" for="checkConsent">
+                                    Tôi xác nhận thông tin trên thẻ sinh viên là chính xác và đồng ý lưu minh chứng kèm cập nhật thông tin tương ứng vào hồ sơ Freelancer.
+                                </label>
+                            </div>
+
+                            <!-- ACTION CONFIRM BUTTONS -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" id="btnCancelVerification" class="btn btn-outline-secondary rounded-pill px-4">
+                                    Hủy thao tác
+                                </button>
+                                <button type="button" id="btnSaveEvidence" class="btn btn-success rounded-pill px-4 fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Xác nhận & Cập nhật hồ sơ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: HỒ SƠ HIỆN TẠI & LỊCH SỬ MINH CHỨNG -->
+            <div class="col-lg-5">
+                <!-- CARD HỒ SƠ SINH VIÊN HIỆN TẠI -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-white border-bottom border-light py-3 px-4">
+                        <span class="fw-bold fs-6 text-dark">
+                            <i class="bi bi-person-circle me-2 text-success"></i> Thông tin hồ sơ Freelancer hiện tại
+                        </span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="avatar-circle-sm bg-success-subtle text-success fw-bold fs-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.HoTenHienTai) ? "S" : Model.ThongTinSinhVien.HoTenHienTai.Substring(0, 1).ToUpper())
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">
+                                    @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.HoTenHienTai) ? "Chưa có họ tên" : Model.ThongTinSinhVien.HoTenHienTai)
+                                </h6>
+                                <span class="badge bg-secondary-subtle text-secondary small">Freelancer Student</span>
+                            </div>
+                        </div>
+
+                        <ul class="list-group list-group-flush small">
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-muted"><i class="bi bi-mortarboard me-2"></i> Trường học:</span>
+                                <span class="fw-bold text-dark text-end">
+                                    @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.TenTruong) ? "Chưa cập nhật" : Model.ThongTinSinhVien.TenTruong)
+                                </span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-muted"><i class="bi bi-book me-2"></i> Chuyên ngành:</span>
+                                <span class="fw-bold text-dark text-end">
+                                    @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.ChuyenNganh) ? "Chưa cập nhật" : Model.ThongTinSinhVien.ChuyenNganh)
+                                </span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-muted"><i class="bi bi-geo-alt me-2"></i> Khu vực:</span>
+                                <span class="fw-bold text-dark text-end">
+                                    @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.DiaDiemHienTai) ? "Chưa cập nhật" : Model.ThongTinSinhVien.DiaDiemHienTai)
+                                </span>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <span class="text-muted"><i class="bi bi-calendar-event me-2"></i> Ngày sinh:</span>
+                                <span class="fw-bold text-dark">
+                                    @(Model.ThongTinSinhVien.NgaySinhHienTai.HasValue ? Model.ThongTinSinhVien.NgaySinhHienTai.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- CARD LỊCH SỬ MINH CHỨNG ĐÃ NỘP -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold fs-6 text-dark">
+                            <i class="bi bi-clock-history me-2 text-primary"></i> Lịch sử minh chứng đã gửi
+                        </span>
+                        <span class="badge bg-light text-dark border">@Model.DanhSachMinhChung.Count bản ghi</span>
+                    </div>
+                    <div class="card-body p-3">
+                        @if (Model.DanhSachMinhChung.Count == 0)
+                        {
+                            <div class="text-center py-4 text-muted small">
+                                <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Bạn chưa gửi minh chứng nào. Hãy tải lên ảnh Thẻ sinh viên ở khung bên cạnh!
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var item in Model.DanhSachMinhChung)
+                                {
+                                    <div class="list-group-item px-2 py-3 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <span class="fw-bold text-dark">
+                                                <i class="bi bi-person-vcard text-success me-1"></i> @item.LoaiMinhChung
+                                            </span>
+                                            @if (item.TrangThaiGuiMinhChung == "Đã xác minh")
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                                    <i class="bi bi-check-circle me-1"></i> Đã xác minh
+                                                </span>
+                                            }
+                                            else if (item.TrangThaiGuiMinhChung == "Đã từ chối")
+                                            {
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                                    <i class="bi bi-x-circle me-1"></i> Đã từ chối
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">
+                                                    <i class="bi bi-hourglass-split me-1"></i> Đang gửi (Chờ duyệt)
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 12px;">
+                                            <span><i class="bi bi-calendar3 me-1"></i> Nộp ngày: @item.NgayNop.ToString("dd/MM/yyyy HH:mm")</span>
+                                            @if (!string.IsNullOrWhiteSpace(item.FileMinhChung))
+                                            {
+                                                var fullImgUrl = item.FileMinhChung.StartsWith("http") ? item.FileMinhChung : ("http://localhost:5152" + (item.FileMinhChung.StartsWith("/") ? "" : "/") + item.FileMinhChung);
+                                                <a href="@fullImgUrl" target="_blank" class="text-decoration-none text-primary fw-medium">
+                                                    <i class="bi bi-eye me-1"></i> Xem ảnh
+                                                </a>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(item.LyDoTuChoi))
+                                        {
+                                            <div class="mt-2 text-danger small bg-danger-subtle p-2 rounded-2">
+                                                <strong>Lý do từ chối:</strong> @item.LyDoTuChoi
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .minhchung-page {
+        background-color: #f7faf8;
+        min-height: calc(100vh - 120px);
+    }
+    .upload-dropzone {
+        background-color: #fafcfb;
+        border-color: #c8ded0 !important;
+        transition: all 0.25s ease;
+    }
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+        border-color: #2f7650 !important;
+        background-color: #edf5f0;
+    }
+    .upload-icon-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: #eaf4ed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+@section Scripts {
+<script>
+    let selectedFile = null;
+    let ocrScanResult = null;
+
+    const fileInput = document.getElementById('studentCardInput');
+    const cameraInput = document.getElementById('cameraInput');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const imageFileName = document.getElementById('imageFileName');
+    const btnRemoveImage = document.getElementById('btnRemoveImage');
+    const btnStartScan = document.getElementById('btnStartScan');
+    const scanStatusBadge = document.getElementById('scanStatusBadge');
+    const scanLoading = document.getElementById('scanLoading');
+    const scanErrorAlert = document.getElementById('scanErrorAlert');
+    const scanErrorMessage = document.getElementById('scanErrorMessage');
+    const verificationCard = document.getElementById('verificationCard');
+    const btnCancelVerification = document.getElementById('btnCancelVerification');
+    const btnSaveEvidence = document.getElementById('btnSaveEvidence');
+
+    // Xử lý chọn tệp từ file input
+    fileInput.addEventListener('change', function (e) {
+        if (e.target.files && e.target.files[0]) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    // Xử lý chụp từ camera
+    cameraInput.addEventListener('change', function (e) {
+        if (e.target.files && e.target.files[0]) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    // Xử lý file được chọn
+    function handleFileSelect(file) {
+        // Kiểm tra loại file
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+            alert('Vui lòng chọn định dạng ảnh JPG, PNG hoặc WEBP hợp lệ.');
+            return;
+        }
+
+        // Kiểm tra kích thước <= 10MB
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Dung lượng ảnh vượt quá giới hạn 10MB.');
+            return;
+        }
+
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            imagePreview.src = e.target.result;
+            imageFileName.innerText = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            uploadPrompt.classList.add('d-none');
+            previewContainer.classList.remove('d-none');
+            btnStartScan.disabled = false;
+            scanStatusBadge.className = 'badge bg-primary-subtle text-primary rounded-pill px-3 py-1';
+            scanStatusBadge.innerText = 'Đã chọn ảnh thẻ';
+            scanErrorAlert.classList.add('d-none');
+            verificationCard.classList.add('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Xóa ảnh đã chọn
+    btnRemoveImage.addEventListener('click', function () {
+        selectedFile = null;
+        fileInput.value = '';
+        cameraInput.value = '';
+        imagePreview.src = '';
+        uploadPrompt.classList.remove('d-none');
+        previewContainer.classList.add('d-none');
+        btnStartScan.disabled = true;
+        scanStatusBadge.className = 'badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1';
+        scanStatusBadge.innerText = 'Chờ tải ảnh';
+        scanErrorAlert.classList.add('d-none');
+        verificationCard.classList.add('d-none');
+    });
+
+    // Bắt đầu Quét OCR
+    btnStartScan.addEventListener('click', async function () {
+        if (!selectedFile) {
+            alert('Vui lòng chọn ảnh thẻ sinh viên.');
+            return;
+        }
+
+        btnStartScan.disabled = true;
+        scanLoading.classList.remove('d-none');
+        scanErrorAlert.classList.add('d-none');
+        verificationCard.classList.add('d-none');
+        scanStatusBadge.className = 'badge bg-warning-subtle text-warning rounded-pill px-3 py-1';
+        scanStatusBadge.innerText = 'Đang nhận diện OCR...';
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const response = await fetch('/Account/QuetTheSinhVien', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            scanLoading.classList.add('d-none');
+            btnStartScan.disabled = false;
+
+            if (result.success && result.data) {
+                ocrScanResult = result.data;
+                populateVerificationData(result.data);
+                scanStatusBadge.className = 'badge bg-success-subtle text-success rounded-pill px-3 py-1';
+                scanStatusBadge.innerText = 'Quét thành công';
+            } else {
+                scanErrorAlert.classList.remove('d-none');
+                scanErrorMessage.innerText = result.message || 'Không thể trích xuất thông tin từ ảnh thẻ. Vui lòng chụp rõ hơn.';
+                scanStatusBadge.className = 'badge bg-danger-subtle text-danger rounded-pill px-3 py-1';
+                scanStatusBadge.innerText = 'Quét thất bại';
+            }
+        } catch (error) {
+            scanLoading.classList.add('d-none');
+            btnStartScan.disabled = false;
+            scanErrorAlert.classList.remove('d-none');
+            scanErrorMessage.innerText = 'Lỗi kết nối tới máy chủ khi gửi ảnh quét: ' + error.message;
+            scanStatusBadge.className = 'badge bg-danger-subtle text-danger rounded-pill px-3 py-1';
+            scanStatusBadge.innerText = 'Lỗi kết nối';
+        }
+    });
+
+    // Điền dữ liệu nhận diện vào bảng đối chiếu
+    function populateVerificationData(data) {
+        document.getElementById('confirmedFileUrl').value = data.fileMinhChungUrl || '';
+
+        // Độ tin cậy OCR
+        const badge = document.getElementById('ocrConfidenceBadge');
+        const score = data.doTinCay || 0;
+        badge.innerText = `Độ tin cậy: ${score.toFixed(0)}%`;
+        if (score >= 80) {
+            badge.className = 'badge bg-success rounded-pill px-3 py-1';
+        } else if (score >= 50) {
+            badge.className = 'badge bg-warning text-dark rounded-pill px-3 py-1';
+        } else {
+            badge.className = 'badge bg-danger rounded-pill px-3 py-1';
+        }
+
+        // Họ tên: hiển thị trung thực dữ liệu OCR nhận diện từ thẻ sinh viên, KHÔNG fallback sang currentName
+        const currentName = (data.hoSoHienTai && (data.hoSoHienTai.hoTenHienTai || data.hoSoHienTai.HoTenHienTai)) || '';
+        const detectedName = data.hoVaTen || data.HoVaTen || '';
+        const inputName = document.getElementById('inputHoVaTen');
+        inputName.value = detectedName;
+        if (!detectedName) {
+            inputName.placeholder = '(Không nhận diện được từ thẻ - Vui lòng nhập họ tên)';
+        }
+
+        const diffBadgeName = document.getElementById('diffBadgeName');
+        if (detectedName && currentName && detectedName.trim().toLowerCase() !== currentName.trim().toLowerCase()) {
+            diffBadgeName.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Tên trên thẻ ("${detectedName}") khác họ tên tài khoản ("${currentName}")`;
+            diffBadgeName.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle mt-1';
+            diffBadgeName.classList.remove('d-none');
+        } else if (detectedName && currentName) {
+            diffBadgeName.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Khớp với họ tên tài khoản`;
+            diffBadgeName.className = 'badge bg-success-subtle text-success border border-success-subtle mt-1';
+            diffBadgeName.classList.remove('d-none');
+        } else {
+            diffBadgeName.classList.add('d-none');
+        }
+
+        // MSSV
+        document.getElementById('inputMssv').value = data.mssv || data.Mssv || 'Không tìm thấy MSSV';
+
+        // Tên trường: hiển thị trung thực dữ liệu OCR nhận diện từ thẻ, KHÔNG fallback sang currentSchool
+        const currentSchool = (data.hoSoHienTai && (data.hoSoHienTai.tenTruong || data.hoSoHienTai.TenTruong)) || '';
+        const detectedSchool = data.tenTruong || data.TenTruong || '';
+        const inputSchool = document.getElementById('inputTenTruong');
+        inputSchool.value = detectedSchool;
+        if (!detectedSchool) {
+            inputSchool.placeholder = '(Không nhận diện được từ thẻ - Vui lòng nhập tên trường)';
+        }
+
+        const diffBadgeSchool = document.getElementById('diffBadgeSchool');
+        if (detectedSchool && currentSchool && detectedSchool.trim().toLowerCase() !== currentSchool.trim().toLowerCase()) {
+            diffBadgeSchool.innerHTML = `<i class="bi bi-arrow-repeat me-1"></i>Trường trên thẻ khác với hồ sơ hiện tại`;
+            diffBadgeSchool.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle mt-1';
+            diffBadgeSchool.classList.remove('d-none');
+        } else if (detectedSchool && currentSchool) {
+            diffBadgeSchool.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Khớp với trường trong hồ sơ`;
+            diffBadgeSchool.className = 'badge bg-success-subtle text-success border border-success-subtle mt-1';
+            diffBadgeSchool.classList.remove('d-none');
+        } else {
+            diffBadgeSchool.classList.add('d-none');
+        }
+
+        // Chuyên ngành đọc từ thẻ
+        const inputMajorFromCard = document.getElementById('inputMajorFromCard');
+        const cardMajor = data.khoaNganh || data.KhoaNganh || data.tenChuyenNganhGoiY || data.TenChuyenNganhGoiY || '';
+        if (inputMajorFromCard) {
+            inputMajorFromCard.value = cardMajor ? cardMajor : '(Không nhận diện được từ thẻ - Vui lòng chọn bên dưới)';
+        }
+
+        // Chuyên ngành hệ thống (gợi ý)
+        const selectCN = document.getElementById('selectChuyenNganh');
+        const maGoiY = data.maChuyenNganhGoiY || data.MaChuyenNganhGoiY;
+        const tenGoiY = data.tenChuyenNganhGoiY || data.TenChuyenNganhGoiY;
+        if (maGoiY) {
+            if (!Array.from(selectCN.options).some(o => o.value === maGoiY)) {
+                selectCN.add(new Option(`${tenGoiY || maGoiY} (${maGoiY})`, maGoiY));
+            }
+            selectCN.value = maGoiY;
+        }
+        const ocrMajorText = document.getElementById('ocrDetectedMajorText');
+        if (data.khoaNganh) {
+            ocrMajorText.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>Đã khớp ngành: "${data.tenChuyenNganhGoiY || data.khoaNganh}"</span>`;
+        } else {
+            ocrMajorText.innerText = '';
+        }
+
+        // Niên khóa
+        document.getElementById('inputNienKhoa').value = data.nienKhoa || '';
+
+        // Năm thứ
+        if (data.namThu && data.namThu >= 1 && data.namThu <= 6) {
+            document.getElementById('selectNamThu').value = data.namThu.toString();
+        } else {
+            document.getElementById('selectNamThu').value = '';
+        }
+
+        // Ngày sinh
+        if (data.ngaySinh) {
+            const d = new Date(data.ngaySinh);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById('inputNgaySinh').value = `${yyyy}-${mm}-${dd}`;
+        } else {
+            document.getElementById('inputNgaySinh').value = '';
+        }
+
+        verificationCard.classList.remove('d-none');
+        verificationCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Hủy thao tác kiểm tra
+    btnCancelVerification.addEventListener('click', function () {
+        if (confirm('Bạn có chắc chắn muốn hủy kết quả nhận diện này không?')) {
+            verificationCard.classList.add('d-none');
+        }
+    });
+
+    // Xác nhận và lưu hồ sơ
+    btnSaveEvidence.addEventListener('click', async function () {
+        const consent = document.getElementById('checkConsent').checked;
+        if (!consent) {
+            alert('Bạn cần đồng ý xác nhận thông tin trước khi lưu hồ sơ.');
+            return;
+        }
+
+        const hoVaTen = document.getElementById('inputHoVaTen').value.trim();
+        const tenTruong = document.getElementById('inputTenTruong').value.trim();
+        const maChuyenNganh = document.getElementById('selectChuyenNganh').value;
+        const selectCNElem = document.getElementById('selectChuyenNganh');
+        const tenChuyenNganh = maChuyenNganh && selectCNElem.selectedIndex >= 0 ? selectCNElem.options[selectCNElem.selectedIndex].text.replace(/\s*\([^)]*\)$/, '').trim() : null;
+        const nienKhoa = document.getElementById('inputNienKhoa').value.trim();
+        const namThuVal = document.getElementById('selectNamThu').value;
+        const ngaySinhVal = document.getElementById('inputNgaySinh').value;
+        const fileMinhChungUrl = document.getElementById('confirmedFileUrl').value;
+
+        if (!hoVaTen) {
+            alert('Họ và tên sinh viên không được để trống.');
+            return;
+        }
+        if (!tenTruong) {
+            alert('Tên trường ĐH / CĐ không được để trống.');
+            return;
+        }
+        if (!fileMinhChungUrl) {
+            alert('Không tìm thấy ảnh thẻ sinh viên đã tải lên. Vui lòng thử quét lại.');
+            return;
+        }
+
+        btnSaveEvidence.disabled = true;
+        btnSaveEvidence.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang cập nhật...';
+
+        const payload = {
+            hoVaTen: hoVaTen,
+            tenTruong: tenTruong,
+            maChuyenNganh: maChuyenNganh || null,
+            tenChuyenNganh: tenChuyenNganh || null,
+            nienKhoa: nienKhoa || null,
+            namThu: namThuVal ? parseInt(namThuVal) : null,
+            ngaySinh: ngaySinhVal ? ngaySinhVal : null,
+            fileMinhChungUrl: fileMinhChungUrl,
+            dongYCapNhatHoSo: true
+        };
+
+        try {
+            const response = await fetch('/Account/XacNhanTheSinhVien', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            btnSaveEvidence.disabled = false;
+            btnSaveEvidence.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Xác nhận & Cập nhật hồ sơ';
+
+            if (result.success) {
+                alert(result.message || 'Cập nhật hồ sơ từ Thẻ sinh viên thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi cập nhật: ' + (result.message || 'Không thể cập nhật hồ sơ'));
+            }
+        } catch (error) {
+            btnSaveEvidence.disabled = false;
+            btnSaveEvidence.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Xác nhận & Cập nhật hồ sơ';
+            alert('Lỗi kết nối máy chủ khi lưu hồ sơ: ' + error.message);
+        }
+    });
+
+    window.duyetNhanhDemo = function(maMinhChung) {
+        if (!confirm('Bạn có muốn duyệt nhanh minh chứng này để mở khóa toàn bộ quyền của sinh viên không?')) return;
+
+        fetch('/Account/PheDuyetMinhChung', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                maMinhChung: maMinhChung,
+                chapNhan: true
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Phê duyệt thành công! Các chức năng đăng bài, ứng tuyển, hợp đồng, ví đã được mở khóa.');
+                window.location.reload();
+            } else {
+                alert(data.message || 'Lỗi khi phê duyệt');
+            }
+        })
+        .catch(err => {
+            alert('Lỗi kết nối khi phê duyệt.');
+        });
+    };
+</script>
+}

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/mo_hinh_hop_dong.dart';
 import '../services/dich_vu_hop_dong.dart';
@@ -120,6 +120,44 @@ class HopDongViewModel extends ChangeNotifier {
     final response = await _hopDongService.kyQuyHopDong(
       maHD: maHD,
       maUserNhaTuyenDung: maUserNhaTuyenDung,
+    );
+
+    _dangTai = false;
+    if (!response.isSuccess) {
+      _thongBaoLoi = response.message;
+    }
+    notifyListeners();
+    return response.isSuccess;
+  }
+
+  /// Nhà tuyển dụng nghiệm thu hợp đồng
+  Future<bool> nghiemThuHopDong(String maHD, {int? maUser}) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final response = await _hopDongService.nghiemThuHopDong(
+      maHD: maHD,
+      maUser: maUser,
+    );
+
+    _dangTai = false;
+    if (!response.isSuccess) {
+      _thongBaoLoi = response.message;
+    }
+    notifyListeners();
+    return response.isSuccess;
+  }
+
+  /// Nhà tuyển dụng giải ngân / thanh toán hợp đồng
+  Future<bool> thanhToanHopDong(String maHD, {int? maUser}) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final response = await _hopDongService.thanhToanHopDong(
+      maHD: maHD,
+      maUser: maUser,
     );
 
     _dangTai = false;

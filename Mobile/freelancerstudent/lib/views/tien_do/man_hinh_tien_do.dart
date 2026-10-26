@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../models/mo_hinh_hop_dong.dart';
@@ -342,6 +343,31 @@ class _TienDoScreenState extends State<TienDoScreen> {
 
   void _thongBao(String s) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s)));
+
+  Future<void> _moLink(String urlStr) async {
+    final clean = urlStr.trim();
+    if (clean.isEmpty) return;
+    Uri? uri = Uri.tryParse(clean);
+    if (uri != null && !uri.hasScheme) {
+      uri = Uri.tryParse('https://$clean');
+    }
+    if (uri != null) {
+      try {
+        final launched =
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched) {
+          await Clipboard.setData(ClipboardData(text: clean));
+          _thongBao('Đã sao chép liên kết vào bộ nhớ tạm.');
+        }
+      } catch (_) {
+        await Clipboard.setData(ClipboardData(text: clean));
+        _thongBao('Đã sao chép liên kết vào bộ nhớ tạm.');
+      }
+    } else {
+      await Clipboard.setData(ClipboardData(text: clean));
+      _thongBao('Đã sao chép liên kết vào bộ nhớ tạm.');
+    }
+  }
 
   /// Đánh giá từng giai đoạn của đầu việc dự án (Nhà tuyển dụng chấm Đạt / Chưa đạt cho từng giai đoạn)
   Future<void> _danhGiaGiaiDoan(
@@ -784,6 +810,9 @@ class _TienDoScreenState extends State<TienDoScreen> {
                                     tenTask: '',
                                     moTa: '',
                                     trangThai: ''));
+                        final linkSanPhamGiaiDoan = (gd.linkSanPham != null && gd.linkSanPham!.trim().isNotEmpty)
+                            ? gd.linkSanPham!.trim()
+                            : (taskCoLink.linkSanPham ?? '').trim();
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
@@ -885,26 +914,27 @@ class _TienDoScreenState extends State<TienDoScreen> {
                                   ],
                                 ),
                               ],
-                              if ((taskCoLink.linkSanPham ?? '').isNotEmpty) ...[
-                                const SizedBox(height: 6),
+                              if (linkSanPhamGiaiDoan.isNotEmpty) ...[
+                                const SizedBox(height: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: Colors.green.shade50,
-                                    borderRadius: BorderRadius.circular(6),
+                                    borderRadius: BorderRadius.circular(8),
                                     border: Border.all(color: Colors.green.shade200),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.link, size: 14, color: AppColors.primary),
+                                      const Icon(Icons.link, size: 16, color: AppColors.primary),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          'Sản phẩm: ${taskCoLink.linkSanPham!}',
+                                          'Sản phẩm: $linkSanPhamGiaiDoan',
                                           style: const TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 12,
                                             color: Colors.blue,
                                             decoration: TextDecoration.underline,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -913,10 +943,18 @@ class _TienDoScreenState extends State<TienDoScreen> {
                                       IconButton(
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(),
-                                        icon: const Icon(Icons.copy, size: 14, color: AppColors.primary),
+                                        icon: const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.primary),
+                                        tooltip: 'Mở sản phẩm',
+                                        onPressed: () => _moLink(linkSanPhamGiaiDoan),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      IconButton(
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        icon: const Icon(Icons.copy, size: 15, color: Colors.grey),
                                         tooltip: 'Sao chép link',
                                         onPressed: () {
-                                          Clipboard.setData(ClipboardData(text: taskCoLink.linkSanPham!));
+                                          Clipboard.setData(ClipboardData(text: linkSanPhamGiaiDoan));
                                           _thongBao('Đã sao chép link bàn giao của giai đoạn.');
                                         },
                                       ),
@@ -1250,8 +1288,14 @@ class _TienDoScreenState extends State<TienDoScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.copy,
+                                icon: const Icon(Icons.open_in_new_rounded,
                                     size: 18, color: AppColors.primary),
+                                tooltip: 'Mở link sản phẩm',
+                                onPressed: () => _moLink(t.linkSanPham!),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.copy,
+                                    size: 18, color: Colors.grey),
                                 tooltip: 'Sao chép link',
                                 onPressed: () {
                                   Clipboard.setData(

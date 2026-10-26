@@ -1,5 +1,6 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
+import '../core/network/phan_hoi_api.dart';
 import '../models/mo_hinh_vi_tien.dart';
 import '../services/dich_vu_vi_tien.dart';
 
@@ -11,10 +12,14 @@ class WalletViewModel extends ChangeNotifier {
   // ==========================================
   bool _dangTai = false;
   WalletModel? _vi;
+  List<LichSuGiaoDichModel> _danhSachGiaoDich = [];
+  List<YeuCauRutTienModel> _danhSachRutTien = [];
   String? _thongBaoLoi;
 
   bool get dangTai => _dangTai;
   WalletModel? get vi => _vi;
+  List<LichSuGiaoDichModel> get danhSachGiaoDich => _danhSachGiaoDich;
+  List<YeuCauRutTienModel> get danhSachRutTien => _danhSachRutTien;
   String? get thongBaoLoi => _thongBaoLoi;
 
   // Tương thích ngược
@@ -41,6 +46,72 @@ class WalletViewModel extends ChangeNotifier {
 
     _dangTai = false;
     notifyListeners();
+  }
+
+  /// Tải lịch sử biến động số dư ví
+  Future<void> taiLichSuGiaoDich(int maUser) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final response = await _walletService.layLichSuGiaoDich(maUser);
+    if (response.isSuccess) {
+      _danhSachGiaoDich = response.data ?? [];
+    } else {
+      _thongBaoLoi = response.message;
+    }
+
+    _dangTai = false;
+    notifyListeners();
+  }
+
+  /// Tải danh sách yêu cầu rút tiền của người dùng
+  Future<void> taiDanhSachRutTien(int maUser) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final response = await _walletService.layDanhSachRutTien(maUser);
+    if (response.isSuccess) {
+      _danhSachRutTien = response.data ?? [];
+    } else {
+      _thongBaoLoi = response.message;
+    }
+
+    _dangTai = false;
+    notifyListeners();
+  }
+
+  /// Gửi yêu cầu rút tiền mô phỏng
+  Future<ApiResponse<YeuCauRutTienModel>> taoYeuCauRutTien(
+    int maUser, {
+    required double soTienRut,
+    required String tenNganHang,
+    required String soTaiKhoan,
+    required String tenChuTaiKhoan,
+  }) async {
+    _dangTai = true;
+    notifyListeners();
+
+    final response = await _walletService.taoYeuCauRutTien(
+      maUser,
+      soTienRut: soTienRut,
+      tenNganHang: tenNganHang,
+      soTaiKhoan: soTaiKhoan,
+      tenChuTaiKhoan: tenChuTaiKhoan,
+    );
+
+    if (response.isSuccess) {
+      // Cập nhật lại số dư ví và danh sách rút tiền
+      await taiThongTinVi(maUser);
+      await taiDanhSachRutTien(maUser);
+    } else {
+      _thongBaoLoi = response.message;
+    }
+
+    _dangTai = false;
+    notifyListeners();
+    return response;
   }
 
   // ==========================================

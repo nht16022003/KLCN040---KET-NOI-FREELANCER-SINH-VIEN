@@ -284,5 +284,30 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
+        public async Task<ApiReponse<List<KyNangGoiYViewModel>>> layGoiYKyNangTheoTieuDe(string? tieuDe, string? moTa = null)
+        {
+            try
+            {
+                var query = $"api/JobPost/GoiYKyNangTheoTieuDe?tieuDe={Uri.EscapeDataString(tieuDe ?? string.Empty)}";
+                if (!string.IsNullOrWhiteSpace(moTa))
+                {
+                    query += $"&moTa={Uri.EscapeDataString(moTa)}";
+                }
+
+                var response = await _guiRequest.GetAsync(query);
+                var data = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<List<KyNangGoiYViewModel>>>(data, _jsonOptions)
+                    ?? new ApiReponse<List<KyNangGoiYViewModel>> { success = false, message = "Không thể đọc dữ liệu gợi ý kỹ năng" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<KyNangGoiYViewModel>>
+                {
+                    success = false,
+                    message = "Lỗi kết nối khi gợi ý kỹ năng: " + ex.Message
+                };
+            }
+        }
+
     }
 }

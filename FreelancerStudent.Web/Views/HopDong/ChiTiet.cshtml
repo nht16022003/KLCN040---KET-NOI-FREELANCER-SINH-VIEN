@@ -10,8 +10,10 @@
         { "ChoKyKet", "Chờ ký kết" },
         { "ChoKyQuy", "Chờ ký quỹ" },
         { "DangThucHien", "Đang thực hiện" },
-        { "DaHoanThanh", "Đã hoàn thành" },
+        { "DaHoanThanh", "Đã hoàn thành – chờ thanh toán" },
+        { "DaThanhToan", "Đã thanh toán" },
         { "DaHuy", "Đã hủy" },
+        { "DaHuyHoanTien", "Đã hủy – đã hoàn tiền" },
         { "DangTranhChap", "Đang tranh chấp" }
     };
 
@@ -24,7 +26,9 @@
         "ChoKyQuy" => "bg-primary text-white",
         "DangThucHien" => "bg-success text-white",
         "DaHoanThanh" => "bg-dark text-white",
+        "DaThanhToan" => "bg-success text-white",
         "DaHuy" => "bg-danger text-white",
+        "DaHuyHoanTien" => "bg-danger text-white",
         _ => "bg-secondary text-white"
     };
 }
@@ -371,7 +375,7 @@
                                 <th>Tên giai đoạn / Mốc bàn giao</th>
                                 <th>Mô tả & Tiêu chí nghiệm thu</th>
                                 <th>Hạn chót mốc</th>
-                                <th class="text-end">Trạng thái</th>
+                                <th class="text-end">Trạng thái &amp; nghiệm thu</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -381,27 +385,105 @@
                                 <tr>
                                     <td class="text-center fw-bold text-muted">@(i + 1)</td>
                                     <td class="fw-semibold text-dark">@gd.tenGiaiDoan</td>
-                                    <td class="text-muted small">@(string.IsNullOrWhiteSpace(gd.moTa) ? "Theo yêu cầu chung" : gd.moTa)</td>
+                                    <td>
+                                        @{
+                                            var moTaHienThi = System.Text.RegularExpressions.Regex.Replace(string.IsNullOrWhiteSpace(gd.moTa) ? "Theo yêu cầu chung" : gd.moTa, @"\[Giải ngân:[^\]]*\]\s*", "");
+                                            var linkMoc = gd.linkSanPham;
+                                            if (string.IsNullOrWhiteSpace(linkMoc) && !string.IsNullOrWhiteSpace(gd.moTa))
+                                            {
+                                                var match = System.Text.RegularExpressions.Regex.Match(gd.moTa, @"https?://[^\s]+");
+                                                if (match.Success) { linkMoc = match.Value; }
+                                            }
+                                            if (string.IsNullOrWhiteSpace(linkMoc) && Model.TienDoDuAn?.danhSachGiaiDoan != null)
+                                            {
+                                                var gdTienDo = Model.TienDoDuAn.danhSachGiaiDoan.FirstOrDefault(g => g.maGiaiDoan == gd.maGiaiDoan && !string.IsNullOrWhiteSpace(g.linkSanPham));
+                                                if (gdTienDo != null) { linkMoc = gdTienDo.linkSanPham; }
+                                            }
+                                            if (string.IsNullOrWhiteSpace(linkMoc) && Model.TienDoDuAn?.danhSachTask != null)
+                                            {
+                                                var taskCoLink = Model.TienDoDuAn.danhSachTask.FirstOrDefault(t => t.maGiaiDoan == gd.maGiaiDoan && (!string.IsNullOrWhiteSpace(t.linkSanPham) || (!string.IsNullOrWhiteSpace(t.moTa) && (t.moTa.Contains("[LINK_SAN_PHAM]") || t.moTa.Contains("http")))));
+                                                if (taskCoLink != null)
+                                                {
+                                                    if (!string.IsNullOrWhiteSpace(taskCoLink.linkSanPham))
+                                                    {
+                                                        linkMoc = taskCoLink.linkSanPham;
+                                                    }
+                                                    else
+                                                    {
+                                                        var mTask = System.Text.RegularExpressions.Regex.Match(taskCoLink.moTa, @"https?://[^\s]+");
+                                                        if (mTask.Success) { linkMoc = mTask.Value; }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        <div class="text-muted small">@moTaHienThi</div>
+                                        @if (!string.IsNullOrWhiteSpace(linkMoc))
+                                        {
+                                            <div class="mt-2">
+                                                <a href="@linkMoc" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold shadow-sm">
+                                                    <i class="bi bi-box-arrow-up-right me-1"></i> Xem sản phẩm mốc
+                                                </a>
+                                                <span class="text-muted small ms-1 text-truncate d-inline-block" style="max-width: 280px; vertical-align: middle;">@linkMoc</span>
+                                            </div>
+                                        }
+                                    </td>
                                     <td class="fw-medium text-dark">@gd.hanChot.ToString("dd/MM/yyyy")</td>
                                     <td class="text-end">
-                                        @if (gd.trangThai == "DaNghiemThu")
+                                        @if (gd.trangThai == "Dat" || gd.trangThai == "DaNghiemThu")
                                         {
-                                            <span class="badge bg-success rounded-0">Đã nghiệm thu</span>
-                                        }
-                                        else if (gd.trangThai == "ChoDuyet")
-                                        {
-                                            <span class="badge bg-warning text-dark rounded-0">Chờ duyệt</span>
+                                            <span class="badge bg-success rounded-0">Đạt</span>
                                         }
                                         else
                                         {
                                             <span class="badge bg-light text-secondary border rounded-0">Chưa đạt</span>
+                                        }
+                                        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                                        {
+                                            <div class="d-flex justify-content-end gap-1 mt-2">
+                                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                    <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                    <input type="hidden" name="trangThai" value="Dat" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" disabled="@(gd.trangThai == "Dat")">Đạt</button>
+                                                </form>
+                                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                    <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                    <input type="hidden" name="trangThai" value="ChuaDat" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" disabled="@(gd.trangThai != "Dat")">Chưa đạt</button>
+                                                </form>
+                                            </div>
                                         }
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                <div class="p-3 bg-light border-top d-flex align-items-center gap-2 small text-muted">
+                    <i class="bi bi-shield-lock-fill text-success fs-6"></i>
+                    <span>Toàn bộ thù lao hợp đồng (<strong>@((Model.sotienkyquy ?? 0).ToString("N0")) VNĐ</strong>) được giữ an toàn tại ví ký quỹ. Sau khi nghiệm thu đạt toàn bộ dự án, Nhà tuyển dụng sẽ xác nhận hoàn thành và giải ngân thanh toán 1 lần cho Freelancer.</span>
                 </div>
+            </div>
+
+                @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                {
+                    <div class="d-flex justify-content-end gap-2 p-3 border-top">
+                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" onsubmit="return confirm('Đánh dấu tất cả giai đoạn là Chưa đạt?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="trangThai" value="ChuaDat" />
+                            <button type="submit" class="btn btn-outline-danger">Đánh dấu tất cả chưa đạt</button>
+                        </form>
+                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" onsubmit="return confirm('Xác nhận tất cả giai đoạn đều đạt yêu cầu?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="trangThai" value="Dat" />
+                            <button type="submit" class="btn btn-success">Đánh dấu tất cả đạt</button>
+                        </form>
+                    </div>
+                }
             }
             else
             {
@@ -411,6 +493,117 @@
             }
         </div>
     </div>
+
+    @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien" && Model.giaiDoans.Count > 0 && Model.giaiDoans.All(g => g.trangThai == "Dat"))
+    {
+        <div class="alert alert-success d-flex justify-content-between align-items-center gap-3">
+            <span>Tất cả các giai đoạn đã được nghiệm thu đạt.</span>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNghiemThu">Xác nhận nghiệm thu &amp; Hoàn thành</button>
+        </div>
+        <div class="modal fade" id="modalNghiemThu" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <form asp-controller="HopDong" asp-action="NghiemThu" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                    <div class="modal-header"><h5 class="modal-title">Xác nhận nghiệm thu</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body"><p>Việc xác nhận đồng nghĩa với việc chấp thuận toàn bộ sản phẩm và hợp đồng chuyển sang bước thanh toán.</p></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Quay lại</button><button type="submit" class="btn btn-success">Xác nhận nghiệm thu</button></div>
+                </form>
+            </div></div>
+        </div>
+    }
+
+    @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+    {
+        <div class="alert alert-primary d-flex justify-content-between align-items-center gap-3">
+            <span>Hợp đồng đã nghiệm thu và đang chờ thanh toán.</span>
+            <a asp-controller="HopDong" asp-action="ThanhToan" asp-route-maHD="@Model.maHD" class="btn btn-primary">Thanh toán cho Freelancer</a>
+        </div>
+    }
+
+    @{
+        var ttHopDong = Model.trangThai?.Trim();
+        var laTrangThaiDanhGia = string.Equals(ttHopDong, "DaThanhToan", StringComparison.OrdinalIgnoreCase) 
+                             || string.Equals(ttHopDong, "DaHoanThanh", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(ttHopDong, "DaHuyHoanTien", StringComparison.OrdinalIgnoreCase);
+    }
+    @if (laTrangThaiDanhGia)
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
+                    <div>
+                        <h5 class="mb-1">Đánh giá đối tác</h5>
+                        <span class="text-muted small">@(Model.trangThaiDanhGia == "DaDanhGia" ? "Bạn đã gửi đánh giá cho đối tác trên hợp đồng này." : "Chia sẻ trải nghiệm và đánh giá chất lượng làm việc của đối tác.")</span>
+                    </div>
+                    <div>
+                        @if (Model.trangThaiDanhGia == "DaDanhGia")
+                        {
+                            <span class="badge text-bg-success me-2">Đã đánh giá</span>
+                            @if (Model.coTheChinhSuaDanhGia && Model.maDanhGia.HasValue)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="moFormDanhGia('@Model.maHD', @Model.maDanhGia)">Chỉnh sửa đánh giá</button>
+                            }
+                        }
+                        else if (Model.coTheDanhGia)
+                        {
+                            <button type="button" class="btn btn-sm btn-primary" onclick="moFormDanhGia('@Model.maHD')">Gửi đánh giá</button>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Đã hết thời hạn gửi đánh giá.</span>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.ThongTinDanhGiaHienTai != null)
+                {
+                    <div class="bg-light p-3 rounded mt-3 border">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div>
+                                <span class="fw-bold text-dark">Đánh giá bạn đã gửi:</span>
+                                <span class="text-warning fw-bold ms-2">
+                                    @for (var s = 1; s <= 5; s++)
+                                    {
+                                        <span>@(Model.ThongTinDanhGiaHienTai.soSaoTongThe >= s ? "★" : "☆")</span>
+                                    }
+                                    <span class="text-dark small fw-normal">(@Model.ThongTinDanhGiaHienTai.soSaoTongThe/5)</span>
+                                </span>
+                            </div>
+                            <small class="text-muted">Ngày gửi: @Model.ThongTinDanhGiaHienTai.ngayDanhGia.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+
+                        <div class="row g-2 small text-secondary mb-2">
+                            @if (Model.ThongTinDanhGiaHienTai.soSaoChatLuong.HasValue)
+                            {
+                                <div class="col-sm-4">Chất lượng: <strong>@Model.ThongTinDanhGiaHienTai.soSaoChatLuong ★</strong></div>
+                            }
+                            @if (Model.ThongTinDanhGiaHienTai.soSaoDungHan.HasValue)
+                            {
+                                <div class="col-sm-4">Đúng hạn: <strong>@Model.ThongTinDanhGiaHienTai.soSaoDungHan ★</strong></div>
+                            }
+                            @if (Model.ThongTinDanhGiaHienTai.soSaoGiaoTiep.HasValue)
+                            {
+                                <div class="col-sm-4">Giao tiếp: <strong>@Model.ThongTinDanhGiaHienTai.soSaoGiaoTiep ★</strong></div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ThongTinDanhGiaHienTai.nhanXet))
+                        {
+                            <div class="mt-2 text-dark bg-white p-2 rounded border-start border-3 border-success small">
+                                <em>"@Model.ThongTinDanhGiaHienTai.nhanXet"</em>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-1 text-muted small fst-italic">Không có lời nhận xét kèm theo.</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    <div id="danhGiaModalContainer"></div>
 
     <!-- ================= KHU VỰC TIẾN ĐỘ DỰ ÁN (FRL-UC-09) ================= -->
     @{
@@ -701,6 +894,69 @@
             </div>
         }
     </div>
+    
+    @if ((Model.LaFreelancerCuaHopDong ||
+        Model.LaNhaTuyenDungCuaHopDong) &&
+        (Model.trangThai == "DangThucHien" ||
+        Model.trangThai == "DaHoanThanh" ||
+        Model.trangThai == "DaThanhToan"))
+    {
+        <div class="card shadow-sm rounded-0 mb-4" id="sectionBanGiaoSanPham">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-box-seam me-2 text-success"></i>
+                            Bàn giao và nghiệm thu sản phẩm
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Quản lý các phiên bản bàn giao, yêu cầu chỉnh sửa và nghiệm thu sản phẩm.
+                        </p>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <a asp-controller="BanGiaoSanPham"
+                           asp-action="Index"
+                           asp-route-maHD="@Model.maHD"
+                           class="btn btn-success rounded-0">
+                            <i class="bi bi-box-seam me-1"></i> Xem bàn giao sản phẩm
+                        </a>
+
+                        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+                        {
+                            <a asp-controller="HopDong"
+                               asp-action="ThanhToan"
+                               asp-route-maHD="@Model.maHD"
+                               class="btn btn-primary rounded-0 fw-bold shadow-sm">
+                                <i class="bi bi-cash-stack me-1"></i> Thanh toán cho Freelancer
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+                {
+                    <div class="alert alert-primary mt-3 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-info-circle-fill fs-5 text-primary"></i>
+                            <div>
+                                <strong>Hợp đồng đã nghiệm thu hoàn thành!</strong>
+                                <div class="small">Sản phẩm đã được nghiệm thu đạt yêu cầu. Vui lòng xác nhận giải ngân thù lao cho Freelancer để hoàn tất hợp đồng.</div>
+                            </div>
+                        </div>
+                        <a asp-controller="HopDong"
+                           asp-action="ThanhToan"
+                           asp-route-maHD="@Model.maHD"
+                           class="btn btn-primary rounded-0 fw-bold text-nowrap">
+                            <i class="bi bi-credit-card-2-front me-1"></i> Xác nhận thanh toán
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
 </div>
 
 <!-- Modal Thêm Đầu Việc -->
@@ -829,6 +1085,124 @@
     <script>
         const contractEndDateStr = '@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")';
         const maHDHienTai = '@Model.maHD';
+
+        async function moFormDanhGia(maHD, maDanhGia) {
+            const container = document.getElementById('danhGiaModalContainer');
+            if (!container) return;
+            try {
+                const url = `/DanhGia/Form?maHD=${encodeURIComponent(maHD)}`;
+                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!response.ok) {
+                    let errMsg = 'Không thể tải biểu mẫu đánh giá.';
+                    try {
+                        const errJson = await response.json();
+                        if (errJson && errJson.message) errMsg = errJson.message;
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+                container.innerHTML = await response.text();
+                const modalElement = container.querySelector('.modal');
+                if (!modalElement) throw new Error('Biểu mẫu đánh giá không hợp lệ.');
+                if (maDanhGia) modalElement.dataset.maDanhGia = maDanhGia;
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+            } catch (error) {
+                alert(error.message || 'Không thể tải biểu mẫu đánh giá.');
+            }
+        }
+
+        async function guiDanhGia(form, event) {
+            event.preventDefault();
+            const modalElement = form.closest('.modal');
+            const tongSao = Number(form.querySelector('[name="soSaoTongThe"]').value);
+            if (!tongSao) {
+                const message = form.querySelector('[data-review-message]');
+                if (message) {
+                    message.textContent = 'Vui lòng chọn số sao đánh giá tổng thể.';
+                    message.classList.remove('d-none');
+                }
+                return;
+            }
+            const payload = {
+                maHD: form.querySelector('[name="maHD"]').value,
+                soSaoTongThe: tongSao,
+                soSaoChatLuong: Number(form.querySelector('[name="soSaoChatLuong"]').value) || null,
+                soSaoDungHan: Number(form.querySelector('[name="soSaoDungHan"]').value) || null,
+                soSaoGiaoTiep: Number(form.querySelector('[name="soSaoGiaoTiep"]').value) || null,
+                nhanXet: form.querySelector('[name="nhanXet"]').value
+            };
+            const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const maDanhGia = modalElement.dataset.maDanhGia;
+            const url = maDanhGia ? `/DanhGia/CapNhat?maDanhGia=${encodeURIComponent(maDanhGia)}` : '/DanhGia/Gui';
+            const message = form.querySelector('[data-review-message]');
+            const button = form.querySelector('[type="submit"]');
+            button.disabled = true;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'Không thể lưu đánh giá.');
+                location.reload();
+            } catch (error) {
+                if (message) { message.textContent = error.message; message.classList.remove('d-none'); }
+                button.disabled = false;
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const starButton = event.target.closest('[data-rating-group][data-rating-value]');
+            if (starButton) {
+                const form = starButton.closest('form');
+                const groupName = starButton.dataset.ratingGroup;
+                const selectedValue = Number(starButton.dataset.ratingValue);
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+
+                valueInput.value = selectedValue;
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    const value = Number(button.dataset.ratingValue);
+                    const selected = value === selectedValue;
+                    button.setAttribute('aria-checked', selected ? 'true' : 'false');
+                    button.classList.toggle('text-warning', value <= selectedValue);
+                    button.classList.toggle('text-secondary', value > selectedValue);
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-star-fill', value <= selectedValue);
+                        icon.classList.toggle('bi-star', value > selectedValue);
+                    }
+                });
+
+                const label = form.querySelector(`[data-rating-label="${groupName}"]`);
+                if (label) label.textContent = `${selectedValue} trên 5`;
+                return;
+            }
+
+            const clearButton = event.target.closest('[data-rating-clear]');
+            if (clearButton) {
+                const form = clearButton.closest('form');
+                const groupName = clearButton.dataset.ratingClear;
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+                valueInput.value = '';
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    button.setAttribute('aria-checked', 'false');
+                    button.classList.remove('text-warning');
+                    button.classList.add('text-secondary');
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-star-fill');
+                        icon.classList.add('bi-star');
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const reviewContract = '@(TempData["MoPopupDanhGia"] as string ?? "")';
+            if (reviewContract) moFormDanhGia(reviewContract);
+        });
 
         function showAlert(alertId, message) {
             const alertEl = document.getElementById(alertId);

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -8,6 +8,7 @@ import '../../models/mo_hinh_ho_so_freelancer.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_ho_so_freelancer.dart';
 import 'man_hinh_chinh_sua_ho_so.dart';
+import 'man_hinh_minh_chung_the_sv.dart';
 
 class ProfileScreen extends StatefulWidget {
   final int? freelancerId;
@@ -538,6 +539,30 @@ class _ProfileProofTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: ListView(
         children: [
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ManHinhMinhChungTheSV(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.document_scanner),
+              label: const Text('Quét Thẻ Sinh Viên (OCR)'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           if (profile.proofs.isEmpty)
             const _EmptyState(title: 'Chưa có minh chứng')
           else

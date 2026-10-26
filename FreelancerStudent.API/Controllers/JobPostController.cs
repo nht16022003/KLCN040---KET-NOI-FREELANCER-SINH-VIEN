@@ -11,10 +11,12 @@ namespace FreelancerStudent.API.Controllers
     public class JobPostController : ControllerBase
     {
         private readonly IJobPostService _jobPostService;
+        private readonly IKyNangGoiYService _kyNangGoiYService;
 
-        public JobPostController(IJobPostService jobPostService)
+        public JobPostController(IJobPostService jobPostService, IKyNangGoiYService kyNangGoiYService)
         {
             _jobPostService = jobPostService;
+            _kyNangGoiYService = kyNangGoiYService;
         }
 
         [HttpGet("DanhSachJobPost")]
@@ -231,6 +233,30 @@ namespace FreelancerStudent.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi lấy việc làm gợi ý: " + ex.Message
+                });
+            }
+        }
+
+        // GET: api/JobPost/GoiYKyNangTheoTieuDe?tieuDe=...&moTa=...
+        [HttpGet("GoiYKyNangTheoTieuDe")]
+        public async Task<IActionResult> GoiYKyNangTheoTieuDe([FromQuery] string? tieuDe, [FromQuery] string? moTa = null)
+        {
+            try
+            {
+                var data = await _kyNangGoiYService.GoiYKyNangTheoVanBanAsync(tieuDe, moTa);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Gợi ý kỹ năng thành công!",
+                    data = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Lỗi khi gợi ý kỹ năng: " + ex.Message
                 });
             }
         }

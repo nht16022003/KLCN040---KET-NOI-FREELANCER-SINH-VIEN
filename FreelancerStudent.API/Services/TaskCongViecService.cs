@@ -149,14 +149,27 @@ namespace FreelancerStudent.API.Services
                 coQuyenCapNhat = coQuyenCapNhat,
                 coQuyenDanhGia = coQuyenDanhGia,
                 duAnDaDat = duAnDaDat,
-                danhSachGiaiDoan = hopDong.GiaiDoan_HopDongs?.Select(g => new GiaiDoanHopDong_ResponseDTO
+                danhSachGiaiDoan = hopDong.GiaiDoan_HopDongs?.Select(g =>
                 {
-                    maGiaiDoan = g.maGiaiDoan,
-                    maHD = g.maHD,
-                    tenGiaiDoan = g.tenGiaiDoan,
-                    moTa = g.moTa,
-                    hanChot = g.hanChot,
-                    trangThai = g.trangThai ?? "ChuaDat"
+                    TachMoTaVaLink(g.moTa, out string moTaSach, out string? link);
+                    if (string.IsNullOrWhiteSpace(link))
+                    {
+                        var taskMoc = tasks.FirstOrDefault(t => t.maGiaiDoan == g.maGiaiDoan && !string.IsNullOrWhiteSpace(t.moTa));
+                        if (taskMoc != null)
+                        {
+                            TachMoTaVaLink(taskMoc.moTa, out _, out link);
+                        }
+                    }
+                    return new GiaiDoanHopDong_ResponseDTO
+                    {
+                        maGiaiDoan = g.maGiaiDoan,
+                        maHD = g.maHD,
+                        tenGiaiDoan = g.tenGiaiDoan,
+                        moTa = moTaSach,
+                        linkSanPham = link,
+                        hanChot = g.hanChot,
+                        trangThai = g.trangThai ?? "ChuaDat"
+                    };
                 }).ToList() ?? new List<GiaiDoanHopDong_ResponseDTO>(),
                 danhSachTask = tasks.Select(t =>
                 {
@@ -469,7 +482,7 @@ namespace FreelancerStudent.API.Services
             return $"{moTaGoc.Trim()}\n[LINK_SAN_PHAM]: {linkSanPham.Trim()}";
         }
 
-        private static void TachMoTaVaLink(string moTaDb, out string moTaSach, out string? linkSanPham)
+        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham)
         {
             if (string.IsNullOrWhiteSpace(moTaDb))
             {
@@ -487,8 +500,13 @@ namespace FreelancerStudent.API.Services
             }
             else
             {
+                moTaSach = moTaDb.Trim();
                 linkSanPham = null;
-                moTaSach = moTaDb;
+                var match = System.Text.RegularExpressions.Regex.Match(moTaDb, @"https?://[^\s]+");
+                if (match.Success)
+                {
+                    linkSanPham = match.Value.Trim();
+                }
             }
         }
     }

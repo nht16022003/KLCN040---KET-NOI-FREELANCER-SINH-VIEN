@@ -110,6 +110,7 @@ namespace FreelancerStudent.Web.Services
                     {
                         tenGiaiDoan = g.tenGiaiDoan.Trim(),
                         moTa = g.moTa,
+                        linkSanPham = g.linkSanPham,
                         hanChot = g.hanChot ?? model.ngayKetThuc,
                         tyLeGiaiNgan = g.tyLeGiaiNgan,
                         soTien = g.soTien
@@ -155,6 +156,50 @@ namespace FreelancerStudent.Web.Services
             }
 
             return result;
+        }
+
+        public async Task<ApiReponse<bool>> NghiemThuAsync(string maHD, int maUserNTD)
+        {
+            try
+            {
+                using var response = await _httpClient.PostAsJsonAsync($"api/HopDong/nghiem-thu?maUser={maUserNTD}", new { maHD });
+                return await ReadApiResponseAsync<bool>(response);
+            }
+            catch (Exception ex) { return new ApiReponse<bool> { success = false, message = "Không thể kết nối đến máy chủ: " + ex.Message }; }
+        }
+
+        public async Task<ApiReponse<HopDongThanhToanViewModel>> LayThongTinThanhToanAsync(string maHD, int maUserNTD)
+        {
+            try
+            {
+                using var response = await _httpClient.GetAsync($"api/HopDong/thanh-toan/{Uri.EscapeDataString(maHD)}?maUser={maUserNTD}");
+                return await ReadApiResponseAsync<HopDongThanhToanViewModel>(response);
+            }
+            catch (Exception ex) { return new ApiReponse<HopDongThanhToanViewModel> { success = false, message = "Không thể kết nối đến máy chủ: " + ex.Message }; }
+        }
+
+        public async Task<ApiReponse<bool>> ThanhToanAsync(string maHD, int maUserNTD)
+        {
+            try
+            {
+                using var response = await _httpClient.PostAsJsonAsync($"api/HopDong/thanh-toan?maUser={maUserNTD}", new { maHD });
+                return await ReadApiResponseAsync<bool>(response);
+            }
+            catch (Exception ex) { return new ApiReponse<bool> { success = false, message = "Không thể kết nối đến máy chủ: " + ex.Message }; }
+        }
+
+        private static async Task<ApiReponse<T>> ReadApiResponseAsync<T>(HttpResponseMessage response)
+        {
+            try
+            {
+                var result = await response.Content.ReadFromJsonAsync<ApiReponse<T>>();
+                if (result != null)
+                    return result;
+            }
+            catch
+            {
+            }
+            return new ApiReponse<T> { success = false, message = $"Lỗi từ máy chủ ({(int)response.StatusCode})." };
         }
 
         public async Task<HopDongViewModel?> LayChiTietTheoJobAsync(string maJob)

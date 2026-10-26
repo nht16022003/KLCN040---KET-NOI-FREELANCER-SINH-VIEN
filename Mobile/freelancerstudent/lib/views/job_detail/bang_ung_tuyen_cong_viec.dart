@@ -1,11 +1,13 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_bai_dang_tuyen_dung.dart';
 import '../../services/dich_vu_ung_tuyen.dart';
+import '../../services/dich_vu_minh_chung.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
+import '../profile/man_hinh_minh_chung_the_sv.dart';
 
 class ApplyJobBottomSheet extends StatefulWidget {
   final JobPostModel job;
@@ -59,6 +61,51 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
       );
       return;
     }
+
+    // Kiểm tra trạng thái xác minh thẻ sinh viên
+    final minhChungService = MinhChungService();
+    final xacThuc = await minhChungService.kiemTraTrangThaiXacThuc(user.userId);
+    if (xacThuc.isSuccess && xacThuc.data != null && xacThuc.data!['daXacMinh'] != true) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.shield_outlined, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Text(
+            xacThuc.data!['thongBao']?.toString() ??
+                'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi ứng tuyển công việc!',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Để sau'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
+                );
+              },
+              child: const Text('Xác thực thẻ SV', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
 
     final effectiveMaJob = widget.job.maJob.trim().isNotEmpty
         ? widget.job.maJob.trim()

@@ -10,7 +10,11 @@ import '../chat/man_hinh_chi_tiet_chat.dart';
 import '../tien_do/man_hinh_tien_do.dart';
 import '../employer/man_hinh_tao_hop_dong.dart';
 import '../../models/mo_hinh_ung_tuyen.dart';
+import '../../viewmodels/viewmodel_task_cong_viec.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'man_hinh_danh_sach_hop_dong.dart';
+import 'man_hinh_ban_giao_san_pham.dart';
 
 /// Chi tiết hợp đồng của Freelancer: `GET api/HopDong/chi-tiet/{maHD}`,
 /// xác nhận / từ chối: `POST api/HopDong/xac-nhan?maUserFreelancer=`.
@@ -144,6 +148,124 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       await _tai();
     } else {
       _thongBao(vm.thongBaoLoi ?? 'Ký quỹ thất bại. Vui lòng kiểm tra lại số dư ví.');
+    }
+  }
+
+  Future<void> _nghiemThu(HopDongModel hd) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) {
+      _thongBao('Bạn cần đăng nhập.');
+      return;
+    }
+
+    final xacNhan = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nghiệm thu hợp đồng'),
+        content: const Text(
+          'Bạn xác nhận nghiệm thu và chuyển hợp đồng sang trạng thái Đã hoàn thành (chờ thanh toán giải ngân)?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: const Text('Xác nhận nghiệm thu'),
+          ),
+        ],
+      ),
+    );
+
+    if (xacNhan != true || !mounted) return;
+
+    if (hd.giaiDoans.isNotEmpty &&
+        hd.giaiDoans.any((g) => g.trangThai != 'Dat' && g.trangThai != 'DaNghiemThu')) {
+      _thongBao('Vui lòng đánh giá Đạt tất cả các mốc giai đoạn trước khi nghiệm thu hoàn thành hợp đồng.');
+      return;
+    }
+
+    setState(() => _dangXuLy = true);
+    final vm = context.read<HopDongViewModel>();
+    final ok = await vm.nghiemThuHopDong(hd.maHD, maUser: user.userId);
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    if (ok) {
+      _thongBao('Đã nghiệm thu hợp đồng thành công! Hợp đồng chuyển sang trạng thái Đã hoàn thành.');
+      await _tai();
+    } else {
+      _thongBao(vm.thongBaoLoi ?? 'Nghiệm thu thất bại. Vui lòng thử lại.');
+    }
+  }
+
+  Future<void> _danhGiaGiaiDoan(HopDongModel hd, GiaiDoanHopDongModel gd, String trangThai) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) {
+      _thongBao('Bạn cần đăng nhập.');
+      return;
+    }
+
+    setState(() => _dangXuLy = true);
+    final vm = context.read<TaskViewModel>();
+    final loi = await vm.danhGiaGiaiDoan(
+      maHD: hd.maHD,
+      maUser: user.userId,
+      maGiaiDoan: gd.maGiaiDoan,
+      trangThai: trangThai,
+    );
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    if (loi == null) {
+      _thongBao(trangThai == 'Dat'
+          ? 'Đã xác nhận mốc "${gd.tenGiaiDoan}" là Đạt.'
+          : 'Đã đánh dấu mốc "${gd.tenGiaiDoan}" là Chưa đạt.');
+      await _tai();
+    } else {
+      _thongBao(loi);
+    }
+  }
+
+  String _lamSachMoTaGiaiDoan(String? moTa) {
+    if (moTa == null || moTa.isEmpty) return '';
+    var s = moTa.replaceAll(RegExp(r'\[Giải ngân:[^\]]*\]\s*'), '').trim();
+    s = s.replaceAll(RegExp(r'\[LINK_SAN_PHAM\]:[^\n]*'), '').trim();
+    return s;
+  }
+
+  String? _trichXuatLink(String? moTa) {
+    if (moTa == null || moTa.isEmpty) return null;
+    final match = RegExp(r'https?://[^\s]+').firstMatch(moTa);
+    return match?.group(0);
+  }
+
+  Future<void> _moLink(String urlStr) async {
+    final clean = urlStr.trim();
+    if (clean.isEmpty) return;
+    Uri? uri = Uri.tryParse(clean);
+    if (uri != null && !uri.hasScheme) {
+      uri = Uri.tryParse('https://$clean');
+    }
+    if (uri != null) {
+      try {
+        final launched =
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched) {
+          await Clipboard.setData(ClipboardData(text: clean));
+          _thongBao('Đã sao chép liên kết vào bộ nhớ tạm.');
+        }
+      } catch (_) {
+        await Clipboard.setData(ClipboardData(text: clean));
+        _thongBao('Đã sao chép liên kết vào bộ nhớ tạm.');
+      }
+    } else {
+      await Clipboard.setData(ClipboardData(text: clean));
+      _thongBao('Đã sao chép liên kết vào bộ nhớ tạm.');
     }
   }
 
@@ -284,23 +406,193 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
             _dong('Mô tả công việc', hd.moTaCongViec),
             _dong('Điều khoản', hd.dieuKhoan),
             if (hd.giaiDoans.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              const Text(
-                'Giai đoạn thanh toán',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              ...hd.giaiDoans.map(
-                (g) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(g.tenGiaiDoan),
-                  subtitle: Text(
-                    [
-                      if ((g.moTa ?? '').isNotEmpty) g.moTa!,
-                      if (g.hanChot != null) 'Hạn: ${_ngay(g.hanChot)}',
-                    ].join('\n'),
+              const SizedBox(height: 16),
+              const Row(
+                children: [
+                  Icon(Icons.checklist_rounded, color: AppColors.primary, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Lộ trình các mốc bàn giao',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.heading,
+                    ),
                   ),
-                  trailing: Text(g.trangThai),
-                ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ...hd.giaiDoans.map(
+                (g) {
+                  final daDat = g.trangThai == 'Dat' || g.trangThai == 'DaNghiemThu';
+                  final moTaSach = _lamSachMoTaGiaiDoan(g.moTa);
+                  final linkMoc = (g.linkSanPham != null && g.linkSanPham!.trim().isNotEmpty)
+                      ? g.linkSanPham!.trim()
+                      : _trichXuatLink(g.moTa);
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    color: AppColors.surface,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  g.tenGiaiDoan,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: AppColors.heading,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: daDat ? AppColors.lightGreenSurface : Colors.orange.withAlpha(25),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  daDat ? 'Đạt' : 'Chưa đạt',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: daDat ? AppColors.primary : Colors.orange.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (moTaSach.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              moTaSach,
+                              style: const TextStyle(fontSize: 13, color: AppColors.bodyText),
+                            ),
+                          ],
+                          if (linkMoc != null && linkMoc.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.link_rounded, size: 18, color: AppColors.primary),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Sản phẩm: $linkMoc',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  InkWell(
+                                    onTap: () => _moLink(linkMoc),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.open_in_new_rounded, size: 12, color: Colors.white),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            'Xem link',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    icon: const Icon(Icons.copy_rounded, size: 16),
+                                    color: Colors.grey.shade700,
+                                    tooltip: 'Sao chép link',
+                                    onPressed: () {
+                                      Clipboard.setData(ClipboardData(text: linkMoc));
+                                      _thongBao('Đã sao chép link sản phẩm.');
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          if (g.hanChot != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Hạn bàn giao: ${_ngay(g.hanChot)}',
+                              style: const TextStyle(fontSize: 12, color: AppColors.mutedText),
+                            ),
+                          ],
+                          if (isNTD && hd.trangThai == 'DangThucHien') ...[
+                            const SizedBox(height: 8),
+                            const Divider(height: 1),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: _dangXuLy || !daDat
+                                      ? null
+                                      : () => _danhGiaGiaiDoan(hd, g, 'ChuaDat'),
+                                  icon: const Icon(Icons.close, size: 15),
+                                  label: const Text('Chưa đạt', style: TextStyle(fontSize: 12)),
+                                  style: OutlinedButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    foregroundColor: Colors.red,
+                                    side: const BorderSide(color: Colors.red),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                FilledButton.icon(
+                                  onPressed: _dangXuLy || daDat
+                                      ? null
+                                      : () => _danhGiaGiaiDoan(hd, g, 'Dat'),
+                                  icon: const Icon(Icons.check, size: 15),
+                                  label: const Text('Đạt', style: TextStyle(fontSize: 12)),
+                                  style: FilledButton.styleFrom(
+                                    visualDensity: VisualDensity.compact,
+                                    backgroundColor: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
             const SizedBox(height: 16),
@@ -377,7 +669,109 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                 ),
               ),
             ],
-            if (hd.trangThai == 'DangThucHien')
+            // BÀN GIAO VÀ NGHIỆM THU SẢN PHẨM (Tương tự sectionBanGiaoSanPham bên Web)
+            if ((laFreelancerCuaHopDong || isNTD) &&
+                (hd.trangThai == 'DangThucHien' ||
+                    hd.trangThai == 'DaHoanThanh' ||
+                    hd.trangThai == 'DaThanhToan')) ...[
+              const SizedBox(height: 12),
+              Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.inventory_2_outlined,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Bàn giao & Nghiệm thu sản phẩm',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    color: AppColors.heading,
+                                  ),
+                                ),
+                                SizedBox(height: 3),
+                                Text(
+                                  'Quản lý các phiên bản bàn giao, yêu cầu chỉnh sửa và nghiệm thu sản phẩm.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.mutedText,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ManHinhBanGiaoSanPham(
+                                  maHD: hd.maHD,
+                                  trangThaiHopDong: hd.trangThai,
+                                  laFreelancer: laFreelancerCuaHopDong,
+                                  laKhachHang: isNTD,
+                                ),
+                              ),
+                            );
+                            if (mounted) _tai();
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          icon: const Icon(Icons.inventory_2_rounded, size: 18),
+                          label: const Text(
+                            'Xem bàn giao sản phẩm',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            if (hd.trangThai == 'DangThucHien') ...[
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
@@ -398,6 +792,22 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                   ),
                 ),
               ),
+              if (isNTD) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _dangXuLy ? null : () => _nghiemThu(hd),
+                    icon: const Icon(Icons.verified),
+                    label: const Text('Nghiệm thu hợp đồng'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ],
             if (isNTD && hd.maUserFreelancer != null) ...[
               const SizedBox(height: 8),
               SizedBox(

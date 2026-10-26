@@ -1,11 +1,14 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
+import '../../services/dich_vu_minh_chung.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_vi_tien.dart';
+import '../profile/man_hinh_minh_chung_the_sv.dart';
 import 'man_hinh_nap_tien.dart';
+import 'man_hinh_rut_tien.dart';
 import 'man_hinh_lich_su_giao_dich.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -27,6 +30,64 @@ class _WalletScreenState extends State<WalletScreen> {
     if (user != null) {
       await context.read<WalletViewModel>().taiThongTinVi(user.userId);
     }
+  }
+
+  Future<void> _kiemTraVaChuyenHuong(
+    BuildContext context,
+    int userId,
+    Widget manHinhTiepTheo,
+    String hanhDong,
+  ) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    // Nếu là Nhà tuyển dụng thì không cần minh chứng thẻ sinh viên
+    if (user != null && user.role.toLowerCase() != 'nhatuyendung') {
+      final minhChungService = MinhChungService();
+      final xacThuc = await minhChungService.kiemTraTrangThaiXacThuc(userId);
+      if (xacThuc.isSuccess && xacThuc.data != null && xacThuc.data!['daXacMinh'] != true) {
+        if (!context.mounted) return;
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.shield_outlined, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Text(
+              xacThuc.data!['thongBao']?.toString() ??
+                  'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi $hanhDong!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Để sau'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
+                  );
+                },
+                child: const Text('Xác thực ngay', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
+    if (!context.mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => manHinhTiepTheo),
+    );
   }
 
   @override
@@ -168,11 +229,11 @@ class _WalletScreenState extends State<WalletScreen> {
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () {
-                        Navigator.push(
+                        _kiemTraVaChuyenHuong(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => const DepositScreen(),
-                          ),
+                          user.userId,
+                          const DepositScreen(),
+                          'nạp tiền vào ví',
                         );
                       },
                       icon: const Icon(Icons.add_circle_outline),
@@ -183,27 +244,44 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: FilledButton.icon(
                       onPressed: () {
-                        Navigator.push(
+                        _kiemTraVaChuyenHuong(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => const TransactionHistoryScreen(),
-                          ),
+                          user.userId,
+                          const WithdrawScreen(),
+                          'tạo yêu cầu rút tiền',
                         );
                       },
-                      icon: const Icon(Icons.history),
-                      label: const Text('Lịch sử'),
-                      style: OutlinedButton.styleFrom(
+                      icon: const Icon(Icons.outbox_rounded),
+                      label: const Text('Rút tiền'),
+                      style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
+                        backgroundColor: Colors.teal,
                       ),
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TransactionHistoryScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history),
+                label: const Text('Xem lịch sử giao dịch & Rút tiền'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                ),
               ),
             ],
           ],

@@ -5,6 +5,8 @@ using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
 using FreelancerStudent.API.Services.Interfaces;
+using FreelancerStudent.API.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 
 namespace FreelancerStudent.API.Services
@@ -14,11 +16,13 @@ namespace FreelancerStudent.API.Services
         private readonly IFreelancerStudentRepository _freelancerStudentRepository; //Sử dụng để gọi các dữ liệu đucợ laays từ database để service xử lý
 
         private readonly IPortfolioService _portfolioService;
+        private readonly ApplicationDBContext _context;
 
-        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository, IPortfolioService portfolioService)
+        public FreelancerStudentService(IFreelancerStudentRepository freelancerStudentRepository, IPortfolioService portfolioService, ApplicationDBContext context)
         {
             _freelancerStudentRepository = freelancerStudentRepository;
             _portfolioService = portfolioService;
+            _context = context;
         }
 
 
@@ -62,26 +66,66 @@ namespace FreelancerStudent.API.Services
         public decimal chiPhiTu { get; set; }
             */
 
-            var dsResult = ds_layTuSQL.Select(free => new FreelancerStudent_ReponseDTO
+            var userIds = ds_layTuSQL.Where(f => f.maUser > 0).Select(f => f.maUser).Distinct().ToList();
+            var reviewStats = await _context.DanhGia_NhanXets.AsNoTracking()
+                .Where(d => userIds.Contains(d.maNguoiDuocDanhGia))
+                .GroupBy(d => d.maNguoiDuocDanhGia)
+                .Select(g => new
+                {
+                    MaUser = g.Key,
+                    SoLuot = g.Count(),
+                    DiemTB = g.Average(d => (double)d.soSao)
+                })
+                .ToListAsync();
+
+            var dsResult = ds_layTuSQL.Select(free =>
             {
-                maFreelancerStudents = free.maFreelancerStudents,
-                maChuyenNganh = free.maChuyenNganh,
-                tenChuyenNganh = free.ChuyenNganh?.tenChuyenNganh ?? "Empty",
-                maUser = free.maUser,
-                tenUser = free.User?.hotenUser,
-                maTruong = free.maTruong,
-                tenTruong = free.tenTruong,
-                diaDiemTruong = free.diaDiemTruong,
-                diaDiemFreelancerStudent = free.diaDiemFreelancerStudent,
-                ngonNgu = free.ngonNgu,
-                kyNangCoBan = free.kyNangCoBan,
-                namThu = free.namThu,
-                GPA = free.GPA,
-                nienKhoa = free.nienKhoa,
-                gioithieu = free.gioithieu,
-                avatar = free.User?.avatarUrl,
-                trangthaiNhanViec = free.trangthaiNhanViec,
-                chiPhiTu = free.chiPhiTu
+                var stat = reviewStats.FirstOrDefault(s => s.MaUser == free.maUser);
+                double sao = (stat != null && stat.SoLuot > 0)
+                    ? stat.DiemTB
+                    : (double)free.diemDanhGiaTrungBinh;
+                int soLuot = (stat != null && stat.SoLuot > 0)
+                    ? stat.SoLuot
+                    : free.soLuotDanhGia;
+
+                var skills = free.FreelancerStudent_KyNangs != null && free.FreelancerStudent_KyNangs.Any()
+                    ? free.FreelancerStudent_KyNangs
+                        .Where(k => k.KyNang != null && !string.IsNullOrWhiteSpace(k.KyNang.tenKyNang))
+                        .Select(k => k.KyNang!.tenKyNang.Trim())
+                        .Distinct()
+                        .ToList()
+                    : (!string.IsNullOrWhiteSpace(free.kyNangCoBan)
+                        ? free.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(s => s.Trim())
+                            .Distinct()
+                            .ToList()
+                        : new List<string>());
+
+                return new FreelancerStudent_ReponseDTO
+                {
+                    maFreelancerStudents = free.maFreelancerStudents,
+                    maChuyenNganh = free.maChuyenNganh,
+                    tenChuyenNganh = free.ChuyenNganh?.tenChuyenNganh ?? "Công nghệ thông tin",
+                    maUser = free.maUser,
+                    tenUser = free.User?.hotenUser,
+                    maTruong = free.maTruong,
+                    tenTruong = free.tenTruong,
+                    diaDiemTruong = free.diaDiemTruong,
+                    diaDiemFreelancerStudent = free.diaDiemFreelancerStudent,
+                    ngonNgu = free.ngonNgu,
+                    kyNangCoBan = free.kyNangCoBan,
+                    namThu = free.namThu,
+                    GPA = free.GPA,
+                    nienKhoa = free.nienKhoa,
+                    gioithieu = free.gioithieu,
+                    avatar = free.User?.avatarUrl,
+                    trangthaiNhanViec = free.trangthaiNhanViec,
+                    chiPhiTu = free.chiPhiTu,
+                    diemDanhGiaTrungBinh = sao,
+                    soLuotDanhGia = soLuot,
+                    ngayTao = free.User?.ngayTao ?? DateTime.UtcNow,
+                    danhSachKyNang = skills
+                };
             }).ToList();
 
             return dsResult;
@@ -160,6 +204,21 @@ namespace FreelancerStudent.API.Services
             var portfolio = await _portfolioService.layPortfolioAsync(maFreelancerStudents);
             var tatCaKyNang = await _freelancerStudentRepository.layTatCaKyNangAsync();
 
+            var reviewsQuery = _context.DanhGia_NhanXets.AsNoTracking()
+                .Where(d => d.maNguoiDuocDanhGia == freelancer.maUser);
+            var tongDanhGia = await reviewsQuery.CountAsync();
+            var danhGiaTot = await reviewsQuery.CountAsync(d => d.soSao >= 4);
+            var soDuAnHoanThanh = await _context.HopDongs.AsNoTracking()
+                .CountAsync(h => h.maFreelancerStudent == maFreelancerStudents && (h.trangThai == "DaThanhToan" || h.trangThai == "DaHoanThanh"));
+            var soKhachHang = await _context.HopDongs.AsNoTracking()
+                .Where(h => h.maFreelancerStudent == maFreelancerStudents && (h.trangThai == "DaThanhToan" || h.trangThai == "DaHoanThanh"))
+                .Select(h => h.JobPost!.maNhaTuyenDung).Distinct().CountAsync();
+            var danhGiaGanDay = await _context.DanhGia_NhanXets.AsNoTracking()
+                .Where(d => d.maNguoiDuocDanhGia == freelancer.maUser)
+                .Include(d => d.NguoiDanhGia).ThenInclude(u => u!.NhaTuyenDung)
+                .Include(d => d.HopDong).ThenInclude(h => h!.JobPost)
+                .OrderByDescending(d => d.ngayDanhGia).Take(5).ToListAsync();
+
             return new FreelancerStudentProfile_ReponseDTO
             {
                 User = new ProfileUserResponse
@@ -184,7 +243,29 @@ namespace FreelancerStudent.API.Services
                     NienKhoa = freelancer.nienKhoa,
                     Gioithieu = freelancer.gioithieu,
                     TrangthaiNhanViec = freelancer.trangthaiNhanViec,
-                    ChiPhiTu = freelancer.chiPhiTu
+                    ChiPhiTu = freelancer.chiPhiTu,
+                    DiemDanhGiaTrungBinh = freelancer.diemDanhGiaTrungBinh,
+                    SoLuotDanhGia = freelancer.soLuotDanhGia,
+                    TyLeHaiLong = tongDanhGia == 0 ? 0 : Math.Round(danhGiaTot * 100d / tongDanhGia, 1),
+                    SoDuAnHoanThanh = soDuAnHoanThanh,
+                    SoKhachHang = soKhachHang,
+                    DanhGiaGanDay = danhGiaGanDay.Select(d => new DanhGia_ReponseDTO
+                    {
+                        maDanhGia = d.maDanhGia,
+                        maHD = d.maHD,
+                        tenNguoiDanhGia = d.NguoiDanhGia?.NhaTuyenDung?.tencongty ?? d.NguoiDanhGia?.hotenUser ?? "Nhà tuyển dụng",
+                        avatar = d.NguoiDanhGia?.avatarUrl,
+                        tenCongViec = d.HopDong?.JobPost?.tieude ?? string.Empty,
+                        soSaoTongThe = d.soSao,
+                        soSaoChatLuong = d.soSaoChatLuong,
+                        soSaoDungHan = d.soSaoDungHan,
+                        soSaoGiaoTiep = d.soSaoGiaoTiep,
+                        nhanXet = d.nhanXet,
+                        ngayDanhGia = d.ngayDanhGia,
+                        hanChinhSua = d.ngayDanhGia.AddDays(7),
+                        daChinhSua = d.soLanChinhSua > 0,
+                        ngayCapNhat = d.ngayCapNhat
+                    }).ToList()
                 },
                 ChuyenNganh = freelancer.ChuyenNganh == null ? null : new ProfileMajorResponse
                 {
@@ -213,7 +294,17 @@ namespace FreelancerStudent.API.Services
                     LinkDemo = project.linkDemo,
                     Link_file = project.link_file
                 }).ToList() ?? new List<ProfileProjectResponse>(),
-                TatCaKyNangGoiY = tatCaKyNang
+                TatCaKyNangGoiY = tatCaKyNang,
+                MinhChung = await _context.MinhChung_FreelancerStudents.AsNoTracking()
+                    .Where(m => m.maUser == freelancer.maUser)
+                    .OrderByDescending(m => m.ngayNop)
+                    .Select(m => new ProfileEvidenceResponse
+                    {
+                        LoaiMinhChung = m.loaiMinhChung,
+                        TrangThaiGuiMinhChung = m.trangThaiGuiMinhChung,
+                        FileMinhChung = m.fileMinhChung
+                    })
+                    .FirstOrDefaultAsync()
             };
         }
 

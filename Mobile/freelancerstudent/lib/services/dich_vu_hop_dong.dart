@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
 import '../core/network/phan_hoi_api.dart';
 import '../models/mo_hinh_hop_dong.dart';
@@ -207,6 +207,66 @@ class HopDongService {
       return ApiResponse<bool>(
         isSuccess: false,
         message: 'Lỗi ký quỹ hợp đồng: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Nhà tuyển dụng nghiệm thu hợp đồng (HopDongController.NghiemThu)
+  Future<ApiResponse<bool>> nghiemThuHopDong({
+    required String maHD,
+    int? maUser,
+  }) async {
+    try {
+      final url = maUser != null
+          ? '${ApiEndpoints.nghiemThuHopDong}?maUser=$maUser'
+          : ApiEndpoints.nghiemThuHopDong;
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        url,
+        {'maHD': maHD},
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+
+      return ApiResponse<bool>(
+        isSuccess: body['success'] == true || response.statusCode == 200,
+        data: true,
+        message: body['message']?.toString() ?? 'Nghiệm thu hợp đồng thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi nghiệm thu hợp đồng: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Nhà tuyển dụng giải ngân / thanh toán hợp đồng cho Freelancer (HopDongController.ThanhToan)
+  Future<ApiResponse<bool>> thanhToanHopDong({
+    required String maHD,
+    int? maUser,
+  }) async {
+    try {
+      final url = maUser != null
+          ? '${ApiEndpoints.thanhToanHopDong}?maUser=$maUser'
+          : ApiEndpoints.thanhToanHopDong;
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        url,
+        {'maHD': maHD},
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+
+      return ApiResponse<bool>(
+        isSuccess: body['success'] == true || response.statusCode == 200,
+        data: true,
+        message: body['message']?.toString() ?? 'Giải ngân thanh toán thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi thanh toán hợp đồng: ${e.toString()}',
       );
     }
   }

@@ -10,10 +10,12 @@ namespace FreelancerStudent.Web.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthWebService _authWebService; //Khai báo để sử dụng serviceswweb
+        private readonly IMinhChungWebService _minhChungWebService;
 
-        public AccountController(IAuthWebService authWebService)
+        public AccountController(IAuthWebService authWebService, IMinhChungWebService minhChungWebService)
         {
             _authWebService = authWebService;
+            _minhChungWebService = minhChungWebService;
         }
 
         [HttpGet]
@@ -422,5 +424,102 @@ namespace FreelancerStudent.Web.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        #region Minh Chứng Sinh Viên (Quét Thẻ SV)
+
+        [HttpGet]
+        public async Task<IActionResult> MinhChung()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var viewModel = new MinhChungIndexViewModel();
+
+            var thongTinRes = await _minhChungWebService.LayThongTinHienTaiAsync(maUser.Value);
+            if (thongTinRes.success && thongTinRes.data != null)
+            {
+                viewModel.ThongTinSinhVien = thongTinRes.data;
+            }
+
+            var lichSuRes = await _minhChungWebService.LayLichSuMinhChungAsync(maUser.Value);
+            if (lichSuRes.success && lichSuRes.data != null)
+            {
+                viewModel.DanhSachMinhChung = lichSuRes.data;
+            }
+
+            var chuyenNganhRes = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+            if (chuyenNganhRes.success && chuyenNganhRes.data != null)
+            {
+                viewModel.DanhSachChuyenNganh = chuyenNganhRes.data;
+            }
+
+            var xacThucRes = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            if (xacThucRes.data != null)
+            {
+                viewModel.TrangThaiXacThuc = xacThucRes.data;
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PheDuyetMinhChung(int maMinhChung, bool chapNhan = true, string? lyDoTuChoi = null)
+        {
+            var result = await _minhChungWebService.PheDuyetMinhChungAsync(maMinhChung, chapNhan, lyDoTuChoi);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> QuetTheSinhVien(IFormFile file)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Vui lòng chọn hoặc chụp ảnh thẻ sinh viên." });
+            }
+
+            var result = await _minhChungWebService.QuetTheSinhVienAsync(file, maUser.Value);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> XacNhanTheSinhVien([FromBody] XacNhanTheSinhVienViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (model == null)
+            {
+                return Json(new { success = false, message = "Dữ liệu xác nhận không hợp lệ." });
+            }
+
+            // Bảo mật: Luôn dùng maUser từ session người dùng đăng nhập hiện tại
+            model.MaUser = maUser.Value;
+
+            var result = await _minhChungWebService.XacNhanTheSinhVienAsync(model);
+            if (result.success)
+            {
+                // Cập nhật lại session tên người dùng nếu có thay đổi
+                if (!string.IsNullOrWhiteSpace(model.HoVaTen))
+                {
+                    HttpContext.Session.SetString("hovaten", model.HoVaTen);
+                }
+            }
+
+            return Json(result);
+        }
+
+        #endregion
     }
-}
+}

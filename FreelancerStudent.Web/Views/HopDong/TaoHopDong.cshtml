@@ -214,32 +214,25 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Thiết lập mốc bàn giao (Milestones) & Tỷ lệ giải ngân -->
+                <!-- Card 2: Thiết lập mốc bàn giao (Milestones) -->
                 <div class="card border-0 shadow-sm rounded-0 mb-4">
                     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-0 fw-bold text-dark">
-                                <i class="bi bi-signpost-split text-success me-2"></i>Các mốc bàn giao & Tỷ lệ giải ngân (Milestones)
+                                <i class="bi bi-signpost-split text-success me-2"></i>Các mốc bàn giao tiến độ (Milestones)
                             </h5>
-                            <small class="text-muted">Tùy chọn thiết lập các giai đoạn nghiệm thu kèm tỷ lệ giải ngân tương ứng</small>
+                            <small class="text-muted">Thiết lập các mốc bàn giao sản phẩm để theo dõi tiến độ. Toàn bộ thù lao sẽ thanh toán 1 lần sau khi nghiệm thu toàn bộ dự án.</small>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-success rounded-0" id="btnThemGiaiDoan">
                             <i class="bi bi-plus-circle me-1"></i> Thêm mốc bàn giao
                         </button>
                     </div>
                     <div class="card-body">
-                        <!-- Progress bar tổng tỷ lệ giải ngân -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="small fw-semibold text-muted">Tổng tỷ lệ giải ngân các giai đoạn:</span>
-                                <span class="badge bg-success" id="badgeTongTyLe">100%</span>
-                            </div>
-                            <div class="progress rounded-0" style="height: 10px;">
-                                <div class="progress-bar bg-success progress-bar-striped" id="progressBarTyLe"
-                                     role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <div class="text-danger small mt-1 d-none" id="canhBaoTyLe">
-                                <i class="bi bi-exclamation-circle me-1"></i> Tổng tỷ lệ giải ngân chưa đủ hoặc vượt quá 100%!
+                        <!-- Thông báo thanh toán 1 lần -->
+                        <div class="alert alert-light border d-flex align-items-center gap-2 py-2 px-3 mb-3">
+                            <i class="bi bi-shield-check text-success fs-5"></i>
+                            <div class="small text-muted">
+                                Toàn bộ thù lao (<strong class="text-success" id="textThuLaoDisplay">@(Model.sotienkyquy.ToString("N0")) VNĐ</strong>) sẽ được ký quỹ đảm bảo và giải ngân thanh toán 1 lần cho Freelancer sau khi hoàn thành và nghiệm thu dự án.
                             </div>
                         </div>
 
@@ -248,6 +241,8 @@
                             @for (int i = 0; i < Model.giaiDoans.Count; i++)
                             {
                                 <div class="giai-doan-item p-3 border mb-3 bg-light position-relative" data-index="@i">
+                                    <input type="hidden" name="giaiDoans[@i].tyLeGiaiNgan" value="100" />
+                                    <input type="hidden" name="giaiDoans[@i].soTien" value="@Model.giaiDoans[i].soTien" />
                                     <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                         <span class="fw-bold text-success giai-doan-title">
                                             <i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #@(i + 1)
@@ -257,28 +252,24 @@
                                         </button>
                                     </div>
                                     <div class="row g-2">
-                                        <div class="col-md-6">
+                                        <div class="col-md-7">
                                             <label class="form-label small fw-semibold">Tên giai đoạn / mốc bàn giao <span class="text-danger">*</span></label>
                                             <input name="giaiDoans[@i].tenGiaiDoan" value="@Model.giaiDoans[i].tenGiaiDoan" class="form-control form-control-sm rounded-0 input-ten-gd" required />
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-5">
                                             <label class="form-label small fw-semibold">Hạn chót mốc</label>
                                             <input name="giaiDoans[@i].hanChot" type="date" value="@(Model.giaiDoans[i].hanChot?.ToString("yyyy-MM-dd") ?? Model.ngayKetThuc.ToString("yyyy-MM-dd"))" class="form-control form-control-sm rounded-0 input-hanchot-gd" />
                                         </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-semibold">Tỷ lệ giải ngân (%)</label>
-                                            <div class="input-group input-group-sm">
-                                                <input name="giaiDoans[@i].tyLeGiaiNgan" type="number" min="0" max="100" value="@(Model.giaiDoans[i].tyLeGiaiNgan ?? 100)" class="form-control rounded-0 input-ty-le-gd" placeholder="%" />
-                                                <span class="input-group-text rounded-0">%</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <label class="form-label small fw-semibold">Mô tả sản phẩm bàn giao của mốc</label>
+                                        <div class="col-12">
+                                            <label class="form-label small fw-semibold">Mô tả sản phẩm / Tiêu chí bàn giao của mốc</label>
                                             <input name="giaiDoans[@i].moTa" value="@Model.giaiDoans[i].moTa" class="form-control form-control-sm rounded-0" placeholder="Yêu cầu sản phẩm, tiêu chí nghiệm thu của mốc này..." />
                                         </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label small fw-semibold">Số tiền ước tính</label>
-                                            <input name="giaiDoans[@i].soTien" type="number" value="@Model.giaiDoans[i].soTien" class="form-control form-control-sm rounded-0 input-sotien-gd" readonly />
+                                        <div class="col-12">
+                                            <label class="form-label small fw-semibold">Link sản phẩm bàn giao (nếu có)</label>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text rounded-0"><i class="bi bi-link-45deg"></i></span>
+                                                <input name="giaiDoans[@i].linkSanPham" value="@Model.giaiDoans[i].linkSanPham" class="form-control rounded-0" placeholder="https://drive.google.com/... hoặc GitHub, Figma, Demo" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -315,20 +306,20 @@
         document.addEventListener('DOMContentLoaded', function () {
             const inputThuLao = document.getElementById('inputThuLao');
             const thuLaoFormatted = document.getElementById('thuLaoFormatted');
+            const textThuLaoDisplay = document.getElementById('textThuLaoDisplay');
             const danhSachGiaiDoan = document.getElementById('danhSachGiaiDoan');
             const btnThemGiaiDoan = document.getElementById('btnThemGiaiDoan');
-            const badgeTongTyLe = document.getElementById('badgeTongTyLe');
-            const progressBarTyLe = document.getElementById('progressBarTyLe');
-            const canhBaoTyLe = document.getElementById('canhBaoTyLe');
             const inputNgayKetThuc = document.getElementById('inputNgayKetThuc');
 
-            function capNhatTienVaTyLe() {
+            function capNhatTienVaMoc() {
                 const tongTien = parseFloat(inputThuLao.value) || 0;
-                thuLaoFormatted.innerText = "Định dạng: " + tongTien.toLocaleString('vi-VN') + " VNĐ";
+                const formattedStr = tongTien.toLocaleString('vi-VN') + " VNĐ";
+                thuLaoFormatted.innerText = "Định dạng: " + formattedStr;
+                if (textThuLaoDisplay) {
+                    textThuLaoDisplay.innerText = formattedStr;
+                }
 
-                let tongTyLe = 0;
                 const items = danhSachGiaiDoan.querySelectorAll('.giai-doan-item');
-
                 items.forEach((item, index) => {
                     item.setAttribute('data-index', index);
                     const titleEl = item.querySelector('.giai-doan-title');
@@ -343,35 +334,10 @@
                             inp.setAttribute('name', name.replace(/giaiDoans\[\d+\]/, `giaiDoans[${index}]`));
                         }
                     });
-
-                    const inputTyLe = item.querySelector('.input-ty-le-gd');
-                    const inputSoTien = item.querySelector('.input-sotien-gd');
-
-                    const tyLe = parseFloat(inputTyLe.value) || 0;
-                    tongTyLe += tyLe;
-
-                    const soTienGiaiDoan = Math.round((tongTien * tyLe) / 100);
-                    if (inputSoTien) {
-                        inputSoTien.value = soTienGiaiDoan;
-                    }
                 });
-
-                badgeTongTyLe.innerText = tongTyLe + "%";
-                progressBarTyLe.style.width = Math.min(tongTyLe, 100) + "%";
-
-                if (tongTyLe === 100) {
-                    badgeTongTyLe.className = "badge bg-success";
-                    progressBarTyLe.className = "progress-bar bg-success";
-                    canhBaoTyLe.classList.add('d-none');
-                } else {
-                    badgeTongTyLe.className = "badge bg-warning text-dark";
-                    progressBarTyLe.className = "progress-bar bg-warning";
-                    canhBaoTyLe.classList.remove('d-none');
-                    canhBaoTyLe.innerHTML = `<i class="bi bi-exclamation-circle me-1"></i> Tổng tỷ lệ giải ngân hiện tại là ${tongTyLe}%. Vui lòng điều chỉnh để đạt đủ 100%!`;
-                }
             }
 
-            inputThuLao.addEventListener('input', capNhatTienVaTyLe);
+            inputThuLao.addEventListener('input', capNhatTienVaMoc);
 
             // Xử lý thêm mốc bàn giao
             btnThemGiaiDoan.addEventListener('click', function () {
@@ -380,6 +346,8 @@
 
                 const html = `
                     <div class="giai-doan-item p-3 border mb-3 bg-light position-relative" data-index="${count}">
+                        <input type="hidden" name="giaiDoans[${count}].tyLeGiaiNgan" value="100" />
+                        <input type="hidden" name="giaiDoans[${count}].soTien" value="0" />
                         <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                             <span class="fw-bold text-success giai-doan-title">
                                 <i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #${count + 1}
@@ -389,35 +357,31 @@
                             </button>
                         </div>
                         <div class="row g-2">
-                            <div class="col-md-6">
+                            <div class="col-md-7">
                                 <label class="form-label small fw-semibold">Tên giai đoạn / mốc bàn giao <span class="text-danger">*</span></label>
-                                <input name="giaiDoans[${count}].tenGiaiDoan" value="Giai đoạn ${count + 1}: " class="form-control form-control-sm rounded-0 input-ten-gd" required />
+                                <input name="giaiDoans[${count}].tenGiaiDoan" value="Mốc ${count + 1}: " class="form-control form-control-sm rounded-0 input-ten-gd" required />
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-5">
                                 <label class="form-label small fw-semibold">Hạn chót mốc</label>
                                 <input name="giaiDoans[${count}].hanChot" type="date" value="${deadline}" class="form-control form-control-sm rounded-0 input-hanchot-gd" />
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label small fw-semibold">Tỷ lệ giải ngân (%)</label>
-                                <div class="input-group input-group-sm">
-                                    <input name="giaiDoans[${count}].tyLeGiaiNgan" type="number" min="0" max="100" value="0" class="form-control rounded-0 input-ty-le-gd" placeholder="%" />
-                                    <span class="input-group-text rounded-0">%</span>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label small fw-semibold">Mô tả sản phẩm bàn giao của mốc</label>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Mô tả sản phẩm / Tiêu chí bàn giao của mốc</label>
                                 <input name="giaiDoans[${count}].moTa" class="form-control form-control-sm rounded-0" placeholder="Yêu cầu sản phẩm, tiêu chí nghiệm thu của mốc này..." />
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Số tiền ước tính</label>
-                                <input name="giaiDoans[${count}].soTien" type="number" value="0" class="form-control form-control-sm rounded-0 input-sotien-gd" readonly />
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Link sản phẩm bàn giao (nếu có)</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text rounded-0"><i class="bi bi-link-45deg"></i></span>
+                                    <input name="giaiDoans[${count}].linkSanPham" class="form-control rounded-0" placeholder="https://drive.google.com/... hoặc GitHub, Figma, Demo" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
 
                 danhSachGiaiDoan.insertAdjacentHTML('beforeend', html);
-                capNhatTienVaTyLe();
+                capNhatTienVaMoc();
             });
 
             // Xóa mốc
@@ -429,14 +393,7 @@
                         return;
                     }
                     item.remove();
-                    capNhatTienVaTyLe();
-                }
-            });
-
-            // Lắng nghe thay đổi tỷ lệ % trong mốc
-            danhSachGiaiDoan.addEventListener('input', function (e) {
-                if (e.target.classList.contains('input-ty-le-gd')) {
-                    capNhatTienVaTyLe();
+                    capNhatTienVaMoc();
                 }
             });
 
@@ -455,7 +412,7 @@
                 }
             });
 
-            capNhatTienVaTyLe();
+            capNhatTienVaMoc();
         });
     </script>
 }
