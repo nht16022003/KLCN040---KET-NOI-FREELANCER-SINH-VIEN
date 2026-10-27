@@ -29,3 +29,82 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* ============================================================ */
+/* LOẠI BỎ BO GÓC (BORDER-RADIUS: 0) TOÀN HỆ THỐNG GIAO DIỆN    */
+/* ============================================================ */
+:root {
+  --bs-border-radius: 0 !important;
+  --bs-border-radius-sm: 0 !important;
+  --bs-border-radius-lg: 0 !important;
+  --bs-border-radius-xl: 0 !important;
+  --bs-border-radius-xxl: 0 !important;
+  --bs-border-radius-2xl: 0 !important;
+  --bs-border-radius-pill: 0 !important;
+}
+
+*,
+*::before,
+*::after,
+html *,
+body *,
+.btn,
+.form-control,
+.form-select,
+.form-check-input,
+.input-group,
+.input-group-text,
+.card,
+.card-header,
+.card-footer,
+.card-img,
+.card-img-top,
+.card-img-bottom,
+.modal-content,
+.modal-header,
+.modal-footer,
+.dropdown-menu,
+.dropdown-item,
+.badge,
+.alert,
+.progress,
+.progress-bar,
+.toast,
+.tooltip,
+.popover,
+.nav-pills .nav-link,
+.nav-tabs .nav-link,
+.pagination .page-item,
+.pagination .page-link,
+.list-group-item,
+.accordion-item,
+.accordion-button,
+.rounded,
+.rounded-0,
+.rounded-1,
+.rounded-2,
+.rounded-3,
+.rounded-4,
+.rounded-5,
+.rounded-top,
+.rounded-bottom,
+.rounded-start,
+.rounded-end,
+.rounded-circle,
+.rounded-pill {
+  border-radius: 0 !important;
+}
+
+/* ============================================================ */
+/* LOẠI BỎ ICON GIAO DIỆN & TRANG TRÍ                           */
+/* Giữ nguyên nút đóng modal (.btn-close) và hình ảnh avatar/logo */
+/* ============================================================ */
+i.bi,
+i.fa,
+i.fas,
+i.far,
+i.fab,
+[class^="bi-"],
+[class*=" bi-"] {
+  display: none !important;
+}

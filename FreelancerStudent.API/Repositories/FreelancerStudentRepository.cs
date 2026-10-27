@@ -99,6 +99,16 @@ namespace FreelancerStudent.API.Repositories
                 return false;
             }
 
+            // Kiểm tra tính hợp lệ dữ liệu
+            if (dto.GPA < 0.0 || dto.GPA > 4.0)
+            {
+                throw new ArgumentException("Điểm GPA phải nằm trong khoảng từ 0.0 đến 4.0.");
+            }
+            if (dto.chiPhiTu.HasValue && dto.chiPhiTu.Value < 0)
+            {
+                throw new ArgumentException("Mức giá tham khảo không được là số âm.");
+            }
+
             // Kiểm tra xem sinh viên đã có minh chứng thẻ sinh viên được duyệt ("Đã xác minh") hay chưa
             bool daXacMinhThe = await _context.MinhChung_FreelancerStudents
                 .AsNoTracking()
@@ -122,7 +132,7 @@ namespace FreelancerStudent.API.Repositories
 
             // Các trường tự do không thuộc nhóm thẻ sinh viên vẫn cho phép cập nhật theo quyền hạn:
             student.diaDiemFreelancerStudent = dto.diaDiemFreelancerStudent ?? string.Empty;
-            student.GPA = dto.GPA;
+            student.GPA = Math.Round(dto.GPA, 2);
             student.gioithieu = dto.gioithieu;
             student.kyNangCoBan = dto.kyNangCoBan;
             student.ngonNgu = dto.ngonNgu;
@@ -162,6 +172,72 @@ namespace FreelancerStudent.API.Repositories
             }
 
             //Lưu toàn bộ thay đổi xuống SQL Server
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // Cập nhật thông tin cơ bản: Địa điểm, Ngôn ngữ, Kỹ năng cơ bản, Mức giá tham khảo
+        public async Task<bool> capNhatThongTinCoBanAsync(DTOs.RequestDTOs.CapNhatThongTinCoBan_RequestDTO dto)
+        {
+            var student = await _context.FreelancerStudents
+                .FirstOrDefaultAsync(f => f.maUser == dto.maUser);
+
+            if (student == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.diaDiemFreelancerStudent))
+            {
+                throw new ArgumentException("Địa điểm không được để trống.");
+            }
+
+            if (dto.diaDiemFreelancerStudent.Trim().Length > 100)
+            {
+                throw new ArgumentException("Địa điểm không được vượt quá 100 ký tự.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.ngonNgu) && dto.ngonNgu.Trim().Length > 100)
+            {
+                throw new ArgumentException("Ngôn ngữ không được vượt quá 100 ký tự.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.kyNangCoBan) && dto.kyNangCoBan.Trim().Length > 150)
+            {
+                throw new ArgumentException("Kỹ năng cơ bản không được vượt quá 150 ký tự.");
+            }
+
+            if (dto.chiPhiTu.HasValue && dto.chiPhiTu.Value < 0)
+            {
+                throw new ArgumentException("Mức giá tham khảo không được là số âm.");
+            }
+
+            student.diaDiemFreelancerStudent = dto.diaDiemFreelancerStudent.Trim();
+            student.ngonNgu = string.IsNullOrWhiteSpace(dto.ngonNgu) ? null : dto.ngonNgu.Trim();
+            student.kyNangCoBan = string.IsNullOrWhiteSpace(dto.kyNangCoBan) ? null : dto.kyNangCoBan.Trim();
+            student.chiPhiTu = dto.chiPhiTu;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // Cập nhật điểm GPA học tập
+        public async Task<bool> capNhatGPAAsync(DTOs.RequestDTOs.CapNhatGPA_RequestDTO dto)
+        {
+            var student = await _context.FreelancerStudents
+                .FirstOrDefaultAsync(f => f.maUser == dto.maUser);
+
+            if (student == null)
+            {
+                return false;
+            }
+
+            if (dto.GPA < 0.0 || dto.GPA > 4.0)
+            {
+                throw new ArgumentException("Điểm GPA phải nằm trong khoảng hợp lệ từ 0.0 đến 4.0.");
+            }
+
+            student.GPA = Math.Round(dto.GPA, 2);
             await _context.SaveChangesAsync();
             return true;
         }

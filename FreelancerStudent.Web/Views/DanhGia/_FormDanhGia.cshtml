@@ -30,13 +30,13 @@
                         <div class="d-flex align-items-center gap-1" role="radiogroup" aria-label="Đánh giá tổng thể">
                             @for (var star = 1; star <= 5; star++)
                             {
-                                <button type="button" class="btn btn-link p-1 fs-3 text-decoration-none @(review?.soSaoTongThe >= star ? "text-warning" : "text-secondary")" data-rating-group="soSaoTongThe" data-rating-value="@star" role="radio" aria-checked="@(review?.soSaoTongThe == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><i class="bi @(review?.soSaoTongThe >= star ? "bi-star-fill" : "bi-star")"></i></button>
+                                <button type="button" class="btn btn-link p-1 fs-3 text-decoration-none rounded-0 @(review?.soSaoTongThe >= star ? "text-warning" : "text-secondary")" data-rating-group="soSaoTongThe" data-rating-value="@star" role="radio" aria-checked="@(review?.soSaoTongThe == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><span class="star-char">@(review?.soSaoTongThe >= star ? "★" : "☆")</span></button>
                             }
                             <span class="small text-muted ms-2" data-rating-label="soSaoTongThe">@(review?.soSaoTongThe > 0 ? $"{review.soSaoTongThe} trên 5" : "Chọn mức đánh giá")</span>
                         </div>
                     </div>
 
-                    <div class="border rounded p-3 mb-3">
+                    <div class="border rounded-0 p-3 mb-3">
                         <div class="fw-semibold mb-2">Đánh giá chi tiết <span class="text-muted fw-normal small">(không bắt buộc)</span></div>
                         @foreach (var criterion in new[] {
                             (Name: "soSaoChatLuong", Label: "Chất lượng công việc", Value: review?.soSaoChatLuong),
@@ -50,9 +50,9 @@
                                     <input type="hidden" name="@criterion.Name" value="@(criterion.Value?.ToString() ?? "")" />
                                     @for (var star = 1; star <= 5; star++)
                                     {
-                                        <button type="button" class="btn btn-link p-0 fs-5 text-decoration-none @(criterion.Value >= star ? "text-warning" : "text-secondary")" data-rating-group="@criterion.Name" data-rating-value="@star" role="radio" aria-checked="@(criterion.Value == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><i class="bi @(criterion.Value >= star ? "bi-star-fill" : "bi-star")"></i></button>
+                                        <button type="button" class="btn btn-link p-0 fs-5 text-decoration-none rounded-0 @(criterion.Value >= star ? "text-warning" : "text-secondary")" data-rating-group="@criterion.Name" data-rating-value="@star" role="radio" aria-checked="@(criterion.Value == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><span class="star-char">@(criterion.Value >= star ? "★" : "☆")</span></button>
                                     }
-                                    <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none" data-rating-clear="@criterion.Name" disabled="@(!canSubmit)">Bỏ chọn</button>
+                                    <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none rounded-0" data-rating-clear="@criterion.Name" disabled="@(!canSubmit)">Bỏ chọn</button>
                                 </div>
                             </div>
                         }

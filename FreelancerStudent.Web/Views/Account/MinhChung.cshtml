@@ -18,12 +18,12 @@
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
                     <h2 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-                        <i class="bi bi-person-badge text-success"></i> Minh Chứng Thẻ Sinh Viên
+                        Minh Chứng Thẻ Sinh Viên
                     </h2>
                     <p class="text-muted mb-0">Quét ảnh thẻ sinh viên để hệ thống tự động trích xuất thông tin, đối chiếu và cập nhật hồ sơ Freelancer.</p>
                 </div>
-                <div class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fs-6">
-                    <i class="bi bi-shield-check me-1"></i> Xác thực chuẩn trường cấp
+                <div class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-0 fs-6">
+                    Xác thực chuẩn trường cấp
                 </div>
             </div>
         </div>
@@ -31,8 +31,7 @@
         <!-- THÔNG BÁO TỪ HỆ THỐNG NẾU BỊ CHẶN ĐIỀU HƯỚNG TỚI ĐÂY -->
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-3">
-                <i class="bi bi-exclamation-triangle-fill fs-3 text-danger flex-shrink-0"></i>
+            <div class="alert alert-danger border-0 shadow-sm rounded-0 p-3 mb-4 d-flex align-items-center gap-3">
                 <div class="flex-grow-1">
                     <strong class="d-block text-danger fs-6">Yêu cầu xác thực tài khoản sinh viên!</strong>
                     <span>@TempData["ErrorMessage"]</span>
@@ -41,8 +40,7 @@
         }
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center gap-3">
-                <i class="bi bi-check-circle-fill fs-3 text-success flex-shrink-0"></i>
+            <div class="alert alert-success border-0 shadow-sm rounded-0 p-3 mb-4 d-flex align-items-center gap-3">
                 <div>
                     <strong class="d-block text-success fs-6">Thành công!</strong>
                     <span>@TempData["SuccessMessage"]</span>
@@ -59,10 +57,10 @@
 
         @if (isDaXacMinh)
         {
-            <div class="alert alert-success border-0 shadow-sm rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="alert alert-success border-0 shadow-sm rounded-0 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 24px;">
-                        <i class="bi bi-check2-all"></i>
+                    <div class="bg-success text-white rounded-0 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 16px; font-weight: bold;">
+                        ✓
                     </div>
                     <div>
                         <h5 class="fw-bold text-success mb-1">Tài khoản sinh viên: ĐÃ ĐƯỢC XÁC THỰC THÀNH CÔNG</h5>
@@ -70,19 +68,19 @@
                     </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Đăng bài tìm việc</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Nộp đơn ứng tuyển</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Hợp đồng & Bàn giao</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i> Nạp / rút ví</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-0">Đăng bài tìm việc</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-0">Nộp đơn ứng tuyển</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-0">Hợp đồng & Bàn giao</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-0">Nạp / rút ví</span>
                 </div>
             </div>
         }
         else if (trangThai == "Đang gửi")
         {
-            <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="alert alert-warning border-0 shadow-sm rounded-0 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 24px;">
-                        <i class="bi bi-hourglass-split"></i>
+                    <div class="bg-warning text-dark rounded-0 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 14px; font-weight: bold;">
+                        Chờ
                     </div>
                     <div>
                         <h5 class="fw-bold text-dark mb-1">Minh chứng thẻ sinh viên: ĐANG CHỜ PHÊ DUYỆT</h5>
@@ -92,8 +90,8 @@
                 @if (maMCMoiNhat.HasValue && maMCMoiNhat.Value > 0)
                 {
                     <div>
-                        <button type="button" class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm" onclick="duyetNhanhDemo(@maMCMoiNhat.Value)">
-                            <i class="bi bi-lightning-charge-fill me-1"></i> Duyệt nhanh (Môi trường kiểm thử)
+                        <button type="button" class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm rounded-0" onclick="duyetNhanhDemo(@maMCMoiNhat.Value)">
+                            Duyệt nhanh (Môi trường kiểm thử)
                         </button>
                     </div>
                 }
@@ -101,10 +99,10 @@
         }
         else
         {
-            <div class="alert alert-danger border-0 shadow-sm rounded-4 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="alert alert-danger border-0 shadow-sm rounded-0 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 24px;">
-                        <i class="bi bi-shield-lock-fill"></i>
+                    <div class="bg-danger text-white rounded-0 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 14px; font-weight: bold;">
+                        Khóa
                     </div>
                     <div>
                         <h5 class="fw-bold text-danger mb-1">Tài khoản sinh viên: CHƯA XÁC THỰC MINH CHỨNG</h5>
@@ -112,17 +110,16 @@
                     </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa đăng bài</span>
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa ứng tuyển</span>
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa hợp đồng</span>
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill"><i class="bi bi-lock-fill me-1"></i> Khóa nạp/rút ví</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-0">Khóa đăng bài</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-0">Khóa ứng tuyển</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-0">Khóa hợp đồng</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-0">Khóa nạp/rút ví</span>
                 </div>
             </div>
         }
 
         <!-- THÔNG BÁO QUY ĐỊNH & BẢO MẬT -->
-        <div class="alert alert-info border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-start gap-3">
-            <i class="bi bi-info-circle-fill fs-3 text-info flex-shrink-0 mt-1"></i>
+        <div class="alert alert-info border-0 shadow-sm rounded-0 p-3 mb-4 d-flex align-items-start gap-3">
             <div>
                 <div class="fw-bold fs-6 mb-1">Lưu ý quan trọng khi tải thẻ sinh viên:</div>
                 <ul class="mb-0 ps-3 text-secondary small">
@@ -137,30 +134,30 @@
         <div class="row g-4">
             <!-- CỘT TRÁI: KHU VỰC QUÉT THẺ SINH VIÊN -->
             <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card border-0 shadow-sm rounded-0 overflow-hidden mb-4">
                     <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex align-items-center justify-content-between">
                         <span class="fw-bold fs-5 text-dark">
-                            <i class="bi bi-camera me-2 text-success"></i> Bước 1 & 2: Tải lên & Quét Thẻ
+                            Bước 1 & 2: Tải lên & Quét Thẻ
                         </span>
-                        <span id="scanStatusBadge" class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1">Chờ tải ảnh</span>
+                        <span id="scanStatusBadge" class="badge bg-secondary-subtle text-secondary rounded-0 px-3 py-1">Chờ tải ảnh</span>
                     </div>
                     <div class="card-body p-4">
                         <!-- UPLOAD DROP ZONE -->
-                        <div id="dropZone" class="upload-dropzone border border-2 border-dashed rounded-4 p-4 text-center position-relative mb-3">
+                        <div id="dropZone" class="upload-dropzone border border-2 border-dashed rounded-0 p-4 text-center position-relative mb-3">
                             <input type="file" id="studentCardInput" accept="image/jpeg,image/png,image/webp,image/jpg" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" style="z-index: 5;" />
                             
                             <div id="uploadPrompt" class="py-3">
                                 <div class="upload-icon-circle mx-auto mb-3">
-                                    <i class="bi bi-cloud-arrow-up text-success fs-1"></i>
+                                    Thẻ SV
                                 </div>
                                 <h6 class="fw-bold mb-1">Kéo thả ảnh thẻ sinh viên vào đây</h6>
                                 <p class="text-muted small mb-3">Hoặc nhấp chuột để chọn ảnh từ máy tính / thư viện</p>
                                 <div class="d-flex justify-content-center gap-2">
-                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3" onclick="document.getElementById('studentCardInput').click();">
-                                        <i class="bi bi-folder2-open me-1"></i> Chọn tệp ảnh
+                                    <button type="button" class="btn btn-outline-success btn-sm rounded-0 px-3" onclick="document.getElementById('studentCardInput').click();">
+                                        Chọn tệp ảnh
                                     </button>
-                                    <label for="cameraInput" class="btn btn-outline-primary btn-sm rounded-pill px-3 mb-0 cursor-pointer">
-                                        <i class="bi bi-camera me-1"></i> Chụp bằng Camera
+                                    <label for="cameraInput" class="btn btn-outline-primary btn-sm rounded-0 px-3 mb-0 cursor-pointer">
+                                        Chụp bằng Camera
                                     </label>
                                     <input type="file" id="cameraInput" accept="image/*" capture="environment" class="d-none" />
                                 </div>
@@ -170,9 +167,9 @@
                             <!-- PREVIEW CONTAINER -->
                             <div id="previewContainer" class="d-none">
                                 <div class="position-relative d-inline-block">
-                                    <img id="imagePreview" src="" alt="Thẻ sinh viên" class="img-fluid rounded-3 shadow-sm border border-2 border-success" style="max-height: 280px; object-fit: contain;" />
-                                    <button type="button" id="btnRemoveImage" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 m-2 shadow" title="Xóa ảnh chọn lại">
-                                        <i class="bi bi-x-lg"></i>
+                                    <img id="imagePreview" src="" alt="Thẻ sinh viên" class="img-fluid rounded-0 shadow-sm border border-2 border-success" style="max-height: 280px; object-fit: contain;" />
+                                    <button type="button" id="btnRemoveImage" class="btn btn-danger btn-sm rounded-0 position-absolute top-0 end-0 m-2 shadow" title="Xóa ảnh chọn lại">
+                                        Xóa
                                     </button>
                                 </div>
                                 <div class="mt-2 text-muted small" id="imageFileName"></div>
@@ -181,8 +178,8 @@
 
                         <!-- SCAN ACTION BUTTON -->
                         <div class="d-grid gap-2">
-                            <button type="button" id="btnStartScan" class="btn btn-success btn-lg rounded-pill fw-bold py-2 shadow-sm" disabled>
-                                <i class="bi bi-upc-scan me-2"></i> Bắt đầu quét & Nhận diện thẻ SV
+                            <button type="button" id="btnStartScan" class="btn btn-success btn-lg rounded-0 fw-bold py-2 shadow-sm" disabled>
+                                Bắt đầu quét & Nhận diện thẻ SV
                             </button>
                         </div>
 
@@ -196,9 +193,8 @@
                         </div>
 
                         <!-- SCAN ERROR ALERT -->
-                        <div id="scanErrorAlert" class="alert alert-danger rounded-4 mt-3 d-none">
+                        <div id="scanErrorAlert" class="alert alert-danger rounded-0 mt-3 d-none">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
                                 <span id="scanErrorMessage" class="fw-medium">Lỗi khi nhận diện thẻ sinh viên.</span>
                             </div>
                         </div>
@@ -206,16 +202,15 @@
                 </div>
 
                 <!-- BẢNG ĐỐI CHIẾU VÀ XÁC NHẬN (BƯỚC 3) -->
-                <div id="verificationCard" class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 d-none">
+                <div id="verificationCard" class="card border-0 shadow-sm rounded-0 overflow-hidden mb-4 d-none">
                     <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex align-items-center justify-content-between">
                         <span class="fw-bold fs-5 text-dark">
-                            <i class="bi bi-clipboard-check me-2 text-primary"></i> Bước 3: Kiểm tra & Xác nhận thông tin
+                            Bước 3: Kiểm tra & Xác nhận thông tin
                         </span>
-                        <span id="ocrConfidenceBadge" class="badge bg-success rounded-pill px-3 py-1">Độ tin cậy: 95%</span>
+                        <span id="ocrConfidenceBadge" class="badge bg-success rounded-0 px-3 py-1">Độ tin cậy: 95%</span>
                     </div>
                     <div class="card-body p-4">
-                        <div class="alert alert-warning border-0 rounded-3 p-3 mb-3 small d-flex align-items-center gap-2">
-                            <i class="bi bi-pencil-square fs-5 text-warning flex-shrink-0"></i>
+                        <div class="alert alert-warning border-0 rounded-0 p-3 mb-3 small d-flex align-items-center gap-2">
                             <div>Vui lòng kiểm tra lại thông tin nhận diện được dưới đây. Bạn có thể chỉnh sửa lại các trường thông tin trước khi nhấn nút xác nhận cập nhật hồ sơ.</div>
                         </div>
 
@@ -241,8 +236,8 @@
                                                 @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.HoTenHienTai) ? "(Chưa cập nhật)" : Model.ThongTinSinhVien.HoTenHienTai)
                                             </td>
                                             <td>
-                                                <input type="text" id="inputHoVaTen" class="form-control form-control-sm rounded-3 fw-bold text-dark" required />
-                                                <div id="diffBadgeName" class="badge bg-primary-subtle text-primary mt-1 d-none">Có thay đổi</div>
+                                                <input type="text" id="inputHoVaTen" class="form-control form-control-sm rounded-0 fw-bold text-dark" required />
+                                                <div id="diffBadgeName" class="badge bg-primary-subtle text-primary rounded-0 mt-1 d-none">Có thay đổi</div>
                                             </td>
                                         </tr>
 
@@ -252,12 +247,12 @@
                                                 Mã số sinh viên (MSSV)
                                             </td>
                                             <td class="text-muted">
-                                                <span class="badge bg-light text-secondary border">Đối chiếu thẻ</span>
+                                                <span class="badge bg-light text-secondary border rounded-0">Đối chiếu thẻ</span>
                                             </td>
                                             <td>
                                                 <div class="input-group input-group-sm">
-                                                    <span class="input-group-text bg-light"><i class="bi bi-upc"></i></span>
-                                                    <input type="text" id="inputMssv" class="form-control rounded-end-3" placeholder="Không đọc được MSSV" readonly />
+                                                    <span class="input-group-text bg-light rounded-0">MSSV</span>
+                                                    <input type="text" id="inputMssv" class="form-control rounded-0" placeholder="Nhập hoặc quét MSSV từ thẻ" />
                                                 </div>
                                                 <small class="text-muted" style="font-size: 11px;">(MSSV dùng để đối chiếu xác minh minh chứng)</small>
                                             </td>
@@ -272,8 +267,8 @@
                                                 @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.TenTruong) ? "(Chưa cập nhật)" : Model.ThongTinSinhVien.TenTruong)
                                             </td>
                                             <td>
-                                                <input type="text" id="inputTenTruong" class="form-control form-control-sm rounded-3" placeholder="Nhập tên trường" required />
-                                                <div id="diffBadgeSchool" class="badge bg-primary-subtle text-primary mt-1 d-none">Có thay đổi</div>
+                                                <input type="text" id="inputTenTruong" class="form-control form-control-sm rounded-0" placeholder="Nhập tên trường" required />
+                                                <div id="diffBadgeSchool" class="badge bg-primary-subtle text-primary rounded-0 mt-1 d-none">Có thay đổi</div>
                                             </td>
                                         </tr>
 
@@ -288,19 +283,19 @@
                                             <td>
                                                 <div class="mb-2">
                                                     <label class="form-label small text-muted mb-1" style="font-size: 11px;">
-                                                        <i class="bi bi-card-text me-1 text-primary"></i>Dữ liệu đọc từ Thẻ SV:
+                                                        Dữ liệu đọc từ Thẻ SV:
                                                     </label>
-                                                    <input type="text" id="inputMajorFromCard" class="form-control form-control-sm rounded-3 bg-light fw-bold text-primary" placeholder="(Chưa nhận diện được ngành từ thẻ)" readonly />
+                                                    <input type="text" id="inputMajorFromCard" class="form-control form-control-sm rounded-0 bg-light fw-bold text-primary" placeholder="(Chưa nhận diện được ngành từ thẻ)" readonly />
                                                 </div>
                                                 <div>
                                                     <label class="form-label small text-muted mb-1" style="font-size: 11px;">
-                                                        <i class="bi bi-check2-circle me-1 text-success"></i>Chuyên ngành hệ thống (Xác nhận):
+                                                        Chuyên ngành hệ thống (Xác nhận):
                                                     </label>
-                                                    <select id="selectChuyenNganh" class="form-select form-select-sm rounded-3">
+                                                    <select id="selectChuyenNganh" class="form-select form-select-sm rounded-0">
                                                         <option value="">-- Chọn chuyên ngành phù hợp --</option>
                                                         @foreach (var cn in Model.DanhSachChuyenNganh)
                                                         {
-                                                            <option value="@cn.MaChuyenNganh">@cn.TenChuyenNganh (@cn.MaChuyenNganh)</option>
+                                                             <option value="@cn.MaChuyenNganh">@cn.TenChuyenNganh (@cn.MaChuyenNganh)</option>
                                                         }
                                                     </select>
                                                     <div id="ocrDetectedMajorText" class="text-muted small mt-1" style="font-size: 11px;"></div>
@@ -314,10 +309,10 @@
                                                 Niên khóa
                                             </td>
                                             <td class="text-muted">
-                                                <span class="badge bg-light text-secondary border">Hồ sơ</span>
+                                                <span class="badge bg-light text-secondary border rounded-0">Hồ sơ</span>
                                             </td>
                                             <td>
-                                                <input type="text" id="inputNienKhoa" class="form-control form-control-sm rounded-3" placeholder="VD: 2021-2025" />
+                                                <input type="text" id="inputNienKhoa" class="form-control form-control-sm rounded-0" placeholder="VD: 2021-2025" />
                                             </td>
                                         </tr>
 
@@ -327,10 +322,10 @@
                                                 Sinh viên năm thứ
                                             </td>
                                             <td class="text-muted">
-                                                <span class="badge bg-light text-secondary border">1 - 6</span>
+                                                <span class="badge bg-light text-secondary border rounded-0">1 - 6</span>
                                             </td>
                                             <td>
-                                                <select id="selectNamThu" class="form-select form-select-sm rounded-3">
+                                                <select id="selectNamThu" class="form-select form-select-sm rounded-0">
                                                     <option value="">-- Chưa chọn --</option>
                                                     <option value="1">Năm 1</option>
                                                     <option value="2">Năm 2</option>
@@ -351,7 +346,7 @@
                                                 @(Model.ThongTinSinhVien.NgaySinhHienTai.HasValue ? Model.ThongTinSinhVien.NgaySinhHienTai.Value.ToString("dd/MM/yyyy") : "(Chưa có)")
                                             </td>
                                             <td>
-                                                <input type="date" id="inputNgaySinh" class="form-control form-control-sm rounded-3" />
+                                                <input type="date" id="inputNgaySinh" class="form-control form-control-sm rounded-0" />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -359,7 +354,7 @@
                             </div>
 
                             <!-- CHECKBOX ĐỒNG Ý CẬP NHẬT -->
-                            <div class="form-check p-3 bg-light rounded-3 mb-4">
+                            <div class="form-check p-3 bg-light rounded-0 mb-4">
                                 <input class="form-check-input ms-0 me-2" type="checkbox" id="checkConsent" checked>
                                 <label class="form-check-label fw-bold text-dark small" for="checkConsent">
                                     Tôi xác nhận thông tin trên thẻ sinh viên là chính xác và đồng ý lưu minh chứng kèm cập nhật thông tin tương ứng vào hồ sơ Freelancer.
@@ -368,11 +363,11 @@
 
                             <!-- ACTION CONFIRM BUTTONS -->
                             <div class="d-flex justify-content-end gap-2">
-                                <button type="button" id="btnCancelVerification" class="btn btn-outline-secondary rounded-pill px-4">
+                                <button type="button" id="btnCancelVerification" class="btn btn-outline-secondary rounded-0 px-4">
                                     Hủy thao tác
                                 </button>
-                                <button type="button" id="btnSaveEvidence" class="btn btn-success rounded-pill px-4 fw-bold">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Xác nhận & Cập nhật hồ sơ
+                                <button type="button" id="btnSaveEvidence" class="btn btn-success rounded-0 px-4 fw-bold">
+                                    Xác nhận & Cập nhật hồ sơ
                                 </button>
                             </div>
                         </form>
@@ -383,46 +378,46 @@
             <!-- CỘT PHẢI: HỒ SƠ HIỆN TẠI & LỊCH SỬ MINH CHỨNG -->
             <div class="col-lg-5">
                 <!-- CARD HỒ SƠ SINH VIÊN HIỆN TẠI -->
-                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card border-0 shadow-sm rounded-0 mb-4">
                     <div class="card-header bg-white border-bottom border-light py-3 px-4">
                         <span class="fw-bold fs-6 text-dark">
-                            <i class="bi bi-person-circle me-2 text-success"></i> Thông tin hồ sơ Freelancer hiện tại
+                            Thông tin hồ sơ Freelancer hiện tại
                         </span>
                     </div>
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center gap-3 mb-3">
-                            <div class="avatar-circle-sm bg-success-subtle text-success fw-bold fs-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <div class="avatar-circle-sm bg-success-subtle text-success fw-bold fs-4 rounded-0 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                                 @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.HoTenHienTai) ? "S" : Model.ThongTinSinhVien.HoTenHienTai.Substring(0, 1).ToUpper())
                             </div>
                             <div>
                                 <h6 class="fw-bold mb-0 text-dark">
                                     @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.HoTenHienTai) ? "Chưa có họ tên" : Model.ThongTinSinhVien.HoTenHienTai)
                                 </h6>
-                                <span class="badge bg-secondary-subtle text-secondary small">Freelancer Student</span>
+                                <span class="badge bg-secondary-subtle text-secondary small rounded-0">Freelancer Student</span>
                             </div>
                         </div>
 
                         <ul class="list-group list-group-flush small">
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted"><i class="bi bi-mortarboard me-2"></i> Trường học:</span>
+                                <span class="text-muted">Trường học:</span>
                                 <span class="fw-bold text-dark text-end">
                                     @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.TenTruong) ? "Chưa cập nhật" : Model.ThongTinSinhVien.TenTruong)
                                 </span>
                             </li>
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted"><i class="bi bi-book me-2"></i> Chuyên ngành:</span>
+                                <span class="text-muted">Chuyên ngành:</span>
                                 <span class="fw-bold text-dark text-end">
                                     @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.ChuyenNganh) ? "Chưa cập nhật" : Model.ThongTinSinhVien.ChuyenNganh)
                                 </span>
                             </li>
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted"><i class="bi bi-geo-alt me-2"></i> Khu vực:</span>
+                                <span class="text-muted">Khu vực:</span>
                                 <span class="fw-bold text-dark text-end">
                                     @(string.IsNullOrWhiteSpace(Model.ThongTinSinhVien.DiaDiemHienTai) ? "Chưa cập nhật" : Model.ThongTinSinhVien.DiaDiemHienTai)
                                 </span>
                             </li>
                             <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <span class="text-muted"><i class="bi bi-calendar-event me-2"></i> Ngày sinh:</span>
+                                <span class="text-muted">Ngày sinh:</span>
                                 <span class="fw-bold text-dark">
                                     @(Model.ThongTinSinhVien.NgaySinhHienTai.HasValue ? Model.ThongTinSinhVien.NgaySinhHienTai.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")
                                 </span>
@@ -432,18 +427,17 @@
                 </div>
 
                 <!-- CARD LỊCH SỬ MINH CHỨNG ĐÃ NỘP -->
-                <div class="card border-0 shadow-sm rounded-4">
+                <div class="card border-0 shadow-sm rounded-0">
                     <div class="card-header bg-white border-bottom border-light py-3 px-4 d-flex justify-content-between align-items-center">
                         <span class="fw-bold fs-6 text-dark">
-                            <i class="bi bi-clock-history me-2 text-primary"></i> Lịch sử minh chứng đã gửi
+                            Lịch sử minh chứng đã gửi
                         </span>
-                        <span class="badge bg-light text-dark border">@Model.DanhSachMinhChung.Count bản ghi</span>
+                        <span class="badge bg-light text-dark border rounded-0">@Model.DanhSachMinhChung.Count bản ghi</span>
                     </div>
                     <div class="card-body p-3">
                         @if (Model.DanhSachMinhChung.Count == 0)
                         {
                             <div class="text-center py-4 text-muted small">
-                                <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Bạn chưa gửi minh chứng nào. Hãy tải lên ảnh Thẻ sinh viên ở khung bên cạnh!
                             </div>
                         }
@@ -455,40 +449,40 @@
                                     <div class="list-group-item px-2 py-3 border-bottom">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
                                             <span class="fw-bold text-dark">
-                                                <i class="bi bi-person-vcard text-success me-1"></i> @item.LoaiMinhChung
+                                                @item.LoaiMinhChung
                                             </span>
                                             @if (item.TrangThaiGuiMinhChung == "Đã xác minh")
                                             {
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
-                                                    <i class="bi bi-check-circle me-1"></i> Đã xác minh
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-0">
+                                                    Đã xác minh
                                                 </span>
                                             }
                                             else if (item.TrangThaiGuiMinhChung == "Đã từ chối")
                                             {
-                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
-                                                    <i class="bi bi-x-circle me-1"></i> Đã từ chối
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-0">
+                                                    Đã từ chối
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">
-                                                    <i class="bi bi-hourglass-split me-1"></i> Đang gửi (Chờ duyệt)
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-0">
+                                                    Đang gửi (Chờ duyệt)
                                                 </span>
                                             }
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 12px;">
-                                            <span><i class="bi bi-calendar3 me-1"></i> Nộp ngày: @item.NgayNop.ToString("dd/MM/yyyy HH:mm")</span>
+                                            <span>Nộp ngày: @item.NgayNop.ToString("dd/MM/yyyy HH:mm")</span>
                                             @if (!string.IsNullOrWhiteSpace(item.FileMinhChung))
                                             {
                                                 var fullImgUrl = item.FileMinhChung.StartsWith("http") ? item.FileMinhChung : ("http://localhost:5152" + (item.FileMinhChung.StartsWith("/") ? "" : "/") + item.FileMinhChung);
                                                 <a href="@fullImgUrl" target="_blank" class="text-decoration-none text-primary fw-medium">
-                                                    <i class="bi bi-eye me-1"></i> Xem ảnh
+                                                    Xem ảnh
                                                 </a>
                                             }
                                         </div>
                                         @if (!string.IsNullOrWhiteSpace(item.LyDoTuChoi))
                                         {
-                                            <div class="mt-2 text-danger small bg-danger-subtle p-2 rounded-2">
+                                            <div class="mt-2 text-danger small bg-danger-subtle p-2 rounded-0">
                                                 <strong>Lý do từ chối:</strong> @item.LyDoTuChoi
                                             </div>
                                         }
@@ -520,11 +514,14 @@
     .upload-icon-circle {
         width: 70px;
         height: 70px;
-        border-radius: 50%;
+        border-radius: 0;
         background-color: #eaf4ed;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        color: #2f7650;
     }
     .cursor-pointer {
         cursor: pointer;
@@ -589,7 +586,7 @@
             uploadPrompt.classList.add('d-none');
             previewContainer.classList.remove('d-none');
             btnStartScan.disabled = false;
-            scanStatusBadge.className = 'badge bg-primary-subtle text-primary rounded-pill px-3 py-1';
+            scanStatusBadge.className = 'badge bg-primary-subtle text-primary rounded-0 px-3 py-1';
             scanStatusBadge.innerText = 'Đã chọn ảnh thẻ';
             scanErrorAlert.classList.add('d-none');
             verificationCard.classList.add('d-none');
@@ -606,7 +603,7 @@
         uploadPrompt.classList.remove('d-none');
         previewContainer.classList.add('d-none');
         btnStartScan.disabled = true;
-        scanStatusBadge.className = 'badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1';
+        scanStatusBadge.className = 'badge bg-secondary-subtle text-secondary rounded-0 px-3 py-1';
         scanStatusBadge.innerText = 'Chờ tải ảnh';
         scanErrorAlert.classList.add('d-none');
         verificationCard.classList.add('d-none');
@@ -623,7 +620,7 @@
         scanLoading.classList.remove('d-none');
         scanErrorAlert.classList.add('d-none');
         verificationCard.classList.add('d-none');
-        scanStatusBadge.className = 'badge bg-warning-subtle text-warning rounded-pill px-3 py-1';
+        scanStatusBadge.className = 'badge bg-warning-subtle text-warning rounded-0 px-3 py-1';
         scanStatusBadge.innerText = 'Đang nhận diện OCR...';
 
         const formData = new FormData();
@@ -642,12 +639,12 @@
             if (result.success && result.data) {
                 ocrScanResult = result.data;
                 populateVerificationData(result.data);
-                scanStatusBadge.className = 'badge bg-success-subtle text-success rounded-pill px-3 py-1';
+                scanStatusBadge.className = 'badge bg-success-subtle text-success rounded-0 px-3 py-1';
                 scanStatusBadge.innerText = 'Quét thành công';
             } else {
                 scanErrorAlert.classList.remove('d-none');
                 scanErrorMessage.innerText = result.message || 'Không thể trích xuất thông tin từ ảnh thẻ. Vui lòng chụp rõ hơn.';
-                scanStatusBadge.className = 'badge bg-danger-subtle text-danger rounded-pill px-3 py-1';
+                scanStatusBadge.className = 'badge bg-danger-subtle text-danger rounded-0 px-3 py-1';
                 scanStatusBadge.innerText = 'Quét thất bại';
             }
         } catch (error) {
@@ -655,7 +652,7 @@
             btnStartScan.disabled = false;
             scanErrorAlert.classList.remove('d-none');
             scanErrorMessage.innerText = 'Lỗi kết nối tới máy chủ khi gửi ảnh quét: ' + error.message;
-            scanStatusBadge.className = 'badge bg-danger-subtle text-danger rounded-pill px-3 py-1';
+            scanStatusBadge.className = 'badge bg-danger-subtle text-danger rounded-0 px-3 py-1';
             scanStatusBadge.innerText = 'Lỗi kết nối';
         }
     });
@@ -669,11 +666,11 @@
         const score = data.doTinCay || 0;
         badge.innerText = `Độ tin cậy: ${score.toFixed(0)}%`;
         if (score >= 80) {
-            badge.className = 'badge bg-success rounded-pill px-3 py-1';
+            badge.className = 'badge bg-success rounded-0 px-3 py-1';
         } else if (score >= 50) {
-            badge.className = 'badge bg-warning text-dark rounded-pill px-3 py-1';
+            badge.className = 'badge bg-warning text-dark rounded-0 px-3 py-1';
         } else {
-            badge.className = 'badge bg-danger rounded-pill px-3 py-1';
+            badge.className = 'badge bg-danger rounded-0 px-3 py-1';
         }
 
         // Họ tên: hiển thị trung thực dữ liệu OCR nhận diện từ thẻ sinh viên, KHÔNG fallback sang currentName
@@ -687,11 +684,11 @@
 
         const diffBadgeName = document.getElementById('diffBadgeName');
         if (detectedName && currentName && detectedName.trim().toLowerCase() !== currentName.trim().toLowerCase()) {
-            diffBadgeName.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Tên trên thẻ ("${detectedName}") khác họ tên tài khoản ("${currentName}")`;
+            diffBadgeName.innerHTML = `Tên trên thẻ ("${detectedName}") khác họ tên tài khoản ("${currentName}")`;
             diffBadgeName.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle mt-1';
             diffBadgeName.classList.remove('d-none');
         } else if (detectedName && currentName) {
-            diffBadgeName.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Khớp với họ tên tài khoản`;
+            diffBadgeName.innerHTML = `Khớp với họ tên tài khoản`;
             diffBadgeName.className = 'badge bg-success-subtle text-success border border-success-subtle mt-1';
             diffBadgeName.classList.remove('d-none');
         } else {
@@ -699,7 +696,7 @@
         }
 
         // MSSV
-        document.getElementById('inputMssv').value = data.mssv || data.Mssv || 'Không tìm thấy MSSV';
+        document.getElementById('inputMssv').value = data.mssv || data.Mssv || '';
 
         // Tên trường: hiển thị trung thực dữ liệu OCR nhận diện từ thẻ, KHÔNG fallback sang currentSchool
         const currentSchool = (data.hoSoHienTai && (data.hoSoHienTai.tenTruong || data.hoSoHienTai.TenTruong)) || '';
@@ -712,11 +709,11 @@
 
         const diffBadgeSchool = document.getElementById('diffBadgeSchool');
         if (detectedSchool && currentSchool && detectedSchool.trim().toLowerCase() !== currentSchool.trim().toLowerCase()) {
-            diffBadgeSchool.innerHTML = `<i class="bi bi-arrow-repeat me-1"></i>Trường trên thẻ khác với hồ sơ hiện tại`;
+            diffBadgeSchool.innerHTML = `Trường trên thẻ khác với hồ sơ hiện tại`;
             diffBadgeSchool.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle mt-1';
             diffBadgeSchool.classList.remove('d-none');
         } else if (detectedSchool && currentSchool) {
-            diffBadgeSchool.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>Khớp với trường trong hồ sơ`;
+            diffBadgeSchool.innerHTML = `Khớp với trường trong hồ sơ`;
             diffBadgeSchool.className = 'badge bg-success-subtle text-success border border-success-subtle mt-1';
             diffBadgeSchool.classList.remove('d-none');
         } else {
@@ -742,7 +739,7 @@
         }
         const ocrMajorText = document.getElementById('ocrDetectedMajorText');
         if (data.khoaNganh) {
-            ocrMajorText.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>Đã khớp ngành: "${data.tenChuyenNganhGoiY || data.khoaNganh}"</span>`;
+            ocrMajorText.innerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle">Đã khớp ngành: "${data.tenChuyenNganhGoiY || data.khoaNganh}"</span>`;
         } else {
             ocrMajorText.innerText = '';
         }
@@ -813,7 +810,14 @@
         btnSaveEvidence.disabled = true;
         btnSaveEvidence.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang cập nhật...';
 
+        const mssvInput = document.getElementById('inputMssv');
+        let mssvVal = mssvInput ? mssvInput.value.trim() : null;
+        if (mssvVal === 'Không tìm thấy MSSV' || mssvVal === 'Không đọc được MSSV' || mssvVal === '') {
+            mssvVal = null;
+        }
+
         const payload = {
+            mssv: mssvVal,
             hoVaTen: hoVaTen,
             tenTruong: tenTruong,
             maChuyenNganh: maChuyenNganh || null,
@@ -836,7 +840,7 @@
 
             const result = await response.json();
             btnSaveEvidence.disabled = false;
-            btnSaveEvidence.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Xác nhận & Cập nhật hồ sơ';
+            btnSaveEvidence.innerHTML = 'Xác nhận & Cập nhật hồ sơ';
 
             if (result.success) {
                 alert(result.message || 'Cập nhật hồ sơ từ Thẻ sinh viên thành công!');
@@ -846,7 +850,7 @@
             }
         } catch (error) {
             btnSaveEvidence.disabled = false;
-            btnSaveEvidence.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Xác nhận & Cập nhật hồ sơ';
+            btnSaveEvidence.innerHTML = 'Xác nhận & Cập nhật hồ sơ';
             alert('Lỗi kết nối máy chủ khi lưu hồ sơ: ' + error.message);
         }
     });

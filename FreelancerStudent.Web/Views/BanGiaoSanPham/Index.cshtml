@@ -41,7 +41,6 @@
     <div class="card border-0 shadow-sm rounded-0 mb-4">
         <div class="card-body p-4">
             <h4 class="fw-bold text-success mb-2">
-                <i class="bi bi-box-seam me-2"></i>
                 Bàn giao và nghiệm thu sản phẩm
             </h4>
 
@@ -71,14 +70,13 @@
     {
         <div class="alert alert-primary d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 shadow-sm rounded-0">
             <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-cash-stack fs-4 text-primary"></i>
                 <div>
                     <strong>Sản phẩm đã được nghiệm thu!</strong>
                     <div class="small text-muted">Hợp đồng đang chờ thanh toán. Vui lòng xác nhận giải ngân thù lao cho Freelancer.</div>
                 </div>
             </div>
             <a asp-controller="HopDong" asp-action="ThanhToan" asp-route-maHD="@Model.MaHD" class="btn btn-primary rounded-0 fw-bold">
-                <i class="bi bi-credit-card me-1"></i> Thanh toán cho Freelancer
+                Thanh toán cho Freelancer
             </a>
         </div>
     }
@@ -103,7 +101,6 @@
         <div class="card border-0 shadow-sm rounded-0 mb-4">
             <div class="card-header bg-light py-3">
                 <h5 class="fw-bold mb-0">
-                    <i class="bi bi-cloud-upload text-success me-2"></i>
                     @(moiNhat == null
                         ? "Bàn giao sản phẩm lần đầu"
                         : "Nộp lại sản phẩm sau chỉnh sửa")
@@ -166,7 +163,6 @@
                     <button type="submit"
                             class="btn btn-success rounded-0 px-4"
                             onclick="return confirm('Xác nhận bàn giao sản phẩm?');">
-                        <i class="bi bi-send me-1"></i>
                         Gửi bàn giao
                     </button>
                 </form>
@@ -178,7 +174,6 @@
     <div class="card border-0 shadow-sm rounded-0 mb-4">
         <div class="card-header bg-light py-3">
             <h5 class="fw-bold mb-0">
-                <i class="bi bi-clock-history text-success me-2"></i>
                 Lịch sử bàn giao sản phẩm
             </h5>
         </div>
@@ -187,7 +182,6 @@
             @if (!danhSach.Any())
             {
                 <div class="text-center text-muted py-4">
-                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                     Chưa có sản phẩm nào được bàn giao.
                 </div>
             }
@@ -319,7 +313,6 @@
                                         <button type="submit"
                                                 class="btn btn-warning rounded-0"
                                                 onclick="return confirm('Gửi yêu cầu chỉnh sửa?');">
-                                            <i class="bi bi-pencil-square me-1"></i>
                                             Yêu cầu chỉnh sửa
                                         </button>
                                     </form>
@@ -342,13 +335,12 @@
 
                                         <div class="alert alert-info small">
                                             Chỉ nghiệm thu khi sản phẩm
-                                            đã đáp ứng yêu cầu hợp đồng.
+                                             đáp ứng yêu cầu hợp đồng.
                                         </div>
 
                                         <button type="submit"
                                                 class="btn btn-success rounded-0"
                                                 onclick="return confirm('Xác nhận nghiệm thu sản phẩm?');">
-                                            <i class="bi bi-check-circle me-1"></i>
                                             Nghiệm thu sản phẩm
                                         </button>
                                     </form>
@@ -365,7 +357,6 @@
        asp-action="ChiTiet"
        asp-route-maHD="@Model.MaHD"
        class="btn btn-outline-secondary rounded-0">
-        <i class="bi bi-arrow-left me-1"></i>
         Quay lại hợp đồng
     </a>
 </div>

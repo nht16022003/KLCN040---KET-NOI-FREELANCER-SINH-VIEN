@@ -21,7 +21,7 @@
     .wallet-hero-box {
         background: #234E36;
         color: #FFFFFF;
-        border-radius: 10px;
+        border-radius: 0;
         padding: 28px;
         margin-bottom: 24px;
         box-shadow: 0 4px 12px rgba(35, 78, 54, 0.12);
@@ -29,7 +29,7 @@
 
     .wallet-sub-card {
         background: rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
+        border-radius: 0;
         padding: 14px 18px;
         border: 1px solid rgba(255, 255, 255, 0.15);
     }
@@ -38,7 +38,7 @@
     .content-box {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
-        border-radius: 10px;
+        border-radius: 0;
         padding: 24px;
         margin-bottom: 24px;
     }
@@ -81,7 +81,7 @@
         color: #334155;
         font-weight: 600;
         padding: 10px 8px;
-        border-radius: 6px;
+        border-radius: 0;
         width: 100%;
         transition: all 0.15s;
     }
@@ -100,7 +100,7 @@
     .bank-info-box {
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
-        border-radius: 8px;
+        border-radius: 0;
         padding: 16px;
         font-size: 0.9rem;
     }
@@ -140,7 +140,7 @@
     .badge-soft {
         display: inline-block;
         padding: 4px 10px;
-        border-radius: 4px;
+        border-radius: 0;
         font-size: 0.78rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -157,7 +157,7 @@
         background: #F0FDF4;
         border-left: 4px solid #234E36;
         padding: 12px 16px;
-        border-radius: 4px;
+        border-radius: 0;
         font-size: 0.86rem;
         margin-bottom: 20px;
         color: #166534;
@@ -174,16 +174,15 @@
 
         @if (ViewBag.DaXacMinhSinhVien == false)
         {
-            <div class="alert alert-warning border-0 shadow-sm rounded-3 p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="alert alert-warning border-0 shadow-sm rounded-0 p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-shield-exclamation text-warning fs-2 flex-shrink-0"></i>
                     <div>
                         <strong class="d-block text-dark fs-6">Yêu cầu xác thực thẻ sinh viên!</strong>
                         <span class="text-secondary small">Trạng thái minh chứng: <strong class="text-dark">@(ViewBag.TrangThaiXacMinh ?? "Chưa gửi")</strong>. Bạn cần được xác thực Thẻ sinh viên (trạng thái 'Đã xác minh') để thực hiện nạp tiền và rút tiền ví.</span>
                     </div>
                 </div>
-                <a href="@Url.Action("MinhChung", "Account")" class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm text-nowrap">
-                    <i class="bi bi-person-badge me-1"></i> Xác thực ngay
+                <a href="@Url.Action("MinhChung", "Account")" class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm text-nowrap rounded-0">
+                    Xác thực ngay
                 </a>
             </div>
         }

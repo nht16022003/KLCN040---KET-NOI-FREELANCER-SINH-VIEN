@@ -71,7 +71,6 @@
                         @if (ViewBag.DaXacMinh == true)
                         {
                             <div class="alert alert-success d-flex align-items-center rounded-0 py-2 px-3 mb-3 border-start border-success border-4" style="background-color: #f0fdf4;">
-                                <i class="bi bi-patch-check-fill text-success fs-5 me-2"></i>
                                 <div class="small">
                                     <strong>Hồ sơ đã xác minh:</strong> Họ và tên cùng thông tin học vấn đã được xác thực từ Thẻ sinh viên bởi Ban quản trị. Các trường này đã được khóa để bảo đảm tính minh bạch.
                                 </div>
@@ -82,7 +81,7 @@
                                 <label class="form-label fw-bold small">Họ và tên <span class="text-danger">*</span>
                                     @if (ViewBag.DaXacMinh == true)
                                     {
-                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã xác minh</span>
+                                        <span class="badge bg-success-subtle text-success ms-1">Đã xác minh</span>
                                     }
                                 </label>
                                 <input asp-for="TenUser" class="form-control rounded-0" required
@@ -139,7 +138,7 @@
                                 <label class="form-label fw-bold small">Chuyên ngành <span class="text-danger">*</span>
                                     @if (ViewBag.DaXacMinh == true)
                                     {
-                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                        <span class="badge bg-success-subtle text-success ms-1">Đã khóa</span>
                                     }
                                 </label>
                                 @if (ViewBag.DaXacMinh == true)
@@ -174,7 +173,7 @@
                                 <label class="form-label fw-bold small">Trường Đại học / Cao đẳng
                                     @if (ViewBag.DaXacMinh == true)
                                     {
-                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                        <span class="badge bg-success-subtle text-success ms-1">Đã khóa</span>
                                     }
                                 </label>
                                 <input asp-for="TenTruong" class="form-control rounded-0"
@@ -190,7 +189,7 @@
                                 <label class="form-label fw-bold small">Sinh viên năm thứ
                                     @if (ViewBag.DaXacMinh == true)
                                     {
-                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                        <span class="badge bg-success-subtle text-success ms-1">Đã khóa</span>
                                     }
                                 </label>
                                 @if (ViewBag.DaXacMinh == true)
@@ -225,7 +224,7 @@
                                 <label class="form-label fw-bold small">Niên khóa
                                     @if (ViewBag.DaXacMinh == true)
                                     {
-                                        <span class="badge bg-success-subtle text-success ms-1"><i class="bi bi-lock-fill"></i> Đã khóa</span>
+                                        <span class="badge bg-success-subtle text-success ms-1">Đã khóa</span>
                                     }
                                 </label>
                                 <input asp-for="NienKhoa" class="form-control rounded-0"

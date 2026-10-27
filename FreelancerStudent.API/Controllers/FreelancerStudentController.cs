@@ -106,6 +106,64 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+        // Cập nhật thông tin cơ bản: Địa điểm, Ngôn ngữ, Kỹ năng cơ bản, Mức giá tham khảo
+        [HttpPut("CapNhatThongTinCoBan")]
+        public async Task<IActionResult> CapNhatThongTinCoBan([FromBody] DTOs.RequestDTOs.CapNhatThongTinCoBan_RequestDTO dto)
+        {
+            try
+            {
+                if (dto == null || dto.maUser <= 0)
+                {
+                    return BadRequest(new { success = false, message = "Dữ liệu cập nhật không hợp lệ." });
+                }
+
+                var ketqua = await _freelancerStudentService.capNhatThongTinCoBanAsync(dto);
+                if (!ketqua)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy hồ sơ sinh viên để cập nhật." });
+                }
+
+                return Ok(new { success = true, message = "Cập nhật thông tin cơ bản thành công!" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Lỗi khi cập nhật thông tin cơ bản: " + ex.Message });
+            }
+        }
+
+        // Cập nhật điểm GPA học tập
+        [HttpPut("CapNhatGPA")]
+        public async Task<IActionResult> CapNhatGPA([FromBody] DTOs.RequestDTOs.CapNhatGPA_RequestDTO dto)
+        {
+            try
+            {
+                if (dto == null || dto.maUser <= 0)
+                {
+                    return BadRequest(new { success = false, message = "Dữ liệu cập nhật không hợp lệ." });
+                }
+
+                var ketqua = await _freelancerStudentService.capNhatGPAAsync(dto);
+                if (!ketqua)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy hồ sơ sinh viên để cập nhật GPA." });
+                }
+
+                return Ok(new { success = true, message = "Cập nhật điểm GPA thành công!" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Lỗi khi cập nhật GPA: " + ex.Message });
+            }
+        }
+
         //Xuân Sơn
         //XS
         [HttpGet("Profile/{maFreelancerStudents:int}")]

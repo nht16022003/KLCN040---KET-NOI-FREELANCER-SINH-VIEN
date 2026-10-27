@@ -41,7 +41,7 @@
     .profile-header-card {
         background: #ffffff;
         border: 1px solid #e5ece7;
-        border-radius: 28px;
+        border-radius: 0;
         padding: 42px 46px;
         display: flex;
         align-items: center;
@@ -68,7 +68,7 @@
         width: 130px;
         height: 130px;
 
-        border-radius: 50%;
+        border-radius: 0;
         overflow: hidden;
 
         background: #edf5f0;
@@ -97,7 +97,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 50%;
+        border-radius: 0;
     }
 
     .avatar-hover-overlay {
@@ -109,7 +109,7 @@
         width: 100%;
         height: 100%;
 
-        border-radius: 50%;
+        border-radius: 0;
 
         background: rgba(0, 0, 0, 0.48);
 
@@ -162,7 +162,7 @@
         color: #286644;
 
         padding: 8px 15px;
-        border-radius: 22px;
+        border-radius: 0;
 
         font-size: 14px;
         font-weight: 700;
@@ -189,7 +189,7 @@
         width: 5px;
         height: 5px;
         background: #667085;
-        border-radius: 50%;
+        border-radius: 0;
     }
 
     .verify-area {
@@ -210,7 +210,7 @@
         gap: 8px;
 
         padding: 10px 18px;
-        border-radius: 24px;
+        border-radius: 0;
 
         background: #e7f8ee;
         border: 1px solid #c5ecd5;
@@ -225,7 +225,7 @@
     .account-tabs {
         background: #ffffff;
         border: 1px solid #e4e9e6;
-        border-radius: 20px;
+        border-radius: 0;
 
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -237,7 +237,7 @@
     .account-tab {
         height: 66px;
 
-        border-radius: 15px;
+        border-radius: 0;
 
         display: flex;
         align-items: center;
@@ -271,7 +271,7 @@
     .account-content-card {
         background: #ffffff;
         border: 1px solid #e4e9e6;
-        border-radius: 24px;
+        border-radius: 0;
 
         padding: 40px 42px;
 
@@ -318,7 +318,7 @@
 
         padding: 13px 24px;
 
-        border-radius: 30px;
+        border-radius: 0;
 
         font-weight: 700;
         font-size: 15px;
@@ -361,7 +361,7 @@
         min-height: 62px;
 
         border: 1px solid #e3e7e5;
-        border-radius: 13px;
+        border-radius: 0;
 
         background: #fbfbfd;
 
@@ -385,7 +385,7 @@
         background: #f1faf5;
 
         border: 1px solid #d7eee1;
-        border-radius: 8px;
+        border-radius: 0;
 
         padding: 5px 9px;
 
@@ -424,7 +424,7 @@
         height: 58px;
 
         border: 1px solid #dfe4e1;
-        border-radius: 12px;
+        border-radius: 0;
 
         padding: 0 52px 0 17px;
 
@@ -460,7 +460,7 @@
         height: 58px;
 
         border: none;
-        border-radius: 30px;
+        border-radius: 0;
 
         background: #3b7457;
         color: #ffffff;
@@ -479,7 +479,7 @@
         background: #f8fbf9;
         border: 1px dashed #d5e1da;
 
-        border-radius: 17px;
+        border-radius: 0;
 
         padding: 25px;
         margin-bottom: 22px;
@@ -519,7 +519,7 @@
 
     .security-warning {
         background: #fff8c7;
-        border-radius: 17px;
+        border-radius: 0;
 
         padding: 23px;
 
@@ -877,7 +877,7 @@
 
                 <div class="modal-dialog modal-dialog-centered">
 
-                    <div class="modal-content border-0 shadow" style="border-radius:20px;">
+                    <div class="modal-content border-0 shadow" style="border-radius:0;">
 
                         <div class="modal-header border-0 px-4 pt-4">
 
@@ -903,7 +903,7 @@
                                         Họ và tên
                                     </label>
 
-                                    <input type="text" name="hovaten" value="@Model.hovaten" class="form-control"
+                                    <input type="text" name="hovaten" value="@Model.hovaten" class="form-control rounded-0"
                                            required />
 
                                 </div>
@@ -915,7 +915,7 @@
                                         Số điện thoại
                                     </label>
 
-                                    <input type="text" name="sodienthoai" value="@Model.sodienthoai" class="form-control" />
+                                    <input type="text" name="sodienthoai" value="@Model.sodienthoai" class="form-control rounded-0" />
 
                                 </div>
 
@@ -926,7 +926,7 @@
                                         Tên tài khoản
                                     </label>
 
-                                    <input type="text" value="@Model.tentaikhoan" class="form-control" disabled />
+                                    <input type="text" value="@Model.tentaikhoan" class="form-control rounded-0" disabled />
 
                                     <small class="text-muted">
                                         Tên tài khoản không thể thay đổi.
@@ -941,7 +941,7 @@
                                         Email
                                     </label>
 
-                                    <input type="text" value="@Model.email" class="form-control" disabled />
+                                    <input type="text" value="@Model.email" class="form-control rounded-0" disabled />
 
                                 </div>
 
@@ -950,11 +950,11 @@
 
                             <div class="modal-footer border-0 px-4 pb-4">
 
-                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                                <button type="button" class="btn btn-light rounded-0 px-4" data-bs-dismiss="modal">
                                     Hủy bỏ
                                 </button>
 
-                                <button type="submit" class="btn btn-success rounded-pill px-4">
+                                <button type="submit" class="btn btn-success rounded-0 px-4">
                                     Lưu thay đổi
                                 </button>
 

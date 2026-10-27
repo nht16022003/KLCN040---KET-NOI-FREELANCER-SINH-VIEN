@@ -37,13 +37,13 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
         <div>
             <h3 class="fw-bold text-success mb-1">
-                <i class="bi bi-file-earmark-text-fill me-2"></i>Khởi tạo dự thảo hợp đồng
+                Khởi tạo dự thảo hợp đồng
             </h3>
             <p class="text-muted mb-0">Thiết lập các điều khoản, thù lao và lộ trình mốc bàn giao với Freelancer đã chọn.</p>
         </div>
         <div>
             <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-0">
-                <i class="bi bi-arrow-left me-1"></i> Quay lại
+                Quay lại
             </a>
         </div>
     </div>
@@ -51,7 +51,6 @@
     @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
     {
         <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @ViewData.ModelState[string.Empty]?.Errors.First().ErrorMessage
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -73,7 +72,7 @@
                 <div class="card border-0 shadow-sm rounded-0 mb-4">
                     <div class="card-header bg-success text-white py-2 rounded-0">
                         <h6 class="mb-0 fw-semibold">
-                            <i class="bi bi-briefcase me-2"></i>Bài tuyển dụng gốc
+                            Bài tuyển dụng gốc
                         </h6>
                     </div>
                     <div class="card-body">
@@ -107,7 +106,7 @@
                 <div class="card border-0 shadow-sm rounded-0">
                     <div class="card-header bg-light border-bottom py-2 rounded-0">
                         <h6 class="mb-0 fw-semibold text-dark">
-                            <i class="bi bi-person-check me-2 text-success"></i>Freelancer hợp tác
+                            Freelancer hợp tác
                         </h6>
                     </div>
                     <div class="card-body">
@@ -147,7 +146,7 @@
                 <div class="card border-0 shadow-sm rounded-0 mb-4">
                     <div class="card-header bg-white border-bottom py-3">
                         <h5 class="mb-0 fw-bold text-dark">
-                            <i class="bi bi-cash-coin text-success me-2"></i>Thù lao thỏa thuận & Thời hạn thực hiện
+                            Thù lao thỏa thuận & Thời hạn thực hiện
                         </h5>
                     </div>
                     <div class="card-body">
@@ -219,18 +218,17 @@
                     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-0 fw-bold text-dark">
-                                <i class="bi bi-signpost-split text-success me-2"></i>Các mốc bàn giao tiến độ (Milestones)
+                                Các mốc bàn giao tiến độ (Milestones)
                             </h5>
                             <small class="text-muted">Thiết lập các mốc bàn giao sản phẩm để theo dõi tiến độ. Toàn bộ thù lao sẽ thanh toán 1 lần sau khi nghiệm thu toàn bộ dự án.</small>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-success rounded-0" id="btnThemGiaiDoan">
-                            <i class="bi bi-plus-circle me-1"></i> Thêm mốc bàn giao
+                            Thêm mốc bàn giao
                         </button>
                     </div>
                     <div class="card-body">
                         <!-- Thông báo thanh toán 1 lần -->
                         <div class="alert alert-light border d-flex align-items-center gap-2 py-2 px-3 mb-3">
-                            <i class="bi bi-shield-check text-success fs-5"></i>
                             <div class="small text-muted">
                                 Toàn bộ thù lao (<strong class="text-success" id="textThuLaoDisplay">@(Model.sotienkyquy.ToString("N0")) VNĐ</strong>) sẽ được ký quỹ đảm bảo và giải ngân thanh toán 1 lần cho Freelancer sau khi hoàn thành và nghiệm thu dự án.
                             </div>
@@ -245,10 +243,10 @@
                                     <input type="hidden" name="giaiDoans[@i].soTien" value="@Model.giaiDoans[i].soTien" />
                                     <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                         <span class="fw-bold text-success giai-doan-title">
-                                            <i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #@(i + 1)
+                                            Mốc bàn giao #@(i + 1)
                                         </span>
                                         <button type="button" class="btn btn-sm btn-outline-danger btn-xoa-gd border-0 rounded-0" title="Xóa mốc này">
-                                            <i class="bi bi-trash"></i> Xóa
+                                            Xóa
                                         </button>
                                     </div>
                                     <div class="row g-2">
@@ -267,7 +265,6 @@
                                         <div class="col-12">
                                             <label class="form-label small fw-semibold">Link sản phẩm bàn giao (nếu có)</label>
                                             <div class="input-group input-group-sm">
-                                                <span class="input-group-text rounded-0"><i class="bi bi-link-45deg"></i></span>
                                                 <input name="giaiDoans[@i].linkSanPham" value="@Model.giaiDoans[i].linkSanPham" class="form-control rounded-0" placeholder="https://drive.google.com/... hoặc GitHub, Figma, Demo" />
                                             </div>
                                         </div>
@@ -282,7 +279,6 @@
                 <div class="card border-0 shadow-sm rounded-0 p-3 bg-white">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                         <div class="text-muted small">
-                            <i class="bi bi-shield-check text-success me-1"></i>
                             Nhấn <strong>"Gửi hợp đồng"</strong> sẽ chuyển hợp đồng sang trạng thái <strong>"Chờ Freelancer xác nhận"</strong> và gửi thông báo trực tiếp cho ứng viên.
                         </div>
                         <div class="d-flex gap-2">
@@ -291,7 +287,7 @@
                             </a>
                             <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold shadow-sm"
                                     style="background-color: #1B5E36; border-color: #1B5E36;" id="btnGuiHopDong">
-                                <i class="bi bi-send-fill me-1"></i> Gửi hợp đồng
+                                Gửi hợp đồng
                             </button>
                         </div>
                     </div>
@@ -324,7 +320,7 @@
                     item.setAttribute('data-index', index);
                     const titleEl = item.querySelector('.giai-doan-title');
                     if (titleEl) {
-                        titleEl.innerHTML = `<i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #${index + 1}`;
+                        titleEl.innerHTML = `Mốc bàn giao #${index + 1}`;
                     }
 
                     // Cập nhật lại name cho input để ASP.NET Core bind mảng chính xác
@@ -350,10 +346,10 @@
                         <input type="hidden" name="giaiDoans[${count}].soTien" value="0" />
                         <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                             <span class="fw-bold text-success giai-doan-title">
-                                <i class="bi bi-flag-fill me-1"></i> Mốc bàn giao #${count + 1}
+                                Mốc bàn giao #${count + 1}
                             </span>
                             <button type="button" class="btn btn-sm btn-outline-danger btn-xoa-gd border-0 rounded-0" title="Xóa mốc này">
-                                <i class="bi bi-trash"></i> Xóa
+                                Xóa
                             </button>
                         </div>
                         <div class="row g-2">
@@ -372,7 +368,6 @@
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Link sản phẩm bàn giao (nếu có)</label>
                                 <div class="input-group input-group-sm">
-                                    <span class="input-group-text rounded-0"><i class="bi bi-link-45deg"></i></span>
                                     <input name="giaiDoans[${count}].linkSanPham" class="form-control rounded-0" placeholder="https://drive.google.com/... hoặc GitHub, Figma, Demo" />
                                 </div>
                             </div>

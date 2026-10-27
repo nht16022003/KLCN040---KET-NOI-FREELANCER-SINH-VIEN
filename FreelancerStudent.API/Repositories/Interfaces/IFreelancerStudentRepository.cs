@@ -29,5 +29,11 @@ namespace FreelancerStudent.API.Repositories.Interfaces
 
         // Lấy tất cả tên kỹ năng từ bảng KyNang trong database
         Task<List<string>> layTatCaKyNangAsync();
+
+        // Cập nhật thông tin cơ bản: Địa điểm, Ngôn ngữ, Kỹ năng cơ bản, Mức giá tham khảo
+        Task<bool> capNhatThongTinCoBanAsync(DTOs.RequestDTOs.CapNhatThongTinCoBan_RequestDTO dto);
+
+        // Cập nhật GPA học tập
+        Task<bool> capNhatGPAAsync(DTOs.RequestDTOs.CapNhatGPA_RequestDTO dto);
     }
 }

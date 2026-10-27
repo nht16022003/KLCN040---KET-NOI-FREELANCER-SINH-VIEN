@@ -14,7 +14,7 @@
     .section-card {
         background: #FFFFFF;
         border: 1px solid #E5ECE7;
-        border-radius: 20px;
+        border-radius: 0;
         padding: 26px;
         margin-bottom: 24px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
@@ -22,7 +22,7 @@
 
     .project-item-box {
         border: 1.5px solid #E2EDE6;
-        border-radius: 16px;
+        border-radius: 0;
         padding: 20px;
         background: #FFFFFF;
         margin-bottom: 16px;
@@ -37,20 +37,18 @@
             </div>
             <a asp-controller="FreelancerStudent" asp-action="Profile"
                asp-route-maUser="@Context.Session.GetInt32("maUser")"
-               class="btn btn-outline-success rounded-pill px-4">
-                <i class="bi bi-eye me-1"></i> Xem hồ sơ công khai
+               class="btn btn-outline-success rounded-0 px-4">
+                Xem hồ sơ công khai
             </a>
         </div>
 
         <div class="row g-4">
             <div class="col-12 col-lg-7">
                 <div class="section-card">
-                    <h4 class="fw-bold text-dark mb-3"><i class="bi bi-folder2-open text-success me-2"></i>Dự án trong
-                        Portfolio (@Model.projects.Count)</h4>
+                    <h4 class="fw-bold text-dark mb-3">Dự án trong Portfolio (@Model.projects.Count)</h4>
                         @if (!Model.projects.Any())
                         {
                             <div class="text-center py-5 text-muted">
-                                <i class="bi bi-folder-plus display-3"></i>
                                 <h6 class="fw-bold mt-2">Chưa có dự án nào</h6>
                                 <p class="small mb-0">Bạn chưa thêm dự án nào.</p>
                             </div>
@@ -65,16 +63,16 @@
                                     <p class="text-secondary small mb-2">@project.moTa</p>
                                     <span class="badge bg-success-subtle text-success">@project.congnghe</span>
                                     <div class="d-flex gap-2 mt-3 pt-3 border-top">
-                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill"
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-0"
                                                 data-bs-toggle="modal" data-bs-target="#editProjectModal-@project.maDA">
-                                            <i class="bi bi-pencil me-1"></i>Sửa
+                                            Sửa
                                         </button>
                                         <form asp-action="DeleteProject" method="post"
                                               onsubmit="return confirm('Bạn có chắc muốn xóa dự án này?');">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="maDA" value="@project.maDA" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
-                                                <i class="bi bi-trash me-1"></i>Xóa
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-0">
+                                                Xóa
                                             </button>
                                         </form>
                                     </div>
@@ -87,7 +85,7 @@
                     {
                         <div class="modal fade" id="editProjectModal-@project.maDA" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
-                                <div class="modal-content rounded-4 border-0">
+                                <div class="modal-content rounded-0 border-0">
                                     <div class="modal-header">
                                         <h5 class="modal-title fw-bold">Sửa dự án</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -111,9 +109,9 @@
                                                    placeholder="Demo" />
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-light rounded-pill"
+                                            <button type="button" class="btn btn-light rounded-0"
                                                     data-bs-dismiss="modal">Hủy</button>
-                                            <button type="submit" class="btn btn-primary rounded-pill">Lưu thay đổi</button>
+                                            <button type="submit" class="btn btn-primary rounded-0">Lưu thay đổi</button>
                                         </div>
                                     </form>
                                 </div>
@@ -122,27 +120,25 @@
                     }
 
                     <div class="text-center mb-4">
-                        <button type="button" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal"
+                        <button type="button" class="btn btn-success rounded-0 px-4" data-bs-toggle="modal"
                                 data-bs-target="#addProjectModal">
-                            <i class="bi bi-plus-circle me-1"></i> Thêm dự án
+                            Thêm dự án
                         </button>
                     </div>
                 </div>
 
                 <div class="col-12 col-lg-5">
                     <div class="section-card">
-                        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-file-person text-success me-2"></i>Giới thiệu
-                            Portfolio</h4>
+                        <h4 class="fw-bold text-dark mb-3">Giới thiệu Portfolio</h4>
                             <p class="text-secondary small mb-0">@(Model.moTaBanThan ?? "Chưa cập nhật phần giới thiệu.")</p>
                         </div>
 
                         <div class="section-card">
                             <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                                <h4 class="fw-bold text-dark mb-0"><i class="bi bi-play-btn text-success me-2"></i>Video giới
-                                    thiệu</h4>
-                                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill" data-bs-toggle="modal"
+                                <h4 class="fw-bold text-dark mb-0">Video giới thiệu</h4>
+                                    <button type="button" class="btn btn-outline-success btn-sm rounded-0" data-bs-toggle="modal"
                                             data-bs-target="#videoPortfolioModal">
-                                        <i class="bi bi-plus-circle me-1"></i>@(string.IsNullOrWhiteSpace(Model.url_video) ? "Thêm video" : "Cập nhật video")
+                                        @(string.IsNullOrWhiteSpace(Model.url_video) ? "Thêm video" : "Cập nhật video")
                                     </button>
                                 </div>
                                 @if (string.IsNullOrWhiteSpace(Model.url_video))
@@ -159,7 +155,7 @@
                                 else
                                 {
                                     <a href="@Model.url_video" target="_blank" rel="noopener noreferrer"
-                                       class="btn btn-outline-success btn-sm rounded-pill">
+                                       class="btn btn-outline-success btn-sm rounded-0">
                                         Mở video giới thiệu
                                     </a>
                                 }
@@ -170,7 +166,7 @@
                     <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel"
                          aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered modal-lg">
-                            <div class="modal-content rounded-4 border-0">
+                            <div class="modal-content rounded-0 border-0">
                                 <div class="modal-header">
                                     <h5 class="modal-title fw-bold" id="addProjectModalLabel">Thêm dự án mới</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
@@ -178,17 +174,17 @@
                                 <form asp-action="AddProject" method="post">
                                     @Html.AntiForgeryToken()
                                     <div class="modal-body">
-                                        <input asp-for="NewTenDuAn" class="form-control mb-2" placeholder="Tên dự án" required />
-                                        <input asp-for="NewVaiTro" class="form-control mb-2" placeholder="Vai trò" />
-                                        <input asp-for="NewCongNghe" class="form-control mb-2" placeholder="Công nghệ sử dụng" />
-                                        <textarea asp-for="NewMoTa" class="form-control mb-2" placeholder="Mô tả"></textarea>
-                                        <input asp-for="NewLinkGithub" class="form-control mb-2" placeholder="Link GitHub" />
-                                        <input asp-for="NewLinkDemo" class="form-control" placeholder="Link Demo" />
+                                        <input asp-for="NewTenDuAn" class="form-control mb-2 rounded-0" placeholder="Tên dự án" required />
+                                        <input asp-for="NewVaiTro" class="form-control mb-2 rounded-0" placeholder="Vai trò" />
+                                        <input asp-for="NewCongNghe" class="form-control mb-2 rounded-0" placeholder="Công nghệ sử dụng" />
+                                        <textarea asp-for="NewMoTa" class="form-control mb-2 rounded-0" placeholder="Mô tả"></textarea>
+                                        <input asp-for="NewLinkGithub" class="form-control mb-2 rounded-0" placeholder="Link GitHub" />
+                                        <input asp-for="NewLinkDemo" class="form-control rounded-0" placeholder="Link Demo" />
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-light rounded-pill"
+                                        <button type="button" class="btn btn-light rounded-0"
                                                 data-bs-dismiss="modal">Hủy</button>
-                                        <button type="submit" class="btn btn-success rounded-pill">Lưu dự án</button>
+                                        <button type="submit" class="btn btn-success rounded-0">Lưu dự án</button>
                                     </div>
                                 </form>
                             </div>
@@ -198,7 +194,7 @@
                     <div class="modal fade" id="videoPortfolioModal" tabindex="-1" aria-labelledby="videoPortfolioModalLabel"
                          aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content rounded-4 border-0">
+                            <div class="modal-content rounded-0 border-0">
                                 <div class="modal-header">
                                     <h5 class="modal-title fw-bold" id="videoPortfolioModalLabel">
                                         @(string.IsNullOrWhiteSpace(Model.url_video) ? "Thêm video giới thiệu" : "Cập nhật video giới thiệu")</h5>
@@ -209,14 +205,14 @@
                                         <div class="modal-body">
                                             <input asp-for="moTaBanThan" type="hidden" />
                                             <label asp-for="url_video" class="form-label">URL video</label>
-                                            <input asp-for="url_video" class="form-control"
+                                            <input asp-for="url_video" class="form-control rounded-0"
                                                    placeholder="https://www.youtube.com/watch?v=..." />
                                             <div class="form-text">Có thể nhập link YouTube hoặc đường dẫn video khác.</div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-light rounded-pill"
+                                            <button type="button" class="btn btn-light rounded-0"
                                                     data-bs-dismiss="modal">Hủy</button>
-                                            <button type="submit" class="btn btn-success rounded-pill">Lưu video</button>
+                                            <button type="submit" class="btn btn-success rounded-0">Lưu video</button>
                                         </div>
                                     </form>
                                 </div>
@@ -227,11 +223,10 @@
                         {
                             <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content rounded-4 border-0 text-center p-4">
-                                        <i class="bi bi-check-circle-fill text-success display-4"></i>
+                                    <div class="modal-content rounded-0 border-0 text-center p-4">
                                         <h5 class="fw-bold mt-3">@TempData["Success"]</h5>
                                         <p class="text-muted mb-3">@TempData["Success"]</p>
-                                        <button type="button" class="btn btn-success rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                                        <button type="button" class="btn btn-success rounded-0" data-bs-dismiss="modal">Đóng</button>
                                     </div>
                                 </div>
                             </div>

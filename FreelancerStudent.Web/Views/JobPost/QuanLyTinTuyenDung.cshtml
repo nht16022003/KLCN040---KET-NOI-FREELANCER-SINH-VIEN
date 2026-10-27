@@ -22,7 +22,7 @@
     .stat-box {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
-        border-radius: 8px;
+        border-radius: 0;
         padding: 16px 20px;
     }
     .stat-box .num {
@@ -41,7 +41,7 @@
     .job-item-card {
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
-        border-radius: 8px;
+        border-radius: 0;
         padding: 20px;
         margin-bottom: 14px;
         transition: border-color 0.15s;
@@ -68,7 +68,7 @@
         font-size: 0.76rem;
         font-weight: 600;
         padding: 3px 10px;
-        border-radius: 12px;
+        border-radius: 0;
         display: inline-block;
     }
     .badge-status-off {
@@ -78,7 +78,7 @@
         font-size: 0.76rem;
         font-weight: 600;
         padding: 3px 10px;
-        border-radius: 12px;
+        border-radius: 0;
         display: inline-block;
     }
 
@@ -90,7 +90,7 @@
         font-size: 0.88rem;
         font-weight: 600;
         padding: 6px 14px;
-        border-radius: 6px;
+        border-radius: 0;
         cursor: pointer;
         transition: all 0.15s;
     }
@@ -107,7 +107,7 @@
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
         padding: 3px 9px;
-        border-radius: 4px;
+        border-radius: 0;
     }
 </style>
 
@@ -117,14 +117,14 @@
         <!-- Thông báo -->
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="alert alert-success alert-dismissible fade show rounded-2 mb-3" role="alert">
+            <div class="alert alert-success alert-dismissible fade show rounded-0 mb-3" role="alert">
                 @TempData["SuccessMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger alert-dismissible fade show rounded-2 mb-3" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show rounded-0 mb-3" role="alert">
                 @TempData["ErrorMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -293,7 +293,7 @@
             }
             else
             {
-                <div class="bg-white border rounded-2 p-5 text-center text-muted">
+                <div class="bg-white border rounded-0 p-5 text-center text-muted">
                     <h6 class="fw-bold text-dark">Bạn chưa có bài tuyển dụng nào</h6>
                     <p class="small text-muted mb-3">Đăng tin để kết nối với các bạn sinh viên ngay hôm nay.</p>
                     <a asp-controller="JobPost" asp-action="Create" class="btn btn-success btn-sm px-3">
@@ -303,7 +303,7 @@
             }
         </div>
 
-        <div id="noResultBox" class="bg-white border rounded-2 p-4 text-center text-muted mt-3 d-none">
+        <div id="noResultBox" class="bg-white border rounded-0 p-4 text-center text-muted mt-3 d-none">
             Không tìm thấy bài tuyển dụng nào phù hợp với từ khóa hoặc bộ lọc đã chọn.
         </div>
 

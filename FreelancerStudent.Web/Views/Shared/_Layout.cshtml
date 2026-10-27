@@ -59,12 +59,53 @@
                 --border-color: #E2E8F0;
                 --card-bg: #FFFFFF;
                 --body-bg: #FAFCFB;
+
+                --bs-border-radius: 0 !important;
+                --bs-border-radius-sm: 0 !important;
+                --bs-border-radius-lg: 0 !important;
+                --bs-border-radius-xl: 0 !important;
+                --bs-border-radius-xxl: 0 !important;
+                --bs-border-radius-2xl: 0 !important;
+                --bs-border-radius-pill: 0 !important;
             }
 
-            * {
+            *,
+            *::before,
+            *::after,
+            html *,
+            body *,
+            .btn,
+            .form-control,
+            .form-select,
+            .input-group,
+            .input-group-text,
+            .card,
+            .modal-content,
+            .dropdown-menu,
+            .badge,
+            .alert,
+            .rounded,
+            .rounded-1,
+            .rounded-2,
+            .rounded-3,
+            .rounded-4,
+            .rounded-5,
+            .rounded-pill,
+            .rounded-circle {
+                border-radius: 0 !important;
                 box-sizing: border-box;
                 margin: 0;
                 padding: 0;
+            }
+
+            i.bi,
+            i.fa,
+            i.fas,
+            i.far,
+            i.fab,
+            [class^="bi-"],
+            [class*=" bi-"] {
+                display: none !important;
             }
 
             body {
@@ -120,7 +161,7 @@
                 font-weight: 600;
                 font-size: 0.9rem;
                 padding: 7px 20px;
-                border-radius: 30px;
+                border-radius: 0;
                 text-decoration: none;
                 transition: all 0.2s;
             }
@@ -138,7 +179,7 @@
                 font-weight: 600;
                 font-size: 0.9rem;
                 padding: 7px 22px;
-                border-radius: 30px;
+                border-radius: 0;
                 text-decoration: none;
                 transition: all 0.2s;
             }
@@ -160,7 +201,7 @@
             .search-pill-btn {
                 background-color: #DDEAE1;
                 border: 1px solid #C4D9CD;
-                border-radius: 8px;
+                border-radius: 0;
                 padding: 6px 14px;
                 font-size: 0.86rem;
                 font-weight: 600;
@@ -187,7 +228,7 @@
                 color: #2D3748;
                 text-decoration: none;
                 padding: 6px 12px;
-                border-radius: 8px;
+                border-radius: 0;
                 transition: all 0.2s ease;
             }
 
@@ -204,7 +245,7 @@
             .portal-icon-btn {
                 width: 38px;
                 height: 38px;
-                border-radius: 50%;
+                border-radius: 0;
                 background: #F1F5F9;
                 color: #334155;
                 display: inline-flex;
@@ -227,7 +268,7 @@
                 font-weight: 700;
                 font-size: 0.88rem;
                 padding: 8px 22px;
-                border-radius: 30px;
+                border-radius: 0;
                 text-decoration: none;
                 display: inline-flex;
                 align-items: center;
@@ -249,7 +290,7 @@
                 gap: 10px;
                 text-decoration: none;
                 padding: 2px 6px;
-                border-radius: 30px;
+                border-radius: 0;
                 transition: background 0.2s;
             }
 
@@ -260,7 +301,7 @@
             .portal-user-avatar {
                 width: 38px;
                 height: 38px;
-                border-radius: 50%;
+                border-radius: 0;
                 object-fit: cover;
                 border: 2px solid #E2E8F0;
             }
@@ -299,7 +340,7 @@
                 font-weight: 700;
                 font-size: 0.85rem;
                 padding: 6px 18px;
-                border-radius: 20px;
+                border-radius: 0;
                 text-decoration: none;
                 display: inline-block;
             }
@@ -312,7 +353,7 @@
                 text-decoration: none;
                 display: inline-block;
                 transition: all 0.2s ease;
-                border-radius: 20px;
+                border-radius: 0;
             }
 
             .subnav-link:hover {
@@ -362,7 +403,7 @@
             .feature-icon-box {
                 width: 46px;
                 height: 46px;
-                border-radius: 50%;
+                border-radius: 0;
                 background: #E2ECE6;
                 display: flex;
                 align-items: center;
@@ -394,7 +435,7 @@
             .hero-student-img {
                 width: 100%;
                 height: auto;
-                border-radius: 20px;
+                border-radius: 0;
                 object-fit: cover;
                 box-shadow: 0 12px 36px rgba(59, 110, 83, 0.12);
             }
@@ -411,7 +452,7 @@
                 left: -20px;
                 background: rgba(255, 255, 255, 0.95);
                 padding: 8px 16px;
-                border-radius: 12px;
+                border-radius: 0;
                 box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
                 transform: rotate(-6deg);
                 z-index: 2;
@@ -421,7 +462,7 @@
             .login-card-container {
                 background: #FFFFFF;
                 border: 1px solid #E8EFF2;
-                border-radius: 24px;
+                border-radius: 0;
                 padding: 40px 36px;
                 box-shadow: 0 15px 40px rgba(0, 0, 0, 0.04);
             }
@@ -448,7 +489,7 @@
                 justify-content: center;
                 gap: 12px;
                 padding: 11px 16px;
-                border-radius: 12px;
+                border-radius: 0;
                 border: 1px solid #E2E8F0;
                 background: #FFFFFF;
                 color: #334155;
@@ -514,7 +555,7 @@
                 width: 100%;
                 height: 48px;
                 padding: 10px 14px 10px 42px;
-                border-radius: 12px;
+                border-radius: 0;
                 border: 1px solid #CBD5E1;
                 font-size: 0.92rem;
                 color: #1E293B;
@@ -570,7 +611,7 @@
             .btn-submit-auth {
                 width: 100%;
                 height: 50px;
-                border-radius: 30px;
+                border-radius: 0;
                 background: var(--primary-green);
                 color: #FFFFFF;
                 border: none;
@@ -624,7 +665,7 @@
             .quick-fill-section {
                 background: #F8FAFC;
                 border: 1px dashed #CBD5E1;
-                border-radius: 12px;
+                border-radius: 0;
                 padding: 10px 14px;
                 margin-top: 18px;
             }
@@ -700,7 +741,7 @@
             .subscribe-input {
                 flex: 1;
                 height: 42px;
-                border-radius: 8px;
+                border-radius: 0;
                 border: 1px solid #CBD5E1;
                 padding: 8px 12px;
                 font-size: 0.85rem;
@@ -709,7 +750,7 @@
             .subscribe-btn {
                 width: 42px;
                 height: 42px;
-                border-radius: 8px;
+                border-radius: 0;
                 background: var(--primary-green);
                 color: #FFFFFF;
                 border: none;
@@ -803,20 +844,20 @@
                                             Thiết lập tài khoản
                                         </a>
                                     </li>
-                                    <li><a class="dropdown-item" href="/Account/Profile?tab=security">Thiết lập bảo mật</a></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                           asp-route-tab="baomat">
+                                            Thiết lập bảo mật
+                                        </a>
+                                    </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
-                                    <li><a class="dropdown-item" href="/Employer/Profile">Hồ sơ công ty</a></li>
-                                    <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="/Employer/FreelancerYeuThich">Freelancer quan tâm</a>
-                                    </li>
+                                    <li><a class="dropdown-item" href="/NhaTuyenDung/Profile">Hồ sơ công ty</a></li>
+                                    <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a></li>
                                     <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
                                     <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
-                                    <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
-                                    </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
@@ -836,12 +877,11 @@
                         <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
                             <a href="/JobPost/QuanLyTinTuyenDung" class="subnav-link">Quản lý tin tuyển dụng</a>
                             <a href="/NhaTuyenDung/DanhSachUngVien" class="subnav-link">Danh sách ứng viên</a>
-                            <a href="/Employer/FreelancerYeuThich" class="subnav-link">Freelancer quan tâm</a>
                             <a href="/Wallet" class="subnav-link">Ví điện tử</a>
                             <a href="/JobPost/Create" class="subnav-link text-success fw-bold">Đăng tin mới</a>
                             <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
                             <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
-                            <a href="/Employer/Profile" class="subnav-link">Hồ sơ công ty</a>
+                            <a href="/NhaTuyenDung/Profile" class="subnav-link">Hồ sơ công ty</a>
                         </div>
                     </div>
                 </nav>
@@ -919,58 +959,53 @@
                                                 Thiết lập tài khoản
                                             </a>
                                         </li>
-                                        <li><a class="dropdown-item" href="/Account/Profile?tab=security">Thiết lập bảo mật</a></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                               asp-route-tab="baomat">
+                                                Thiết lập bảo mật
+                                            </a>
+                                        </li>
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
                                         <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
-                                        <li><a class="dropdown-item" href="/Account/MinhChung">Minh chứng sinh viên</a>
-                                        </li>
+                                        <li><a class="dropdown-item" href="/Account/MinhChung">Minh chứng sinh viên</a></li>
                                         @if (maUserDangNhap.HasValue)
                                         {
                                             <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Profile"
-                                                       asp-route-maUser="@maUserDangNhap.Value">Hồ sơ năng lực sinh viên</a></li>
-                                            }
-                                            <li><a class="dropdown-item" asp-controller="FreelancerStudent"
-                                                       asp-action="Portfolio">Portfolio cá nhân</a></li>
-                                                <li><a class="dropdown-item" href="/Freelancer/NhaTuyenDungYeuThich">NTD quan tâm (Đã
-                                                    lưu)</a>
-                                                </li>
-                                                <li><a class="dropdown-item" href="/HopDong">Hợp đồng của tôi</a></li>
-                                                <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
-                                                <li><a class="dropdown-item" href="/TranhChap">Tranh chấp & Khiếu nại</a>
-                                                </li>
-                                                <li>
-                                                    <hr class="dropdown-divider">
-                                                </li>
-                                                <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng
-                                                    xuất</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                    </div>
+                                                   asp-route-maUser="@maUserDangNhap.Value">Hồ sơ năng lực sinh viên</a></li>
+                                        }
+                                        <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Portfolio">Portfolio cá nhân</a></li>
+                                        <li><a class="dropdown-item" href="/HopDong">Hợp đồng của tôi</a></li>
+                                        <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                    </ul>
                                 </div>
-                            </header>
+                            </div>
 
-                            <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
-                            <nav class="portal-subnav">
-                                <div class="container-fluid px-lg-5">
-                                    <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
-                                        <a href="/FreelancerStudent/QuanLyTimViec" class="subnav-link">Quản lý tìm việc</a>
-                                        <a href="/FreelancerStudent/DangTinTimViec" class="subnav-link">Đăng tin tìm việc</a>
-                                        <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
-                                        <a href="/Freelancer/LoiMoiNhanViec" class="subnav-link">Lời mời nhận việc</a>
-                                        <a href="/Freelancer/NhaTuyenDungYeuThich" class="subnav-link">NTD quan tâm</a>
-                                        <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
-                                        <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
-                                        <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
-                                        <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
-                                        <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
-                                        <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
-                                    </div>
-                                </div>
-                            </nav>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
+                <nav class="portal-subnav">
+                    <div class="container-fluid px-lg-5">
+                        <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                            <a href="/FreelancerStudent/QuanLyTimViec" class="subnav-link">Quản lý tìm việc</a>
+                            <a href="/FreelancerStudent/DangTinTimViec" class="subnav-link">Đăng tin tìm việc</a>
+                            <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
+                            <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
+                            <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
+                            <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
+                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                            <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
+                            <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
+                        </div>
+                    </div>
+                </nav>
                         }
     else if (role == "Admin" || (Context.Request.Path.Value != null && Context.Request.Path.Value.StartsWith("/Admin",
     StringComparison.OrdinalIgnoreCase)))
@@ -1023,7 +1058,7 @@
                                                 </a>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                                                     <li><a class="dropdown-item" href="/Admin">Bảng điều khiển Quản trị</a></li>
-                                                    <li><a class="dropdown-item fw-bold text-success" href="/Admin/DuyetMinhChung"><i class="bi bi-person-badge me-1"></i>Duyệt thẻ sinh viên</a></li>
+                                                    <li><a class="dropdown-item fw-bold text-success" href="/Admin/DuyetMinhChung">Duyệt thẻ sinh viên</a></li>
                                                     <li><a class="dropdown-item" href="/Admin/DanhSachNguoiDung">Quản lý người dùng</a></li>
                                                     <li><a class="dropdown-item" href="/Admin/DuyetRutTien">Duyệt yêu cầu rút tiền</a></li>
                                                     <li><a class="dropdown-item" href="/Admin/DieuChinhSoDu">Điều chỉnh số dư ví</a></li>
@@ -1049,7 +1084,7 @@
                                 <div class="container-fluid px-lg-5">
                                     <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
                                         <a href="/Admin" class="subnav-link">Tổng quan</a>
-                                        <a href="/Admin/DuyetMinhChung" class="subnav-link text-success fw-bold"><i class="bi bi-person-badge me-1"></i>Duyệt thẻ SV</a>
+                                        <a href="/Admin/DuyetMinhChung" class="subnav-link text-success fw-bold">Duyệt thẻ SV</a>
                                         <a href="/Admin/DanhSachNguoiDung" class="subnav-link">Quản lý người dùng</a>
                                         <a href="/Admin/XuLyTaiKhoan" class="subnav-link">Khóa và mở tài khoản</a>
                                         <a href="/Admin/DuyetRutTien" class="subnav-link">Duyệt yêu cầu rút tiền</a>
@@ -1073,34 +1108,13 @@
 
                                                                                 <!-- Nav Links -->
                                                                                 <nav class="d-none d-lg-flex align-items-center gap-2">
-                                                                                    <a href="#" class="nav-link-custom">Tìm công việc</a>
-                                                                                    <a href="#" class="nav-link-custom">Tìm Freelancer</a>
-                                                                                    <a href="#" class="nav-link-custom">Về chúng tôi</a>
-                                                                                    <a href="#" class="nav-link-custom">Hỗ trợ</a>
+                                                                                    <a href="/JobPost" class="nav-link-custom">Tìm công việc</a>
+                                                                                    <a href="/FreelancerStudent" class="nav-link-custom">Tìm Freelancer</a>
                                                                                 </nav>
 
                                                                                 <!-- Right -->
                                                                                 <div class="d-flex align-items-center gap-3">
-
-                                                                                    <div class="dropdown d-none d-sm-block">
-                                                                                        <button class="btn btn-sm btn-link text-decoration-none text-secondary dropdown-toggle p-0"
-                                                                                                type="button" data-bs-toggle="dropdown">
-                                                                                            VI
-                                                                                        </button>
-
-                                                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                                                                            <li>
-                                                                                                <a class="dropdown-item active" href="#">
-                                                                                                    Tiếng Việt (VI)
-                                                                                                </a>
-                                                                                            </li>
-                                                                                            <li>
-                                                                                                <a class="dropdown-item" href="#">
-                                                                                                    English (EN)
-                                                                                                </a>
-                                                                                            </li>
-                                                                                        </ul>
-                                                                                    </div>
+                                                                                    <span class="badge bg-light text-secondary border px-2 py-1 small d-none d-sm-inline-block">VI</span>
 
                                                                                     <a asp-controller="Account" asp-action="DangNhap" class="btn-header-login">
                                                                                         Đăng nhập
@@ -1133,32 +1147,25 @@
                                                                                 <p class="footer-desc">
                                                                                     Kết nối sinh viên tài năng với cơ hội thực tế
                                                                                 </p>
-                                                                                <div class="footer-social-links">
-                                                                                    <a href="#"></a>
-                                                                                    <a href="#"></a>
-                                                                                    <a href="#"></a>
-                                                                                    <a href="#"></a>
-                                                                                </div>
                                                                             </div>
 
-                                                                            <!-- Col 2: About Us -->
+                                                                            <!-- Col 2: Features -->
                                                                             <div class="col-6 col-md-2">
-                                                                                <h5 class="footer-heading">Về chúng tôi</h5>
+                                                                                <h5 class="footer-heading">Khám phá</h5>
                                                                                 <ul class="footer-links">
-                                                                                    <li><a href="#">Giới thiệu</a></li>
-                                                                                    <li><a href="#">Điều khoản sử dụng</a></li>
-                                                                                    <li><a href="#">Chính sách bảo mật</a></li>
-                                                                                    <li><a href="#">Liên hệ</a></li>
+                                                                                    <li><a href="/JobPost">Tìm việc làm</a></li>
+                                                                                    <li><a href="/FreelancerStudent">Tìm Freelancer</a></li>
+                                                                                    <li><a asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></li>
                                                                                 </ul>
                                                                             </div>
 
-                                                                            <!-- Col 3: Support -->
+                                                                            <!-- Col 3: Services -->
                                                                             <div class="col-6 col-md-2">
-                                                                                <h5 class="footer-heading">Hỗ trợ</h5>
+                                                                                <h5 class="footer-heading">Dịch vụ</h5>
                                                                                 <ul class="footer-links">
-                                                                                    <li><a href="#">Trung tâm trợ giúp</a></li>
-                                                                                    <li><a href="#">Hướng dẫn sử dụng</a></li>
-                                                                                    <li><a href="#">Câu hỏi thường gặp</a></li>
+                                                                                    <li><a href="/HopDong">Hợp đồng & Ký quỹ</a></li>
+                                                                                    <li><a href="/Wallet">Ví điện tử</a></li>
+                                                                                    <li><a href="/Account/MinhChung">Minh chứng sinh viên</a></li>
                                                                                 </ul>
                                                                             </div>
 
@@ -1182,11 +1189,7 @@
                                                                                 &copy; 2026 Freelancer Students. All rights reserved.
                                                                             </div>
                                                                             <div class="d-flex gap-3">
-                                                                                <a href="#" class="text-decoration-none text-muted">Điều khoản</a>
-                                                                                <span>|</span>
-                                                                                <a href="#" class="text-decoration-none text-muted">Bảo mật</a>
-                                                                                <span>|</span>
-                                                                                <a href="#" class="text-decoration-none text-muted">Liên hệ</a>
+                                                                                <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">Chính sách bảo mật</a>
                                                                             </div>
                                                                         </div>
                                                                     </div>

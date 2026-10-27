@@ -86,24 +86,39 @@ namespace FreelancerStudent.API.Services
 
             // 3. Lưu file an toàn vào thư mục wwwroot/uploads/minhchung
             string relativeFolder = Path.Combine("uploads", "minhchung");
-            string absoluteFolder = Path.Combine(_env.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot", relativeFolder);
-            if (!Directory.Exists(Path.GetFullPath(absoluteFolder)))
-            {
-                // Thử lưu trong chính ContentRootPath nếu cấu trúc khác
-                absoluteFolder = Path.Combine(_env.ContentRootPath, "wwwroot", relativeFolder);
-            }
+            string apiWwwroot = Path.Combine(_env.ContentRootPath, "wwwroot", relativeFolder);
+            string webWwwroot = Path.Combine(_env.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot", relativeFolder);
 
-            if (!Directory.Exists(absoluteFolder))
+            if (!Directory.Exists(apiWwwroot))
             {
-                Directory.CreateDirectory(absoluteFolder);
+                Directory.CreateDirectory(apiWwwroot);
             }
 
             string uniqueFileName = $"the_sv_{maUser}_{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid():N}{extension}";
-            string absoluteFilePath = Path.Combine(absoluteFolder, uniqueFileName);
+            string absoluteFilePath = Path.Combine(apiWwwroot, uniqueFileName);
 
             using (var stream = new FileStream(absoluteFilePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
+            }
+
+            // Đồng bộ sang thư mục Web wwwroot nếu tồn tại
+            try
+            {
+                string webBase = Path.Combine(_env.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot");
+                if (Directory.Exists(webBase))
+                {
+                    if (!Directory.Exists(webWwwroot))
+                    {
+                        Directory.CreateDirectory(webWwwroot);
+                    }
+                    string webFilePath = Path.Combine(webWwwroot, uniqueFileName);
+                    File.Copy(absoluteFilePath, webFilePath, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Không thể sao chép ảnh sang Web wwwroot: {Message}", ex.Message);
             }
 
             string fileUrl = $"uploads/minhchung/{uniqueFileName}";
@@ -889,6 +904,7 @@ namespace FreelancerStudent.API.Services
                 NgayGui = DateTime.Now
             };
 
+            string metaJson = System.Text.Json.JsonSerializer.Serialize(meta, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
             string? metaPath = GetMetaFilePath(request.FileMinhChungUrl);
             if (!string.IsNullOrEmpty(metaPath))
             {
@@ -897,7 +913,24 @@ namespace FreelancerStudent.API.Services
                 {
                     Directory.CreateDirectory(dir);
                 }
-                await File.WriteAllTextAsync(metaPath, System.Text.Json.JsonSerializer.Serialize(meta, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                await File.WriteAllTextAsync(metaPath, metaJson);
+            }
+
+            // Đồng bộ sang file meta ở Web wwwroot nếu có
+            try
+            {
+                string cleanUrl = (request.FileMinhChungUrl ?? "").TrimStart('/', '\\');
+                string webMeta = Path.Combine(_env.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot", cleanUrl + ".meta.json");
+                string dirWeb = Path.GetDirectoryName(webMeta) ?? "";
+                if (Directory.Exists(Path.GetDirectoryName(dirWeb) ?? ""))
+                {
+                    if (!Directory.Exists(dirWeb)) Directory.CreateDirectory(dirWeb);
+                    await File.WriteAllTextAsync(webMeta, metaJson);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Không thể lưu file meta sang Web wwwroot: {Message}", ex.Message);
             }
 
             // Lưu bản ghi minh chứng sinh viên với trạng thái "Đang gửi" (chờ Admin duyệt)
@@ -1237,6 +1270,46 @@ namespace FreelancerStudent.API.Services
                     }
                 }
 
+                string? mssvXacNhan = meta?.Mssv;
+                if (string.IsNullOrWhiteSpace(mssvXacNhan) && !string.IsNullOrWhiteSpace(m.fileMinhChung))
+                {
+                    try
+                    {
+                        string cleanUrl = m.fileMinhChung.TrimStart('/', '\\');
+                        string imgPath = Path.Combine(_env.ContentRootPath, "wwwroot", cleanUrl);
+                        if (!File.Exists(imgPath))
+                        {
+                            imgPath = Path.Combine(_env.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot", cleanUrl);
+                        }
+                        if (File.Exists(imgPath))
+                        {
+                            using var bmp = new Bitmap(imgPath);
+                            var reader = new BarcodeReader
+                            {
+                                AutoRotate = true,
+                                Options = new ZXing.Common.DecodingOptions
+                                {
+                                    TryHarder = true,
+                                    PossibleFormats = new List<BarcodeFormat>
+                                    {
+                                        BarcodeFormat.CODE_128, BarcodeFormat.CODE_39, BarcodeFormat.QR_CODE, BarcodeFormat.EAN_13
+                                    }
+                                }
+                            };
+                            var decodeResult = reader.Decode(bmp);
+                            if (decodeResult != null && !string.IsNullOrWhiteSpace(decodeResult.Text))
+                            {
+                                var bc = decodeResult.Text.Trim();
+                                if (Regex.IsMatch(bc, @"^[A-Z0-9]{6,15}$", RegexOptions.IgnoreCase))
+                                {
+                                    mssvXacNhan = bc.ToUpperInvariant();
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
                 var item = new MinhChungItem_ResponseDTO
                 {
                     MaMinhChung = m.maMinhChung,
@@ -1254,7 +1327,7 @@ namespace FreelancerStudent.API.Services
                     TenTruongHienTai = student?.tenTruong,
                     TenChuyenNganhHienTai = student?.ChuyenNganh?.tenChuyenNganh,
 
-                    MssvXacNhan = meta?.Mssv,
+                    MssvXacNhan = mssvXacNhan,
                     HoTenXacNhan = meta?.HoVaTen,
                     TenTruongXacNhan = meta?.TenTruong,
                     MaTruongXacNhan = meta?.MaTruong,

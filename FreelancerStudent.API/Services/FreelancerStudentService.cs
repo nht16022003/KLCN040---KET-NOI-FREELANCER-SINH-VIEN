@@ -187,6 +187,16 @@ namespace FreelancerStudent.API.Services
             return await _freelancerStudentRepository.capNhatHoSoAsync(dto);
         }
 
+        public async Task<bool> capNhatThongTinCoBanAsync(DTOs.RequestDTOs.CapNhatThongTinCoBan_RequestDTO dto)
+        {
+            return await _freelancerStudentRepository.capNhatThongTinCoBanAsync(dto);
+        }
+
+        public async Task<bool> capNhatGPAAsync(DTOs.RequestDTOs.CapNhatGPA_RequestDTO dto)
+        {
+            return await _freelancerStudentRepository.capNhatGPAAsync(dto);
+        }
+
         public async Task<FreelancerStudentProfile_ReponseDTO?> layProfileFreelancerStudent(int maFreelancerStudents)
         {
             if (maFreelancerStudents <= 0)

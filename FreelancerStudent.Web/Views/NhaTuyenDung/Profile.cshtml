@@ -45,7 +45,7 @@
     .employer-card {
         background: var(--card-bg);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 0;
         box-shadow: none;
         margin-bottom: 24px;
     }
@@ -53,8 +53,7 @@
     .cover-strip {
         height: 64px;
         background: #E8EEE9;
-        border-top-left-radius: 7px;
-        border-top-right-radius: 7px;
+        border-radius: 0;
     }
 
     .header-content-inner {
@@ -72,7 +71,7 @@
     .avatar-img {
         width: 84px;
         height: 84px;
-        border-radius: 8px;
+        border-radius: 0;
         object-fit: cover;
         border: 3px solid #FFFFFF;
         background-color: #FFFFFF;
@@ -110,7 +109,7 @@
         background-color: var(--accent);
         color: #FFFFFF;
         border: 1px solid var(--accent);
-        border-radius: 6px;
+        border-radius: 0;
         padding: 8px 18px;
         font-weight: 600;
         font-size: 0.88rem;
@@ -128,7 +127,7 @@
         background-color: transparent;
         color: var(--ink);
         border: 1px solid var(--border);
-        border-radius: 6px;
+        border-radius: 0;
         padding: 8px 18px;
         font-weight: 600;
         font-size: 0.88rem;
@@ -147,7 +146,7 @@
     .metrics-bar {
         background: #FFFFFF;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 0;
         padding: 16px 24px;
         margin-bottom: 24px;
     }
@@ -191,7 +190,7 @@
         margin-bottom: 24px;
         background: #FFFFFF;
         padding: 0 24px;
-        border-radius: 8px 8px 0 0;
+        border-radius: 0;
     }
 
     .profile-tab-btn {
@@ -221,7 +220,7 @@
     .section-box {
         background: #FFFFFF;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 0;
         padding: 22px;
         margin-bottom: 24px;
     }
@@ -266,7 +265,7 @@
     .job-item-card {
         background: #FFFFFF;
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 0;
         padding: 18px 20px;
         margin-bottom: 14px;
         transition: border-color 0.15s ease;
@@ -300,7 +299,7 @@
         font-size: 0.75rem;
         font-weight: 600;
         padding: 3px 8px;
-        border-radius: 4px;
+        border-radius: 0;
         display: inline-block;
     }
 
@@ -365,14 +364,14 @@
 
         @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
         {
-            <div class="alert alert-success alert-dismissible fade show rounded-2 mb-3" role="alert">
+            <div class="alert alert-success alert-dismissible fade show rounded-0 mb-3" role="alert">
                 @(TempData["SuccessMessage"] ?? TempData["Success"])
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
             </div>
         }
         @if (TempData["ErrorMessage"] != null || TempData["Error"] != null)
         {
-            <div class="alert alert-danger alert-dismissible fade show rounded-2 mb-3" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show rounded-0 mb-3" role="alert">
                 @(TempData["ErrorMessage"] ?? TempData["Error"])
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
             </div>
@@ -851,7 +850,7 @@
                 @if (thongKe != null && thongKe.tongLuotDanhGia > 0)
                 {
                     <!-- Bảng tóm tắt chỉ số đánh giá -->
-                    <div class="row g-3 mb-4 p-3 bg-light rounded-2 border">
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-0 border">
                         <div class="col-6 col-md-3 text-center border-end">
                             <div class="fs-4 fw-bold text-dark">@thongKe.diemTrungBinh.ToString("0.0") / 5.0</div>
                             <div class="text-muted small">@thongKe.tongLuotDanhGia lượt đánh giá</div>

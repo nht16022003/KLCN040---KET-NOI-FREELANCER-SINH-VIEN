@@ -110,7 +110,6 @@
                         @if (item.trangThaiUngTuyen == "TuChoi" && item.TrangThaiHopDong == "DaHuy")
                         {
                             <span class="badge bg-danger rounded-0 p-2">
-                                <i class="bi bi-x-circle me-1"></i>
                                 Đã hủy - Chờ ứng tuyển lại
                             </span>
                         }
@@ -119,7 +118,6 @@
                             @if (item.TrangThaiHopDong == "DaHuy")
                             {
                                 <span class="badge bg-danger rounded-0 p-2">
-                                    <i class="bi bi-x-circle me-1"></i>
                                     Đã hủy
                                 </span>
                             }
@@ -146,7 +144,6 @@
                                 <!-- Nút trao đổi -->
                                 <a href="/Chat?maFreelancerStudent=@item.maFreelancerStudents&maJob=@item.maJob"
                                 class="btn btn-sm btn-outline-success rounded-0">
-                                    <i class="bi bi-chat-dots me-1"></i>
                                     Trao đổi
                                 </a>
 
@@ -154,7 +151,6 @@
                                 <a href="/HopDong/TaoHopDong?maJob=@item.maJob&maFreelancerStudent=@item.maFreelancerStudents&maUngTuyen=@item.maUngTuyen"
                                 class="btn btn-sm btn-primary rounded-0 text-white fw-medium shadow-sm"
                                 title="Khởi tạo dự thảo hợp đồng với ứng viên này">
-                                    <i class="bi bi-file-earmark-text me-1"></i>
                                     Tạo hợp đồng
                                 </a>
                             }

@@ -18,7 +18,7 @@
     .job-header-card {
         background: #FFFFFF;
         border: 1px solid #E5ECE7;
-        border-radius: 20px;
+        border-radius: 0;
         padding: 28px;
         margin-bottom: 24px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
@@ -62,14 +62,14 @@
         gap: 6px;
         background: #F1F5F9;
         padding: 5px 12px;
-        border-radius: 20px;
+        border-radius: 0;
     }
 
     .status-badge-job {
         font-size: 0.8rem;
         font-weight: 700;
         padding: 5px 14px;
-        border-radius: 20px;
+        border-radius: 0;
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -91,7 +91,7 @@
     .section-card {
         background: #FFFFFF;
         border: 1px solid #E5ECE7;
-        border-radius: 18px;
+        border-radius: 0;
         padding: 24px;
         margin-bottom: 24px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
@@ -113,7 +113,7 @@
         font-weight: 700;
         font-size: 0.82rem;
         padding: 6px 14px;
-        border-radius: 20px;
+        border-radius: 0;
         border: 1px solid #D2E7DC;
         display: inline-block;
         margin-right: 6px;
@@ -124,7 +124,7 @@
     .salary-box-card {
         background: linear-gradient(135deg, #F3FAF5 0%, #FFFFFF 100%);
         border: 1.5px solid #C9E5D2;
-        border-radius: 18px;
+        border-radius: 0;
         padding: 24px;
         margin-bottom: 24px;
     }
@@ -142,7 +142,7 @@
         font-weight: 700;
         font-size: 0.95rem;
         padding: 12px;
-        border-radius: 30px;
+        border-radius: 0;
         border: none;
         width: 100%;
         display: inline-flex;
@@ -218,10 +218,10 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" onclick="alert('Đã lưu bài viết vào mục yêu thích!')">
+                    <button type="button" class="btn btn-outline-secondary rounded-0 px-3" onclick="alert('Đã lưu bài viết vào mục yêu thích!')">
                         Lưu tin
                     </button>
-                    <button type="button" class="btn btn-outline-success rounded-pill px-3" onclick="navigator.clipboard.writeText(window.location.href); alert('Đã sao chép link bài đăng!');">
+                    <button type="button" class="btn btn-outline-success rounded-0 px-3" onclick="navigator.clipboard.writeText(window.location.href); alert('Đã sao chép link bài đăng!');">
                         Chia sẻ
                     </button>
                 </div>
@@ -282,13 +282,13 @@
                     </h5>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 h-100">
+                            <div class="p-3 bg-light rounded-0 h-100">
                                 <h6 class="fw-bold text-dark mb-1">Bảo đảm Ký quỹ Escrow</h6>
                                 <p class="text-muted small mb-0">Doanh nghiệp ký quỹ 100% thù lao lên hệ thống trước khi bắt đầu, đảm bảo không rủi ro quỵt tiền.</p>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 h-100">
+                            <div class="p-3 bg-light rounded-0 h-100">
                                 <h6 class="fw-bold text-dark mb-1">Thời gian linh hoạt</h6>
                                 <p class="text-muted small mb-0">Chủ động sắp xếp thời gian học và làm việc, phù hợp với lịch học tại trường.</p>
                             </div>
@@ -331,7 +331,7 @@
                             <label class="form-label text-dark fw-bold small">Link CV / Sản phẩm mẫu (Google Drive, Canva, Github...) (Tùy chọn):</label>
                             <input type="text" name="fileCV" class="form-control" placeholder="https://..." />
                         </div>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-bold"
+                        <button type="submit" class="btn btn-success rounded-0 px-4 py-2 fw-bold"
                                 style="background-color: #1B5E36; border-color: #1B5E36;">
                             Xác nhận gửi ứng tuyển
                         </button>
@@ -373,7 +373,7 @@
                                     ? Model.Employer.Logo
                                     : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenHienThiNTD)}&background=E8F5E9&color=1B5E36");
                         }
-                        <img src="@empAvatar" alt="@tenHienThiNTD" class="rounded-circle border mx-auto d-block mb-2 shadow-sm" style="width: 70px; height: 70px; object-fit: cover;" />
+                        <img src="@empAvatar" alt="@tenHienThiNTD" class="rounded-0 border mx-auto d-block mb-2 shadow-sm" style="width: 70px; height: 70px; object-fit: cover;" />
                         <h6 class="fw-bold text-dark mb-1">
                             @tenHienThiNTD
                         </h6>
@@ -386,7 +386,7 @@
                         <p class="mb-0"><strong>Tham gia:</strong> @(Model.Employer?.NgayDangKy.ToString("MM/yyyy") ?? "2024")</p>
                     </div>
 
-                    <a href="/Employer/Profile/@(Model.Employer?.MaNhaTuyenDung ?? 1)" class="btn btn-outline-success btn-sm w-100 rounded-pill fw-semibold">
+                    <a href="/Employer/Profile/@(Model.Employer?.MaNhaTuyenDung ?? 1)" class="btn btn-outline-success btn-sm w-100 rounded-0 fw-semibold">
                         Xem hồ sơ công ty
                     </a>
                 </div>

@@ -46,7 +46,6 @@
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
             @TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -55,7 +54,6 @@
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
             @TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -69,8 +67,8 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
                         <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-warning text-dark px-2 py-1 fs-6">
-                                <i class="bi bi-bell-fill me-1"></i> Dự thảo hợp đồng đang chờ bạn xác nhận
+                            <span class="badge bg-warning text-dark px-2 py-1 fs-6 rounded-0">
+                                Dự thảo hợp đồng đang chờ bạn xác nhận
                             </span>
                         </div>
                         <p class="text-dark mb-0 mt-2">
@@ -81,7 +79,7 @@
                     <div class="d-flex gap-2">
                         <!-- Nút Từ chối -->
                         <button type="button" class="btn btn-outline-danger rounded-0 px-3 fw-medium" data-bs-toggle="modal" data-bs-target="#modalTuChoi">
-                            <i class="bi bi-x-circle me-1"></i> Từ chối hợp đồng
+                            Từ chối hợp đồng
                         </button>
 
                         <!-- Form Xác nhận hợp đồng -->
@@ -90,7 +88,7 @@
                             <input type="hidden" name="maHD" value="@Model.maHD" />
                             <input type="hidden" name="dongY" value="true" />
                             <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold shadow-sm" style="background-color: #1B5E36; border-color: #1B5E36;">
-                                <i class="bi bi-check2-circle me-1"></i> Xác nhận hợp đồng
+                                Xác nhận hợp đồng
                             </button>
                         </form>
                     </div>
@@ -108,7 +106,7 @@
                         <input type="hidden" name="dongY" value="false" />
                         <div class="modal-header bg-light">
                             <h5 class="modal-title text-danger fw-bold" id="modalTuChoiLabel">
-                                <i class="bi bi-x-circle me-1"></i> Từ chối dự thảo hợp đồng
+                                Từ chối dự thảo hợp đồng
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -139,8 +137,8 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <div>
                         <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary text-white px-2 py-1 fs-6">
-                                <i class="bi bi-wallet2 me-1"></i> Hợp đồng đang chờ bạn ký quỹ
+                            <span class="badge bg-primary text-white px-2 py-1 fs-6 rounded-0">
+                                Hợp đồng đang chờ bạn ký quỹ
                             </span>
                         </div>
                         <h5 class="fw-bold text-primary mb-1 mt-2">
@@ -154,7 +152,7 @@
 
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-primary btn-lg rounded-0 fw-bold px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
-                            <i class="bi bi-shield-check me-1"></i> Tiến hành ký quỹ ngay
+                            Tiến hành ký quỹ ngay
                         </button>
                     </div>
                 </div>
@@ -170,7 +168,7 @@
                         <input type="hidden" name="maHD" value="@Model.maHD" />
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title fw-bold" id="modalKyQuyLabel">
-                                <i class="bi bi-shield-lock-fill me-1"></i> Ký quỹ bảo chứng hợp đồng (Escrow)
+                                Ký quỹ bảo chứng hợp đồng (Escrow)
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -178,24 +176,23 @@
                             <div class="text-center mb-4">
                                 <span class="text-muted small text-uppercase">Tổng số tiền ký quỹ</span>
                                 <h2 class="text-primary fw-bold mt-1 mb-0">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</h2>
-                                <span class="badge bg-light text-muted border mt-2">Áp dụng cho Hợp đồng #@Model.maHD</span>
+                                <span class="badge bg-light text-muted border rounded-0 mt-2">Áp dụng cho Hợp đồng #@Model.maHD</span>
                             </div>
 
                             <div class="alert alert-info rounded-0 small mb-3">
-                                <i class="bi bi-info-circle-fill me-1"></i>
                                 Tiền ký quỹ sẽ được bảo lưu an toàn tại hệ thống cho tới khi bạn kiểm tra và xác nhận nghiệm thu các mốc sản phẩm bàn giao từ Freelancer.
                             </div>
 
                             <ul class="list-unstyled small text-muted mb-0">
-                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Trạng thái hợp đồng sẽ chuyển sang <strong>Đang thực hiện</strong>.</li>
-                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Freelancer sẽ nhận được thông báo để bắt đầu công việc ngay lập tức.</li>
-                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> Bạn có thể theo dõi tiến độ và duyệt từng giai đoạn.</li>
+                                <li class="mb-2">- Trạng thái hợp đồng sẽ chuyển sang <strong>Đang thực hiện</strong>.</li>
+                                <li class="mb-2">- Freelancer sẽ nhận được thông báo để bắt đầu công việc ngay lập tức.</li>
+                                <li>- Bạn có thể theo dõi tiến độ và duyệt từng giai đoạn.</li>
                             </ul>
                         </div>
                         <div class="modal-footer bg-light">
                             <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
                             <button type="submit" class="btn btn-primary rounded-0 fw-bold px-4">
-                                <i class="bi bi-check2-circle me-1"></i> Xác nhận Ký quỹ & Kích hoạt
+                                Xác nhận Ký quỹ & Kích hoạt
                             </button>
                         </div>
                     </form>
@@ -221,7 +218,7 @@
                         @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
                         {
                             <button type="button" class="btn btn-primary rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
-                                <i class="bi bi-wallet2 me-1"></i> Tiến hành ký quỹ
+                                Tiến hành ký quỹ
                             </button>
                         }
                     </div>
@@ -276,7 +273,7 @@
             <div class="card border-0 shadow-sm rounded-0 h-100">
                 <div class="card-header bg-light border-bottom py-2">
                     <h6 class="mb-0 fw-bold text-dark">
-                        <i class="bi bi-building text-success me-2"></i>BÊN A: BÊN THUÊ (NHÀ TUYỂN DỤNG)
+                        BÊN A: BÊN THUÊ (NHÀ TUYỂN DỤNG)
                     </h6>
                 </div>
                 <div class="card-body">
@@ -307,7 +304,7 @@
             <div class="card border-0 shadow-sm rounded-0 h-100">
                 <div class="card-header bg-light border-bottom py-2">
                     <h6 class="mb-0 fw-bold text-dark">
-                        <i class="bi bi-person-badge text-success me-2"></i>BÊN B: BÊN NHẬN VIỆC (FREELANCER)
+                        BÊN B: BÊN NHẬN VIỆC (FREELANCER)
                     </h6>
                 </div>
                 <div class="card-body">
@@ -347,7 +344,7 @@
         <div class="card border-0 shadow-sm rounded-0 mb-4">
             <div class="card-header bg-light border-bottom py-2">
                 <h6 class="mb-0 fw-bold text-dark">
-                    <i class="bi bi-file-text text-success me-2"></i>Mô tả yêu cầu công việc
+                    Mô tả yêu cầu công việc
                 </h6>
             </div>
             <div class="card-body">
@@ -360,7 +357,7 @@
     <div class="card border-0 shadow-sm rounded-0 mb-4">
         <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold text-dark">
-                <i class="bi bi-signpost-split text-success me-2"></i>Lộ trình các mốc bàn giao (Milestones)
+                Lộ trình các mốc bàn giao (Milestones)
             </h5>
             <span class="badge bg-secondary rounded-0">@(Model.giaiDoans?.Count ?? 0) giai đoạn</span>
         </div>
@@ -420,8 +417,8 @@
                                         @if (!string.IsNullOrWhiteSpace(linkMoc))
                                         {
                                             <div class="mt-2">
-                                                <a href="@linkMoc" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold shadow-sm">
-                                                    <i class="bi bi-box-arrow-up-right me-1"></i> Xem sản phẩm mốc
+                                                <a href="@linkMoc" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success py-1 px-2 fw-semibold shadow-sm rounded-0">
+                                                    Xem sản phẩm mốc
                                                 </a>
                                                 <span class="text-muted small ms-1 text-truncate d-inline-block" style="max-width: 280px; vertical-align: middle;">@linkMoc</span>
                                             </div>
@@ -445,14 +442,14 @@
                                                     <input type="hidden" name="maHD" value="@Model.maHD" />
                                                     <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
                                                     <input type="hidden" name="trangThai" value="Dat" />
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" disabled="@(gd.trangThai == "Dat")">Đạt</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-0" disabled="@(gd.trangThai == "Dat")">Đạt</button>
                                                 </form>
                                                 <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="maHD" value="@Model.maHD" />
                                                     <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
                                                     <input type="hidden" name="trangThai" value="ChuaDat" />
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" disabled="@(gd.trangThai != "Dat")">Chưa đạt</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-0" disabled="@(gd.trangThai != "Dat")">Chưa đạt</button>
                                                 </form>
                                             </div>
                                         }
@@ -462,7 +459,6 @@
                         </tbody>
                     </table>
                 <div class="p-3 bg-light border-top d-flex align-items-center gap-2 small text-muted">
-                    <i class="bi bi-shield-lock-fill text-success fs-6"></i>
                     <span>Toàn bộ thù lao hợp đồng (<strong>@((Model.sotienkyquy ?? 0).ToString("N0")) VNĐ</strong>) được giữ an toàn tại ví ký quỹ. Sau khi nghiệm thu đạt toàn bộ dự án, Nhà tuyển dụng sẽ xác nhận hoàn thành và giải ngân thanh toán 1 lần cho Freelancer.</span>
                 </div>
             </div>
@@ -620,11 +616,11 @@
         <div class="card-header bg-light border-bottom py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="d-flex align-items-center gap-2">
                 <h5 class="mb-0 fw-bold text-dark">
-                    <i class="bi bi-kanban text-success me-2"></i>Tiến độ dự án (Project Progress)
+                    Tiến độ dự án (Project Progress)
                 </h5>
                 @if (tongTask > 0)
                 {
-                    <span class="badge @(tyLe == 100 ? "bg-success" : (tyLe >= 50 ? "bg-primary" : "bg-warning text-dark")) rounded-pill px-3 py-1">
+                    <span class="badge @(tyLe == 100 ? "bg-success" : (tyLe >= 50 ? "bg-primary" : "bg-warning text-dark")) rounded-0 px-3 py-1">
                         @tyLe% hoàn thành (@hoanThanh/@tongTask việc)
                     </span>
                 }
@@ -634,7 +630,7 @@
             {
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-sm btn-success rounded-0 px-3 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalThemTask" style="background-color: #1B5E36; border-color: #1B5E36;">
-                        <i class="bi bi-plus-circle me-1"></i> Cập nhật tiến độ dự án
+                        Cập nhật tiến độ dự án
                     </button>
                 </div>
             }
@@ -690,7 +686,6 @@
             @if (Model.trangThai != "DangThucHien")
             {
                 <div class="alert alert-secondary rounded-0 py-2 px-3 small mb-3">
-                    <i class="bi bi-info-circle me-1"></i>
                     Hợp đồng hiện tại đang ở trạng thái <strong>@tenTrangThai</strong>.
                     @if (Model.LaFreelancerCuaHopDong)
                     {
@@ -744,7 +739,7 @@
                                             <div class="text-muted small mt-1" style="white-space: pre-line;">@task.moTa</div>
                                         }
                                         <div class="text-muted mt-1" style="font-size: 0.75rem;">
-                                            <i class="bi bi-clock me-1"></i>Cập nhật: @task.ngayCapNhat.ToString("dd/MM/yyyy HH:mm")
+                                            Cập nhật: @task.ngayCapNhat.ToString("dd/MM/yyyy HH:mm")
                                         </div>
                                     </td>
                                     <td>
@@ -762,7 +757,7 @@
                                         {
                                             var isOverdue = task.trangThai != "HoanThanh" && task.hanHoanThanh.Value.Date < DateTime.Now.Date;
                                             <div class="@(isOverdue ? "text-danger fw-bold" : "text-dark") small">
-                                                <i class="bi bi-calendar-event me-1"></i>@task.hanHoanThanh.Value.ToString("dd/MM/yyyy")
+                                                @task.hanHoanThanh.Value.ToString("dd/MM/yyyy")
                                             </div>
                                             @if (isOverdue)
                                             {
@@ -782,9 +777,9 @@
                                                     @taskStatusText
                                                 </button>
                                                 <ul class="dropdown-menu shadow-sm rounded-0">
-                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "ChuaThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'ChuaThucHien')"><i class="bi bi-hourglass me-2"></i>Chưa thực hiện</a></li>
-                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "DangThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'DangThucHien')"><i class="bi bi-arrow-repeat me-2"></i>Đang thực hiện</a></li>
-                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "HoanThanh" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'HoanThanh')"><i class="bi bi-check-circle me-2"></i>Hoàn thành</a></li>
+                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "ChuaThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'ChuaThucHien')">Chưa thực hiện</a></li>
+                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "DangThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'DangThucHien')">Đang thực hiện</a></li>
+                                                    <li><a class="dropdown-item py-2 small @(task.trangThai == "HoanThanh" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'HoanThanh')">Hoàn thành</a></li>
                                                 </ul>
                                             </div>
                                         }
@@ -800,18 +795,18 @@
                                                     class="btn btn-sm btn-outline-primary rounded-0 me-1" 
                                                     title="Chỉnh sửa đầu việc"
                                                     onclick="moModalSuaTask(@task.maTask, '@Html.Raw(JavaScriptEncoder.Default.Encode(task.tenTask))', '@Html.Raw(JavaScriptEncoder.Default.Encode(task.moTa ?? ""))', '@(task.hanHoanThanh?.ToString("yyyy-MM-dd") ?? "")', '@task.trangThai', '@(task.maGiaiDoan?.ToString() ?? "")')">
-                                                <i class="bi bi-pencil"></i>
+                                                Sửa
                                             </button>
                                             <button type="button" 
                                                     class="btn btn-sm btn-outline-danger rounded-0" 
                                                     title="Xóa đầu việc"
                                                     onclick="xacNhanXoaTask(@task.maTask, '@Html.Raw(JavaScriptEncoder.Default.Encode(task.tenTask))')">
-                                                <i class="bi bi-trash"></i>
+                                                Xóa
                                             </button>
                                         }
                                         else
                                         {
-                                            <span class="text-muted small"><i class="bi bi-lock me-1"></i>Chỉ xem</span>
+                                            <span class="text-muted small">Chỉ xem</span>
                                         }
                                     </td>
                                 </tr>
@@ -824,9 +819,6 @@
             {
                 <!-- Trạng thái chưa có đầu việc nào -->
                 <div class="text-center py-5 border bg-light">
-                    <div class="text-muted mb-2">
-                        <i class="bi bi-clipboard2-x display-5 text-secondary"></i>
-                    </div>
                     @if (Model.LaFreelancerCuaHopDong)
                     {
                         <h6 class="fw-bold text-dark mb-1">Chưa có đầu việc nào được tạo cho dự án này</h6>
@@ -836,7 +828,7 @@
                         @if (coTheCapNhat)
                         {
                             <button type="button" class="btn btn-success rounded-0 px-4 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#modalThemTask" style="background-color: #1B5E36; border-color: #1B5E36;">
-                                <i class="bi bi-plus-circle me-1"></i> Thêm đầu việc ngay
+                                Thêm đầu việc ngay
                             </button>
                         }
                     }
@@ -854,7 +846,7 @@
     <div class="card border-0 shadow-sm rounded-0 mb-4">
         <div class="card-header bg-light border-bottom py-3">
             <h5 class="mb-0 fw-bold text-dark">
-                <i class="bi bi-shield-lock text-success me-2"></i>Điều khoản giao kết cụ thể
+                Điều khoản giao kết cụ thể
             </h5>
         </div>
         <div class="card-body">
@@ -874,7 +866,7 @@
     <!-- Nút quay lại & Hành động cuối trang -->
     <div class="d-flex justify-content-between align-items-center">
         <a asp-controller="HopDong" asp-action="Index" class="btn btn-outline-secondary rounded-0">
-            <i class="bi bi-arrow-left me-1"></i> Trở về danh sách hợp đồng
+            Trở về danh sách hợp đồng
         </a>
 
         @if (Model.CoQuyenXacNhan)
@@ -888,7 +880,7 @@
                     <input type="hidden" name="maHD" value="@Model.maHD" />
                     <input type="hidden" name="dongY" value="true" />
                     <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
-                        <i class="bi bi-check2-circle me-1"></i> Xác nhận hợp đồng
+                        Xác nhận hợp đồng
                     </button>
                 </form>
             </div>
@@ -906,7 +898,6 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h5 class="fw-bold mb-1">
-                            <i class="bi bi-box-seam me-2 text-success"></i>
                             Bàn giao và nghiệm thu sản phẩm
                         </h5>
 
@@ -920,7 +911,7 @@
                            asp-action="Index"
                            asp-route-maHD="@Model.maHD"
                            class="btn btn-success rounded-0">
-                            <i class="bi bi-box-seam me-1"></i> Xem bàn giao sản phẩm
+                            Xem bàn giao sản phẩm
                         </a>
 
                         @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
@@ -929,7 +920,7 @@
                                asp-action="ThanhToan"
                                asp-route-maHD="@Model.maHD"
                                class="btn btn-primary rounded-0 fw-bold shadow-sm">
-                                <i class="bi bi-cash-stack me-1"></i> Thanh toán cho Freelancer
+                                Thanh toán cho Freelancer
                             </a>
                         }
                     </div>
@@ -937,9 +928,8 @@
 
                 @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
                 {
-                    <div class="alert alert-primary mt-3 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="alert alert-primary mt-3 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-3 rounded-0">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-info-circle-fill fs-5 text-primary"></i>
                             <div>
                                 <strong>Hợp đồng đã nghiệm thu hoàn thành!</strong>
                                 <div class="small">Sản phẩm đã được nghiệm thu đạt yêu cầu. Vui lòng xác nhận giải ngân thù lao cho Freelancer để hoàn tất hợp đồng.</div>
@@ -949,7 +939,7 @@
                            asp-action="ThanhToan"
                            asp-route-maHD="@Model.maHD"
                            class="btn btn-primary rounded-0 fw-bold text-nowrap">
-                            <i class="bi bi-credit-card-2-front me-1"></i> Xác nhận thanh toán
+                            Xác nhận thanh toán
                         </a>
                     </div>
                 }
@@ -965,12 +955,12 @@
         <div class="modal-content rounded-0">
             <div class="modal-header bg-light">
                 <h5 class="modal-title fw-bold text-success" id="modalThemTaskLabel">
-                    <i class="bi bi-plus-circle me-1"></i> Thêm đầu việc tiến độ dự án
+                    Thêm đầu việc tiến độ dự án
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <div id="alertThemTask" class="alert alert-danger d-none py-2 px-3 small mb-3"></div>
+                <div id="alertThemTask" class="alert alert-danger d-none py-2 px-3 small mb-3 rounded-0"></div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Tiêu đề đầu việc <span class="text-danger">*</span></label>
@@ -1009,7 +999,7 @@
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
                 <button type="button" class="btn btn-success rounded-0 fw-bold px-4" id="btnLuuThemTask" onclick="luuThemTask()" style="background-color: #1B5E36; border-color: #1B5E36;">
-                    <i class="bi bi-save me-1"></i> Lưu đầu việc
+                    Lưu đầu việc
                 </button>
             </div>
         </div>
@@ -1022,12 +1012,12 @@
         <div class="modal-content rounded-0">
             <div class="modal-header bg-light">
                 <h5 class="modal-title fw-bold text-primary" id="modalSuaTaskLabel">
-                    <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa đầu việc
+                    Chỉnh sửa đầu việc
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <div id="alertSuaTask" class="alert alert-danger d-none py-2 px-3 small mb-3"></div>
+                <div id="alertSuaTask" class="alert alert-danger d-none py-2 px-3 small mb-3 rounded-0"></div>
                 <input type="hidden" id="maTaskSua" />
 
                 <div class="mb-3">
@@ -1074,7 +1064,7 @@
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
                 <button type="button" class="btn btn-primary rounded-0 fw-bold px-4" id="btnLuuSuaTask" onclick="luuSuaTask()">
-                    <i class="bi bi-save me-1"></i> Cập nhật
+                    Cập nhật
                 </button>
             </div>
         </div>
@@ -1172,6 +1162,10 @@
                         icon.classList.toggle('bi-star-fill', value <= selectedValue);
                         icon.classList.toggle('bi-star', value > selectedValue);
                     }
+                    const starSpan = button.querySelector('.star-char');
+                    if (starSpan) {
+                        starSpan.textContent = value <= selectedValue ? '★' : '☆';
+                    }
                 });
 
                 const label = form.querySelector(`[data-rating-label="${groupName}"]`);
@@ -1194,6 +1188,10 @@
                     if (icon) {
                         icon.classList.remove('bi-star-fill');
                         icon.classList.add('bi-star');
+                    }
+                    const starSpan = button.querySelector('.star-char');
+                    if (starSpan) {
+                        starSpan.textContent = '☆';
                     }
                 });
             }
@@ -1273,7 +1271,7 @@
                 showAlert('alertThemTask', 'Lỗi kết nối máy chủ: ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-save me-1"></i> Lưu đầu việc';
+                btn.innerHTML = 'Lưu đầu việc';
             }
         }
 
@@ -1348,7 +1346,7 @@
                 showAlert('alertSuaTask', 'Lỗi kết nối máy chủ: ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-save me-1"></i> Cập nhật';
+                btn.innerHTML = 'Cập nhật';
             }
         }
 

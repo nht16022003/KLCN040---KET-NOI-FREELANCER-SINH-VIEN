@@ -17,10 +17,10 @@
             <p class="text-muted small mb-0">Kiểm tra thông tin tài khoản ngân hàng thụ hưởng, xác nhận giải ngân hoặc từ chối hoàn tiền về ví người dùng.</p>
         </div>
         <div class="d-flex gap-2 mt-2 mt-md-0">
-            <a href="/Admin/DieuChinhSoDu" class="btn btn-outline-warning btn-sm rounded-pill px-3 text-dark fw-semibold">
+            <a href="/Admin/DieuChinhSoDu" class="btn btn-outline-warning btn-sm rounded-0 px-3 text-dark fw-semibold">
                 Điều chỉnh số dư ví
             </a>
-            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-0 px-3">
                 Quản lý người dùng
             </a>
         </div>
@@ -29,14 +29,14 @@
     <!-- Alert / Toast -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm border-0 mb-4" role="alert">
             @TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm border-0 mb-4" role="alert">
             @TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -45,7 +45,7 @@
     <!-- Stat KPI Cards -->
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-warning border-4">
+            <div class="card border-0 shadow-sm rounded-0 p-3 bg-white h-100 border-start border-warning border-4">
                 <span class="text-muted small fw-semibold text-uppercase">Chờ Quản trị duyệt</span>
                 <h3 class="fw-bold text-warning mt-2 mb-0">@Model.TongSoChoXuLy <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
                 <div class="small text-muted mt-2 pt-2 border-top">Tổng tiền chờ giải ngân: <strong class="text-dark">@Model.TongTienChoXuLy.ToString("N0") VNĐ</strong></div>
@@ -53,7 +53,7 @@
         </div>
 
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-success border-4">
+            <div class="card border-0 shadow-sm rounded-0 p-3 bg-white h-100 border-start border-success border-4">
                 <span class="text-muted small fw-semibold text-uppercase">Đã duyệt giải ngân</span>
                 <h3 class="fw-bold text-success mt-2 mb-0">@Model.TongSoHoanThanh <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
                 <div class="small text-muted mt-2 pt-2 border-top">Đã tất toán chuyển khoản ngân hàng</div>
@@ -61,7 +61,7 @@
         </div>
 
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-danger border-4">
+            <div class="card border-0 shadow-sm rounded-0 p-3 bg-white h-100 border-start border-danger border-4">
                 <span class="text-muted small fw-semibold text-uppercase">Bị từ chối / Hủy</span>
                 <h3 class="fw-bold text-danger mt-2 mb-0">@Model.TongSoTuChoi <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
                 <div class="small text-muted mt-2 pt-2 border-top">Tiền đã hoàn lại ví khả dụng người dùng</div>
@@ -72,25 +72,25 @@
     <!-- Filter Pills Navigation -->
     <div class="d-flex flex-wrap gap-2 mb-3">
         <a href="/Admin/DuyetRutTien?trangThai=ChoXuLy" 
-           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "ChoXuLy" ? "btn-warning text-dark shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "ChoXuLy" ? "btn-warning text-dark shadow-sm" : "btn-outline-secondary bg-white")">
             Chờ xử lý (@Model.TongSoChoXuLy)
         </a>
         <a href="/Admin/DuyetRutTien?trangThai=TatCa" 
-           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "TatCa" ? "btn-dark shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "TatCa" ? "btn-dark shadow-sm" : "btn-outline-secondary bg-white")">
             Tất cả (@(Model.TongSoChoXuLy + Model.TongSoHoanThanh + Model.TongSoTuChoi))
         </a>
         <a href="/Admin/DuyetRutTien?trangThai=HoanThanh" 
-           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "HoanThanh" ? "btn-success shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "HoanThanh" ? "btn-success shadow-sm" : "btn-outline-secondary bg-white")">
             Đã hoàn thành (@Model.TongSoHoanThanh)
         </a>
         <a href="/Admin/DuyetRutTien?trangThai=TuChoi" 
-           class="btn btn-sm rounded-pill px-3 fw-semibold @(Model.CurrentFilter == "TuChoi" ? "btn-danger shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "TuChoi" ? "btn-danger shadow-sm" : "btn-outline-secondary bg-white")">
             Từ chối (@Model.TongSoTuChoi)
         </a>
     </div>
 
     <!-- Table of Requests -->
-    <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-0 bg-white overflow-hidden">
         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
             <h5 class="fw-bold text-dark mb-0">Danh sách Yêu cầu Rút tiền</h5>
             <span class="text-muted small">Hiển thị @Model.DanhSachYeuCau.Count bản ghi</span>
@@ -247,8 +247,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top py-2">
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4 shadow-sm">Xác nhận Từ chối</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-0 px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger btn-sm rounded-0 px-4 shadow-sm">Xác nhận Từ chối</button>
                 </div>
             </form>
         </div>

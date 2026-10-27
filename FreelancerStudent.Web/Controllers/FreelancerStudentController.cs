@@ -441,6 +441,105 @@ namespace FreelancerStudent.Web.Controllers
             return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
         }
 
+        // Cập nhật thông tin cơ bản: Địa điểm, Ngôn ngữ, Kỹ năng cơ bản, Mức giá tham khảo trực tiếp từ trang Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatThongTinCoBan(string diaDiem, string? ngonNgu, string? kyNangCoBan, decimal? chiPhiTu)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (string.IsNullOrWhiteSpace(diaDiem))
+            {
+                TempData["ErrorMessage"] = "Địa điểm làm việc / sinh sống không được để trống.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (diaDiem.Trim().Length > 100)
+            {
+                TempData["ErrorMessage"] = "Địa điểm không được vượt quá 100 ký tự.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (!string.IsNullOrWhiteSpace(ngonNgu) && ngonNgu.Trim().Length > 100)
+            {
+                TempData["ErrorMessage"] = "Ngôn ngữ không được vượt quá 100 ký tự.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (!string.IsNullOrWhiteSpace(kyNangCoBan) && kyNangCoBan.Trim().Length > 150)
+            {
+                TempData["ErrorMessage"] = "Kỹ năng cơ bản không được vượt quá 150 ký tự.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (chiPhiTu.HasValue && chiPhiTu.Value < 0)
+            {
+                TempData["ErrorMessage"] = "Mức giá tham khảo không được là số âm.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            var model = new CapNhatThongTinCoBanViewModel
+            {
+                MaUser = maUser.Value,
+                DiaDiemFreelancerStudent = diaDiem.Trim(),
+                NgonNgu = string.IsNullOrWhiteSpace(ngonNgu) ? null : ngonNgu.Trim(),
+                KyNangCoBan = string.IsNullOrWhiteSpace(kyNangCoBan) ? null : kyNangCoBan.Trim(),
+                ChiPhiTu = chiPhiTu
+            };
+
+            var res = await _freelancerStudentWebService.capNhatThongTinCoBanAsync(model);
+            if (res.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật thông tin cơ bản thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = res.message ?? "Không thể cập nhật thông tin cơ bản.";
+            }
+
+            return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+        }
+
+        // Cập nhật điểm GPA học tập trực tiếp từ trang Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatGPA(double? gpa)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (!gpa.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập điểm GPA.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (gpa.Value < 0.0 || gpa.Value > 4.0)
+            {
+                TempData["ErrorMessage"] = "Điểm GPA phải nằm trong khoảng hợp lệ từ 0.0 đến 4.0.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            var res = await _freelancerStudentWebService.capNhatGPAAsync(maUser.Value, gpa.Value);
+            if (res.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật điểm GPA học tập thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = res.message ?? "Không thể cập nhật điểm GPA.";
+            }
+
+            return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+        }
+
 
         //Tuấn
         [HttpGet]
