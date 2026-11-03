@@ -7,17 +7,21 @@ import '../../models/mo_hinh_bai_dang_tuyen_dung.dart';
 import '../../services/dich_vu_cong_viec.dart';
 import '../../services/dich_vu_minh_chung.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
+import '../../viewmodels/viewmodel_yeu_thich.dart';
 import '../applications/man_hinh_danh_sach_ung_vien.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
 import '../employer/man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
+import '../profile/man_hinh_ho_so_nha_tuyen_dung.dart';
 import '../profile/man_hinh_minh_chung_the_sv.dart';
 import 'bang_ung_tuyen_cong_viec.dart';
 
 /// Chi tiết công việc: dữ liệu thật từ `GET api/JobPost/ChiTietJobPost/{maJob}`.
 class JobDetailScreen extends StatefulWidget {
-  final JobPostModel job;
+  final JobPostModel? job;
+  final String? maJob;
 
-  const JobDetailScreen({super.key, required this.job});
+  const JobDetailScreen({super.key, this.job, this.maJob})
+      : assert(job != null || maJob != null, 'Phải cung cấp job hoặc maJob');
 
   @override
   State<JobDetailScreen> createState() => _JobDetailScreenState();
@@ -33,14 +37,29 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _job = widget.job;
+    _job = widget.job ?? JobPostModel.taoMoi(maJob: widget.maJob ?? '');
     _taiChiTiet();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authUser = context.read<AuthViewModel>().currentUser;
+      if (authUser != null) {
+        final effectiveMaJob = _job.maJob.isNotEmpty
+            ? _job.maJob
+            : (widget.maJob ?? '');
+        if (effectiveMaJob.isNotEmpty) {
+          context
+              .read<YeuThichViewModel>()
+              .kiemTraLuuViec(authUser.userId, effectiveMaJob);
+        }
+      }
+    });
   }
 
   Future<void> _taiChiTiet() async {
-    final effectiveMaJob = widget.job.maJob.trim().isNotEmpty
-        ? widget.job.maJob.trim()
-        : widget.job.id.trim();
+    final effectiveMaJob = _job.maJob.trim().isNotEmpty
+        ? _job.maJob.trim()
+        : _job.id.trim().isNotEmpty
+            ? _job.id.trim()
+            : widget.maJob?.trim() ?? '';
 
     if (effectiveMaJob.isEmpty) return;
 
@@ -56,31 +75,33 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       if (res.isSuccess && res.data != null && res.data!.title.isNotEmpty) {
         // Giữ lại các trường gợi ý nếu có từ danh sách trước đó
         final chiTietMoi = res.data!;
+        final cu = _job;
         _job = JobPostModel(
-          maJob: chiTietMoi.maJob.isNotEmpty ? chiTietMoi.maJob : widget.job.maJob,
+          maJob: chiTietMoi.maJob.isNotEmpty ? chiTietMoi.maJob : cu.maJob,
           maNhaTuyenDung: chiTietMoi.maNhaTuyenDung.isNotEmpty
               ? chiTietMoi.maNhaTuyenDung
-              : widget.job.maNhaTuyenDung,
-          tieude: chiTietMoi.tieude.isNotEmpty ? chiTietMoi.tieude : widget.job.tieude,
-          mota: chiTietMoi.mota.isNotEmpty ? chiTietMoi.mota : widget.job.mota,
+              : cu.maNhaTuyenDung,
+          tieude: chiTietMoi.tieude.isNotEmpty ? chiTietMoi.tieude : cu.tieude,
+          mota: chiTietMoi.mota.isNotEmpty ? chiTietMoi.mota : cu.mota,
           kynangyeucau: chiTietMoi.kynangyeucau.isNotEmpty
               ? chiTietMoi.kynangyeucau
-              : widget.job.kynangyeucau,
-          thulao: chiTietMoi.thulao > 0 ? chiTietMoi.thulao : widget.job.thulao,
-          status: chiTietMoi.status.isNotEmpty ? chiTietMoi.status : widget.job.status,
+              : cu.kynangyeucau,
+          thulao: chiTietMoi.thulao > 0 ? chiTietMoi.thulao : cu.thulao,
+          status: chiTietMoi.status.isNotEmpty ? chiTietMoi.status : cu.status,
           soluongtuyen: chiTietMoi.soluongtuyen > 0
               ? chiTietMoi.soluongtuyen
-              : widget.job.soluongtuyen,
-          nganSachMin: chiTietMoi.nganSachMin ?? widget.job.nganSachMin,
-          nganSachMax: chiTietMoi.nganSachMax ?? widget.job.nganSachMax,
-          tenNhaTuyenDung: chiTietMoi.tenNhaTuyenDung ?? widget.job.tenNhaTuyenDung,
+              : cu.soluongtuyen,
+          daTuyenDu: chiTietMoi.daTuyenDu || cu.daTuyenDu,
+          nganSachMin: chiTietMoi.nganSachMin ?? cu.nganSachMin,
+          nganSachMax: chiTietMoi.nganSachMax ?? cu.nganSachMax,
+          tenNhaTuyenDung: chiTietMoi.tenNhaTuyenDung ?? cu.tenNhaTuyenDung,
           avatarNhaTuyenDung:
-              chiTietMoi.avatarNhaTuyenDung ?? widget.job.avatarNhaTuyenDung,
-          ngayHetHan: chiTietMoi.ngayHetHan ?? widget.job.ngayHetHan,
-          doPhuHop: widget.job.doPhuHop ?? chiTietMoi.doPhuHop,
-          lyDoGoiY: widget.job.lyDoGoiY ?? chiTietMoi.lyDoGoiY,
-          kyNangTrungKhop: widget.job.kyNangTrungKhop.isNotEmpty
-              ? widget.job.kyNangTrungKhop
+              chiTietMoi.avatarNhaTuyenDung ?? cu.avatarNhaTuyenDung,
+          ngayHetHan: chiTietMoi.ngayHetHan ?? cu.ngayHetHan,
+          doPhuHop: cu.doPhuHop ?? chiTietMoi.doPhuHop,
+          lyDoGoiY: cu.lyDoGoiY ?? chiTietMoi.lyDoGoiY,
+          kyNangTrungKhop: cu.kyNangTrungKhop.isNotEmpty
+              ? cu.kyNangTrungKhop
               : chiTietMoi.kyNangTrungKhop,
         );
       } else if (!res.isSuccess) {
@@ -90,6 +111,25 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _ungTuyen() async {
+    if (_job.isDaHoanThanh) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Công việc đã hoàn thành nghiệm thu, không thể ứng tuyển.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+    if (_job.isDaTuyenDu) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Công việc đã tuyển đủ ứng viên, không thể ứng tuyển thêm.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     final currentUser = context.read<AuthViewModel>().currentUser;
     if (currentUser != null && currentUser.userId > 0) {
       final minhChungService = MinhChungService();
@@ -169,7 +209,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         currentUser.role.toLowerCase() == 'nhatuyendung';
 
     final statusStr = _job.trangThai.toLowerCase();
-    final dangTuyen = statusStr == 'dangtuyen' || statusStr.isEmpty;
+    final isDaHoanThanh = _job.isDaHoanThanh;
+    final isDaTuyenDu = _job.isDaTuyenDu;
+    final dangTuyen = !isDaHoanThanh && !isDaTuyenDu && (statusStr == 'dangtuyen' || statusStr.isEmpty);
+    final String trangThaiHienThi = isDaHoanThanh
+        ? 'Đã hoàn thành'
+        : (isDaTuyenDu
+            ? 'Đã tuyển đủ'
+            : (dangTuyen ? 'Đang tuyển' : 'Đã đóng'));
     final tenNtd = _job.tenNhaTuyenDung ?? 'Doanh nghiệp tuyển dụng';
     final phanTramPhuHop = _job.phanTramPhuHop;
 
@@ -192,6 +239,41 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             fontSize: 18,
           ),
         ),
+        actions: [
+          Consumer<YeuThichViewModel>(
+            builder: (context, yeuThichVM, _) {
+              final effectiveMaJob = _job.maJob.isNotEmpty
+                  ? _job.maJob
+                  : (widget.job?.maJob ?? widget.maJob ?? '');
+              final daLuu = yeuThichVM.daLuuViec(effectiveMaJob);
+              return IconButton(
+                icon: Icon(
+                  daLuu ? Icons.bookmark : Icons.bookmark_border,
+                  color: daLuu ? AppColors.primary : AppColors.heading,
+                ),
+                tooltip: daLuu ? 'Bỏ lưu việc' : 'Lưu công việc',
+                onPressed: () async {
+                  final authUser = context.read<AuthViewModel>().currentUser;
+                  if (authUser == null) return;
+                  final ketQua = await yeuThichVM.toggleLuuViec(
+                      authUser.userId, effectiveMaJob);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(ketQua
+                            ? 'Đã lưu công việc thành công'
+                            : 'Đã bỏ lưu công việc'),
+                        backgroundColor: AppColors.primary,
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.heading,
         elevation: 0.5,
@@ -309,25 +391,44 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tenNtd,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.heading,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () {
+                            final maNTD = int.tryParse(_job.maNhaTuyenDung) ?? 0;
+                            final maUserNTD = _job.maUser ?? 0;
+                            if (maNTD > 0 || maUserNTD > 0) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NhaTuyenDungProfileScreen(
+                                    maNhaTuyenDung: maNTD > 0 ? maNTD : null,
+                                    maUser: maUserNTD > 0 ? maUserNTD : null,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tenNtd,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.heading,
+                                ),
                               ),
-                            ),
-                            const Text(
-                              'Nhà tuyển dụng xác thực',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.bodyText,
+                              const Text(
+                                'Xem hồ sơ Nhà tuyển dụng →',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       if (_job.maNhaTuyenDung.isNotEmpty)
@@ -419,7 +520,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       const SizedBox(width: 12),
                       _TheChiTietItem(
                         tieuDe: 'Trạng thái',
-                        giaTri: dangTuyen ? 'Đang tuyển' : 'Đã đóng',
+                        giaTri: trangThaiHienThi,
                       ),
                     ],
                   ),
@@ -618,7 +719,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       child: ElevatedButton(
                         onPressed: dangTuyen ? _ungTuyen : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: dangTuyen
+                              ? AppColors.primary
+                              : (isDaHoanThanh
+                                  ? Colors.grey.shade600
+                                  : (isDaTuyenDu ? Colors.amber.shade700 : Colors.grey)),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -626,9 +731,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           elevation: 0,
                         ),
                         child: Text(
-                          dangTuyen
-                              ? 'Ứng tuyển công việc này'
-                              : 'Công việc đã đóng tuyển',
+                          isDaHoanThanh
+                              ? 'Công việc đã hoàn thành'
+                              : (isDaTuyenDu
+                                  ? 'Công việc đã tuyển đủ'
+                                  : (dangTuyen
+                                      ? 'Ứng tuyển công việc này'
+                                      : 'Công việc đã đóng tuyển')),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,

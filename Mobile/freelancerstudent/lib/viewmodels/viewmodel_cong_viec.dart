@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/mo_hinh_bai_dang_tuyen_dung.dart';
 import '../services/dich_vu_cong_viec.dart';
@@ -16,9 +16,23 @@ class JobViewModel extends ChangeNotifier {
   bool _daTaiDanhSach = false;
   int _requestId = 0;
 
+  // Bộ lọc nâng cao đồng bộ Web Views/JobPost/Index.cshtml
+  String _tuKhoaHienTai = '';
+  String _mucThuLaoLoc = 'tat-ca'; // tat-ca, duoi-1tr, 1tr-3tr, 3tr-10tr, tren-10tr
+  String _trangThaiLoc = 'tat-ca'; // tat-ca, DangTuyen, DaHoanThanh
+  String _thuTuSapXep = 'moi-nhat'; // moi-nhat, luong-cao, luong-thap
+
   bool get dangTai => _dangTai;
   List<JobPostModel> get danhSachJobPost => _danhSachJobPost;
   String? get thongBaoLoi => _thongBaoLoi;
+  String get mucThuLaoLoc => _mucThuLaoLoc;
+  String get trangThaiLoc => _trangThaiLoc;
+  String get thuTuSapXep => _thuTuSapXep;
+
+  bool get dangCoBoLocNangCao =>
+      _mucThuLaoLoc != 'tat-ca' ||
+      _trangThaiLoc != 'tat-ca' ||
+      _thuTuSapXep != 'moi-nhat';
 
   // Trạng thái gợi ý việc làm
   bool _dangTaiGoiY = false;
@@ -53,12 +67,12 @@ class JobViewModel extends ChangeNotifier {
     String tuKhoa = '',
     bool lamMoi = false,
   }) async {
-    final query = tuKhoa.trim().toLowerCase();
-    if (_daTaiDanhSach && query.isNotEmpty && !lamMoi) {
+    _tuKhoaHienTai = tuKhoa.trim().toLowerCase();
+    if (_daTaiDanhSach && _tuKhoaHienTai.isNotEmpty && !lamMoi) {
       _requestId++;
       _dangTai = false;
       _thongBaoLoi = null;
-      _danhSachJobPost = _locCongViec(_tatCaJobPost, query);
+      _danhSachJobPost = _locCongViec(_tatCaJobPost, _tuKhoaHienTai);
       if (_danhSachJobPost.isEmpty) {
         _thongBaoLoi = 'Chưa có công việc nào phù hợp.';
       }
@@ -80,7 +94,7 @@ class JobViewModel extends ChangeNotifier {
     if (response.isSuccess) {
       _tatCaJobPost = response.data ?? <JobPostModel>[];
       _daTaiDanhSach = true;
-      _danhSachJobPost = _locCongViec(_tatCaJobPost, query);
+      _danhSachJobPost = _locCongViec(_tatCaJobPost, _tuKhoaHienTai);
       if (_danhSachJobPost.isEmpty) {
         _thongBaoLoi = 'Chưa có công việc nào phù hợp.';
       }
@@ -92,6 +106,37 @@ class JobViewModel extends ChangeNotifier {
     }
 
     _dangTai = false;
+    notifyListeners();
+  }
+
+  void datBoLocThuLao(String mucThuLao) {
+    _mucThuLaoLoc = mucThuLao;
+    _apDungLaiBoLoc();
+  }
+
+  void datBoLocTrangThai(String trangThai) {
+    _trangThaiLoc = trangThai;
+    _apDungLaiBoLoc();
+  }
+
+  void datThuTuSapXep(String thuTu) {
+    _thuTuSapXep = thuTu;
+    _apDungLaiBoLoc();
+  }
+
+  void xoaBoLocNangCao() {
+    _mucThuLaoLoc = 'tat-ca';
+    _trangThaiLoc = 'tat-ca';
+    _thuTuSapXep = 'moi-nhat';
+    _apDungLaiBoLoc();
+  }
+
+  void _apDungLaiBoLoc() {
+    _thongBaoLoi = null;
+    _danhSachJobPost = _locCongViec(_tatCaJobPost, _tuKhoaHienTai);
+    if (_danhSachJobPost.isEmpty) {
+      _thongBaoLoi = 'Chưa có công việc nào phù hợp với bộ lọc.';
+    }
     notifyListeners();
   }
 
@@ -168,10 +213,52 @@ class JobViewModel extends ChangeNotifier {
   }
 
   List<JobPostModel> _locCongViec(List<JobPostModel> jobs, String query) {
-    if (query.isEmpty) return jobs;
-    return jobs.where((job) {
-      return job.tieude.toLowerCase().contains(query) ||
-          job.kynangyeucau.toLowerCase().contains(query);
+    final ketQua = jobs.where((job) {
+      final khopTuKhoa = query.isEmpty ||
+          job.tieude.toLowerCase().contains(query) ||
+          job.kynangyeucau.toLowerCase().contains(query) ||
+          (job.tenNhaTuyenDung ?? '').toLowerCase().contains(query);
+
+      if (!khopTuKhoa) return false;
+
+      // Lọc theo mức thù lao
+      final thuLao = job.budget;
+      bool khopThuLao = true;
+      switch (_mucThuLaoLoc) {
+        case 'duoi-1tr':
+          khopThuLao = thuLao < 1000000;
+          break;
+        case '1tr-3tr':
+          khopThuLao = thuLao >= 1000000 && thuLao <= 3000000;
+          break;
+        case '3tr-10tr':
+          khopThuLao = thuLao > 3000000 && thuLao <= 10000000;
+          break;
+        case 'tren-10tr':
+          khopThuLao = thuLao > 10000000;
+          break;
+      }
+      if (!khopThuLao) return false;
+
+      // Lọc theo trạng thái
+      if (_trangThaiLoc == 'DangTuyen') {
+        if (job.isDaHoanThanh || job.isDaTuyenDu || job.status != 'DangTuyen') {
+          return false;
+        }
+      } else if (_trangThaiLoc == 'DaHoanThanh') {
+        if (!job.isDaHoanThanh) return false;
+      }
+
+      return true;
     }).toList();
+
+    // Sắp xếp
+    if (_thuTuSapXep == 'luong-cao') {
+      ketQua.sort((a, b) => b.budget.compareTo(a.budget));
+    } else if (_thuTuSapXep == 'luong-thap') {
+      ketQua.sort((a, b) => a.budget.compareTo(b.budget));
+    }
+
+    return ketQua;
   }
 }

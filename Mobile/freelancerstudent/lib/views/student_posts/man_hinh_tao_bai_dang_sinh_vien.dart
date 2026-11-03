@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
+import '../../models/mo_hinh_bai_dang_sinh_vien.dart';
 import '../../services/dich_vu_bai_dang_sinh_vien.dart';
 import '../../services/dich_vu_minh_chung.dart';
 import '../../viewmodels/viewmodel_bai_dang_sinh_vien.dart';
@@ -9,7 +10,12 @@ import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../profile/man_hinh_minh_chung_the_sv.dart';
 
 class CreateStudentPostScreen extends StatefulWidget {
-  const CreateStudentPostScreen({super.key});
+  final StudentPostModel? baiDangCanSua;
+
+  const CreateStudentPostScreen({
+    super.key,
+    this.baiDangCanSua,
+  });
 
   @override
   State<CreateStudentPostScreen> createState() => _CreateStudentPostScreenState();
@@ -41,6 +47,22 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
 
   final StudentPostService _service = StudentPostService();
   bool _dangXuLy = false;
+
+  bool get _laChinhSua => widget.baiDangCanSua != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final post = widget.baiDangCanSua;
+    if (post != null) {
+      _tieuDeController.text = post.tieuDe;
+      _moTaController.text = post.moTa;
+      if (post.mucGiaTu > 0) {
+        _mucGiaController.text = post.mucGiaTu.toInt().toString();
+      }
+      _selectedSkills.addAll(post.kyNangList);
+    }
+  }
 
   @override
   void dispose() {
@@ -81,54 +103,56 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
     final user = context.read<AuthViewModel>().currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng đăng nhập để đăng tin tìm việc.')),
+        const SnackBar(content: Text('Vui lòng đăng nhập để thực hiện thao tác này.')),
       );
       return;
     }
 
     setState(() => _dangXuLy = true);
 
-    // Kiểm tra trạng thái xác thực minh chứng sinh viên
-    final minhChungService = MinhChungService();
-    final xacThucRes = await minhChungService.kiemTraTrangThaiXacThuc(user.userId);
-    if (xacThucRes.isSuccess && xacThucRes.data != null && xacThucRes.data!['daXacMinh'] != true) {
-      if (!mounted) return;
-      setState(() => _dangXuLy = false);
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
-            children: [
-              Icon(Icons.shield_outlined, color: Colors.orange),
-              SizedBox(width: 8),
-              Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+    // Khi tạo mới, kiểm tra trạng thái xác thực minh chứng sinh viên
+    if (!_laChinhSua) {
+      final minhChungService = MinhChungService();
+      final xacThucRes = await minhChungService.kiemTraTrangThaiXacThuc(user.userId);
+      if (xacThucRes.isSuccess && xacThucRes.data != null && xacThucRes.data!['daXacMinh'] != true) {
+        if (!mounted) return;
+        setState(() => _dangXuLy = false);
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.shield_outlined, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Text(
+              xacThucRes.data!['thongBao']?.toString() ??
+                  'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi đăng bài tìm việc!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Để sau'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
+                  );
+                },
+                child: const Text('Xác thực thẻ SV', style: TextStyle(color: Colors.white)),
+              ),
             ],
           ),
-          content: Text(
-            xacThucRes.data!['thongBao']?.toString() ??
-                'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi đăng bài tìm việc!',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Để sau'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              onPressed: () {
-                Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
-                );
-              },
-              child: const Text('Xác thực thẻ SV', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      );
-      return;
+        );
+        return;
+      }
     }
 
     final rawGia = _mucGiaController.text.replaceAll(RegExp(r'[^0-9]'), '');
@@ -138,8 +162,6 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
         ? _selectedSkills.join(', ')
         : _kyNangController.text.trim();
 
-    setState(() => _dangXuLy = true);
-
     final duLieu = {
       'maUser': user.userId,
       'tieude': _tieuDeController.text.trim(),
@@ -148,13 +170,46 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
       'mota': _moTaController.text.trim(),
     };
 
+    if (_laChinhSua) {
+      final res = await _service.capNhatBaiDangTimViec(
+        widget.baiDangCanSua!.maBaiDang,
+        duLieu,
+      );
+      if (!mounted) return;
+      setState(() => _dangXuLy = false);
+
+      if (res.isSuccess) {
+        final vm = context.read<StudentPostViewModel>();
+        await vm.taiDanhSachBaiDangCuaToi(user.userId);
+        await vm.taiDanhSachBaiDangTimViec();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res.message.isNotEmpty ? res.message : 'Cập nhật bài đăng tìm việc thành công!'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res.message.isNotEmpty ? res.message : 'Cập nhật bài đăng thất bại, vui lòng thử lại.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
     final res = await _service.taoBaiDangTimViec(duLieu);
 
     if (!mounted) return;
     setState(() => _dangXuLy = false);
 
     if (res.isSuccess) {
-      await context.read<StudentPostViewModel>().taiDanhSachBaiDangTimViec();
+      final vm = context.read<StudentPostViewModel>();
+      await vm.taiDanhSachBaiDangCuaToi(user.userId);
+      await vm.taiDanhSachBaiDangTimViec();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -162,7 +217,7 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
           backgroundColor: AppColors.primary,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -178,7 +233,7 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Tạo tin tìm việc'),
+        title: Text(_laChinhSua ? 'Chỉnh sửa bài tìm việc' : 'Tạo tin tìm việc'),
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.heading,
         elevation: 0.5,
@@ -197,16 +252,18 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: AppColors.primary.withAlpha(50)),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: AppColors.primary, size: 20),
-                      SizedBox(width: 8),
+                      const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Đăng tin giúp các Nhà tuyển dụng dễ dàng tìm thấy và gửi lời mời hợp tác trực tiếp cho bạn.',
-                          style: TextStyle(fontSize: 13, color: AppColors.heading),
+                          _laChinhSua
+                              ? 'Cập nhật thông tin chính xác giúp tăng cơ hội nhận được lời mời hợp tác từ Nhà tuyển dụng.'
+                              : 'Đăng tin giúp các Nhà tuyển dụng dễ dàng tìm thấy và gửi lời mời hợp tác trực tiếp cho bạn.',
+                          style: const TextStyle(fontSize: 13, color: AppColors.heading),
                         ),
                       ),
                     ],
@@ -418,7 +475,7 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Nút đăng bài
+              // Nút đăng bài / cập nhật
               FilledButton(
                 onPressed: _dangXuLy ? null : _guiBaiDang,
                 style: FilledButton.styleFrom(
@@ -432,9 +489,9 @@ class _CreateStudentPostScreenState extends State<CreateStudentPostScreen> {
                         width: 20,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text(
-                        'ĐĂNG BÀI TÌM VIỆC',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    : Text(
+                        _laChinhSua ? 'LƯU CẬP NHẬT BÀI ĐĂNG' : 'ĐĂNG BÀI TÌM VIỆC',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               ),
             ],

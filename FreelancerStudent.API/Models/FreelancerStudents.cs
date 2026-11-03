@@ -56,6 +56,7 @@ namespace FreelancerStudent.API.Models
         [Required]
         public bool trangthaiNhanViec { get; set; } = true;
 
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? chiPhiTu { get; set; }
 
         [Column(TypeName = "decimal(3,2)")]

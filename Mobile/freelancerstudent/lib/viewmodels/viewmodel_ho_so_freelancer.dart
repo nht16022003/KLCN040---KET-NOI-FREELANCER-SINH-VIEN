@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/network/phan_hoi_api.dart';
 import '../models/mo_hinh_chinh_sua_ho_so_freelancer.dart';
@@ -60,6 +60,38 @@ class FreelancerProfileViewModel extends ChangeNotifier {
     return response.isSuccess;
   }
 
+  Future<bool> updatePortfolioInfo({
+    required int freelancerId,
+    String? moTaBanThan,
+    String? urlVideo,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _service.updatePortfolioInfo(
+      freelancerId: freelancerId,
+      moTaBanThan: moTaBanThan,
+      urlVideo: urlVideo,
+    );
+    if (!response.isSuccess) {
+      _errorMessage = response.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final refreshed = await _service.getFreelancerProfileById(freelancerId);
+    if (refreshed.isSuccess && refreshed.data != null) {
+      _profile = refreshed.data;
+    } else {
+      _errorMessage = refreshed.message;
+    }
+    _isLoading = false;
+    notifyListeners();
+    return true;
+  }
+
   Future<bool> addPortfolioProject({
     required int freelancerId,
     required String projectName,
@@ -68,6 +100,7 @@ class FreelancerProfileViewModel extends ChangeNotifier {
     String? technologies,
     String? githubUrl,
     String? demoUrl,
+    String? fileUrl,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -81,6 +114,111 @@ class FreelancerProfileViewModel extends ChangeNotifier {
       technologies: technologies,
       githubUrl: githubUrl,
       demoUrl: demoUrl,
+      fileUrl: fileUrl,
+    );
+    if (!response.isSuccess) {
+      _errorMessage = response.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final refreshed = await _service.getFreelancerProfileById(freelancerId);
+    if (refreshed.isSuccess && refreshed.data != null) {
+      _profile = refreshed.data;
+    } else {
+      _errorMessage = refreshed.message;
+    }
+    _isLoading = false;
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> updatePortfolioProject({
+    required String maDA,
+    required int freelancerId,
+    required String projectName,
+    String? role,
+    String? description,
+    String? technologies,
+    String? githubUrl,
+    String? demoUrl,
+    String? fileUrl,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _service.updatePortfolioProject(
+      maDA: maDA,
+      freelancerId: freelancerId,
+      projectName: projectName,
+      role: role,
+      description: description,
+      technologies: technologies,
+      githubUrl: githubUrl,
+      demoUrl: demoUrl,
+      fileUrl: fileUrl,
+    );
+    if (!response.isSuccess) {
+      _errorMessage = response.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final refreshed = await _service.getFreelancerProfileById(freelancerId);
+    if (refreshed.isSuccess && refreshed.data != null) {
+      _profile = refreshed.data;
+    } else {
+      _errorMessage = refreshed.message;
+    }
+    _isLoading = false;
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> deletePortfolioProject({
+    required String maDA,
+    required int freelancerId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _service.deletePortfolioProject(
+      maDA: maDA,
+      freelancerId: freelancerId,
+    );
+    if (!response.isSuccess) {
+      _errorMessage = response.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final refreshed = await _service.getFreelancerProfileById(freelancerId);
+    if (refreshed.isSuccess && refreshed.data != null) {
+      _profile = refreshed.data;
+    } else {
+      _errorMessage = refreshed.message;
+    }
+    _isLoading = false;
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> updateFeaturedProjects({
+    required int freelancerId,
+    required List<String> maDAs,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final response = await _service.updateFeaturedProjects(
+      freelancerId: freelancerId,
+      maDAs: maDAs,
     );
     if (!response.isSuccess) {
       _errorMessage = response.message;

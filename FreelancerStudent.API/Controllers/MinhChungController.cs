@@ -186,11 +186,11 @@ namespace FreelancerStudent.API.Controllers
         /// Kiểm tra trạng thái xác thực minh chứng sinh viên
         /// </summary>
         [HttpGet("kiem-tra-xac-thuc/{maUser:int}")]
-        public async Task<IActionResult> KiemTraXacThuc(int maUser)
+        public async Task<IActionResult> KiemTraXacThuc(int maUser, [FromQuery] int? namHienTai = null)
         {
             try
             {
-                var result = await _minhChungService.KiemTraTrangThaiXacThucAsync(maUser);
+                var result = await _minhChungService.KiemTraTrangThaiXacThucAsync(maUser, namHienTai);
                 return Ok(new
                 {
                     success = true,

@@ -128,6 +128,11 @@ namespace FreelancerStudent.Web.ViewModels
         public DateTime? NgayXacMinh { get; set; }
         public string? LyDoTuChoi { get; set; }
         public int? MaMinhChungMoiNhat { get; set; }
+
+        // Bổ sung kiểm soát thời hạn niên khóa
+        public bool HetHanNienKhoa { get; set; }
+        public string? NienKhoa { get; set; }
+        public int? NamKetThucNienKhoa { get; set; }
     }
 }
 

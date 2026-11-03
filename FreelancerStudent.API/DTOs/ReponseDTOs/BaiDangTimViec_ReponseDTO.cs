@@ -1,4 +1,4 @@
-namespace FreelancerStudent.API.DTOs.ReponseDTOs
+﻿namespace FreelancerStudent.API.DTOs.ReponseDTOs
 {
     public class BaiDangTimViec_ReponseDTO
     {
@@ -19,5 +19,9 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
         public string? tenChuyenNganh { get; set; }
         public int namThu { get; set; }
         public double GPA { get; set; }
+        public double diemDanhGiaTrungBinh { get; set; } = 0;
+        public int soLuotDanhGia { get; set; } = 0;
+        public bool daXacMinhSinhVien { get; set; } = false;
+        public string? trangThaiXacMinh { get; set; }
     }
 }

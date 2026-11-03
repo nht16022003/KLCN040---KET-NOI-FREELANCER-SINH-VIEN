@@ -11,8 +11,11 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "temp-keys")))
     .SetApplicationName("FreelancerStudentApp");
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+// Add services to the container with KiemTraNienKhoaWebFilter
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<FreelancerStudent.Web.Filters.KiemTraNienKhoaWebFilter>();
+});
 
 //Cấu hình cho HttpClient gọi sang FreelancerStudent.API
 builder.Services.AddHttpClient("ApiClient", client =>
@@ -56,6 +59,7 @@ builder.Services.AddScoped<IAdminWebService, AdminWebService>();
 builder.Services.AddScoped<IThongBaoWebService, ThongBaoWebService>();
 builder.Services.AddScoped<IDanhGiaWebService, DanhGiaWebService>();
 builder.Services.AddScoped<IMinhChungWebService, MinhChungWebService>();
+builder.Services.AddScoped<IYeuThichWebService, YeuThichWebService>();
 
 var app = builder.Build();
 

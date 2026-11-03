@@ -86,6 +86,20 @@ namespace FreelancerStudent.API.Controllers
             }
         }
 
+        [HttpGet("PhiDangBaiHienTai")]
+        public async Task<IActionResult> LayPhiDangBaiHienTai()
+        {
+            try
+            {
+                var fee = await _jobPostService.layPhiDangBaiHienTaiAsync();
+                return Ok(new { success = true, data = fee });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi khi lấy mức phí đăng bài: " + ex.Message });
+            }
+        }
+
         [HttpPost("TaoJob")]
         public async Task<IActionResult> TaoJob([FromBody] JobPost_RequestDTO request)
         {

@@ -19,5 +19,7 @@ namespace FreelancerStudent.API.Services.Interfaces
         Task<bool> CapNhatMauHopDongAsync(AdminMauHopDongDTO model);
         Task<List<AdminYeuCauRutTienItemDTO>> LayDanhSachYeuCauRutTienAsync(string? trangThai);
         Task<bool> XuLyYeuCauRutTienAsync(AdminXuLyRutTienRequestDTO request);
+        Task<List<AdminCauHinhPhiDTO>> LayDanhSachCauHinhPhiAsync();
+        Task<bool> CapNhatPhiDangBaiAsync(AdminCapNhatPhiDangBaiRequestDTO request);
     }
 }

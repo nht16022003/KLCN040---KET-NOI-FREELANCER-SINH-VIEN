@@ -6,6 +6,7 @@ import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_bai_dang_sinh_vien.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
+import 'man_hinh_tao_bai_dang_sinh_vien.dart';
 
 class StudentPostDetailScreen extends StatelessWidget {
   final StudentPostModel post;
@@ -17,6 +18,7 @@ class StudentPostDetailScreen extends StatelessWidget {
     final authVM = context.watch<AuthViewModel>();
     final currentUser = authVM.currentUser;
     final isNTD = currentUser?.isEmployer == true;
+    final isOwner = currentUser != null && post.maUser > 0 && currentUser.userId == post.maUser;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -25,6 +27,24 @@ class StudentPostDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.heading,
         elevation: 0.5,
+        actions: [
+          if (isOwner)
+            IconButton(
+              tooltip: 'Chỉnh sửa bài đăng',
+              icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+              onPressed: () async {
+                final updated = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CreateStudentPostScreen(baiDangCanSua: post),
+                  ),
+                );
+                if (updated == true && context.mounted) {
+                  Navigator.pop(context, true);
+                }
+              },
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -172,10 +192,7 @@ class StudentPostDetailScreen extends StatelessWidget {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: post.kyNang
-                          .split(RegExp(r'[,;]'))
-                          .map((s) => s.trim())
-                          .where((s) => s.isNotEmpty)
+                      children: post.kyNangList
                           .map((tag) => Chip(
                                 label: Text(tag),
                                 backgroundColor: AppColors.lightGreenSurface,
@@ -221,6 +238,32 @@ class StudentPostDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+
+            // Nút hành động nếu là chủ bài đăng
+            if (isOwner)
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    final updated = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CreateStudentPostScreen(baiDangCanSua: post),
+                      ),
+                    );
+                    if (updated == true && context.mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Chỉnh sửa bài đăng này'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
 
             // Nút hành động nếu là Nhà tuyển dụng
             if (isNTD && post.maUser > 0)

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using FreelancerStudent.API.Data;
 using FreelancerStudent.API.DTOs.ReponseDTOs;
 using FreelancerStudent.API.DTOs.RequestDTOs;
+using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -1004,7 +1005,7 @@ namespace FreelancerStudent.API.Services
             };
         }
 
-        public async Task<KiemTraXacThuc_ResponseDTO> KiemTraTrangThaiXacThucAsync(int maUser)
+        public async Task<KiemTraXacThuc_ResponseDTO> KiemTraTrangThaiXacThucAsync(int maUser, int? currentYearOverride = null)
         {
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.maUser == maUser);
             if (user == null)
@@ -1028,6 +1029,11 @@ namespace FreelancerStudent.API.Services
                 };
             }
 
+            // Lấy thông tin hồ sơ sinh viên từ FreelancerStudents
+            var student = await _context.FreelancerStudents
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.maUser == maUser);
+
             var latest = await _context.MinhChung_FreelancerStudents
                 .AsNoTracking()
                 .Where(m => m.maUser == maUser)
@@ -1036,23 +1042,93 @@ namespace FreelancerStudent.API.Services
 
             if (latest == null)
             {
+                // Kiểm tra niên khóa trong hồ sơ sinh viên nếu có
+                var kqNk = NienKhoaHelper.KiemTraNienKhoa(student?.nienKhoa, currentYearOverride);
+                if (kqNk.HetHan)
+                {
+                    return new KiemTraXacThuc_ResponseDTO
+                    {
+                        DaXacMinh = false,
+                        HetHanNienKhoa = true,
+                        TrangThai = "HetHanNienKhoa",
+                        ThongBao = NienKhoaHelper.ThongBaoHetHan,
+                        NienKhoa = student?.nienKhoa,
+                        NamKetThucNienKhoa = kqNk.NamKetThuc
+                    };
+                }
+
                 return new KiemTraXacThuc_ResponseDTO
                 {
                     DaXacMinh = false,
                     TrangThai = "ChuaGui",
-                    ThongBao = "Bạn chưa nộp minh chứng Thẻ sinh viên. Vui lòng quét và xác thực Thẻ sinh viên để mở khóa tính năng này!"
+                    ThongBao = "Bạn chưa nộp minh chứng Thẻ sinh viên. Vui lòng quét và xác thực Thẻ sinh viên để mở khóa tính năng này!",
+                    NienKhoa = student?.nienKhoa,
+                    NamKetThucNienKhoa = kqNk.NamKetThuc
                 };
             }
 
             if (latest.trangThaiGuiMinhChung == "Đã xác minh")
             {
+                // 1. Xác định niên khóa từ hồ sơ FreelancerStudents hoặc file companion metadata (.meta.json)
+                string? nienKhoa = student?.nienKhoa;
+                if (string.IsNullOrWhiteSpace(nienKhoa))
+                {
+                    var metaPath = GetMetaFilePath(latest.fileMinhChung);
+                    if (!string.IsNullOrEmpty(metaPath) && File.Exists(metaPath))
+                    {
+                        try
+                        {
+                            var metaJson = await File.ReadAllTextAsync(metaPath);
+                            var meta = System.Text.Json.JsonSerializer.Deserialize<MinhChungMetaData>(metaJson);
+                            nienKhoa = meta?.NienKhoa;
+                        }
+                        catch { }
+                    }
+                }
+
+                // 2. Kiểm tra thời hạn niên khóa với năm hiện tại
+                var kqKiemTra = NienKhoaHelper.KiemTraNienKhoa(nienKhoa, currentYearOverride);
+
+                if (kqKiemTra.HetHan)
+                {
+                    return new KiemTraXacThuc_ResponseDTO
+                    {
+                        DaXacMinh = false,
+                        HetHanNienKhoa = true,
+                        TrangThai = "HetHanNienKhoa",
+                        ThongBao = NienKhoaHelper.ThongBaoHetHan,
+                        NgayXacMinh = latest.ngayXacMinh,
+                        MaMinhChungMoiNhat = latest.maMinhChung,
+                        NienKhoa = nienKhoa,
+                        NamKetThucNienKhoa = kqKiemTra.NamKetThuc
+                    };
+                }
+
+                if (kqKiemTra.KhongXacDinh)
+                {
+                    return new KiemTraXacThuc_ResponseDTO
+                    {
+                        DaXacMinh = false,
+                        HetHanNienKhoa = false,
+                        TrangThai = "SaiDinhDangNienKhoa",
+                        ThongBao = kqKiemTra.ThongBao,
+                        NgayXacMinh = latest.ngayXacMinh,
+                        MaMinhChungMoiNhat = latest.maMinhChung,
+                        NienKhoa = nienKhoa,
+                        NamKetThucNienKhoa = null
+                    };
+                }
+
                 return new KiemTraXacThuc_ResponseDTO
                 {
                     DaXacMinh = true,
+                    HetHanNienKhoa = false,
                     TrangThai = "DaXacMinh",
                     ThongBao = "Hồ sơ sinh viên đã được xác minh thành công.",
                     NgayXacMinh = latest.ngayXacMinh,
-                    MaMinhChungMoiNhat = latest.maMinhChung
+                    MaMinhChungMoiNhat = latest.maMinhChung,
+                    NienKhoa = nienKhoa,
+                    NamKetThucNienKhoa = kqKiemTra.NamKetThuc
                 };
             }
 
@@ -1063,7 +1139,8 @@ namespace FreelancerStudent.API.Services
                     DaXacMinh = false,
                     TrangThai = "DangGui",
                     ThongBao = "Minh chứng Thẻ sinh viên của bạn đang chờ Ban quản trị phê duyệt. Vui lòng chờ để mở khóa tính năng!",
-                    MaMinhChungMoiNhat = latest.maMinhChung
+                    MaMinhChungMoiNhat = latest.maMinhChung,
+                    NienKhoa = student?.nienKhoa
                 };
             }
 
@@ -1075,7 +1152,8 @@ namespace FreelancerStudent.API.Services
                     ? "Minh chứng thẻ sinh viên bị từ chối. Vui lòng quét lại ảnh thẻ rõ nét."
                     : $"Minh chứng thẻ sinh viên bị từ chối ({latest.lydoTuChoi}). Vui lòng quét lại ảnh thẻ rõ nét.",
                 LyDoTuChoi = latest.lydoTuChoi,
-                MaMinhChungMoiNhat = latest.maMinhChung
+                MaMinhChungMoiNhat = latest.maMinhChung,
+                NienKhoa = student?.nienKhoa
             };
         }
 

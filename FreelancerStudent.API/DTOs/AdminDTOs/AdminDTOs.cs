@@ -16,6 +16,8 @@ namespace FreelancerStudent.API.DTOs.AdminDTOs
         public int TongSoHopDong { get; set; }
         public decimal TongTienDangKyQuy { get; set; }
         public decimal TongDoanhThuHeThong { get; set; }
+        public decimal TongDoanhThuPhiDangBai { get; set; }
+        public decimal PhiDangBaiHienTai { get; set; }
         public List<AdminRecentTransactionDTO> GiaoDichMoiNhat { get; set; } = new();
     }
 
@@ -192,6 +194,31 @@ namespace FreelancerStudent.API.DTOs.AdminDTOs
 
         [MaxLength(255)]
         public string? LyDoTuChoi { get; set; }
+
+        public int? MaAdmin { get; set; }
+    }
+
+    // ==========================================
+    // 7. CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
+    // ==========================================
+    public class AdminCauHinhPhiDTO
+    {
+        public int MaCauHinh { get; set; }
+        public string TenCauHinh { get; set; } = string.Empty;
+        public decimal GiaTri { get; set; }
+        public string LoaiCauHinh { get; set; } = string.Empty;
+        public string? MoTa { get; set; }
+        public int? MaAdmin { get; set; }
+        public string? TenAdmin { get; set; }
+        public DateTime? NgayCapNhat { get; set; }
+        public bool HieuLuc { get; set; }
+    }
+
+    public class AdminCapNhatPhiDangBaiRequestDTO
+    {
+        [Required(ErrorMessage = "Vui lòng nhập mức phí đăng tin")]
+        [Range(0, 100000000, ErrorMessage = "Mức phí đăng tin phải từ 0 VNĐ trở lên")]
+        public decimal PhiDangBai { get; set; }
 
         public int? MaAdmin { get; set; }
     }

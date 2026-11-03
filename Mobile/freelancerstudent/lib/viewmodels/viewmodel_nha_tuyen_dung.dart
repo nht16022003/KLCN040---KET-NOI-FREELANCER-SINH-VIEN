@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/mo_hinh_nha_tuyen_dung.dart';
 import '../services/dich_vu_nha_tuyen_dung.dart';
@@ -12,12 +12,14 @@ class NhaTuyenDungViewModel extends ChangeNotifier {
   bool _dangTai = false;
   List<NhaTuyenDungModel> _danhSachNhaTuyenDung = <NhaTuyenDungModel>[];
   List<NhaTuyenDungModel> _danhSachLoc = <NhaTuyenDungModel>[];
+  NhaTuyenDungProfileModel? _profileChiTiet;
   String? _thongBaoLoi;
   String _tuKhoa = '';
   String _linhVucDaChon = '';
 
   bool get dangTai => _dangTai;
   List<NhaTuyenDungModel> get danhSachNhaTuyenDung => _danhSachLoc;
+  NhaTuyenDungProfileModel? get profileChiTiet => _profileChiTiet;
   int get tongSoNhaTuyenDung => _danhSachNhaTuyenDung.length;
   String? get thongBaoLoi => _thongBaoLoi;
   String get tuKhoa => _tuKhoa;
@@ -61,6 +63,42 @@ class NhaTuyenDungViewModel extends ChangeNotifier {
 
     _dangTai = false;
     notifyListeners();
+  }
+
+  /// Tải hồ sơ chi tiết Nhà tuyển dụng theo maNhaTuyenDung
+  Future<NhaTuyenDungProfileModel?> taiProfileNhaTuyenDung(int maNhaTuyenDung) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final res = await _service.layProfileNhaTuyenDung(maNhaTuyenDung);
+    if (res.isSuccess && res.data != null) {
+      _profileChiTiet = res.data;
+    } else {
+      _thongBaoLoi = res.message;
+    }
+
+    _dangTai = false;
+    notifyListeners();
+    return _profileChiTiet;
+  }
+
+  /// Tải hồ sơ chi tiết Nhà tuyển dụng theo maUser
+  Future<NhaTuyenDungProfileModel?> taiProfileNhaTuyenDungTheoUser(int maUser) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final res = await _service.layProfileNhaTuyenDungTheoUser(maUser);
+    if (res.isSuccess && res.data != null) {
+      _profileChiTiet = res.data;
+    } else {
+      _thongBaoLoi = res.message;
+    }
+
+    _dangTai = false;
+    notifyListeners();
+    return _profileChiTiet;
   }
 
   /// Tìm kiếm theo từ khóa (tên công ty, người liên hệ, địa chỉ)

@@ -32,11 +32,23 @@ namespace FreelancerStudent.API.Services
         public async Task<Portfolio_ReponseDTO?> capNhatPortfolioAsync(Portfolio_UpdateRequestDTO request)
         {
             var portfolio = await _repository.layTheoMaFreelancerAsync(request.maFreelancerStudents);
-            if (portfolio == null) return null;
-
-            portfolio.moTaBanThan = request.moTaBanThan;
-            portfolio.url_video = request.url_video;
-            await _repository.capNhatPortfolioAsync(portfolio);
+            if (portfolio == null)
+            {
+                // Tự động khởi tạo Portfolio nếu sinh viên chưa có
+                portfolio = await _repository.taoPortfolioAsync(new Portfolio
+                {
+                    maPortfolio = $"PF{Guid.NewGuid():N}"[..20],
+                    maFreelancerStudents = request.maFreelancerStudents,
+                    moTaBanThan = request.moTaBanThan,
+                    url_video = request.url_video
+                });
+            }
+            else
+            {
+                portfolio.moTaBanThan = request.moTaBanThan;
+                portfolio.url_video = request.url_video;
+                await _repository.capNhatPortfolioAsync(portfolio);
+            }
 
             return await layPortfolioAsync(request.maFreelancerStudents);
         }

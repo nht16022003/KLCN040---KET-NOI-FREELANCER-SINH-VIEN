@@ -39,6 +39,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxUaGlldExhcFRhaUtob2FuLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Admin/CauHinhHeThong.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ2F1SGluaEhlVGhvbmcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/Admin/ChiTietHopDong.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQ2hpVGlldEhvcERvbmcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -179,8 +183,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxVbmdUdXllbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/JobPost/ViecDaLuu.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSm9iUG9zdFxWaWVjRGFMdXUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/DanhSachUngVien.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhVHV5ZW5EdW5nXERhbmhTYWNoVW5nVmllbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/FreelancerYeuThich.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhVHV5ZW5EdW5nXEZyZWVsYW5jZXJZZXVUaGljaC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/KLTN/KLTN/Improve/FreelancerStudent.Web/Views/NhaTuyenDung/Index.cshtml]

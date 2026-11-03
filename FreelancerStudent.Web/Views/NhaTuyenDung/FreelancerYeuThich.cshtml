@@ -1,0 +1,214 @@
+@model List<FreelancerStudent.Web.ViewModels.FreelancerYeuThichViewModel>
+@{
+    ViewData["Title"] = "Freelancer yêu thích";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-heart-fill text-danger me-2"></i>Freelancer yêu thích
+            </h3>
+            <p class="text-muted small mb-0">
+                Danh sách các ứng viên Freelancer sinh viên bạn đã đánh dấu quan tâm để dễ dàng liên hệ và hợp tác.
+            </p>
+        </div>
+        <div class="mt-2 mt-sm-0">
+            <a href="/FreelancerStudent/Search" class="btn btn-outline-success rounded-0">
+                <i class="bi bi-person-search me-1"></i>Tìm thêm ứng viên
+            </a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- Trạng thái trống -->
+        <div class="text-center py-5 border bg-white rounded-0 p-5">
+            <div class="mb-3">
+                <i class="bi bi-heartbreak" style="font-size: 3.5rem; color: #adb5bd;"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Chưa có Freelancer nào trong danh sách yêu thích</h5>
+            <p class="text-muted small mb-4">
+                Khi tìm kiếm ứng viên hoặc xem hồ sơ năng lực, hãy nhấn "Lưu yêu thích" để đưa ứng viên vào danh sách này.
+            </p>
+            <a href="/FreelancerStudent/Search" class="btn btn-success rounded-0 px-4 py-2 fw-semibold">
+                Khám phá Freelancer ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <span class="text-muted small">
+                Tổng cộng: <strong class="text-dark">@Model.Count</strong> ứng viên yêu thích
+            </span>
+        </div>
+
+        <div class="row g-4" id="favoriteFreelancersContainer">
+            @foreach (var fl in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4" id="freelancer-card-@fl.maFreelancerStudent">
+                    <div class="card h-100 border rounded-0 shadow-sm p-4 bg-white position-relative hover-shadow transition d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- Header thẻ Freelancer -->
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img src="@(!string.IsNullOrWhiteSpace(fl.avatarUrl) ? fl.avatarUrl : $"https://ui-avatars.com/api/?size=120&background=E8F5E9&color=1B5E36&name={Uri.EscapeDataString(fl.hoTen)}")"
+                                     alt="@fl.hoTen" class="rounded-circle border" style="width: 54px; height: 54px; object-fit: cover;" />
+                                <div class="overflow-hidden">
+                                    <h6 class="fw-bold text-dark mb-1 text-truncate">
+                                        <a href="/FreelancerStudent/Profile/@fl.maFreelancerStudent" class="text-dark text-decoration-none hover-text-success">
+                                            @fl.hoTen
+                                        </a>
+                                    </h6>
+                                    <div class="text-muted small text-truncate">
+                                        @(string.IsNullOrWhiteSpace(fl.tenChuyenNganh) ? "Sinh viên" : fl.tenChuyenNganh)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Thông tin trường học & học vấn -->
+                            <div class="bg-light p-2 mb-3 rounded-0 border small text-muted">
+                                <div class="text-truncate">
+                                    <i class="bi bi-mortarboard me-1 text-success"></i>@(string.IsNullOrWhiteSpace(fl.tenTruong) ? "Đang cập nhật trường" : fl.tenTruong)
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span>Năm thứ @fl.namThu</span>
+                                    <span>GPA: <strong class="text-dark">@fl.gpa.ToString("0.0#")</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Điểm đánh giá & Trạng thái -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    @if (fl.soLuotDanhGia > 0)
+                                    {
+                                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-0 px-2 py-1">
+                                            <i class="bi bi-star-fill text-warning me-1"></i>@fl.diemDanhGiaTrungBinh.ToString("0.0") (@fl.soLuotDanhGia)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border rounded-0 px-2 py-1">
+                                            Chưa có đánh giá
+                                        </span>
+                                    }
+                                </div>
+                                <div>
+                                    @if (fl.trangThaiNhanViec)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-0">
+                                            Đang nhận việc
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-0">
+                                            Tạm ngưng
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Kỹ năng -->
+                            @if (fl.kyNangs != null && fl.kyNangs.Any())
+                            {
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    @foreach (var k in fl.kyNangs.Take(4))
+                                    {
+                                        <span class="badge bg-light text-dark border rounded-0" style="font-size: 0.72rem;">
+                                            @k
+                                        </span>
+                                    }
+                                    @if (fl.kyNangs.Count > 4)
+                                    {
+                                        <span class="badge bg-light text-muted border rounded-0" style="font-size: 0.72rem;">
+                                            +@(fl.kyNangs.Count - 4)
+                                        </span>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Mức giá tham khảo -->
+                            <div class="mb-3 small">
+                                <span class="text-muted">Chi phí tham khảo: </span>
+                                <span class="fw-bold text-success">
+                                    @(fl.chiPhiTu.HasValue && fl.chiPhiTu > 0 
+                                        ? fl.chiPhiTu.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ/dự án" 
+                                        : "Thỏa thuận")
+                                </span>
+                            </div>
+
+                            <div class="text-muted small mb-3" style="font-size: 0.75rem;">
+                                <i class="bi bi-calendar-check me-1"></i>Đã lưu: @fl.ngayLuu.ToString("dd/MM/yyyy HH:mm")
+                                @if (!string.IsNullOrWhiteSpace(fl.ghiChu))
+                                {
+                                    <div class="mt-1 fst-italic text-secondary">Ghi chú: @fl.ghiChu</div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Nút thao tác -->
+                        <div class="border-top pt-3 d-flex gap-2">
+                            <a href="/FreelancerStudent/Profile/@fl.maFreelancerStudent" class="btn btn-success btn-sm rounded-0 fw-semibold flex-grow-1">
+                                Xem hồ sơ
+                            </a>
+                            <button type="button" class="btn btn-outline-danger btn-sm rounded-0 px-3" onclick="boLuuFreelancer(@fl.maFreelancerStudent)" title="Bỏ lưu khỏi danh sách yêu thích">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    async function boLuuFreelancer(maFreelancerStudent) {
+        if (!confirm('Bạn có chắc muốn bỏ ứng viên này khỏi danh sách yêu thích?')) return;
+
+        try {
+            const res = await fetch('/NhaTuyenDung/ToggleLuuFreelancer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ maFreelancerStudent: maFreelancerStudent })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const el = document.getElementById('freelancer-card-' + maFreelancerStudent);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        el.remove();
+                        const container = document.getElementById('favoriteFreelancersContainer');
+                        if (container && container.children.length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                }
+            } else {
+                alert(data.message || 'Không thể bỏ lưu ứng viên.');
+            }
+        } catch (err) {
+            alert('Lỗi kết nối máy chủ: ' + err);
+        }
+    }
+</script>
+
+<style>
+    .hover-text-success:hover {
+        color: #198754 !important;
+    }
+    .hover-shadow:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+    }
+    .transition {
+        transition: all 0.2s ease-in-out;
+    }
+</style>
+

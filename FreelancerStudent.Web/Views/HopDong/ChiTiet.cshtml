@@ -215,6 +215,18 @@
                         <span class="badge @badgeClass px-3 py-2 fs-6 rounded-0">
                             @tenTrangThai
                         </span>
+                        @if (Model.LaFreelancerCuaHopDong)
+                        {
+                            <a href="/Chat?maJob=@Model.maJob&maUserNTD=@Model.maUserNhaTuyenDung" class="btn btn-outline-success rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-chat-dots-fill"></i> Nhắn tin với Nhà tuyển dụng
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/Chat?maJob=@Model.maJob&maFreelancerStudent=@Model.maFreelancerStudent" class="btn btn-outline-success rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-chat-dots-fill"></i> Nhắn tin với Freelancer
+                            </a>
+                        }
                         @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
                         {
                             <button type="button" class="btn btn-primary rounded-0 fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
@@ -295,6 +307,14 @@
                             <div class="text-secondary">@Model.sdtNhaTuyenDung</div>
                         </div>
                     }
+                    @if (Model.LaFreelancerCuaHopDong)
+                    {
+                        <div class="mt-3 pt-2 border-top">
+                            <a href="/Chat?maJob=@Model.maJob&maUserNTD=@Model.maUserNhaTuyenDung" class="btn btn-sm btn-outline-success rounded-0 fw-semibold d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-chat-dots"></i> Nhắn tin trao đổi
+                            </a>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -331,6 +351,14 @@
                         <div class="mb-2">
                             <span class="text-muted small">Email sinh viên:</span>
                             <div class="text-secondary">@Model.emailFreelancer</div>
+                        </div>
+                    }
+                    @if (!Model.LaFreelancerCuaHopDong)
+                    {
+                        <div class="mt-3 pt-2 border-top">
+                            <a href="/Chat?maJob=@Model.maJob&maFreelancerStudent=@Model.maFreelancerStudent" class="btn btn-sm btn-outline-success rounded-0 fw-semibold d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-chat-dots"></i> Nhắn tin trao đổi
+                            </a>
                         </div>
                     }
                 </div>

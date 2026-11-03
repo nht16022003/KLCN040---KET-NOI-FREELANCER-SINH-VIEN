@@ -270,4 +270,60 @@ class HopDongService {
       );
     }
   }
+
+  /// Lấy thông tin thanh toán giải ngân hợp đồng (HopDongController.GetThongTinThanhToan)
+  Future<ApiResponse<HopDongThanhToanModel>> layThongTinThanhToan(
+    String maHD, {
+    int? maUser,
+  }) async {
+    try {
+      final url = maUser != null
+          ? '${ApiEndpoints.thanhToanHopDong}/$maHD?maUser=$maUser'
+          : '${ApiEndpoints.thanhToanHopDong}/$maHD';
+      final response = await _apiClient.get<Map<String, dynamic>>(url);
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final dataMap = body['data'] is Map<String, dynamic>
+          ? body['data'] as Map<String, dynamic>
+          : body;
+
+      return ApiResponse<HopDongThanhToanModel>(
+        isSuccess: true,
+        data: HopDongThanhToanModel.fromJson(dataMap),
+      );
+    } catch (e) {
+      return ApiResponse<HopDongThanhToanModel>(
+        isSuccess: false,
+        message: 'Lỗi tải thông tin thanh toán: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Nhà tuyển dụng xóa hợp đồng dự thảo hoặc đã hủy (HopDongController.XoaHopDong)
+  Future<ApiResponse<bool>> xoaHopDong(
+    String maHD, {
+    int? maUserNTD,
+  }) async {
+    try {
+      final url = maUserNTD != null
+          ? '${ApiEndpoints.baseUrl}/HopDong/$maHD?maUserNTD=$maUserNTD'
+          : '${ApiEndpoints.baseUrl}/HopDong/$maHD';
+      final response = await _apiClient.delete<Map<String, dynamic>>(url);
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+
+      return ApiResponse<bool>(
+        isSuccess: body['success'] == true || response.statusCode == 200,
+        data: true,
+        message: body['message']?.toString() ?? 'Đã xóa hợp đồng thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi khi xóa hợp đồng: ${e.toString()}',
+      );
+    }
+  }
 }

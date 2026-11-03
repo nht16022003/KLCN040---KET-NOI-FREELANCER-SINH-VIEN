@@ -14,6 +14,9 @@ import 'viewmodels/viewmodel_bai_dang_sinh_vien.dart';
 import 'viewmodels/viewmodel_task_cong_viec.dart';
 import 'viewmodels/viewmodel_vi_tien.dart';
 import 'viewmodels/viewmodel_ban_giao.dart';
+import 'viewmodels/viewmodel_yeu_thich.dart';
+import 'viewmodels/viewmodel_danh_gia.dart';
+import 'viewmodels/viewmodel_thong_bao.dart';
 import 'views/auth/man_hinh_khoi_dong.dart';
 
 void main() {
@@ -38,6 +41,9 @@ class FreelancerStudentApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TaskViewModel()),
         ChangeNotifierProvider(create: (_) => NhaTuyenDungViewModel()),
         ChangeNotifierProvider(create: (_) => BanGiaoViewModel()),
+        ChangeNotifierProvider(create: (_) => YeuThichViewModel()),
+        ChangeNotifierProvider(create: (_) => DanhGiaViewModel()),
+        ChangeNotifierProvider(create: (_) => ThongBaoViewModel()),
       ],
       child: MaterialApp(
         title: 'FLsv',

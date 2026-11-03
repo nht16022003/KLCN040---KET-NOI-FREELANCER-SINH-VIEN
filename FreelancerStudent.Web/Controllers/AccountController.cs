@@ -4,6 +4,7 @@ using FreelancerStudent.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using FreelancerStudent.Web.Helpers;
 
 namespace FreelancerStudent.Web.Controllers
 {
@@ -87,11 +88,43 @@ namespace FreelancerStudent.Web.Controllers
 
             if (!ketqua_dangnhap.success || ketqua_dangnhap.data == null)
             {
+                if (ketqua_dangnhap.data != null && ketqua_dangnhap.data.hetHanNienKhoa)
+                {
+                    // Thiết lập Session hạn chế để sinh viên có thể xem thông báo, nộp lại minh chứng hoặc đăng xuất
+                    HttpContext.Session.SetInt32("maUser", ketqua_dangnhap.data.maUser);
+                    HttpContext.Session.SetString("hovaten", ketqua_dangnhap.data.hovaten);
+                    HttpContext.Session.SetString("tenRole", ketqua_dangnhap.data.tenrole);
+                    HttpContext.Session.SetString("HetHanNienKhoa", "true");
+                    HttpContext.Session.SetString("ThongBaoNienKhoa", NienKhoaHelper.ThongBaoHetHan);
+
+                    TempData["ErrorMessage"] = NienKhoaHelper.ThongBaoHetHan;
+                    ModelState.AddModelError(string.Empty, NienKhoaHelper.ThongBaoHetHan);
+                    ViewBag.HetHanNienKhoa = true;
+                    ViewBag.ThongBaoNienKhoa = NienKhoaHelper.ThongBaoHetHan;
+                    return View(model);
+                }
+
                 ModelState.AddModelError(string.Empty, ketqua_dangnhap.message!);
                 return View(model);
             }
 
             var user = ketqua_dangnhap.data;
+
+            // Kiểm tra trường hợp tài khoản sinh viên hết hạn niên khóa
+            if (user.hetHanNienKhoa)
+            {
+                HttpContext.Session.SetInt32("maUser", user.maUser);
+                HttpContext.Session.SetString("hovaten", user.hovaten);
+                HttpContext.Session.SetString("tenRole", user.tenrole);
+                HttpContext.Session.SetString("HetHanNienKhoa", "true");
+                HttpContext.Session.SetString("ThongBaoNienKhoa", NienKhoaHelper.ThongBaoHetHan);
+
+                TempData["ErrorMessage"] = NienKhoaHelper.ThongBaoHetHan;
+                ModelState.AddModelError(string.Empty, NienKhoaHelper.ThongBaoHetHan);
+                ViewBag.HetHanNienKhoa = true;
+                ViewBag.ThongBaoNienKhoa = NienKhoaHelper.ThongBaoHetHan;
+                return View(model);
+            }
 
 
 

@@ -1,4 +1,4 @@
-//TUẤN
+﻿//TUẤN
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 
@@ -87,6 +87,8 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public int namThu { get; set; } = 1;
 
         public double GPA { get; set; } = 0;
+        public double diemDanhGiaTrungBinh { get; set; } = 0;
+        public int soLuotDanhGia { get; set; } = 0;
 
         public string nienKhoa { get; set; } = string.Empty;
 
@@ -106,7 +108,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string? TrangThaiHopDong { get; set; }
 
         public string? MaHopDong { get; set; }
+        public bool daXacMinhSinhVien { get; set; } = false;
+        public string? trangThaiXacMinh { get; set; }
     }
-
-
 }

@@ -1,23 +1,30 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../models/mo_hinh_bai_dang_tuyen_dung.dart';
 import '../../models/mo_hinh_nha_tuyen_dung.dart';
-import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_cong_viec.dart';
 import '../../viewmodels/viewmodel_nha_tuyen_dung.dart';
+import '../../viewmodels/viewmodel_thong_bao.dart';
+import '../../viewmodels/viewmodel_xac_thuc.dart';
+import '../../viewmodels/viewmodel_yeu_thich.dart';
 import '../applications/man_hinh_don_ung_tuyen_cua_toi.dart';
 import '../auth/man_hinh_dang_nhap.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
 import '../chat/man_hinh_danh_sach_chat.dart';
+import '../danh_gia/man_hinh_danh_gia.dart';
 import '../hop_dong/man_hinh_danh_sach_hop_dong.dart';
 import '../job_detail/bang_ung_tuyen_cong_viec.dart';
 import '../job_detail/man_hinh_chi_tiet_cong_viec.dart';
+import '../job_detail/man_hinh_cong_viec_da_luu.dart';
 import '../profile/man_hinh_ho_so.dart';
+import '../profile/man_hinh_ho_so_nha_tuyen_dung.dart';
+import '../student_posts/man_hinh_danh_sach_bai_dang_sinh_vien.dart';
+import '../student_posts/man_hinh_quan_ly_bai_dang_sinh_vien.dart';
 import '../student_posts/man_hinh_tao_bai_dang_sinh_vien.dart';
+import '../thong_bao/man_hinh_thong_bao.dart';
 import '../wallet/man_hinh_vi_tien.dart';
-import 'widgets/bang_chi_tiet_nha_tuyen_dung.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final authUser = context.read<AuthViewModel>().currentUser;
       if (authUser != null) {
         context.read<JobViewModel>().taiDanhSachJobGoiY(authUser.userId);
+        context.read<YeuThichViewModel>().taiDanhSachViecDaLuu(authUser.userId);
+        context.read<ThongBaoViewModel>().demChuaDoc(authUser.userId);
       }
     });
   }
@@ -90,6 +99,66 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          // Chuông thông báo + Badge chưa đọc
+          Consumer<ThongBaoViewModel>(
+            builder: (context, thongBaoVM, _) {
+              final chuaDoc = thongBaoVM.soLuongChuaDoc;
+              return IconButton(
+                tooltip: 'Thông báo',
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ThongBaoScreen(),
+                    ),
+                  );
+                  if (context.mounted && authUser != null) {
+                    context
+                        .read<ThongBaoViewModel>()
+                        .demChuaDoc(authUser.userId);
+                  }
+                },
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(
+                      Icons.notifications_outlined,
+                      color: AppColors.heading,
+                      size: 26,
+                    ),
+                    if (chuaDoc > 0)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            chuaDoc > 99 ? '99+' : '$chuaDoc',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
           PopupMenuButton<String>(
             tooltip: 'Tài khoản',
             offset: const Offset(0, 52),
@@ -134,12 +203,52 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const PopupMenuItem(
+                value: 'my_posts',
+                child: Row(
+                  children: [
+                    Icon(Icons.fact_check_outlined, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Quản lý bài tìm việc'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'student_market',
+                child: Row(
+                  children: [
+                    Icon(Icons.groups_outlined, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Chợ bài đăng SV'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'saved_jobs',
+                child: Row(
+                  children: [
+                    Icon(Icons.bookmark_outline, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Công việc đã lưu'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
                 value: 'contracts',
                 child: Row(
                   children: [
                     Icon(Icons.description_outlined, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text('Hợp đồng của tôi'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'reviews',
+                child: Row(
+                  children: [
+                    Icon(Icons.star_outline, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Đánh giá & Nhận xét'),
                   ],
                 ),
               ),
@@ -185,6 +294,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: RefreshIndicator(
           color: AppColors.primary,
           onRefresh: () async {
+            if (authUser != null) {
+              context.read<ThongBaoViewModel>().demChuaDoc(authUser.userId);
+            }
             if (_tabHienTai == 0) {
               await nhaTuyenDungVM.taiDanhSachNhaTuyenDung();
             } else {
@@ -595,11 +707,15 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _TheNhaTuyenDung(
                 ntd: ntd,
                 onXemHoSo: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => NhaTuyenDungDetailBottomSheet(ntd: ntd),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NhaTuyenDungProfileScreen(
+                        maNhaTuyenDung: ntd.maNhaTuyenDung,
+                        maUser: ntd.maUser,
+                        initialData: ntd,
+                      ),
+                    ),
                   );
                 },
                 onNhanTin: () {
@@ -622,7 +738,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ==========================================
-  // TAB 2: KHÁM PHÁ VIỆC LÀM
+  // TAB 2: KHÁM PHÁ VIỆC LÀM (KÈM BỘ LỌC NÂNG CAO ĐỒNG BỘ WEB)
   // ==========================================
   Widget _buildPhanViecLam(BuildContext context, JobViewModel jobViewModel) {
     final jobs = jobViewModel.jobs;
@@ -660,9 +776,67 @@ class _HomeScreenState extends State<HomeScreen> {
             onChanged: _xuLyTimKiemViecLam,
             decoration: const InputDecoration(
               border: InputBorder.none,
-              hintText: 'Tìm theo tiêu đề hoặc kỹ năng...',
+              hintText: 'Tìm theo tiêu đề, kỹ năng hoặc công ty...',
               prefixIcon: Icon(Icons.search, color: AppColors.primary),
             ),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Thanh Bộ lọc nâng cao (Mức thù lao, Trạng thái, Sắp xếp)
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              // Lọc mức thù lao
+              _buildFilterChipMenu(
+                label: _nhanMucThuLao(jobViewModel.mucThuLaoLoc),
+                isActive: jobViewModel.mucThuLaoLoc != 'tat-ca',
+                items: const {
+                  'tat-ca': 'Mọi mức thù lao',
+                  'duoi-1tr': 'Dưới 1 triệu',
+                  '1tr-3tr': '1 - 3 triệu',
+                  '3tr-10tr': '3 - 10 triệu',
+                  'tren-10tr': 'Trên 10 triệu',
+                },
+                onSelected: jobViewModel.datBoLocThuLao,
+              ),
+              const SizedBox(width: 8),
+
+              // Lọc trạng thái
+              _buildFilterChipMenu(
+                label: _nhanTrangThaiLoc(jobViewModel.trangThaiLoc),
+                isActive: jobViewModel.trangThaiLoc != 'tat-ca',
+                items: const {
+                  'tat-ca': 'Tất cả trạng thái',
+                  'DangTuyen': 'Đang mở tuyển',
+                  'DaHoanThanh': 'Đã hoàn thành',
+                },
+                onSelected: jobViewModel.datBoLocTrangThai,
+              ),
+              const SizedBox(width: 8),
+
+              // Thứ tự sắp xếp
+              _buildFilterChipMenu(
+                label: _nhanSapXep(jobViewModel.thuTuSapXep),
+                isActive: jobViewModel.thuTuSapXep != 'moi-nhat',
+                items: const {
+                  'moi-nhat': 'Mới nhất',
+                  'luong-cao': 'Thù lao cao → thấp',
+                  'luong-thap': 'Thù lao thấp → cao',
+                },
+                onSelected: jobViewModel.datThuTuSapXep,
+              ),
+
+              if (jobViewModel.dangCoBoLocNangCao) ...[
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: jobViewModel.xoaBoLocNangCao,
+                  icon: const Icon(Icons.filter_alt_off_outlined, size: 16),
+                  label: const Text('Xóa lọc', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ],
           ),
         ),
 
@@ -765,8 +939,8 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
+          children: [
+            const Text(
               'Tất cả việc làm',
               style: TextStyle(
                 fontSize: 18,
@@ -775,8 +949,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              'Mới nhất',
-              style: TextStyle(
+              '${jobs.length} kết quả',
+              style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
@@ -797,7 +971,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Text(
-                'Chưa có công việc nào được đăng.',
+                'Không tìm thấy công việc nào phù hợp.',
                 style: TextStyle(color: AppColors.bodyText),
               ),
             ),
@@ -846,6 +1020,91 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _nhanMucThuLao(String val) {
+    switch (val) {
+      case 'duoi-1tr':
+        return 'Thù lao: < 1tr';
+      case '1tr-3tr':
+        return 'Thù lao: 1 - 3tr';
+      case '3tr-10tr':
+        return 'Thù lao: 3 - 10tr';
+      case 'tren-10tr':
+        return 'Thù lao: > 10tr';
+      default:
+        return 'Mức thù lao';
+    }
+  }
+
+  String _nhanTrangThaiLoc(String val) {
+    switch (val) {
+      case 'DangTuyen':
+        return 'Đang mở tuyển';
+      case 'DaHoanThanh':
+        return 'Đã hoàn thành';
+      default:
+        return 'Trạng thái';
+    }
+  }
+
+  String _nhanSapXep(String val) {
+    switch (val) {
+      case 'luong-cao':
+        return 'Thù lao cao nhất';
+      case 'luong-thap':
+        return 'Thù lao thấp nhất';
+      default:
+        return 'Mới nhất';
+    }
+  }
+
+  Widget _buildFilterChipMenu({
+    required String label,
+    required bool isActive,
+    required Map<String, String> items,
+    required void Function(String) onSelected,
+  }) {
+    return PopupMenuButton<String>(
+      onSelected: onSelected,
+      itemBuilder: (context) => items.entries
+          .map(
+            (e) => PopupMenuItem<String>(
+              value: e.key,
+              child: Text(e.value),
+            ),
+          )
+          .toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                color: isActive ? Colors.white : AppColors.bodyText,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 16,
+              color: isActive ? Colors.white : AppColors.bodyText,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleMenuAction(BuildContext context, String value) async {
     switch (value) {
       case 'chat':
@@ -866,10 +1125,38 @@ class _HomeScreenState extends State<HomeScreen> {
           MaterialPageRoute(builder: (_) => const CreateStudentPostScreen()),
         );
         break;
+      case 'my_posts':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const QuanLyBaiDangSinhVienScreen(),
+          ),
+        );
+        break;
+      case 'student_market':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const StudentPostListScreen(),
+          ),
+        );
+        break;
+      case 'saved_jobs':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ManHinhCongViecDaLuu()),
+        );
+        break;
       case 'contracts':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const HopDongListScreen()),
+        );
+        break;
+      case 'reviews':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DanhGiaListScreen()),
         );
         break;
       case 'applications':
@@ -1145,7 +1432,13 @@ class _JobCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = job.kynangyeucau.isEmpty ? 'Online' : 'Remote';
-    final type = job.status == 'DangTuyen' ? 'Đang tuyển' : 'Đã đóng';
+    final isDaHoanThanh = job.isDaHoanThanh;
+    final isDaTuyenDu = job.isDaTuyenDu;
+    final type = isDaHoanThanh
+        ? 'Đã hoàn thành'
+        : (isDaTuyenDu
+            ? 'Đã tuyển đủ'
+            : (job.status == 'DangTuyen' ? 'Đang tuyển' : 'Đã đóng'));
     final phanTramPhuHop = job.phanTramPhuHop;
 
     return InkWell(
@@ -1215,6 +1508,35 @@ class _JobCard extends StatelessWidget {
                                 color: AppColors.heading,
                               ),
                             ),
+                          ),
+                          Consumer<YeuThichViewModel>(
+                            builder: (context, yeuThichVM, _) {
+                              final daLuu = yeuThichVM.daLuuViec(job.id);
+                              return IconButton(
+                                icon: Icon(
+                                  daLuu ? Icons.bookmark : Icons.bookmark_border,
+                                  color: daLuu ? AppColors.primary : Colors.grey[500],
+                                  size: 22,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                tooltip: daLuu ? 'Bỏ lưu việc' : 'Lưu công việc',
+                                onPressed: () async {
+                                  final authUser = context.read<AuthViewModel>().currentUser;
+                                  if (authUser == null) return;
+                                  final ketQua = await yeuThichVM.toggleLuuViec(authUser.userId, job.id);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(ketQua ? 'Đã lưu công việc' : 'Đã bỏ lưu công việc'),
+                                        backgroundColor: AppColors.primary,
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                    );
+                                  }
+                                },
+                              );
+                            },
                           ),
                           if (phanTramPhuHop != null) ...[
                             const SizedBox(width: 6),
@@ -1364,18 +1686,22 @@ class _JobCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: onApply,
+                    onPressed: (isDaHoanThanh || isDaTuyenDu) ? null : onApply,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: isDaHoanThanh
+                          ? Colors.grey.shade400
+                          : (isDaTuyenDu ? Colors.amber.shade200 : AppColors.primary),
+                      foregroundColor: isDaTuyenDu ? Colors.brown.shade800 : Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
-                    child: const Text(
-                      'Ứng tuyển',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    child: Text(
+                      isDaHoanThanh
+                          ? 'Đã hoàn thành'
+                          : (isDaTuyenDu ? 'Đã tuyển đủ' : 'Ứng tuyển'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ),
                 ),

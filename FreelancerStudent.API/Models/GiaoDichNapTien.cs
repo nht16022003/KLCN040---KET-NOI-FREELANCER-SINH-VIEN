@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace FreelancerStudent.API.Models
 {
     public class GiaoDichNapTien
@@ -8,6 +10,7 @@ namespace FreelancerStudent.API.Models
 
         public string maGiaoDich { get; set; } = string.Empty;
 
+        [Column(TypeName = "decimal(18,2)")]
         public decimal soTien { get; set; }
 
         public string noiDungChuyenKhoan { get; set; } = string.Empty;

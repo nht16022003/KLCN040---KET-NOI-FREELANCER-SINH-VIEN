@@ -22,12 +22,15 @@ namespace FreelancerStudent.API.Models
         public string loaiDieuChinh { get; set; } = "CongTien"; // CongTien, TruTien
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal soTienDieuChinh { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal soDuTruoc { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal soDuSau { get; set; }
 
         [Required]

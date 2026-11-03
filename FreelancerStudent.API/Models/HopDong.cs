@@ -22,10 +22,13 @@ namespace FreelancerStudent.API.Models
 
         public DateTime? ngayKetThuc { get; set; }
 
+        [NotMapped]
         public DateTime? ngayHoanThanh { get; set; }
 
+        [NotMapped]
         public DateTime? ngayDongHopDong { get; set; }
 
+        [NotMapped]
         public bool thanhToanTuDong { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]

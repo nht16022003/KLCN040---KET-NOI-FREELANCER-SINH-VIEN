@@ -451,9 +451,11 @@
         <!-- DANH SÁCH CARD CÔNG VIỆC -->
         @if (Model.DanhSachJobPost != null && Model.DanhSachJobPost.Any())
         {
+            var dsMaJobDaLuu = ViewBag.DanhSachMaJobDaLuu as HashSet<string> ?? new HashSet<string>();
             <div class="row g-3">
                 @foreach (var job in Model.DanhSachJobPost)
                 {
+                    var daLuu = dsMaJobDaLuu.Contains(job.maJob);
                     var tenNTD = !string.IsNullOrWhiteSpace(job.tenCongTy) ? job.tenCongTy : "Nhà tuyển dụng";
                     var avatarUrl = !string.IsNullOrEmpty(job.avatarNhaTuyenDung)
                         ? (job.avatarNhaTuyenDung.StartsWith("http", StringComparison.OrdinalIgnoreCase) || job.avatarNhaTuyenDung.StartsWith("/")
@@ -490,9 +492,20 @@
                                     </div>
 
                                     <div>
-                                        <span class="status-tag @(isDangTuyen ? "status-open" : "status-closed")">
-                                            @(isDangTuyen ? "Đang tuyển" : (!string.IsNullOrWhiteSpace(job.status) ? job.status : "Đã đóng"))
-                                        </span>
+                                        @if (string.Equals(job.status, "DaHoanThanh", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <span class="badge bg-secondary text-white rounded-0 px-2 py-1" style="font-size: 0.72rem;">Đã hoàn thành</span>
+                                        }
+                                        else if (job.DaTuyenDu || string.Equals(job.status, "DaTuyenDu", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <span class="badge bg-warning text-dark rounded-0 px-2 py-1" style="font-size: 0.72rem;">Đã tuyển đủ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-tag @(isDangTuyen ? "status-open" : "status-closed")">
+                                                @(isDangTuyen ? "Đang tuyển" : (!string.IsNullOrWhiteSpace(job.status) ? job.status : "Đã đóng"))
+                                            </span>
+                                        }
                                     </div>
                                 </div>
 
@@ -554,7 +567,11 @@
                                         trangThaiTheoJob.TryGetValue(job.maJob, out var trangThaiDon);
                                     }
 
-                                    @if (job.DaTuyenDu)
+                                    @if (string.Equals(job.status, "DaHoanThanh", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="badge bg-secondary text-white rounded-0">Đã hoàn thành</span>
+                                    }
+                                    else if (job.DaTuyenDu || string.Equals(job.status, "DaTuyenDu", StringComparison.OrdinalIgnoreCase))
                                     {
                                         <span class="btn-applied-badge">Đã tuyển đủ</span>
                                     }
@@ -565,6 +582,14 @@
                                     else if (trangThaiDon == "ChapNhan")
                                     {
                                         <span class="status-tag status-open">Đã duyệt</span>
+                                    }
+
+                                    @if (User.IsInRole("FreelancerStudent") || Context.Session.GetString("tenRole") == "FreelancerStudent")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none bookmark-job-btn @(daLuu ? "text-success" : "text-secondary")"
+                                                onclick="toggleLuuViec('@job.maJob', this)" title="@(daLuu ? "Bỏ lưu việc" : "Lưu công việc")">
+                                            <i class="bi @(daLuu ? "bi-bookmark-fill" : "bi-bookmark") fs-5"></i>
+                                        </button>
                                     }
 
                                     <a href="/JobPost/Detail?maJob=@job.maJob" class="btn-detail-link">
@@ -596,3 +621,36 @@
     </div>
 
 </div>
+
+<script>
+    async function toggleLuuViec(maJob, btn) {
+        try {
+            const res = await fetch('/JobPost/ToggleLuuViec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maJob: maJob })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.daLuu) {
+                    btn.classList.remove('text-secondary');
+                    btn.classList.add('text-success');
+                    icon.classList.remove('bi-bookmark');
+                    icon.classList.add('bi-bookmark-fill');
+                    btn.title = 'Bỏ lưu việc';
+                } else {
+                    btn.classList.remove('text-success');
+                    btn.classList.add('text-secondary');
+                    icon.classList.remove('bi-bookmark-fill');
+                    icon.classList.add('bi-bookmark');
+                    btn.title = 'Lưu công việc';
+                }
+            } else {
+                alert(data.message);
+            }
+        } catch (e) {
+            alert('Lỗi: ' + e);
+        }
+    }
+</script>

@@ -13,9 +13,11 @@ namespace FreelancerStudent.API.Models
         public int maUser { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? soDuKhaDung { get; set; } = 0;
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? soDuDongBang { get; set; } = 0;
 
         [ForeignKey("maUser")]

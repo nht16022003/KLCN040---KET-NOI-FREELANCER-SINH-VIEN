@@ -268,5 +268,49 @@ namespace FreelancerStudent.API.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
+
+        // ==========================================
+        // 7. CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
+        // ==========================================
+        [HttpGet("CauHinhPhi")]
+        public async Task<IActionResult> GetCauHinhPhi()
+        {
+            try
+            {
+                var data = await _adminService.LayDanhSachCauHinhPhiAsync();
+                return Ok(new { success = true, data });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi khi lấy cấu hình phí: " + ex.Message });
+            }
+        }
+
+        [HttpPost("CapNhatPhiDangBai")]
+        public async Task<IActionResult> CapNhatPhiDangBai([FromBody] AdminCapNhatPhiDangBaiRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors = ModelState });
+            }
+
+            try
+            {
+                var result = await _adminService.CapNhatPhiDangBaiAsync(request);
+                return Ok(new
+                {
+                    success = result,
+                    message = $"Cập nhật mức phí đăng bài thành công: {request.PhiDangBai:N0} VNĐ!"
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi khi cập nhật phí đăng bài: " + ex.Message });
+            }
+        }
     }
 }

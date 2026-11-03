@@ -29,7 +29,7 @@ namespace FreelancerStudent.API.Repositories
                     .ThenInclude(f => f.User)
                 .Where(h =>
                     h.JobPost != null &&
-                    h.JobPost.maNhaTuyenDung == maNhaTuyenDung);
+                    (h.JobPost.maNhaTuyenDung == maNhaTuyenDung || (h.JobPost.NhaTuyenDung != null && h.JobPost.NhaTuyenDung.maUser == maNhaTuyenDung)));
 
             // Tìm kiếm theo mã hợp đồng hoặc tên công việc hoặc tên freelancer
             if (!string.IsNullOrWhiteSpace(tuKhoa))
@@ -70,7 +70,7 @@ namespace FreelancerStudent.API.Repositories
                         .ThenInclude(n => n.User)
                 .Include(h => h.FreelancerStudent)
                     .ThenInclude(f => f.User)
-                .Where(h => h.maFreelancerStudent == maFreelancerStudent);
+                .Where(h => h.maFreelancerStudent == maFreelancerStudent || (h.FreelancerStudent != null && h.FreelancerStudent.maUser == maFreelancerStudent));
 
             // Tìm kiếm theo mã hợp đồng, tên công việc, hoặc tên nhà tuyển dụng
             if (!string.IsNullOrWhiteSpace(tuKhoa))
@@ -277,11 +277,28 @@ namespace FreelancerStudent.API.Repositories
                 .Include(h => h.Tasks)
                 .Where(h =>
                     h.maJob == maJob &&
-                    h.maFreelancerStudent == maFreelancerStudent &&
-                    h.trangThai == "DaHuy")
+                    (h.trangThai == "DaHuy" || h.trangThai == "TuChoi"))
                 .ToListAsync();
 
             if (dsHopDongDaHuy.Count == 0) return 0;
+
+            var dsMaHD = dsHopDongDaHuy.Select(h => h.maHD).ToList();
+
+            var dsBanGiao = await _context.BanGiao_SanPhams
+                .Where(b => dsMaHD.Contains(b.maHD))
+                .ToListAsync();
+            if (dsBanGiao.Any())
+            {
+                var dsMaBG = dsBanGiao.Select(b => b.maBanGiao).ToList();
+                var dsYeuCau = await _context.YeuCauChinhSuas
+                    .Where(y => dsMaBG.Contains(y.maBanGiao))
+                    .ToListAsync();
+                if (dsYeuCau.Any())
+                {
+                    _context.YeuCauChinhSuas.RemoveRange(dsYeuCau);
+                }
+                _context.BanGiao_SanPhams.RemoveRange(dsBanGiao);
+            }
 
             _context.HopDongs.RemoveRange(dsHopDongDaHuy);
             return await _context.SaveChangesAsync();
@@ -293,8 +310,8 @@ namespace FreelancerStudent.API.Repositories
                 .AsNoTracking()
                 .Where(h =>
                     h.maJob == maJob &&
-                    h.maFreelancerStudent == maFreelancerStudent &&
-                    h.trangThai != "DaHuy")
+                    h.trangThai != "DaHuy" &&
+                    h.trangThai != "TuChoi")
                 .FirstOrDefaultAsync();
         }
     }

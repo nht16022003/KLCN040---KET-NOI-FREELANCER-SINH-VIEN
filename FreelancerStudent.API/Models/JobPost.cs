@@ -21,12 +21,14 @@ namespace FreelancerStudent.API.Models
         [MaxLength(100)]
         public string? kynangyeucau { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? thulao { get; set; }
 
         [MaxLength(500)]
         public string? fileDinhKem { get; set; } = string.Empty;
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal phiDangBai { get; set; }
 
         [Required]

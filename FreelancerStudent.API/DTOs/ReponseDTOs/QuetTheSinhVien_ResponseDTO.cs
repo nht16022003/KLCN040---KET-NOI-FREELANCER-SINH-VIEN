@@ -81,11 +81,16 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
     public class KiemTraXacThuc_ResponseDTO
     {
         public bool DaXacMinh { get; set; }
-        public string TrangThai { get; set; } = string.Empty; // "ChuaGui", "DangGui", "DaXacMinh", "DaTuChoi"
+        public string TrangThai { get; set; } = string.Empty; // "ChuaGui", "DangGui", "DaXacMinh", "DaTuChoi", "HetHanNienKhoa", "SaiDinhDangNienKhoa"
         public string ThongBao { get; set; } = string.Empty;
         public DateTime? NgayXacMinh { get; set; }
         public string? LyDoTuChoi { get; set; }
         public int? MaMinhChungMoiNhat { get; set; }
+
+        // Bổ sung kiểm soát thời hạn niên khóa
+        public bool HetHanNienKhoa { get; set; }
+        public string? NienKhoa { get; set; }
+        public int? NamKetThucNienKhoa { get; set; }
     }
 
     public class PheDuyetMinhChung_RequestDTO

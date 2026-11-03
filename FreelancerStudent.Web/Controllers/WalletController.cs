@@ -94,7 +94,9 @@ namespace FreelancerStudent.Web.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi nạp tiền vào ví!"
+                        message = !string.IsNullOrWhiteSpace(checkXacThuc.data.ThongBao)
+                            ? checkXacThuc.data.ThongBao
+                            : "Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi nạp tiền vào ví!"
                     });
                 }
             }
@@ -209,7 +211,9 @@ namespace FreelancerStudent.Web.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi tạo yêu cầu rút tiền!"
+                        message = !string.IsNullOrWhiteSpace(checkXacThuc.data.ThongBao)
+                            ? checkXacThuc.data.ThongBao
+                            : "Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi tạo yêu cầu rút tiền!"
                     });
                 }
             }

@@ -17,6 +17,8 @@ class FreelancerProfileModel {
   final double gpa;
   final String nienKhoa;
   final String? gioiThieu;
+  final String? moTaPortfolio;
+  final String? urlVideoPortfolio;
   final bool trangThaiNhanViec;
   final double? chiPhiTu;
   final List<String> skills;
@@ -43,6 +45,8 @@ class FreelancerProfileModel {
     required this.gpa,
     required this.nienKhoa,
     this.gioiThieu,
+    this.moTaPortfolio,
+    this.urlVideoPortfolio,
     required this.trangThaiNhanViec,
     this.chiPhiTu,
     required this.skills,
@@ -50,6 +54,11 @@ class FreelancerProfileModel {
     required this.proofs,
     required this.jobPosts,
   });
+
+  ProofDocumentModel? get minhChungChinh => proofs.isNotEmpty ? proofs.first : null;
+  bool get daXacMinh => minhChungChinh?.daXacMinh == true;
+  bool get hetHanNienKhoa => minhChungChinh?.hetHanNienKhoa == true;
+  String get trangThaiXacMinh => minhChungChinh?.trangThaiGuiMinhChung ?? 'Chưa gửi';
 
   factory FreelancerProfileModel.fromJson(Map<String, dynamic> json) {
     final root = json;
@@ -101,16 +110,23 @@ class FreelancerProfileModel {
             )
             .toList();
 
-    final proofs =
-        ((root['minhChung'] ?? root['evidences']) is List
-                ? (root['minhChung'] ?? root['evidences']) as List
-                : const <dynamic>[])
-            .map(
-              (e) => ProofDocumentModel.fromJson(
-                Map<String, dynamic>.from(e as Map),
-              ),
-            )
-            .toList();
+    final rawMinhChung = root['minhChung'] ?? root['MinhChung'] ?? root['evidences'];
+    final List<dynamic> proofsList;
+    if (rawMinhChung is List) {
+      proofsList = rawMinhChung;
+    } else if (rawMinhChung is Map) {
+      proofsList = [rawMinhChung];
+    } else {
+      proofsList = const <dynamic>[];
+    }
+
+    final proofs = proofsList
+        .map(
+          (e) => ProofDocumentModel.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
+        .toList();
 
     final posts =
         ((root['baiDangTimViec'] ?? root['jobPosts']) is List
@@ -124,10 +140,10 @@ class FreelancerProfileModel {
             .toList();
 
     return FreelancerProfileModel(
-      maUser: (root['maUser'] ?? user['maUser'] ?? 0) is num
-          ? (root['maUser'] ?? user['maUser'] ?? 0).toInt()
+      maUser: (root['maUser'] ?? root['MaUser'] ?? user['maUser'] ?? user['MaUser'] ?? freelancer['maUser'] ?? freelancer['MaUser'] ?? 0) is num
+          ? (root['maUser'] ?? root['MaUser'] ?? user['maUser'] ?? user['MaUser'] ?? freelancer['maUser'] ?? freelancer['MaUser'] ?? 0).toInt()
           : int.tryParse(
-                  (root['maUser'] ?? user['maUser'] ?? '0').toString(),
+                  (root['maUser'] ?? root['MaUser'] ?? user['maUser'] ?? user['MaUser'] ?? freelancer['maUser'] ?? freelancer['MaUser'] ?? '0').toString(),
                 ) ??
                 0,
       hoTen:
@@ -227,6 +243,22 @@ class FreelancerProfileModel {
           (root['gioithieu'] ?? freelancer['gioithieu'] ?? '').toString() == ''
           ? null
           : (root['gioithieu'] ?? freelancer['gioithieu'])?.toString(),
+      moTaPortfolio:
+          (root['moTaBanThan'] ?? root['portfolio']?['moTaBanThan'] ?? '')
+                  .toString()
+                  .trim()
+                  .isEmpty
+              ? null
+              : (root['moTaBanThan'] ?? root['portfolio']?['moTaBanThan'])
+                  ?.toString(),
+      urlVideoPortfolio:
+          (root['url_video'] ?? root['portfolio']?['url_video'] ?? '')
+                  .toString()
+                  .trim()
+                  .isEmpty
+              ? null
+              : (root['url_video'] ?? root['portfolio']?['url_video'])
+                  ?.toString(),
       trangThaiNhanViec:
           (root['trangthaiNhanViec'] ??
                   root['trangThaiNhanViec'] ??
@@ -268,6 +300,7 @@ class PortfolioProjectModel {
   final String? congNghe;
   final String? linkGithub;
   final String? linkDemo;
+  final String? linkFile;
 
   const PortfolioProjectModel({
     this.maDA,
@@ -278,6 +311,7 @@ class PortfolioProjectModel {
     this.congNghe,
     this.linkGithub,
     this.linkDemo,
+    this.linkFile,
   });
 
   factory PortfolioProjectModel.fromJson(Map<String, dynamic> json) {
@@ -287,9 +321,10 @@ class PortfolioProjectModel {
       tenDuAn: json['tenDuAn'] ?? 'Dự án cá nhân',
       moTa: json['moTa'] ?? json['description'],
       vaiTro: json['vaiTro'] ?? json['role'],
-      congNghe: json['congnghe'] ?? json['technology'],
+      congNghe: json['congnghe'] ?? json['congNghe'] ?? json['technology'],
       linkGithub: json['linkGithub'] ?? json['github'],
       linkDemo: json['linkDemo'] ?? json['demo'],
+      linkFile: json['link_file'] ?? json['linkFile'],
     );
   }
 }
@@ -299,20 +334,46 @@ class ProofDocumentModel {
   final String? fileMinhChung;
   final String? trangThaiGuiMinhChung;
   final DateTime? ngayNop;
+  final DateTime? ngayXacMinh;
+  final String? lydoTuChoi;
+  final String? mssv;
+  final String? nienKhoa;
+  final bool hetHanNienKhoa;
+  final int? namKetThucNienKhoa;
+  final String? thongBao;
+  final bool daXacMinh;
 
   const ProofDocumentModel({
     required this.loaiMinhChung,
     this.fileMinhChung,
     this.trangThaiGuiMinhChung,
     this.ngayNop,
+    this.ngayXacMinh,
+    this.lydoTuChoi,
+    this.mssv,
+    this.nienKhoa,
+    this.hetHanNienKhoa = false,
+    this.namKetThucNienKhoa,
+    this.thongBao,
+    this.daXacMinh = false,
   });
 
   factory ProofDocumentModel.fromJson(Map<String, dynamic> json) {
+    final trangThai = (json['trangThaiGuiMinhChung'] ?? json['trangThai'] ?? '').toString();
+    final bool isVerified = json['daXacMinh'] == true || trangThai == 'Đã xác minh';
     return ProofDocumentModel(
-      loaiMinhChung: json['loaiMinhChung'] ?? 'Minh chứng',
-      fileMinhChung: json['fileMinhChung'],
-      trangThaiGuiMinhChung: json['trangThaiGuiMinhChung'],
+      loaiMinhChung: json['loaiMinhChung']?.toString() ?? 'Thẻ sinh viên',
+      fileMinhChung: json['fileMinhChung']?.toString(),
+      trangThaiGuiMinhChung: trangThai.isNotEmpty ? trangThai : null,
       ngayNop: FreelancerProfileModel._parseDate(json['ngayNop']),
+      ngayXacMinh: FreelancerProfileModel._parseDate(json['ngayXacMinh']),
+      lydoTuChoi: (json['lydoTuChoi'] ?? json['lyDoTuChoi'])?.toString(),
+      mssv: json['mssv']?.toString() ?? json['Mssv']?.toString(),
+      nienKhoa: json['nienKhoa']?.toString() ?? json['NienKhoa']?.toString(),
+      hetHanNienKhoa: json['hetHanNienKhoa'] == true,
+      namKetThucNienKhoa: json['namKetThucNienKhoa'] is num ? (json['namKetThucNienKhoa'] as num).toInt() : null,
+      thongBao: json['thongBao']?.toString(),
+      daXacMinh: isVerified,
     );
   }
 }

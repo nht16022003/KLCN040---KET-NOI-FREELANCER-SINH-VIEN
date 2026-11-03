@@ -18,6 +18,13 @@ namespace FreelancerStudent.API.Models
         [Required, MaxLength(20)]
         public string loaiCauHinh { get; set; } = string.Empty;
 
+        [MaxLength(255)]
+        public string? moTa { get; set; }
+
+        public int? maAdmin { get; set; }
+
+        public DateTime? ngayCapNhat { get; set; }
+
         public bool hieuLuc { get; set; }
     }
 }

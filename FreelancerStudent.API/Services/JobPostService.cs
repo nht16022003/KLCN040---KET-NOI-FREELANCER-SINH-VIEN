@@ -19,6 +19,7 @@ namespace FreelancerStudent.API.Services
         private readonly IFreelancerStudentRepository _free;
         private readonly ApplicationDBContext _context;
         private readonly IKyNangGoiYService _kyNangGoiYService;
+        private readonly IMinhChungService _minhChungService;
 
         public JobPostService(
             IJobPostRepository nhaTuyenDungRepository,
@@ -26,7 +27,8 @@ namespace FreelancerStudent.API.Services
             IUserRepository user,
             IFreelancerStudentRepository free,
             ApplicationDBContext context,
-            IKyNangGoiYService kyNangGoiYService)
+            IKyNangGoiYService kyNangGoiYService,
+            IMinhChungService minhChungService)
         {
             _jopPostRepository = nhaTuyenDungRepository;
             _ntd = ntd;
@@ -34,6 +36,7 @@ namespace FreelancerStudent.API.Services
             _free = free;
             _context = context;
             _kyNangGoiYService = kyNangGoiYService;
+            _minhChungService = minhChungService;
         }
 
 
@@ -42,6 +45,19 @@ namespace FreelancerStudent.API.Services
         {
             var layDS_JobSQL = await _jopPostRepository.layTatCaJobPostAsync(); // Đã sắp xếp mới nhất trước
             
+            // Lấy danh sách các mã Job đã có ứng viên được chấp nhận hoặc hợp đồng đã hoàn thành
+            var dsJobDaDuyet = await _context.UngTuyens.AsNoTracking()
+                .Where(u => u.trangThaiUngTuyen == "ChapNhan")
+                .Select(u => u.maJob)
+                .Distinct()
+                .ToListAsync();
+
+            var dsJobHoanThanh = await _context.HopDongs.AsNoTracking()
+                .Where(h => h.trangThai == "DaHoanThanh")
+                .Select(h => h.maJob)
+                .Distinct()
+                .ToListAsync();
+
             // Tính toán đánh giá thực tế từ bảng DanhGia_NhanXet
             var ntdUserIds = layDS_JobSQL
                 .Where(j => j.NhaTuyenDung != null && j.NhaTuyenDung.maUser > 0)
@@ -72,6 +88,10 @@ namespace FreelancerStudent.API.Services
                     ? stat.SoLuot 
                     : (ntd?.soLuotDanhGia ?? 0);
 
+                bool isJobHoanThanh = job.status == "DaHoanThanh" || dsJobHoanThanh.Contains(job.maJob);
+                bool isDaTuyenDu = isJobHoanThanh || job.status == "DaTuyenDu" || job.status == "Closed" || job.status == "DaDong" || dsJobDaDuyet.Contains(job.maJob);
+                string effectiveStatus = isJobHoanThanh ? "DaHoanThanh" : (isDaTuyenDu && job.status == "DangTuyen" ? "DaTuyenDu" : (job.status ?? "DangTuyen"));
+
                 return new JobPost_ReponseDTO
                 {
                     maJob = job.maJob,
@@ -84,8 +104,9 @@ namespace FreelancerStudent.API.Services
                     phiDangBai = job.phiDangBai,
                     thoigiandangtuyen = job.thoigiandangtuyen,
                     thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
-                    status = job.status,
+                    status = effectiveStatus,
                     soluongtuyen = job.soluongtuyen,
+                    DaTuyenDu = isDaTuyenDu,
                     tenCongTy = ntd?.tencongty ?? ntd?.User?.hotenUser ?? string.Empty,
                     avatarNhaTuyenDung = ntd?.User?.avatarUrl ?? ntd?.logo ?? string.Empty,
                     soSaoDanhGiaNhaTuyenDung = sao,
@@ -116,6 +137,12 @@ namespace FreelancerStudent.API.Services
             var employers = await _ntd.layTatCaNhaTuyenDungAsync();
             var employer = employers.FirstOrDefault(x => x.maNhaTuyenDung == job.maNhaTuyenDung);
 
+            bool isJobHoanThanhChiTiet = job.status == "DaHoanThanh" 
+                || await _context.HopDongs.AsNoTracking().AnyAsync(h => h.maJob == job.maJob && h.trangThai == "DaHoanThanh");
+            bool isDaCoUngVienDuyetChiTiet = await _context.UngTuyens.AsNoTracking().AnyAsync(u => u.maJob == job.maJob && u.trangThaiUngTuyen == "ChapNhan");
+            bool isDaTuyenDuChiTiet = isJobHoanThanhChiTiet || isDaCoUngVienDuyetChiTiet || job.status == "DaTuyenDu" || job.status == "Closed" || job.status == "DaDong";
+            string effectiveStatusChiTiet = isJobHoanThanhChiTiet ? "DaHoanThanh" : (isDaTuyenDuChiTiet && job.status == "DangTuyen" ? "DaTuyenDu" : (job.status ?? "DangTuyen"));
+
             var jobDto = new JobPost_ReponseDTO
             {
                 maJob = job.maJob,
@@ -128,8 +155,9 @@ namespace FreelancerStudent.API.Services
                 phiDangBai = job.phiDangBai,
                 thoigiandangtuyen = job.thoigiandangtuyen,
                 thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
-                status = job.status,
+                status = effectiveStatusChiTiet,
                 soluongtuyen = job.soluongtuyen,
+                DaTuyenDu = isDaTuyenDuChiTiet,
                 tenCongTy = employer?.tencongty ?? employer?.User?.hotenUser ?? string.Empty,
                 avatarNhaTuyenDung = employer?.User?.avatarUrl ?? employer?.logo ?? string.Empty
             };
@@ -175,18 +203,29 @@ namespace FreelancerStudent.API.Services
         }
 
 
+        public async Task<decimal> layPhiDangBaiHienTaiAsync()
+        {
+            var cauHinh = await _context.CauHinhPhiHoaHongs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.tenCauHinh == "PhiDangBai" && c.hieuLuc);
+
+            if (cauHinh == null || cauHinh.giaTri < 0)
+            {
+                return 0m;
+            }
+
+            return cauHinh.giaTri;
+        }
+
         public async Task<JobPost_ReponseDTO> taoJobPostAsync(JobPost_RequestDTO request)
         {
-            //Kiểm tra ngày hoàn thành phải sau ngày hiện tại
+            // Kiểm tra ngày hoàn thành phải sau ngày hiện tại
             if (request.thoigiandukienhoanthanh <= DateTime.Now)
             {
                 throw new Exception("Thời gian hoàn thành dự kiến phải lớn hơn thời gian hiện tại!");
             }
 
-
-            //Tuấn bổ sung:
-            //Lấy thông tin mã nhà tuyển dụng dựa trên request.user
-
+            // Lấy thông tin mã nhà tuyển dụng dựa trên request.maUser
             var NTD_Theo_maUser = await _ntd.layNhaTuyenDungTheoMaUserAsync(request.maUser);
 
             if (NTD_Theo_maUser == null)
@@ -194,49 +233,191 @@ namespace FreelancerStudent.API.Services
                 throw new Exception($"Không tìm thấy hồ sơ Nhà tuyển dụng của User ID {request.maUser}!");
             }
 
-
-            //Gán mã ntd theo mã user
             int maNTD_TheoUser = NTD_Theo_maUser!.maNhaTuyenDung;
-
-
-            //Tự động sinh mã VARCHARR cho maJob
             string maJobTuSinh = "JOB" + DateTime.Now.ToString("yyMMddHHmmsss");
 
-            //Tạo model JobPost để chuẩn bị lưu xuống Database
-            var jobMoi = new JobPost
-            {
-                maJob = maJobTuSinh,
-                maNhaTuyenDung = maNTD_TheoUser, //sửa
-                tieude = request.tieude.Trim(),
-                mota = request.mota!.Trim(),
-                kynangyeucau = request.kynangyeucau?.Trim(),
-                thulao = request.thulao,
-                soluongtuyen = request.soluongtuyen,
-                thoigiandukienhoanthanh = request.thoigiandukienhoanthanh,
-                fileDinhKem = request.fileDinhKem ?? string.Empty,
-                phiDangBai = request.phiDangBai,
-                thoigiandangtuyen = DateTime.UtcNow,
-                status = "DangTuyen"
-            };
+            // Lấy mức phí đăng bài hiện hành do Admin thiết lập
+            decimal phiDangBaiApDung = await layPhiDangBaiHienTaiAsync();
 
-            //Gọi repo để lưu
-            var luuJob = await _jopPostRepository.themJobPostAsync(jobMoi);
-            // 5. Chuyển Model thành DTO trả về cho Controller
-            return new JobPost_ReponseDTO
+            // Nếu hệ thống áp dụng phí đăng bài (> 0 VNĐ)
+            if (phiDangBaiApDung > 0)
             {
-                maJob = luuJob.maJob,
-                maNhaTuyenDung = luuJob.maNhaTuyenDung,
-                tieude = luuJob.tieude,
-                mota = luuJob.mota,
-                kynangyeucau = luuJob.kynangyeucau,
-                thulao = luuJob.thulao,
-                fileDinhKem = luuJob.fileDinhKem,
-                phiDangBai = luuJob.phiDangBai,
-                thoigiandangtuyen = luuJob.thoigiandangtuyen,
-                thoigiandukienhoanthanh = luuJob.thoigiandukienhoanthanh,
-                status = luuJob.status,
-                soluongtuyen = luuJob.soluongtuyen
-            };
+                var walletNTD = await _context.Wallets.FirstOrDefaultAsync(w => w.maUser == request.maUser);
+                if (walletNTD == null || (walletNTD.soDuKhaDung ?? 0) < phiDangBaiApDung)
+                {
+                    decimal soDuHienCo = walletNTD?.soDuKhaDung ?? 0m;
+                    throw new InvalidOperationException($"Số dư khả dụng trong ví ({soDuHienCo:N0} VNĐ) không đủ để thanh toán phí đăng tin ({phiDangBaiApDung:N0} VNĐ). Vui lòng nạp thêm tiền vào ví để tiếp tục.");
+                }
+
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 1. Trừ thẳng số dư khả dụng của Nhà tuyển dụng (kiểm tra điều kiện số dư đồng thời)
+                    decimal soDuNTDTruoc = walletNTD.soDuKhaDung ?? 0m;
+                    var rowUpdatedNTD = await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                        UPDATE Wallet 
+                        SET soDuKhaDung = soDuKhaDung - {phiDangBaiApDung}
+                        WHERE maUser = {request.maUser} AND soDuKhaDung >= {phiDangBaiApDung}");
+
+                    if (rowUpdatedNTD != 1)
+                    {
+                        throw new InvalidOperationException("Giao dịch thất bại: Số dư khả dụng trong ví không đủ hoặc vừa thay đổi. Vui lòng kiểm tra lại ví.");
+                    }
+
+                    // 2. Tìm hoặc khởi tạo Ví của Quản trị viên hệ thống (maRole = 3)
+                    var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.maRole == 3);
+                    if (adminUser == null)
+                    {
+                        throw new InvalidOperationException("Không tìm thấy tài khoản Quản trị viên hệ thống để tiếp nhận phí đăng bài.");
+                    }
+
+                    var walletAdmin = await _context.Wallets.FirstOrDefaultAsync(w => w.maUser == adminUser.maUser);
+                    if (walletAdmin == null)
+                    {
+                        walletAdmin = new Wallet
+                        {
+                            maUser = adminUser.maUser,
+                            soDuKhaDung = 0,
+                            soDuDongBang = 0
+                        };
+                        await _context.Wallets.AddAsync(walletAdmin);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    decimal soDuAdminTruoc = walletAdmin.soDuKhaDung ?? 0m;
+                    var rowUpdatedAdmin = await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                        UPDATE Wallet 
+                        SET soDuKhaDung = soDuKhaDung + {phiDangBaiApDung}
+                        WHERE maUser = {adminUser.maUser}");
+
+                    if (rowUpdatedAdmin != 1)
+                    {
+                        throw new InvalidOperationException("Không thể cộng phí đăng bài vào ví quản trị viên hệ thống.");
+                    }
+
+                    // 3. Tạo bản ghi JobPost
+                    var jobMoi = new JobPost
+                    {
+                        maJob = maJobTuSinh,
+                        maNhaTuyenDung = maNTD_TheoUser,
+                        tieude = request.tieude.Trim(),
+                        mota = request.mota!.Trim(),
+                        kynangyeucau = request.kynangyeucau?.Trim(),
+                        thulao = request.thulao,
+                        soluongtuyen = request.soluongtuyen,
+                        thoigiandukienhoanthanh = request.thoigiandukienhoanthanh,
+                        fileDinhKem = request.fileDinhKem ?? string.Empty,
+                        phiDangBai = phiDangBaiApDung,
+                        thoigiandangtuyen = DateTime.UtcNow,
+                        status = "DangTuyen"
+                    };
+
+                    await _jopPostRepository.themJobPostAsync(jobMoi);
+
+                    // 4. Ghi nhận Sổ cái LichSuGiaoDich cho 2 bên
+                    var walletNTDSau = await _context.Wallets.AsNoTracking().FirstAsync(w => w.maUser == request.maUser);
+                    var walletAdminSau = await _context.Wallets.AsNoTracking().FirstAsync(w => w.maUser == adminUser.maUser);
+
+                    _context.LichSuGiaoDichs.AddRange(
+                        new LichSuGiaoDich
+                        {
+                            maWallet = walletNTD.maWallet,
+                            loaiGiaoDich = "PhiDangBai",
+                            soTien = phiDangBaiApDung,
+                            soDuTruocGD = soDuNTDTruoc,
+                            soDuSauGD = walletNTDSau.soDuKhaDung ?? 0m,
+                            noiDung = $"Thanh toán phí đăng tin tuyển dụng {maJobTuSinh} - \"{jobMoi.tieude}\"",
+                            phuongThucThanhToan = "ViNoiBo",
+                            trangThai = "ThanhCong",
+                            ngayTao = DateTime.Now
+                        },
+                        new LichSuGiaoDich
+                        {
+                            maWallet = walletAdmin.maWallet,
+                            loaiGiaoDich = "ThuPhiDangBai",
+                            soTien = phiDangBaiApDung,
+                            soDuTruocGD = soDuAdminTruoc,
+                            soDuSauGD = walletAdminSau.soDuKhaDung ?? 0m,
+                            noiDung = $"Thu phí đăng tin {maJobTuSinh} từ NTD {NTD_Theo_maUser.tencongty ?? NTD_Theo_maUser.User?.hotenUser ?? $"#{request.maUser}"}",
+                            phuongThucThanhToan = "ViNoiBo",
+                            trangThai = "ThanhCong",
+                            ngayTao = DateTime.Now
+                        }
+                    );
+
+                    // 5. Gửi thông báo cho Nhà tuyển dụng
+                    _context.ThongBaos.Add(new ThongBao
+                    {
+                        maUser = request.maUser,
+                        tieuDe = "Đăng tin tuyển dụng thành công",
+                        noiDung = $"Tin tuyển dụng \"{jobMoi.tieude}\" đã được xuất bản thành công. Phí dịch vụ {phiDangBaiApDung:N0} VNĐ đã được khấu trừ từ số dư khả dụng.",
+                        loaiThongBao = "ThanhToan",
+                        linkDieuHuong = $"/JobPost/Detail?maJob={maJobTuSinh}",
+                        ngayTao = DateTime.Now
+                    });
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return new JobPost_ReponseDTO
+                    {
+                        maJob = jobMoi.maJob,
+                        maNhaTuyenDung = jobMoi.maNhaTuyenDung,
+                        tieude = jobMoi.tieude,
+                        mota = jobMoi.mota,
+                        kynangyeucau = jobMoi.kynangyeucau,
+                        thulao = jobMoi.thulao,
+                        fileDinhKem = jobMoi.fileDinhKem,
+                        phiDangBai = jobMoi.phiDangBai,
+                        thoigiandangtuyen = jobMoi.thoigiandangtuyen,
+                        thoigiandukienhoanthanh = jobMoi.thoigiandukienhoanthanh,
+                        status = jobMoi.status,
+                        soluongtuyen = jobMoi.soluongtuyen
+                    };
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+            else
+            {
+                // Trường hợp phí đăng bài = 0 (miễn phí)
+                var jobMoi = new JobPost
+                {
+                    maJob = maJobTuSinh,
+                    maNhaTuyenDung = maNTD_TheoUser,
+                    tieude = request.tieude.Trim(),
+                    mota = request.mota!.Trim(),
+                    kynangyeucau = request.kynangyeucau?.Trim(),
+                    thulao = request.thulao,
+                    soluongtuyen = request.soluongtuyen,
+                    thoigiandukienhoanthanh = request.thoigiandukienhoanthanh,
+                    fileDinhKem = request.fileDinhKem ?? string.Empty,
+                    phiDangBai = 0,
+                    thoigiandangtuyen = DateTime.UtcNow,
+                    status = "DangTuyen"
+                };
+
+                var luuJob = await _jopPostRepository.themJobPostAsync(jobMoi);
+
+                return new JobPost_ReponseDTO
+                {
+                    maJob = luuJob.maJob,
+                    maNhaTuyenDung = luuJob.maNhaTuyenDung,
+                    tieude = luuJob.tieude,
+                    mota = luuJob.mota,
+                    kynangyeucau = luuJob.kynangyeucau,
+                    thulao = luuJob.thulao,
+                    fileDinhKem = luuJob.fileDinhKem,
+                    phiDangBai = luuJob.phiDangBai,
+                    thoigiandangtuyen = luuJob.thoigiandangtuyen,
+                    thoigiandukienhoanthanh = luuJob.thoigiandukienhoanthanh,
+                    status = luuJob.status,
+                    soluongtuyen = luuJob.soluongtuyen
+                };
+            }
         }
 
         public async Task<List<UngTuyen_ReponseDTO>> layDanhSachUngTuyen_JobPost_TheoMaUser(int maUser)
@@ -292,11 +473,28 @@ namespace FreelancerStudent.API.Services
 
             var dsHopDong = await _context.HopDongs
                 .AsNoTracking()
-                .Where(h =>
-                    maJobs.Contains(h.maJob) &&
-                    maFreelancers.Contains(h.maFreelancerStudent))
+                .Where(h => maJobs.Contains(h.maJob))
                 .ToListAsync();
-            return dsUngTuyen.Select(u => new UngTuyen_ReponseDTO
+
+            var maUserFreelancers = dsUngTuyen
+                .Where(u => u.FreelamcerStudents != null && u.FreelamcerStudents.maUser > 0)
+                .Select(u => u.FreelamcerStudents!.maUser)
+                .Distinct()
+                .ToList();
+
+            var dsMinhChung = await _context.MinhChung_FreelancerStudents
+                .AsNoTracking()
+                .Where(m => maUserFreelancers.Contains(m.maUser))
+                .OrderByDescending(m => m.ngayNop)
+                .ToListAsync();
+
+            return dsUngTuyen.Select(u => {
+                var userStudentId = u.FreelamcerStudents?.maUser ?? 0;
+                var mc = dsMinhChung.FirstOrDefault(m => m.maUser == userStudentId);
+                bool isDaXacMinh = mc != null && mc.trangThaiGuiMinhChung == "Đã xác minh";
+                string ttXacMinh = mc?.trangThaiGuiMinhChung ?? "Chưa gửi";
+
+                return new UngTuyen_ReponseDTO
             {
                 maUngTuyen = u.maUngTuyen,
                 maJob = u.maJob,
@@ -332,6 +530,8 @@ namespace FreelancerStudent.API.Services
                 avatar = u.FreelamcerStudents?.User?.avatarUrl,
                 tenTruong = u.FreelamcerStudents?.tenTruong ?? string.Empty,
                 GPA = u.FreelamcerStudents?.GPA ?? 0,
+                diemDanhGiaTrungBinh = (double)(u.FreelamcerStudents?.diemDanhGiaTrungBinh ?? 0),
+                soLuotDanhGia = u.FreelamcerStudents?.soLuotDanhGia ?? 0,
                 namThu = u.FreelamcerStudents?.namThu ?? 1,
                 tenChuyenNganh = u.FreelamcerStudents?.ChuyenNganh?.tenChuyenNganh ?? string.Empty,
                 TrangThaiHopDong =
@@ -339,14 +539,21 @@ namespace FreelancerStudent.API.Services
                         .Where(h =>
                             h.maJob == u.maJob &&
                             h.maFreelancerStudent == u.maFreelancerStudent &&
-                            h.trangThai != "DaHuy")
+                            h.trangThai != "DaHuy" &&
+                            h.trangThai != "TuChoi")
                         .Select(h => h.trangThai)
                         .FirstOrDefault()
                     ?? dsHopDong
                         .Where(h =>
                             h.maJob == u.maJob &&
-                            h.maFreelancerStudent == u.maFreelancerStudent &&
-                            h.trangThai == "DaHuy")
+                            h.trangThai != "DaHuy" &&
+                            h.trangThai != "TuChoi")
+                        .Select(h => h.trangThai)
+                        .FirstOrDefault()
+                    ?? dsHopDong
+                        .Where(h =>
+                            h.maJob == u.maJob &&
+                            h.maFreelancerStudent == u.maFreelancerStudent)
                         .Select(h => h.trangThai)
                         .FirstOrDefault(),
 
@@ -355,17 +562,27 @@ namespace FreelancerStudent.API.Services
                         .Where(h =>
                             h.maJob == u.maJob &&
                             h.maFreelancerStudent == u.maFreelancerStudent &&
-                            h.trangThai != "DaHuy")
+                            h.trangThai != "DaHuy" &&
+                            h.trangThai != "TuChoi")
                         .Select(h => h.maHD)
                         .FirstOrDefault()
                     ?? dsHopDong
                         .Where(h =>
                             h.maJob == u.maJob &&
-                            h.maFreelancerStudent == u.maFreelancerStudent &&
-                            h.trangThai == "DaHuy")
+                            h.trangThai != "DaHuy" &&
+                            h.trangThai != "TuChoi")
+                        .Select(h => h.maHD)
+                        .FirstOrDefault()
+                    ?? dsHopDong
+                        .Where(h =>
+                            h.maJob == u.maJob &&
+                            h.maFreelancerStudent == u.maFreelancerStudent)
                         .Select(h => h.maHD)
                         .FirstOrDefault(),
-            }).ToList();
+
+                daXacMinhSinhVien = isDaXacMinh,
+                trangThaiXacMinh = ttXacMinh,
+            }; }).ToList();
 
         }
 
@@ -394,14 +611,58 @@ namespace FreelancerStudent.API.Services
                 throw new InvalidOperationException(
                     "Chỉ được duyệt hoặc từ chối đơn đang chờ duyệt.");
             }
-            var ketQua = await _jopPostRepository.capNhatTrangThaiUngTuyenAsync(request.maUngTuyen, request.trangThai);
 
-            if (!ketQua)
+            // QUY TẮC NGHIỆP VỤ: Nếu Nhà tuyển dụng chấp nhận ứng viên
+            if (request.trangThai == "ChapNhan")
             {
-                throw new Exception("Không tìm thấy đơn ứng tuyển để cập nhật!");
-            }
-            return true;
+                var jobPost = await _context.JobPosts.FirstOrDefaultAsync(j => j.maJob == donUngTuyen.maJob);
+                if (jobPost == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy bài tuyển dụng tương ứng!");
+                }
+                if (jobPost.status == "DaHoanThanh")
+                {
+                    throw new InvalidOperationException("Công việc này đã hoàn thành nghiệm thu dự án, không thể duyệt thêm ứng viên!");
+                }
+                if (jobPost.status == "Closed" || jobPost.status == "DaDong")
+                {
+                    throw new InvalidOperationException("Công việc này đã đóng tuyển dụng, không thể duyệt thêm ứng viên!");
+                }
 
+                // Kiểm tra xem công việc này đã có ứng viên nào khác được chấp nhận chưa
+                bool daCoUngVienDuyet = await _context.UngTuyens
+                    .AnyAsync(u => u.maJob == donUngTuyen.maJob && u.trangThaiUngTuyen == "ChapNhan" && u.maUngTuyen != request.maUngTuyen);
+
+                if (daCoUngVienDuyet)
+                {
+                    throw new InvalidOperationException("Công việc này đã có một ứng viên được chấp nhận (đã tuyển đủ). Mỗi công việc chỉ được chấp nhận tối đa 1 Freelancer!");
+                }
+
+                // Cập nhật đơn này thành ChapNhan
+                var ketQua = await _jopPostRepository.capNhatTrangThaiUngTuyenAsync(request.maUngTuyen, "ChapNhan");
+                if (!ketQua)
+                {
+                    throw new Exception("Không tìm thấy đơn ứng tuyển để cập nhật!");
+                }
+
+                // Cập nhật trạng thái JobPost thành DaTuyenDu nếu đang là DangTuyen
+                if (jobPost.status == "DangTuyen")
+                {
+                    jobPost.status = "DaTuyenDu";
+                    await _context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            else
+            {
+                var ketQua = await _jopPostRepository.capNhatTrangThaiUngTuyenAsync(request.maUngTuyen, request.trangThai);
+                if (!ketQua)
+                {
+                    throw new Exception("Không tìm thấy đơn ứng tuyển để cập nhật!");
+                }
+                return true;
+            }
         }
 
         public async Task<bool> nopDonUngTuyenAsync(UngTuyen_RequestDTO request)
@@ -411,6 +672,30 @@ namespace FreelancerStudent.API.Services
                 string.IsNullOrWhiteSpace(request.maJob))
             {
                 throw new ArgumentException("Thông tin ứng tuyển không hợp lệ.");
+            }
+
+            // KIỂM TRA ĐIỀU KIỆN TRẠNG THÁI JOBPOST
+            var jobPost = await _context.JobPosts.FirstOrDefaultAsync(j => j.maJob == request.maJob);
+            if (jobPost == null)
+            {
+                throw new InvalidOperationException("Không tìm thấy bài tuyển dụng!");
+            }
+            if (jobPost.status == "DaHoanThanh")
+            {
+                throw new InvalidOperationException("Công việc này đã hoàn thành nghiệm thu dự án và đóng tuyển dụng.");
+            }
+            if (jobPost.status == "Closed" || jobPost.status == "DaDong")
+            {
+                throw new InvalidOperationException("Công việc này đã đóng tuyển dụng, không tiếp nhận thêm hồ sơ.");
+            }
+
+            bool daCoUngVienDuyet = await _context.UngTuyens
+                .AnyAsync(u => u.maJob == request.maJob && u.trangThaiUngTuyen == "ChapNhan")
+                || jobPost.status == "DaTuyenDu";
+
+            if (daCoUngVienDuyet)
+            {
+                throw new InvalidOperationException("Công việc này đã tuyển đủ ứng viên (đã có ứng viên được chọn). Không thể tiếp nhận thêm hồ sơ mới!");
             }
 
             var sinhvien = await _free.layFreelancerStudent_TheoMaUser(
@@ -433,15 +718,11 @@ namespace FreelancerStudent.API.Services
                 }
             }
 
-            // Kiểm tra xác thực minh chứng sinh viên
-            var daXacMinh = await _context.MinhChung_FreelancerStudents
-                .AsNoTracking()
-                .AnyAsync(m => m.maUser == request.maUser && m.trangThaiGuiMinhChung == "Đã xác minh");
-
-            if (!daXacMinh)
+            // Kiểm tra xác thực minh chứng và niên khóa sinh viên
+            var checkXacThuc = await _minhChungService.KiemTraTrangThaiXacThucAsync(request.maUser);
+            if (!checkXacThuc.DaXacMinh)
             {
-                throw new InvalidOperationException(
-                    "Bạn cần hoàn tất xác thực minh chứng sinh viên (trạng thái 'Đã xác minh') trước khi nộp đơn ứng tuyển công việc!");
+                throw new InvalidOperationException(checkXacThuc.ThongBao);
             }
 
             var donCu = await _jopPostRepository
@@ -516,19 +797,41 @@ namespace FreelancerStudent.API.Services
             var ntd = await _ntd.layNhaTuyenDungTheoMaUserAsync(maUser);
             if (ntd == null) return new List<JobPost_ReponseDTO>();
             var ds = await _jopPostRepository.layJobPostTheoMaNTDAsync(ntd.maNhaTuyenDung);
-            return ds.Select(job => new JobPost_ReponseDTO
+
+            var dsMaJob = ds.Select(j => j.maJob).ToList();
+            var dsJobDaDuyet = await _context.UngTuyens.AsNoTracking()
+                .Where(u => dsMaJob.Contains(u.maJob) && u.trangThaiUngTuyen == "ChapNhan")
+                .Select(u => u.maJob)
+                .Distinct()
+                .ToListAsync();
+
+            var dsJobHoanThanh = await _context.HopDongs.AsNoTracking()
+                .Where(h => dsMaJob.Contains(h.maJob) && h.trangThai == "DaHoanThanh")
+                .Select(h => h.maJob)
+                .Distinct()
+                .ToListAsync();
+
+            return ds.Select(job =>
             {
-                maJob = job.maJob,
-                maNhaTuyenDung = job.maNhaTuyenDung,
-                tieude = job.tieude,
-                mota = job.mota,
-                kynangyeucau = job.kynangyeucau,
-                thulao = job.thulao,
-                soluongtuyen = job.soluongtuyen,
-                thoigiandangtuyen = job.thoigiandangtuyen,
-                thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
-                status = job.status,
-                soLuongUngTuyen = job.UngTuyens?.Count ?? 0
+                bool isJobHoanThanh = job.status == "DaHoanThanh" || dsJobHoanThanh.Contains(job.maJob);
+                bool isDaTuyenDu = isJobHoanThanh || job.status == "DaTuyenDu" || job.status == "Closed" || job.status == "DaDong" || dsJobDaDuyet.Contains(job.maJob);
+                string effectiveStatus = isJobHoanThanh ? "DaHoanThanh" : (isDaTuyenDu && job.status == "DangTuyen" ? "DaTuyenDu" : (job.status ?? "DangTuyen"));
+
+                return new JobPost_ReponseDTO
+                {
+                    maJob = job.maJob,
+                    maNhaTuyenDung = job.maNhaTuyenDung,
+                    tieude = job.tieude,
+                    mota = job.mota,
+                    kynangyeucau = job.kynangyeucau,
+                    thulao = job.thulao,
+                    soluongtuyen = job.soluongtuyen,
+                    thoigiandangtuyen = job.thoigiandangtuyen,
+                    thoigiandukienhoanthanh = job.thoigiandukienhoanthanh,
+                    status = effectiveStatus,
+                    DaTuyenDu = isDaTuyenDu,
+                    soLuongUngTuyen = job.UngTuyens?.Count ?? 0
+                };
             }).ToList();
         }
 

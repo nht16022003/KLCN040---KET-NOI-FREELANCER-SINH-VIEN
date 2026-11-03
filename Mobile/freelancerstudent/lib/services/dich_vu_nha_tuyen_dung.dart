@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
 import '../core/network/phan_hoi_api.dart';
 import '../models/mo_hinh_nha_tuyen_dung.dart';
@@ -34,6 +34,62 @@ class NhaTuyenDungService {
       return ApiResponse<List<NhaTuyenDungModel>>(
         isSuccess: false,
         message: 'Lỗi khi lấy danh sách nhà tuyển dụng: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Lấy hồ sơ chi tiết Nhà tuyển dụng theo maNhaTuyenDung (GET api/NhaTuyenDung/Profile/{maNhaTuyenDung:int})
+  Future<ApiResponse<NhaTuyenDungProfileModel>> layProfileNhaTuyenDung(
+    int maNhaTuyenDung,
+  ) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '${ApiEndpoints.profileNhaTuyenDung}/$maNhaTuyenDung',
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final rawData = body['data'] is Map<String, dynamic>
+          ? body['data'] as Map<String, dynamic>
+          : body;
+
+      return ApiResponse<NhaTuyenDungProfileModel>(
+        isSuccess: body['success'] != false,
+        data: NhaTuyenDungProfileModel.fromJson(rawData),
+        message: body['message']?.toString() ?? 'Lấy hồ sơ nhà tuyển dụng thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<NhaTuyenDungProfileModel>(
+        isSuccess: false,
+        message: 'Lỗi khi tải hồ sơ nhà tuyển dụng: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Lấy hồ sơ chi tiết Nhà tuyển dụng theo maUser (GET api/NhaTuyenDung/Profile/ByUser/{maUser:int})
+  Future<ApiResponse<NhaTuyenDungProfileModel>> layProfileNhaTuyenDungTheoUser(
+    int maUser,
+  ) async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        '${ApiEndpoints.profileNhaTuyenDungTheoUser}/$maUser',
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final rawData = body['data'] is Map<String, dynamic>
+          ? body['data'] as Map<String, dynamic>
+          : body;
+
+      return ApiResponse<NhaTuyenDungProfileModel>(
+        isSuccess: body['success'] != false,
+        data: NhaTuyenDungProfileModel.fromJson(rawData),
+        message: body['message']?.toString() ?? 'Lấy hồ sơ nhà tuyển dụng thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<NhaTuyenDungProfileModel>(
+        isSuccess: false,
+        message: 'Lỗi khi tải hồ sơ nhà tuyển dụng: ${e.toString()}',
       );
     }
   }

@@ -17,6 +17,7 @@ namespace FreelancerStudent.API.Models
 
         public string thuGioiThieu { get; set; } = string.Empty;
 
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? thulaoDeXuat { get; set; }
 
         public string? thoiGianHoanThanhDeXuat { get; set; }

@@ -68,6 +68,34 @@ class WalletService {
     }
   }
 
+  /// Xác nhận nạp tiền mô phỏng (GiaoDichNapTienController.XacNhanMoPhong - POST api/GiaoDichNapTien/XacNhanMoPhong/{maGiaoDich}?maUser={maUser})
+  Future<ApiResponse<bool>> xacNhanNapTienMoPhong(
+    String maGiaoDich,
+    int maUser,
+  ) async {
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '${ApiEndpoints.xacNhanNapTienMoPhong}/$maGiaoDich?maUser=$maUser',
+        {},
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final isOk = body['success'] == true || response.statusCode == 200;
+      return ApiResponse<bool>(
+        isSuccess: isOk,
+        data: isOk,
+        message: body['message']?.toString() ??
+            'Xác nhận nạp tiền mô phỏng thành công! Số dư đã được cộng vào ví.',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi xác nhận nạp tiền mô phỏng: ${e.toString()}',
+      );
+    }
+  }
+
   /// Kiểm tra trạng thái giao dịch nạp tiền (GiaoDichNapTienController.TrangThai - GET api/GiaoDichNapTien/TrangThai/{maGiaoDich})
   Future<ApiResponse<String>> layTrangThaiGiaoDich(String maGiaoDich) async {
     try {
@@ -173,6 +201,41 @@ class WalletService {
       return ApiResponse<List<YeuCauRutTienModel>>(
         isSuccess: false,
         message: 'Lỗi khi lấy danh sách yêu cầu rút tiền: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Xác nhận duyệt hoặc hủy yêu cầu rút tiền mô phỏng (POST api/Wallet/XacNhanRutTienMoPhong/{maRutTien})
+  Future<ApiResponse<bool>> xacNhanRutTienMoPhong(
+    int maRutTien,
+    int maUser, {
+    required bool chapNhan,
+    String? lyDo,
+  }) async {
+    try {
+      final queryLyDo = (lyDo != null && lyDo.trim().isNotEmpty)
+          ? '&lyDo=${Uri.encodeQueryComponent(lyDo.trim())}'
+          : '';
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '${ApiEndpoints.xacNhanRutTienMoPhong}/$maRutTien?maUser=$maUser&chapNhan=$chapNhan$queryLyDo',
+        {},
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final isOk = body['success'] == true || response.statusCode == 200;
+      return ApiResponse<bool>(
+        isSuccess: isOk,
+        data: isOk,
+        message: body['message']?.toString() ??
+            (chapNhan
+                ? 'Đã xác nhận duyệt yêu cầu rút tiền mô phỏng thành công!'
+                : 'Đã hủy yêu cầu rút tiền và hoàn tiền về số dư khả dụng.'),
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi xử lý yêu cầu rút tiền mô phỏng: ${e.toString()}',
       );
     }
   }

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Mvc;
 using FreelancerStudent.API.Services;
@@ -114,9 +115,18 @@ namespace FreelancerStudent.API.Controllers
             {
                 return Conflict(new { message = ex.Message });
             }
+            catch (DbUpdateException ex)
+            {
+                var msg = ex.InnerException?.Message ?? ex.Message;
+                if (msg.Contains("UNIQUE KEY") || msg.Contains("UX_HopDong") || msg.Contains("UQ__HopDong"))
+                {
+                    return Conflict(new { message = "Công việc này đã tồn tại một hợp đồng khác trong hệ thống. Vui lòng kiểm tra lại danh sách hợp đồng." });
+                }
+                return StatusCode(500, new { message = "Lỗi cập nhật dữ liệu hợp đồng: " + msg });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi hệ thống khi tạo dự thảo hợp đồng: " + ex.Message });
+                return StatusCode(500, new { message = "Lỗi hệ thống khi tạo dự thảo hợp đồng: " + (ex.InnerException?.Message ?? ex.Message) });
             }
         }
 

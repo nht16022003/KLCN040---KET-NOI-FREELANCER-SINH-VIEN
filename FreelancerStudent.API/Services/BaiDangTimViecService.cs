@@ -1,4 +1,4 @@
-using FreelancerStudent.API.DTOs.ReponseDTOs;
+﻿using FreelancerStudent.API.DTOs.ReponseDTOs;
 using FreelancerStudent.API.DTOs.RequestDTOs;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
@@ -122,7 +122,11 @@ namespace FreelancerStudent.API.Services
                 tenTruong = b.FreelamcerStudents?.tenTruong,
                 tenChuyenNganh = b.FreelamcerStudents?.ChuyenNganh?.tenChuyenNganh,
                 namThu = b.FreelamcerStudents?.namThu ?? 1,
-                GPA = b.FreelamcerStudents?.GPA ?? 0
+                GPA = b.FreelamcerStudents?.GPA ?? 0,
+                diemDanhGiaTrungBinh = (double)(b.FreelamcerStudents?.diemDanhGiaTrungBinh ?? 0),
+                soLuotDanhGia = b.FreelamcerStudents?.soLuotDanhGia ?? 0,
+                daXacMinhSinhVien = true,
+                trangThaiXacMinh = "Đã xác minh"
             };
         }
 

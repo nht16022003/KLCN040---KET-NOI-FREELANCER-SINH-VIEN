@@ -1023,10 +1023,23 @@
                                     onclick="alert('Đã gửi thông tin liên hệ tới @Model.User.HotenUser!')">
                                 Liên hệ
                             </button>
-                            <button type="button" class="btn-save-outlined"
-                                    onclick="alert('Đã lưu hồ sơ vào danh sách yêu thích!')">
-                                Lưu hồ sơ
-                            </button>
+                            @if (User.IsInRole("NhaTuyenDung") || Context.Session.GetString("tenRole") == "NhaTuyenDung")
+                            {
+                                bool daLuuFLProfile = (ViewBag.DaLuuFreelancer as bool?) ?? false;
+                                <button type="button" class="btn-save-outlined @(daLuuFLProfile ? "text-danger border-danger" : "")"
+                                        id="btnToggleLuuProfile"
+                                        onclick="toggleLuuFreelancerProfile(@Model.FreelancerStudent.MaFreelancerStudents)">
+                                    <i class="bi @(daLuuFLProfile ? "bi-heart-fill text-danger" : "bi-heart")" id="iconLuuProfile" style="display:inline-block !important;"></i>
+                                    <span id="textLuuProfile">@(daLuuFLProfile ? "Đã lưu yêu thích" : "Lưu yêu thích")</span>
+                                </button>
+                            }
+                            else if (!isProfileOwner)
+                            {
+                                <button type="button" class="btn-save-outlined"
+                                        onclick="alert('Chức năng lưu ứng viên dành cho tài khoản Nhà tuyển dụng.')">
+                                    Lưu hồ sơ
+                                </button>
+                            }
                         </div>
 
                     </div>
@@ -1104,7 +1117,7 @@
                     Dự án (@Model.DuAns.Count)
                 </a>
                 <a href="#reviews-content" class="profile-tab-item" data-profile-tab="reviews">
-                    Đánh giá
+                    Đánh giá (@(Model.ThongKeDanhGia?.tongLuotDanhGia ?? Model.FreelancerStudent.SoLuotDanhGia))
                 </a>
                 <a href="#kynang" class="profile-tab-item" data-profile-tab="overview">
                     Kỹ năng
@@ -1442,29 +1455,51 @@
                                             }
                                         </div>
 
-                                        <!-- 3. Đánh giá gần đây -->
+                                        <!-- 3. Đánh giá gần đây (Tối đa 2 đánh giá) -->
                                         <div class="section-card">
-                                            <h5 class="section-card-title">Đánh giá gần đây</h5>
-                    
-                                            @if (Model.FreelancerStudent.DanhGiaGanDay.Count == 0)
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="section-card-title mb-0">Đánh giá</h5>
+                                                @{
+                                                    var totalReviewsCol = Model.ThongKeDanhGia?.tongLuotDanhGia ?? Model.FreelancerStudent.SoLuotDanhGia;
+                                                    var avgRatingCol = Model.ThongKeDanhGia != null && Model.ThongKeDanhGia.tongLuotDanhGia > 0
+                                                        ? Model.ThongKeDanhGia.diemTrungBinh
+                                                        : (double)Model.FreelancerStudent.DiemDanhGiaTrungBinh;
+                                                }
+                                                @if (totalReviewsCol > 0)
+                                                {
+                                                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-0 px-2 py-1">
+                                                        <i class="bi bi-star-fill text-warning me-1"></i>@avgRatingCol.ToString("0.0") (@totalReviewsCol)
+                                                    </span>
+                                                }
+                                            </div>
+
+                                            @{
+                                                var recentReviewsCol = Model.ThongKeDanhGia?.danhSach?.OrderByDescending(x => x.ngayDanhGia).Take(2).ToList()
+                                                    ?? Model.FreelancerStudent.DanhGiaGanDay.Take(2).ToList();
+                                            }
+
+                                            @if (!recentReviewsCol.Any())
                                             {
-                                                <div class="text-muted small">Chưa có đánh giá</div>
+                                                <div class="text-muted small py-2">Chưa có đánh giá nào.</div>
                                             }
                                             else
                                             {
-                                                @foreach (var review in Model.FreelancerStudent.DanhGiaGanDay)
+                                                @foreach (var review in recentReviewsCol)
                                                 {
-                                                    <div class="review-item-box">
+                                                    <div class="review-item-box border-bottom pb-2 mb-2">
                                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                                             <span class="fw-bold text-dark small">@review.tenNguoiDanhGia</span>
                                                             <span class="text-warning small fw-bold">@review.soSaoTongThe ★</span>
                                                         </div>
-                                                        <p class="text-muted mb-1" style="font-size: 0.78rem; line-height: 1.35;">@(review.nhanXet ?? "")</p>
-                                                        <span class="text-secondary" style="font-size: 0.7rem;">@review.ngayDanhGia.ToString("dd/MM/yyyy")</span>
+                                                        <div class="text-muted" style="font-size: 0.72rem;">@review.tenCongViec · @review.ngayDanhGia.ToString("dd/MM/yyyy")</div>
+                                                        <p class="text-muted mb-0 mt-1" style="font-size: 0.78rem; line-height: 1.35;">@(string.IsNullOrWhiteSpace(review.nhanXet) ? "Không có nhận xét chi tiết." : review.nhanXet)</p>
                                                     </div>
                                                 }
-                                            }
 
+                                                <button type="button" class="btn btn-outline-success btn-sm w-100 rounded-0 mt-2" onclick="document.querySelector('[data-profile-tab=\'reviews\']')?.click();">
+                                                    Xem tất cả đánh giá (@totalReviewsCol)
+                                                </button>
+                                            }
                                         </div>
 
                                     </div>
@@ -1676,5 +1711,36 @@
                                         }
                                     }
                                 });
+                            }
+
+                            async function toggleLuuFreelancerProfile(maFreelancer) {
+                                try {
+                                    const res = await fetch('/NhaTuyenDung/ToggleLuuFreelancer', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ maFreelancerStudent: maFreelancer })
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                        const btn = document.getElementById('btnToggleLuuProfile');
+                                        const icon = document.getElementById('iconLuuProfile');
+                                        const text = document.getElementById('textLuuProfile');
+                                        if (data.daLuu) {
+                                            btn.classList.add('text-danger', 'border-danger');
+                                            icon.classList.remove('bi-heart');
+                                            icon.classList.add('bi-heart-fill', 'text-danger');
+                                            text.innerText = 'Đã lưu yêu thích';
+                                        } else {
+                                            btn.classList.remove('text-danger', 'border-danger');
+                                            icon.classList.remove('bi-heart-fill', 'text-danger');
+                                            icon.classList.add('bi-heart');
+                                            text.innerText = 'Lưu yêu thích';
+                                        }
+                                    } else {
+                                        alert(data.message);
+                                    }
+                                } catch (e) {
+                                    alert('Lỗi: ' + e);
+                                }
                             }
                         </script>

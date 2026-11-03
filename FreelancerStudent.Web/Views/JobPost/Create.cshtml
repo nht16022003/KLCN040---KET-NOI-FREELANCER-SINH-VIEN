@@ -446,20 +446,42 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Chính sách thanh toán
+                            Chính sách thanh toán phí đăng bài
                         </label>
 
-                        <div class="fee-box">
-                            <div class="fee-icon">✓</div>
+                        @{
+                            decimal soDuHienTai = ViewBag.SoDuKhaDung != null ? (decimal)ViewBag.SoDuKhaDung : 0m;
+                            bool khongDuTien = Model.phiDangBai > 0 && soDuHienTai < Model.phiDangBai;
+                        }
 
-                            <div>
-                                <div class="fee-title">
-                                    @Model.phiDangBai.ToString("N0") đồng phí đăng tin tuyển dụng
+                        <div class="fee-box" style="@(khongDuTien ? "border: 1.5px solid #dc3545; background-color: #fff5f5;" : "")">
+                            <div class="fee-icon" style="@(khongDuTien ? "color: #dc3545; background-color: #ffe6e6;" : "")">@(khongDuTien ? "!" : "✓")</div>
+
+                            <div style="flex-grow: 1;">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div class="fee-title" style="@(khongDuTien ? "color: #dc3545;" : "")">
+                                        @Model.phiDangBai.ToString("N0") VNĐ phí đăng tin tuyển dụng
+                                    </div>
+                                    <span class="badge @(khongDuTien ? "bg-danger" : "bg-success") text-white px-2 py-1" style="font-size: 0.85rem;">
+                                        Số dư ví khả dụng: @soDuHienTai.ToString("N0") VNĐ
+                                    </span>
                                 </div>
 
-                                <div class="fee-description">
-                                    Phí đăng bài hiện tại của hệ thống.
+                                <div class="fee-description mt-1">
+                                    Phí đăng tin được trừ trực tiếp từ số dư khả dụng của bạn khi xuất bản bài đăng thành công (không ký quỹ).
                                 </div>
+
+                                @if (khongDuTien)
+                                {
+                                    <div class="mt-2 p-2 rounded bg-white border border-danger d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <span class="text-danger small fw-semibold">
+                                            ⚠️ Số dư không đủ: Bạn còn thiếu @((Model.phiDangBai - soDuHienTai).ToString("N0")) VNĐ.
+                                        </span>
+                                        <a href="/Wallet" target="_blank" class="btn btn-sm btn-danger text-white px-3 py-1 text-decoration-none fw-bold" style="font-size: 0.8rem;">
+                                            Nạp ví ngay &rarr;
+                                        </a>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>

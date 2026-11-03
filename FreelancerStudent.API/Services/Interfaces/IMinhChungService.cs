@@ -10,7 +10,7 @@ namespace FreelancerStudent.API.Services.Interfaces
         Task<List<MinhChungItem_ResponseDTO>> LayLichSuMinhChungAsync(int maUser);
         Task<List<ChuyenNganhOption_DTO>> LayDanhSachChuyenNganhAsync();
         Task<ThongTinHienTai_DTO?> LayThongTinHienTaiAsync(int maUser);
-        Task<KiemTraXacThuc_ResponseDTO> KiemTraTrangThaiXacThucAsync(int maUser);
+        Task<KiemTraXacThuc_ResponseDTO> KiemTraTrangThaiXacThucAsync(int maUser, int? currentYearOverride = null);
         Task<bool> PheDuyetMinhChungAsync(PheDuyetMinhChung_RequestDTO request);
         Task<List<MinhChungItem_ResponseDTO>> LayDanhSachMinhChungChoDuyetAsync();
     }

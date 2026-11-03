@@ -50,6 +50,16 @@ namespace FreelancerStudent.API.Repositories
                 .SumAsync(x => (decimal?)x.soTien) ?? 0;
             var tongDoanhThu = tongGiaiNgan * 0.05m; // 5% hoa hồng
 
+            // Doanh thu từ phí đăng tin tuyển dụng
+            var tongPhiDangBai = await _context.LichSuGiaoDichs
+                .Where(x => x.loaiGiaoDich == "ThuPhiDangBai" && x.trangThai == "ThanhCong")
+                .SumAsync(x => (decimal?)x.soTien) ?? 0;
+
+            var phiDangBaiHienTai = await _context.CauHinhPhiHoaHongs
+                .Where(c => c.tenCauHinh == "PhiDangBai" && c.hieuLuc)
+                .Select(c => c.giaTri)
+                .FirstOrDefaultAsync();
+
             var recentTxs = await _context.LichSuGiaoDichs
                 .OrderByDescending(x => x.ngayTao)
                 .Take(10)
@@ -73,7 +83,9 @@ namespace FreelancerStudent.API.Repositories
                 TongSoJob = tongJob,
                 TongSoHopDong = tongHopDong,
                 TongTienDangKyQuy = tongKyQuy,
-                TongDoanhThuHeThong = tongDoanhThu,
+                TongDoanhThuHeThong = tongDoanhThu + tongPhiDangBai,
+                TongDoanhThuPhiDangBai = tongPhiDangBai,
+                PhiDangBaiHienTai = phiDangBaiHienTai,
                 GiaoDichMoiNhat = recentTxs
             };
         }
@@ -552,6 +564,65 @@ namespace FreelancerStudent.API.Repositories
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        // ==========================================
+        // 7. CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
+        // ==========================================
+        public async Task<List<AdminCauHinhPhiDTO>> LayDanhSachCauHinhPhiAsync()
+        {
+            var ds = await _context.CauHinhPhiHoaHongs.AsNoTracking().ToListAsync();
+            var admins = await _context.Admins.AsNoTracking().ToDictionaryAsync(a => a.maAdmin, a => a.hotenAdmin);
+
+            return ds.Select(c => new AdminCauHinhPhiDTO
+            {
+                MaCauHinh = c.maCauHinh,
+                TenCauHinh = c.tenCauHinh ?? string.Empty,
+                GiaTri = c.giaTri,
+                LoaiCauHinh = c.loaiCauHinh,
+                MoTa = c.moTa,
+                MaAdmin = c.maAdmin,
+                TenAdmin = c.maAdmin.HasValue && admins.ContainsKey(c.maAdmin.Value) ? admins[c.maAdmin.Value] : null,
+                NgayCapNhat = c.ngayCapNhat,
+                HieuLuc = c.hieuLuc
+            }).ToList();
+        }
+
+        public async Task<bool> CapNhatPhiDangBaiAsync(AdminCapNhatPhiDangBaiRequestDTO request)
+        {
+            if (request.PhiDangBai < 0)
+            {
+                throw new ArgumentException("Mức phí đăng tin không được nhỏ hơn 0.");
+            }
+
+            var cauHinh = await _context.CauHinhPhiHoaHongs
+                .FirstOrDefaultAsync(c => c.tenCauHinh == "PhiDangBai");
+
+            if (cauHinh == null)
+            {
+                cauHinh = new CauHinhPhiHoaHong
+                {
+                    tenCauHinh = "PhiDangBai",
+                    giaTri = request.PhiDangBai,
+                    loaiCauHinh = "TienMat",
+                    moTa = "Phí xuất bản bài đăng tuyển dụng tiêu chuẩn trên hệ thống",
+                    maAdmin = request.MaAdmin,
+                    ngayCapNhat = DateTime.Now,
+                    hieuLuc = true
+                };
+                await _context.CauHinhPhiHoaHongs.AddAsync(cauHinh);
+            }
+            else
+            {
+                cauHinh.giaTri = request.PhiDangBai;
+                cauHinh.maAdmin = request.MaAdmin;
+                cauHinh.ngayCapNhat = DateTime.Now;
+                cauHinh.hieuLuc = true;
+                _context.CauHinhPhiHoaHongs.Update(cauHinh);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

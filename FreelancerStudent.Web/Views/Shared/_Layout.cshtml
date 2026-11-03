@@ -856,6 +856,7 @@
                                     <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
                                     <li><a class="dropdown-item" href="/NhaTuyenDung/Profile">Hồ sơ công ty</a></li>
                                     <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a></li>
+                                    <li><a class="dropdown-item" href="/NhaTuyenDung/FreelancerYeuThich">Freelancer yêu thích</a></li>
                                     <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
                                     <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
                                     <li>
@@ -876,6 +877,7 @@
                     <div class="container-fluid px-lg-5">
                         <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
                             <a href="/JobPost/QuanLyTinTuyenDung" class="subnav-link">Quản lý tin tuyển dụng</a>
+                            <a href="/NhaTuyenDung/FreelancerYeuThich" class="subnav-link">Freelancer yêu thích</a>
                             <a href="/NhaTuyenDung/DanhSachUngVien" class="subnav-link">Danh sách ứng viên</a>
                             <a href="/Wallet" class="subnav-link">Ví điện tử</a>
                             <a href="/JobPost/Create" class="subnav-link text-success fw-bold">Đăng tin mới</a>
@@ -976,6 +978,7 @@
                                                    asp-route-maUser="@maUserDangNhap.Value">Hồ sơ năng lực sinh viên</a></li>
                                         }
                                         <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Portfolio">Portfolio cá nhân</a></li>
+                                        <li><a class="dropdown-item" href="/JobPost/ViecDaLuu">Công việc đã lưu</a></li>
                                         <li><a class="dropdown-item" href="/HopDong">Hợp đồng của tôi</a></li>
                                         <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
                                         <li>
@@ -995,6 +998,7 @@
                     <div class="container-fluid px-lg-5">
                         <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
                             <a href="/FreelancerStudent/QuanLyTimViec" class="subnav-link">Quản lý tìm việc</a>
+                            <a href="/JobPost/ViecDaLuu" class="subnav-link">Việc đã lưu</a>
                             <a href="/FreelancerStudent/DangTinTimViec" class="subnav-link">Đăng tin tìm việc</a>
                             <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
                             <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
@@ -1128,6 +1132,19 @@
                                                                             </div>
                                                                         </div>
                                                                     </header>
+                                                                }
+
+                                                                @if (TempData["ErrorMessage"] != null)
+                                                                {
+                                                                    <div class="container mt-3">
+                                                                        <div class="alert alert-danger alert-dismissible fade show border border-danger shadow-sm rounded-0 p-3 mb-3 d-flex align-items-center gap-3" role="alert">
+                                                                            <i class="bi bi-exclamation-triangle-fill fs-4 text-danger flex-shrink-0"></i>
+                                                                            <div class="flex-grow-1 fw-bold text-danger">
+                                                                                @TempData["ErrorMessage"]
+                                                                            </div>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                                        </div>
+                                                                    </div>
                                                                 }
 
                                                                 <!-- NỘI DUNG CỦA TỪNG VIEW -->

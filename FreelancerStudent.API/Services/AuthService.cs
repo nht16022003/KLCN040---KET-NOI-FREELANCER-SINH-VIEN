@@ -13,14 +13,17 @@ namespace FreelancerStudent.API.Services
         private readonly IWalletRepository _walletRepository;
 
         private readonly IFreelancerStudentRepository _freelancerStudent;
+        private readonly IMinhChungService _minhChungService;
 
         public AuthService(IUserRepository userRepository, INhaTuyenDungRepository nhaTuyenDungRepository,
-        IWalletRepository walletRepository, IFreelancerStudentRepository freelancerStudent)
+        IWalletRepository walletRepository, IFreelancerStudentRepository freelancerStudent,
+        IMinhChungService minhChungService)
         {
             _userRepository = userRepository;
             _nhaTuyenDungRepository = nhaTuyenDungRepository;
             _walletRepository = walletRepository;
             _freelancerStudent = freelancerStudent;
+            _minhChungService = minhChungService;
         }
 
         public async Task<DangKy_ReponseDTO> DangKyTaiKhoanAsync(DangKy_RequestDTO request)
@@ -133,6 +136,33 @@ namespace FreelancerStudent.API.Services
                 status = user.status,
                 avatarUrl = user.avatarUrl
             };
+
+            // Kiểm tra niên khóa nếu là tài khoản FreelancerStudent (maRole == 1)
+            if (user.maRole == 1)
+            {
+                var checkXacThuc = await _minhChungService.KiemTraTrangThaiXacThucAsync(user.maUser);
+                ketquadangnhap.nienKhoa = checkXacThuc.NienKhoa;
+                ketquadangnhap.namKetThucNienKhoa = checkXacThuc.NamKetThucNienKhoa;
+
+                if (checkXacThuc.HetHanNienKhoa)
+                {
+                    ketquadangnhap.hetHanNienKhoa = true;
+                    ketquadangnhap.nienKhoaHopLe = false;
+                    ketquadangnhap.thongBaoNienKhoa = NienKhoaHelper.ThongBaoHetHan;
+                }
+                else if (checkXacThuc.TrangThai == "SaiDinhDangNienKhoa")
+                {
+                    ketquadangnhap.hetHanNienKhoa = false;
+                    ketquadangnhap.nienKhoaHopLe = false;
+                    ketquadangnhap.thongBaoNienKhoa = checkXacThuc.ThongBao;
+                }
+                else
+                {
+                    ketquadangnhap.hetHanNienKhoa = false;
+                    ketquadangnhap.nienKhoaHopLe = true;
+                    ketquadangnhap.thongBaoNienKhoa = "Niên khóa hợp lệ";
+                }
+            }
 
             return ketquadangnhap;
         }

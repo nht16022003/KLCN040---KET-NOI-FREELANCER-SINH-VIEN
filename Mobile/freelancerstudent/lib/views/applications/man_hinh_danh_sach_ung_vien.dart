@@ -113,10 +113,27 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
     return status == 'Chờ duyệt';
   }
 
+  bool _jobHasAcceptedCandidate(String jobId) {
+    return _applicants.any((item) =>
+        item.jobId == jobId &&
+        (item.status.trim().toLowerCase() == 'chapnhan' ||
+            item.status.toLowerCase().contains('approved') ||
+            item.status.toLowerCase().contains('accept')));
+  }
+
   Future<void> _updateStatus(
     ApplicationModel applicant,
     String nextStatus,
   ) async {
+    if (nextStatus == 'ChapNhan' && _jobHasAcceptedCandidate(applicant.jobId)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Công việc này đã có ứng viên được duyệt. Mỗi công việc chỉ nhận tối đa 1 ứng viên.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
     if (_updatingIds.contains(applicant.id)) return;
     setState(() => _updatingIds.add(applicant.id));
 
@@ -203,6 +220,7 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
               itemBuilder: (context, index) {
                 final applicant = _applicants[index];
                 final isPending = _isPending(applicant);
+                final bool jobDaTuyenDu = _jobHasAcceptedCandidate(applicant.jobId);
                 final statusText = _statusLabel(applicant.status);
                 final freelancerId = int.tryParse(applicant.applicantId);
 
@@ -313,12 +331,31 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        if (isPending)
+                        if (isPending) ...[
+                          if (jobDaTuyenDu)
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: Colors.amber.shade300),
+                              ),
+                              child: Text(
+                                'Công việc này đã có ứng viên được duyệt',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                            ),
                           Row(
                             children: [
                               Expanded(
                                 child: ElevatedButton.icon(
-                                  onPressed: _updatingIds.contains(applicant.id)
+                                  onPressed: (jobDaTuyenDu || _updatingIds.contains(applicant.id))
                                       ? null
                                       : () => _updateStatus(
                                           applicant,
@@ -327,7 +364,7 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                                   icon: const Icon(Icons.check),
                                   label: const Text('Phê duyệt'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
+                                    backgroundColor: jobDaTuyenDu ? Colors.grey.shade400 : AppColors.primary,
                                     foregroundColor: Colors.white,
                                   ),
                                 ),
@@ -348,7 +385,8 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                                 ),
                               ),
                             ],
-                          )
+                          ),
+                        ]
                         else
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

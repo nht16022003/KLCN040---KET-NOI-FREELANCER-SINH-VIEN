@@ -68,9 +68,11 @@ class ApiEndpoints {
   static const String layViTheoUser = '$baseUrl/Wallet/LayViTheoUser';
   static const String taoGiaoDichNapTien = '$baseUrl/GiaoDichNapTien/TaoGiaoDich';
   static const String trangThaiGiaoDichNapTien = '$baseUrl/GiaoDichNapTien/TrangThai';
+  static const String xacNhanNapTienMoPhong = '$baseUrl/GiaoDichNapTien/XacNhanMoPhong';
   static const String lichSuGiaoDichVi = '$baseUrl/Wallet/LichSuGiaoDich';
   static const String taoYeuCauRutTien = '$baseUrl/Wallet/TaoYeuCauRutTien';
   static const String danhSachRutTien = '$baseUrl/Wallet/DanhSachRutTien';
+  static const String xacNhanRutTienMoPhong = '$baseUrl/Wallet/XacNhanRutTienMoPhong';
 
   // ==========================================
   // HỢP ĐỒNG & KÝ QUỸ (ESCROW CONTRACTS)
@@ -111,6 +113,8 @@ class ApiEndpoints {
   // NHÀ TUYỂN DỤNG (EMPLOYERS)
   // ==========================================
   static const String danhSachNhaTuyenDung = '$baseUrl/NhaTuyenDung/DanhSachNhaTuyenDung';
+  static const String profileNhaTuyenDung = '$baseUrl/NhaTuyenDung/Profile';
+  static const String profileNhaTuyenDungTheoUser = '$baseUrl/NhaTuyenDung/Profile/ByUser';
 
   // ==========================================
   // HỒ SƠ & PORTFOLIO FREELANCER
@@ -131,6 +135,34 @@ class ApiEndpoints {
   static const String lichSuMinhChung = '$baseUrl/MinhChung/lich-su';
   static const String danhSachChuyenNganh = '$baseUrl/MinhChung/chuyen-nganh';
   static const String thongTinHienTaiMinhChung = '$baseUrl/MinhChung/thong-tin-hien-tai';
+
+  // ==========================================
+  // YÊU THÍCH & LƯU TRỮ (FAVORITES & BOOKMARKS)
+  // ==========================================
+  static const String luuViec = '$baseUrl/YeuThich/luu-viec';
+  static const String boLuuViec = '$baseUrl/YeuThich/bo-luu-viec';
+  static const String kiemTraLuuViec = '$baseUrl/YeuThich/kiem-tra-luu-viec';
+  static const String danhSachViecDaLuu = '$baseUrl/YeuThich/danh-sach-viec-da-luu';
+  static const String luuFreelancer = '$baseUrl/YeuThich/luu-freelancer';
+  static const String boLuuFreelancer = '$baseUrl/YeuThich/bo-luu-freelancer';
+  static const String kiemTraLuuFreelancer = '$baseUrl/YeuThich/kiem-tra-luu-freelancer';
+  static const String danhSachFreelancerYeuThich = '$baseUrl/YeuThich/danh-sach-freelancer-yeu-thich';
+
+  // ==========================================
+  // ĐÁNH GIÁ & PHẢN HỒI (REVIEWS & RATINGS)
+  // ==========================================
+  static const String danhGia = '$baseUrl/DanhGia';
+  static const String danhGiaHopDong = '$baseUrl/DanhGia/hop-dong';
+  static const String congViecDaThueDanhGia = '$baseUrl/DanhGia/cong-viec-da-thue';
+  static const String danhGiaFreelancer = '$baseUrl/DanhGia/freelancer';
+  static const String danhGiaNhaTuyenDung = '$baseUrl/DanhGia/nha-tuyen-dung';
+
+  // ==========================================
+  // THÔNG BÁO (NOTIFICATIONS)
+  // ==========================================
+  static const String thongBao = '$baseUrl/ThongBao';
+  static const String thongBaoChuaDoc = '$baseUrl/ThongBao/chua-doc';
+  static const String thongBaoDaDocTatCa = '$baseUrl/ThongBao/da-doc-tat-ca';
 
   // Tương thích ngược (Backward Compatibility)
   static const String authLogin = dangNhap;

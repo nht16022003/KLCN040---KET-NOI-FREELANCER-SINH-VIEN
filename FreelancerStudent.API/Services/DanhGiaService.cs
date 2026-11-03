@@ -198,7 +198,7 @@ namespace FreelancerStudent.API.Services
                 .Include(h => h.FreelancerStudent).ThenInclude(f => f!.User)
                 .Where(h => h.trangThai == "DaHoanThanh" || h.trangThai == "DaThanhToan" || h.trangThai == "DaHuyHoanTien")
                 .Where(h => h.JobPost!.NhaTuyenDung!.maUser == maUser || h.FreelancerStudent!.maUser == maUser)
-                .OrderByDescending(h => h.ngayDongHopDong ?? h.ngayHoanThanh)
+                .OrderByDescending(h => h.ngayKetThuc ?? h.ngayBatDau)
                 .ToListAsync();
             var result = new List<HopDongDanhGia_ReponseDTO>();
             foreach (var contract in contracts)
@@ -222,7 +222,7 @@ namespace FreelancerStudent.API.Services
                     maFreelancerStudent = contract.maFreelancerStudent,
                     maNhaTuyenDung = contract.JobPost?.maNhaTuyenDung,
                     tongTien = contract.sotienkyquy,
-                    ngayHoanThanh = contract.ngayDongHopDong ?? contract.ngayHoanThanh,
+                    ngayHoanThanh = contract.ngayDongHopDong ?? contract.ngayHoanThanh ?? contract.ngayKetThuc ?? contract.ngayBatDau,
                     trangThaiHopDong = contract.trangThai ?? string.Empty,
                     trangThaiDanhGia = review == null ? "ChoDanhGia" : "DaDanhGia",
                     maDanhGia = review?.maDanhGia,

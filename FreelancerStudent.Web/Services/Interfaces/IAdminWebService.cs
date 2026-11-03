@@ -19,5 +19,7 @@ namespace FreelancerStudent.Web.Services.Interfaces
         Task<ApiReponse<bool>> CapNhatMauHopDongAsync(AdminContractTemplateViewModel model);
         Task<ApiReponse<List<AdminYeuCauRutTienItemViewModel>>> LayDanhSachYeuCauRutTienAsync(string? trangThai);
         Task<ApiReponse<bool>> XuLyRutTienAsync(AdminXuLyRutTienPostModel model, int maAdmin);
+        Task<ApiReponse<List<AdminCauHinhPhiViewModel>>> LayDanhSachCauHinhPhiAsync();
+        Task<ApiReponse<bool>> CapNhatPhiDangBaiAsync(AdminCapNhatPhiDangBaiViewModel model);
     }
 }

@@ -3,14 +3,16 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
-import '../../viewmodels/viewmodel_xac_thuc.dart';
+import '../../models/mo_hinh_vi_tien.dart';
 import '../../viewmodels/viewmodel_vi_tien.dart';
+import '../../viewmodels/viewmodel_xac_thuc.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
 
   @override
-  State<TransactionHistoryScreen> createState() => _TransactionHistoryScreenState();
+  State<TransactionHistoryScreen> createState() =>
+      _TransactionHistoryScreenState();
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
@@ -41,18 +43,51 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
     }
   }
 
+  Future<void> _xuLyRutTienMoPhong(
+    YeuCauRutTienModel item, {
+    required bool chapNhan,
+  }) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) return;
+
+    final vm = context.read<WalletViewModel>();
+    final res = await vm.xacNhanRutTienMoPhong(
+      item.maRutTien,
+      user.userId,
+      chapNhan: chapNhan,
+      lyDo: chapNhan ? null : 'Người dùng hủy yêu cầu rút tiền mô phỏng',
+    );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(res.message),
+        backgroundColor: res.isSuccess ? AppColors.primary : AppColors.error,
+      ),
+    );
+  }
+
   String _formatLoaiGD(String loai) {
     switch (loai) {
       case 'NapTien':
         return 'Nạp tiền vào ví';
       case 'RutTien':
         return 'Rút tiền về ngân hàng';
+      case 'GiuTienRut':
+        return 'Tạm giữ tiền chờ rút';
+      case 'HoanTienRut':
+        return 'Hoàn tiền yêu cầu rút bị hủy';
       case 'ThanhToanHopDong':
-        return 'Thanh toán ký quỹ hợp đồng';
+      case 'KyQuyHopDong':
+        return 'Ký quỹ hợp đồng';
+      case 'GiaiNganHopDong':
+        return 'Giải ngân hợp đồng';
       case 'NhanTienHopDong':
-        return 'Nhận tiền nghiệm thu hợp đồng';
+      case 'NhanThuLao':
+        return 'Nhận thù lao nghiệm thu hợp đồng';
       case 'HoanTien':
-        return 'Hoàn tiền hợp đồng / rút tiền';
+      case 'HoanTienHopDong':
+        return 'Hoàn tiền ký quỹ hợp đồng';
       case 'DieuChinhCong':
         return 'Admin điều chỉnh cộng tiền';
       case 'DieuChinhTru':
@@ -67,9 +102,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
       case 'ChoXuLy':
         return 'Chờ phê duyệt';
       case 'DaDuyet':
+      case 'HoanThanh':
         return 'Đã giải ngân';
       case 'TuChoi':
-        return 'Bị từ chối';
+      case 'DaHuy':
+        return 'Đã hủy / Từ chối';
       default:
         return status;
     }
@@ -78,8 +115,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
   Color _colorTrangThaiRutTien(String status) {
     switch (status) {
       case 'DaDuyet':
+      case 'HoanThanh':
         return AppColors.success;
       case 'TuChoi':
+      case 'DaHuy':
         return AppColors.error;
       default:
         return AppColors.warning;
@@ -133,7 +172,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                         itemBuilder: (ctx, index) {
                           final item = dsGiaoDich[index];
                           final isAdd = item.laGiaoDichCong;
-                          final color = isAdd ? AppColors.success : AppColors.error;
+                          final color =
+                              isAdd ? AppColors.success : AppColors.error;
 
                           return Card(
                             elevation: 1,
@@ -146,7 +186,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
@@ -180,11 +221,13 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                                   ],
                                   const Divider(height: 18),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         item.ngayTao != null
-                                            ? AppFormatters.formatDateTime(item.ngayTao!)
+                                            ? AppFormatters.formatDateTime(
+                                                item.ngayTao!)
                                             : '',
                                         style: const TextStyle(
                                           color: Colors.black45,
@@ -227,7 +270,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                         separatorBuilder: (_, _) => const SizedBox(height: 12),
                         itemBuilder: (ctx, index) {
                           final item = dsRutTien[index];
-                          final statusColor = _colorTrangThaiRutTien(item.trangThai);
+                          final statusColor =
+                              _colorTrangThaiRutTien(item.trangThai);
+                          final isPending = item.trangThai == 'ChoXuLy';
 
                           return Card(
                             elevation: 1,
@@ -240,7 +285,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Rút: ${AppFormatters.formatCurrency(item.soTienRut)}',
@@ -256,11 +302,14 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: statusColor.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(6),
+                                          color: statusColor.withValues(
+                                              alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
                                         ),
                                         child: Text(
-                                          _formatTrangThaiRutTien(item.trangThai),
+                                          _formatTrangThaiRutTien(
+                                              item.trangThai),
                                           style: TextStyle(
                                             color: statusColor,
                                             fontWeight: FontWeight.bold,
@@ -296,15 +345,94 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
                                     ),
                                   ],
                                   const Divider(height: 18),
-                                  Text(
-                                    item.ngayYeuCau != null
-                                        ? 'Yêu cầu lúc: ${AppFormatters.formatDateTime(item.ngayYeuCau!)}'
-                                        : '',
-                                    style: const TextStyle(
-                                      color: Colors.black45,
-                                      fontSize: 12,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.ngayYeuCau != null
+                                              ? 'Yêu cầu lúc: ${AppFormatters.formatDateTime(item.ngayYeuCau!)}'
+                                              : '',
+                                          style: const TextStyle(
+                                            color: Colors.black45,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  if (isPending && item.maRutTien > 0) ...[
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: Colors.amber.shade300),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Mô phỏng xử lý rút tiền (Demo):',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.amber.shade900,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: OutlinedButton(
+                                                  onPressed: () =>
+                                                      _xuLyRutTienMoPhong(
+                                                    item,
+                                                    chapNhan: false,
+                                                  ),
+                                                  style: OutlinedButton
+                                                      .styleFrom(
+                                                    foregroundColor:
+                                                        AppColors.error,
+                                                    side: const BorderSide(
+                                                        color: AppColors.error),
+                                                  ),
+                                                  child: const Text(
+                                                    'Hủy / Hoàn tiền',
+                                                    style:
+                                                        TextStyle(fontSize: 12),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: FilledButton(
+                                                  onPressed: () =>
+                                                      _xuLyRutTienMoPhong(
+                                                    item,
+                                                    chapNhan: true,
+                                                  ),
+                                                  style: FilledButton.styleFrom(
+                                                    backgroundColor:
+                                                        AppColors.primary,
+                                                  ),
+                                                  child: const Text(
+                                                    'Duyệt giải ngân',
+                                                    style:
+                                                        TextStyle(fontSize: 12),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

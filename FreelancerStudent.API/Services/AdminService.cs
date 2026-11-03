@@ -79,5 +79,15 @@ namespace FreelancerStudent.API.Services
         {
             return _adminRepo.XuLyYeuCauRutTienAsync(request);
         }
+
+        public Task<List<AdminCauHinhPhiDTO>> LayDanhSachCauHinhPhiAsync()
+        {
+            return _adminRepo.LayDanhSachCauHinhPhiAsync();
+        }
+
+        public Task<bool> CapNhatPhiDangBaiAsync(AdminCapNhatPhiDangBaiRequestDTO request)
+        {
+            return _adminRepo.CapNhatPhiDangBaiAsync(request);
+        }
     }
 }

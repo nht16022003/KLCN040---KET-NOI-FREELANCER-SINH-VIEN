@@ -18,6 +18,8 @@ namespace FreelancerStudent.Web.Services.Interfaces
            JobPostViewModel model
        );
 
+        Task<ApiReponse<decimal>> layPhiDangBaiHienTaiAsync();
+
         //Tuấn
         Task<ApiReponse<List<UngTuyenViewModel>>> layDSUngTuyenTheoMaUser(int maUser);
 

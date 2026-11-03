@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
 import '../core/network/phan_hoi_api.dart';
 import '../models/mo_hinh_bai_dang_sinh_vien.dart';
@@ -54,7 +54,7 @@ class StudentPostService {
           : body;
 
       return ApiResponse<StudentPostModel>(
-        isSuccess: true,
+        isSuccess: body['success'] != false,
         data: StudentPostModel.fromJson(json),
         message: body['message']?.toString() ?? 'Đăng tin tìm việc thành công!',
       );
@@ -62,6 +62,33 @@ class StudentPostService {
       return ApiResponse<StudentPostModel>(
         isSuccess: false,
         message: 'Lỗi khi tạo bài đăng tìm việc: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Cập nhật bài đăng tìm việc (BaiDangTimViecController.CapNhat - PUT api/BaiDangTimViec/CapNhat/{maBaiDang})
+  Future<ApiResponse<bool>> capNhatBaiDangTimViec(
+    String maBaiDang,
+    Map<String, dynamic> duLieu,
+  ) async {
+    try {
+      final response = await _apiClient.put<Map<String, dynamic>>(
+        '${ApiEndpoints.capNhatBaiDangTimViec}/$maBaiDang',
+        duLieu,
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final isOk = body['success'] == true || response.statusCode == 200;
+      return ApiResponse<bool>(
+        isSuccess: isOk,
+        data: isOk,
+        message: body['message']?.toString() ?? 'Cập nhật bài đăng tìm việc thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: 'Lỗi khi cập nhật bài đăng tìm việc: ${e.toString()}',
       );
     }
   }

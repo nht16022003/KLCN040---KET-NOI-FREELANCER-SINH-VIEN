@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 
 class JobPostModel {
   final String maJob;
@@ -9,6 +9,7 @@ class JobPostModel {
   final double thulao;
   final String status;
   final int soluongtuyen;
+  final bool daTuyenDu;
 
   // Thuộc tính bổ sung chuẩn từ API JobPost_ReponseDTO
   final int? maUser;
@@ -35,6 +36,7 @@ class JobPostModel {
     required this.thulao,
     required this.status,
     required this.soluongtuyen,
+    this.daTuyenDu = false,
     this.maUser,
     this.nganSachMin,
     this.nganSachMax,
@@ -49,6 +51,20 @@ class JobPostModel {
     this.kyNangTrungKhop = const [],
   });
 
+  factory JobPostModel.taoMoi({required String maJob}) {
+    return JobPostModel(
+      maJob: maJob,
+      maNhaTuyenDung: '',
+      tieude: '',
+      mota: '',
+      kynangyeucau: '',
+      thulao: 0,
+      status: 'Opening',
+      soluongtuyen: 1,
+      daTuyenDu: false,
+    );
+  }
+
   String get hinhAnhHienThi => ApiEndpoints.dinhDangUrlAnh(
         avatarNhaTuyenDung,
         tenMacDinh: tenNhaTuyenDung ?? 'NTD',
@@ -62,6 +78,17 @@ class JobPostModel {
   double get thuLao => thulao;
   String get trangThai => status;
   int get soLuongTuyen => soluongtuyen;
+
+  bool get isDaHoanThanh =>
+      status.toLowerCase() == 'dahoanthanh' ||
+      status.toLowerCase() == 'completed' ||
+      status.toLowerCase() == 'da_hoan_thanh';
+
+  bool get isDaTuyenDu =>
+      daTuyenDu ||
+      status.toLowerCase() == 'datuyendu' ||
+      status.toLowerCase() == 'da_tuyen_du' ||
+      isDaHoanThanh;
 
   // Getter tương thích ngược cho giao diện cũ
   String get id => maJob;
@@ -106,6 +133,7 @@ class JobPostModel {
     final salaryValue = jobMap['thulao'] ?? jobMap['thuLao'] ?? jobMap['nganSachMin'] ?? jobMap['budget'] ?? 0;
     final statusValue = jobMap['status'] ?? jobMap['trangThai'] ?? 'DangTuyen';
     final quantityValue = jobMap['soluongtuyen'] ?? jobMap['soLuongTuyen'] ?? jobMap['quantity'] ?? 1;
+    final daTuyenDuVal = jobMap['daTuyenDu'] == true || jobMap['DaTuyenDu'] == true;
 
     final minBudget = jobMap['nganSachMin'] is num ? (jobMap['nganSachMin'] as num).toDouble() : null;
     final maxBudget = jobMap['nganSachMax'] is num ? (jobMap['nganSachMax'] as num).toDouble() : null;
@@ -129,6 +157,7 @@ class JobPostModel {
       thulao: salaryValue is num ? salaryValue.toDouble() : 0,
       status: statusValue.toString(),
       soluongtuyen: quantityValue is num ? quantityValue.toInt() : 1,
+      daTuyenDu: daTuyenDuVal,
       maUser: jobMap['maUser'] is int
           ? jobMap['maUser'] as int
           : int.tryParse(jobMap['maUser']?.toString() ?? ''),
@@ -166,6 +195,7 @@ class JobPostModel {
     'thulao': thulao,
     'status': status,
     'soluongtuyen': soluongtuyen,
+    'daTuyenDu': daTuyenDu,
     'thoigiandukienhoanthanh': thoigiandukienhoanthanh?.toIso8601String(),
     'ngaydang': ngaydang?.toIso8601String(),
     'phiDangBai': phiDangBai,
@@ -191,6 +221,7 @@ class JobPostModel {
     double? thulao,
     String? status,
     int? soluongtuyen,
+    bool? daTuyenDu,
     double? phiDangBai,
     double? nganSachMin,
     double? nganSachMax,
@@ -213,6 +244,7 @@ class JobPostModel {
       thulao: thulao ?? this.thulao,
       status: status ?? this.status,
       soluongtuyen: soluongtuyen ?? this.soluongtuyen,
+      daTuyenDu: daTuyenDu ?? this.daTuyenDu,
       phiDangBai: phiDangBai ?? this.phiDangBai,
       nganSachMin: nganSachMin ?? this.nganSachMin,
       nganSachMax: nganSachMax ?? this.nganSachMax,

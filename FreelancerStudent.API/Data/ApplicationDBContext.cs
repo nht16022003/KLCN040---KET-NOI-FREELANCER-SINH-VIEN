@@ -63,6 +63,8 @@ namespace FreelancerStudent.API.Data
         public DbSet<TranhChap> TranhChaps { get; set; }
         public DbSet<YeuCauRutTien> YeuCauRutTiens { get; set; }
         public DbSet<MinhChung_FreelancerStudents> MinhChung_FreelancerStudents { get; set; }
+        public DbSet<FreelancerYeuThich> FreelancerYeuThichs { get; set; }
+        public DbSet<LuuViec_ChoFreelancer> LuuViec_ChoFreelancers { get; set; }
 
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
@@ -109,6 +111,9 @@ namespace FreelancerStudent.API.Data
                 //Một freelancer có một chuyên ngành
 
                 entity.HasMany(f => f.FreelancerStudent_KyNangs).WithOne(x => x.FreelancerStudent).HasForeignKey(x => x.maFreelancerStudents);
+
+                entity.Property(f => f.chiPhiTu)
+                    .HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<Admin>(entity =>
@@ -150,6 +155,9 @@ namespace FreelancerStudent.API.Data
 
                 entity.HasOne(j => j.NhaTuyenDung).WithMany(n => n.JobPosts).HasForeignKey(f => f.maNhaTuyenDung)
                 .OnDelete(DeleteBehavior.Cascade); //Nếu xóa nhà tuyển dụng thì xóa luôn bài đăng của ẻm
+
+                entity.Property(j => j.thulao).HasPrecision(18, 2);
+                entity.Property(j => j.phiDangBai).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<Wallet>(entity =>
@@ -160,6 +168,9 @@ namespace FreelancerStudent.API.Data
                 .WithOne(u => u.Wallet)
                 .HasForeignKey<Wallet>(w => w.maUser)
                 .OnDelete(DeleteBehavior.Cascade); //Xóa Users thì xóa luôn ví 
+
+                entity.Property(w => w.soDuKhaDung).HasPrecision(18, 2);
+                entity.Property(w => w.soDuDongBang).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<UngTuyen>(entity =>
@@ -171,6 +182,8 @@ namespace FreelancerStudent.API.Data
 
                 //1 sinh viên có thể nộp nhiều đơn ứng tuyển
                 entity.HasOne(u => u.FreelamcerStudents).WithMany(f => f.UngTuyens).HasForeignKey(u => u.maFreelancerStudent).OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(u => u.thulaoDeXuat).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<BaiDangTimViecFreelancerStudent>(entity =>
@@ -194,6 +207,8 @@ namespace FreelancerStudent.API.Data
            .WithMany()
            .HasForeignKey(g => g.maWallet)
            .OnDelete(DeleteBehavior.Restrict);
+
+               entity.Property(g => g.soTien).HasPrecision(18, 2);
            });
 
 
@@ -281,6 +296,10 @@ namespace FreelancerStudent.API.Data
                      .HasMaxLength(30);
 
                  entity.Property(h => h.dieuKhoan);
+
+                 entity.Ignore(h => h.ngayHoanThanh);
+                 entity.Ignore(h => h.ngayDongHopDong);
+                 entity.Ignore(h => h.thanhToanTuDong);
              });
 
              modelBuilder.Entity<GiaiDoan_HopDong>(entity =>
@@ -376,6 +395,10 @@ namespace FreelancerStudent.API.Data
                     .WithMany()
                     .HasForeignKey(x => x.maAdmin)
                     .OnDelete(DeleteBehavior.NoAction);
+
+                entity.Property(x => x.soTienDieuChinh).HasPrecision(18, 2);
+                entity.Property(x => x.soDuTruoc).HasPrecision(18, 2);
+                entity.Property(x => x.soDuSau).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<YeuCauRutTien>(entity =>

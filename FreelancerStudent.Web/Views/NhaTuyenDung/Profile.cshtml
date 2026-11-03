@@ -687,15 +687,16 @@
                             @if ((thongKe?.tongLuotDanhGia ?? 0) > 0 || ntd.DanhGiaGanDay.Any())
                             {
                                 <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" style="color: var(--accent); font-weight: 600;" onclick="chonTab('reviews')">
-                                    Xem toàn bộ đánh giá
+                                    Xem tất cả đánh giá
                                 </button>
                             }
                         </div>
 
                         @{
                             var recentReviews = (thongKe?.danhSach != null && thongKe.danhSach.Any())
-                                ? thongKe.danhSach.Take(3).ToList()
-                                : null;
+                                ? thongKe.danhSach.OrderByDescending(x => x.ngayDanhGia).Take(2).ToList()
+                                : (ntd.DanhGiaGanDay != null ? ntd.DanhGiaGanDay.Take(2).ToList() : null);
+                            var totalReviewsNtd = thongKe?.tongLuotDanhGia ?? ntd.SoLuotDanhGia;
                         }
 
                         @if (recentReviews != null && recentReviews.Any())
@@ -716,24 +717,12 @@
                                     }
                                 </div>
                             }
-                        }
-                        else if (ntd.DanhGiaGanDay != null && ntd.DanhGiaGanDay.Any())
-                        {
-                            @foreach (var rev in ntd.DanhGiaGanDay.Take(3))
+
+                            @if (totalReviewsNtd > 0)
                             {
-                                <div class="review-row">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="review-author">@rev.tenNguoiDanhGia</span>
-                                        <span class="review-rating-score">@rev.soSaoTongThe.ToString("0.0") / 5.0 điểm</span>
-                                    </div>
-                                    <div class="review-meta">
-                                        Dự án: @rev.tenCongViec — Ngày: @rev.ngayDanhGia.ToString("dd/MM/yyyy")
-                                    </div>
-                                    @if (!string.IsNullOrWhiteSpace(rev.nhanXet))
-                                    {
-                                        <p class="review-body">@rev.nhanXet</p>
-                                    }
-                                </div>
+                                <button type="button" class="btn btn-outline-success btn-sm w-100 rounded-0 mt-3" onclick="chonTab('reviews')">
+                                    Xem tất cả đánh giá (@totalReviewsNtd)
+                                </button>
                             }
                         }
                         else

@@ -260,7 +260,7 @@ namespace FreelancerStudent.API.Services
                 int soHopDong = await _context.Database
                     .ExecuteSqlInterpolatedAsync($@"
                         UPDATE HopDong
-                        SET trangThai = N'DaHoanThanh'
+                        SET trangThai = N'DaThanhToan'
                         WHERE maHD = {maHD}
                         AND trangThai = N'DangThucHien'
                     ");
@@ -268,6 +268,16 @@ namespace FreelancerStudent.API.Services
                 if (soHopDong != 1)
                     throw new InvalidOperationException(
                         "Hợp đồng đã hoàn thành hoặc trạng thái đã thay đổi.");
+
+                // 1.1. Tự động đóng và cập nhật trạng thái JobPost sang 'DaHoanThanh'
+                if (!string.IsNullOrWhiteSpace(hd.maJob))
+                {
+                    await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                        UPDATE JobPost
+                        SET status = N'DaHoanThanh'
+                        WHERE maJob = {hd.maJob}
+                    ");
+                }
 
                 // 2. Chỉ nghiệm thu phiên bản bàn giao mới nhất.
                 int soBanGiao = await _context.Database

@@ -353,5 +353,58 @@ namespace FreelancerStudent.Web.Controllers
 
             return RedirectToAction(nameof(DuyetMinhChung));
         }
+
+        // ==========================================================
+        // 8. QUẢN LÝ CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
+        // ==========================================================
+        [HttpGet]
+        public async Task<IActionResult> CauHinhHeThong()
+        {
+            var res = await _adminService.LayDanhSachCauHinhPhiAsync();
+            var list = res.success && res.data != null ? res.data : new List<AdminCauHinhPhiViewModel>();
+
+            var phiDangBai = list.FirstOrDefault(c => c.TenCauHinh == "PhiDangBai")?.GiaTri ?? 0m;
+
+            var dashRes = await _adminService.LayDashboardAsync();
+            var tongDoanhThuPhi = dashRes.success && dashRes.data != null ? dashRes.data.TongDoanhThuPhiDangBai : 0m;
+
+            var vm = new AdminQuanLyCauHinhViewModel
+            {
+                DanhSachCauHinh = list,
+                FormCapNhat = new AdminCapNhatPhiDangBaiViewModel
+                {
+                    PhiDangBai = phiDangBai,
+                    MaAdmin = GetCurrentAdminId()
+                },
+                TongDoanhThuPhiDangBai = tongDoanhThuPhi
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatPhiDangBai(AdminCapNhatPhiDangBaiViewModel model)
+        {
+            if (model.PhiDangBai < 0)
+            {
+                TempData["ErrorMessage"] = "Mức phí đăng bài không được nhỏ hơn 0 VNĐ.";
+                return RedirectToAction(nameof(CauHinhHeThong));
+            }
+
+            model.MaAdmin = GetCurrentAdminId();
+            var res = await _adminService.CapNhatPhiDangBaiAsync(model);
+
+            if (res.success)
+            {
+                TempData["SuccessMessage"] = $"Cập nhật mức phí đăng bài thành công: {model.PhiDangBai:N0} VNĐ!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = res.message ?? "Không thể cập nhật cấu hình phí.";
+            }
+
+            return RedirectToAction(nameof(CauHinhHeThong));
+        }
     }
 }

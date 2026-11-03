@@ -190,6 +190,19 @@ CREATE TABLE FreelancerYeuThich
 )
 Go
 
+CREATE TABLE LuuViec_ChoFreelancer
+(
+    maLuuViec INT IDENTITY(1,1) PRIMARY KEY,
+    maFreelancerStudent INT NOT NULL,
+    maJob VARCHAR(20) NOT NULL,
+    ngayLuu DATETIME NOT NULL DEFAULT GETDATE(),
+    ghiChu NVARCHAR(255) NULL,
+    CONSTRAINT FK_LuuViec_FreelancerStudents FOREIGN KEY (maFreelancerStudent) REFERENCES FreelancerStudents(maFreelancerStudents),
+    CONSTRAINT FK_LuuViec_JobPost FOREIGN KEY (maJob) REFERENCES JobPost(maJob),
+    CONSTRAINT UQ_LuuViec_Freelancer_Job UNIQUE (maFreelancerStudent, maJob)
+)
+Go
+
 SELECT * FROM NhaTuyenDung;
 SELECT * FROM Wallet;
 
@@ -1218,6 +1231,7 @@ DROP TABLE HopDong;
 
 DROP TABLE UngThue;
 DROP TABLE UngTuyen;
+DROP TABLE LuuViec_ChoFreelancer;
 DROP TABLE JobPost;
 
 DROP TABLE DuAn_Trong_Portfolio;

@@ -1,7 +1,8 @@
 import 'package:intl/intl.dart';
 
 class AppFormatters {
-  static String formatCurrency(double amount) {
+  static String formatCurrency(double? amount) {
+    if (amount == null) return 'Chưa cập nhật';
     final format = NumberFormat.currency(
       locale: 'vi_VN',
       symbol: 'đ',
@@ -10,7 +11,8 @@ class AppFormatters {
     return format.format(amount);
   }
 
-  static String formatDateTime(DateTime date) {
+  static String formatDateTime(DateTime? date) {
+    if (date == null) return 'Chưa cập nhật';
     return DateFormat('HH:mm dd/MM/yyyy').format(date);
   }
 

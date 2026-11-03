@@ -114,6 +114,46 @@ class WalletViewModel extends ChangeNotifier {
     return response;
   }
 
+  /// Xác nhận nạp tiền mô phỏng
+  Future<ApiResponse<bool>> xacNhanNapTienMoPhong(
+    String maGiaoDich,
+    int maUser,
+  ) async {
+    final res = await _walletService.xacNhanNapTienMoPhong(maGiaoDich, maUser);
+    if (res.isSuccess) {
+      await taiThongTinVi(maUser);
+      await taiLichSuGiaoDich(maUser);
+    } else {
+      _thongBaoLoi = res.message;
+      notifyListeners();
+    }
+    return res;
+  }
+
+  /// Xác nhận duyệt hoặc hủy yêu cầu rút tiền mô phỏng
+  Future<ApiResponse<bool>> xacNhanRutTienMoPhong(
+    int maRutTien,
+    int maUser, {
+    required bool chapNhan,
+    String? lyDo,
+  }) async {
+    final res = await _walletService.xacNhanRutTienMoPhong(
+      maRutTien,
+      maUser,
+      chapNhan: chapNhan,
+      lyDo: lyDo,
+    );
+    if (res.isSuccess) {
+      await taiThongTinVi(maUser);
+      await taiDanhSachRutTien(maUser);
+      await taiLichSuGiaoDich(maUser);
+    } else {
+      _thongBaoLoi = res.message;
+      notifyListeners();
+    }
+    return res;
+  }
+
   // ==========================================
   // TƯƠNG THÍCH NGƯỢC (BACKWARD COMPATIBILITY)
   // ==========================================

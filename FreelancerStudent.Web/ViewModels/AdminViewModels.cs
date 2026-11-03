@@ -16,6 +16,8 @@ namespace FreelancerStudent.Web.ViewModels
         public int TongSoHopDong { get; set; }
         public decimal TongTienDangKyQuy { get; set; }
         public decimal TongDoanhThuHeThong { get; set; }
+        public decimal TongDoanhThuPhiDangBai { get; set; }
+        public decimal PhiDangBaiHienTai { get; set; }
         public List<AdminRecentTransactionViewModel> GiaoDichMoiNhat { get; set; } = new();
     }
 
@@ -231,5 +233,38 @@ namespace FreelancerStudent.Web.ViewModels
         public int TongSoHoanThanh { get; set; }
         public int TongSoTuChoi { get; set; }
         public decimal TongTienChoXuLy { get; set; }
+    }
+
+    // ==========================================
+    // 7. CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
+    // ==========================================
+    public class AdminCauHinhPhiViewModel
+    {
+        public int MaCauHinh { get; set; }
+        public string TenCauHinh { get; set; } = string.Empty;
+        public decimal GiaTri { get; set; }
+        public string LoaiCauHinh { get; set; } = string.Empty;
+        public string? MoTa { get; set; }
+        public int? MaAdmin { get; set; }
+        public string? TenAdmin { get; set; }
+        public DateTime? NgayCapNhat { get; set; }
+        public bool HieuLuc { get; set; }
+    }
+
+    public class AdminCapNhatPhiDangBaiViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập mức phí đăng tin")]
+        [Range(0, 100000000, ErrorMessage = "Mức phí đăng tin phải từ 0 VNĐ trở lên")]
+        public decimal PhiDangBai { get; set; }
+
+        public int? MaAdmin { get; set; }
+    }
+
+    public class AdminQuanLyCauHinhViewModel
+    {
+        public List<AdminCauHinhPhiViewModel> DanhSachCauHinh { get; set; } = new();
+        public AdminCapNhatPhiDangBaiViewModel FormCapNhat { get; set; } = new();
+        public decimal TongDoanhThuPhiDangBai { get; set; }
+        public int TongSoTinDaThuPhi { get; set; }
     }
 }

@@ -12,11 +12,13 @@ class HopDongViewModel extends ChangeNotifier {
   bool _dangTai = false;
   List<HopDongModel> _danhSachHopDong = <HopDongModel>[];
   HopDongModel? _hopDongHienTai;
+  HopDongThanhToanModel? _thongTinThanhToan;
   String? _thongBaoLoi;
 
   bool get dangTai => _dangTai;
   List<HopDongModel> get danhSachHopDong => _danhSachHopDong;
   HopDongModel? get hopDongHienTai => _hopDongHienTai;
+  HopDongThanhToanModel? get thongTinThanhToan => _thongTinThanhToan;
   String? get thongBaoLoi => _thongBaoLoi;
 
   // Tương thích ngược
@@ -164,6 +166,45 @@ class HopDongViewModel extends ChangeNotifier {
     if (!response.isSuccess) {
       _thongBaoLoi = response.message;
     }
+    notifyListeners();
+    return response.isSuccess;
+  }
+
+  /// Tải thông tin giải ngân thanh toán hợp đồng
+  Future<HopDongThanhToanModel?> taiThongTinThanhToan(String maHD, {int? maUser}) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final response = await _hopDongService.layThongTinThanhToan(maHD, maUser: maUser);
+    if (response.isSuccess) {
+      _thongTinThanhToan = response.data;
+    } else {
+      _thongBaoLoi = response.message;
+    }
+
+    _dangTai = false;
+    notifyListeners();
+    return _thongTinThanhToan;
+  }
+
+  /// Nhà tuyển dụng xóa hợp đồng dự thảo / đã hủy
+  Future<bool> xoaHopDong(String maHD, {int? maUserNTD}) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final response = await _hopDongService.xoaHopDong(maHD, maUserNTD: maUserNTD);
+    if (response.isSuccess) {
+      _danhSachHopDong.removeWhere((h) => h.maHD == maHD);
+      if (_hopDongHienTai?.maHD == maHD) {
+        _hopDongHienTai = null;
+      }
+    } else {
+      _thongBaoLoi = response.message;
+    }
+
+    _dangTai = false;
     notifyListeners();
     return response.isSuccess;
   }

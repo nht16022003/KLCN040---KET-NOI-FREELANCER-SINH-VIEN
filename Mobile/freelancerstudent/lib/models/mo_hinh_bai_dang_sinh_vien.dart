@@ -1,4 +1,4 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import '../core/constants/diem_cuoi_api.dart';
 
 class StudentPostModel {
   final String maBaiDang;
@@ -8,6 +8,7 @@ class StudentPostModel {
   final String kynang;
   final double mucGiaTu;
   final String trangthai;
+  final DateTime? thoigiandang;
 
   // Thông tin sinh viên từ BaiDangTimViec_ReponseDTO
   final int maUser;
@@ -26,6 +27,7 @@ class StudentPostModel {
     required this.kynang,
     required this.mucGiaTu,
     this.trangthai = 'HienThi',
+    this.thoigiandang,
     this.maUser = 0,
     this.tenUser,
     this.avatar,
@@ -45,6 +47,11 @@ class StudentPostModel {
   String get tieuDe => tieude;
   String get moTa => mota;
   String get kyNang => kynang;
+  List<String> get kyNangList => kynang
+      .split(RegExp(r'[,;]'))
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
   double get giaMongMuon => mucGiaTu;
   String get trangThai => trangthai;
   String get tenSinhVien => tenUser ?? '';
@@ -65,6 +72,7 @@ class StudentPostModel {
     final rawKyNang = json['kynang'] ?? json['kyNang'] ?? json['skill'] ?? '';
     final rawMucGia = json['mucGiaTu'] ?? json['giaMongMuon'] ?? json['expectedSalary'] ?? 0;
     final rawTrangThai = json['trangthai'] ?? json['trangThai'] ?? 'HienThi';
+    final rawThoiGian = json['thoigiandang'] ?? json['thoiGianDang'];
 
     final rawMaFL = json['maFreelancerStudent'] ?? 0;
     final rawMaUser = json['maUser'] ?? 0;
@@ -77,15 +85,16 @@ class StudentPostModel {
       tieude: rawTieuDe.toString(),
       mota: rawMoTa.toString(),
       kynang: rawKyNang.toString(),
-      mucGiaTu: rawMucGia is num ? rawMucGia.toDouble() : 0,
+      mucGiaTu: rawMucGia is num ? rawMucGia.toDouble() : (double.tryParse(rawMucGia.toString()) ?? 0),
       trangthai: rawTrangThai.toString(),
+      thoigiandang: rawThoiGian != null ? DateTime.tryParse(rawThoiGian.toString()) : null,
       maUser: rawMaUser is int ? rawMaUser : int.tryParse(rawMaUser.toString()) ?? 0,
       tenUser: json['tenUser']?.toString() ?? json['hovaten']?.toString(),
       avatar: json['avatar']?.toString() ?? json['avatarUrl']?.toString(),
       tenTruong: json['tenTruong']?.toString(),
       tenChuyenNganh: json['tenChuyenNganh']?.toString(),
       namThu: rawNamThu is int ? rawNamThu : int.tryParse(rawNamThu.toString()) ?? 1,
-      gpa: rawGPA is num ? rawGPA.toDouble() : 0,
+      gpa: rawGPA is num ? rawGPA.toDouble() : (double.tryParse(rawGPA.toString()) ?? 0),
     );
   }
 
@@ -97,6 +106,7 @@ class StudentPostModel {
     'kynang': kynang,
     'mucGiaTu': mucGiaTu,
     'trangthai': trangthai,
+    'thoigiandang': thoigiandang?.toIso8601String(),
     'maUser': maUser,
     'tenUser': tenUser,
     'avatar': avatar,

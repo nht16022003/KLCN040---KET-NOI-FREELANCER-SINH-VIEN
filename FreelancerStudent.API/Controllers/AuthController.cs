@@ -63,6 +63,17 @@ namespace FreelancerStudent.API.Controllers
                 //Gọi service đăng nhập
                 var ketqua = await _authService.DangNhapTaiKhoanAsync(request);
 
+                if (ketqua.hetHanNienKhoa)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        hetHanNienKhoa = true,
+                        message = FreelancerStudent.API.Helper.NienKhoaHelper.ThongBaoHetHan,
+                        data = ketqua
+                    });
+                }
+
                 return Ok(new
                 {
                     success = true,

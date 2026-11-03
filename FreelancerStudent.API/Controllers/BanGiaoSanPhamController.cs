@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace FreelancerStudent.API.Controllers
 {
     [ApiController]
-    [Authorize]
     [Route("api/[controller]")]
     public class BanGiaoSanPhamController : ControllerBase
     {
@@ -20,17 +19,20 @@ namespace FreelancerStudent.API.Controllers
             _service = service;
         }
 
-        // Lấy mã người dùng từ phiên xác thực
-        private int LayMaUser()
+        // Lấy mã người dùng từ phiên xác thực (Cookie Web) hoặc query parameter (Mobile)
+        private int LayMaUser(int? maUserFallback = null)
         {
             var giaTri = User.FindFirst(
                 ClaimTypes.NameIdentifier)?.Value;
 
-            if (!int.TryParse(giaTri, out int maUser))
-                throw new UnauthorizedAccessException(
-                    "Phiên đăng nhập không hợp lệ.");
+            if (int.TryParse(giaTri, out int maUser) && maUser > 0)
+                return maUser;
 
-            return maUser;
+            if (maUserFallback.HasValue && maUserFallback.Value > 0)
+                return maUserFallback.Value;
+
+            throw new UnauthorizedAccessException(
+                "Phiên đăng nhập không hợp lệ.");
         }
 
         // Xử lý lỗi nghiệp vụ
@@ -52,14 +54,15 @@ namespace FreelancerStudent.API.Controllers
                     Conflict(new { message = ex.Message }),
 
                 _ => StatusCode(500,
-                    new { message = "Lỗi hệ thống." })
+                    new { message = "Lỗi hệ thống: " + ex.Message })
             };
         }
 
         // 1. Freelancer bàn giao sản phẩm
         [HttpPost]
         public async Task<IActionResult> TaoBanGiao(
-            [FromBody] TaoBanGiaoRequestDTO request)
+            [FromBody] TaoBanGiaoRequestDTO request,
+            [FromQuery] int? maUser)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -67,7 +70,7 @@ namespace FreelancerStudent.API.Controllers
             try
             {
                 var ketQua = await _service.TaoBanGiaoAsync(
-                    request, LayMaUser());
+                    request, LayMaUser(maUser));
 
                 return Ok(new
                 {
@@ -85,12 +88,13 @@ namespace FreelancerStudent.API.Controllers
         // 2. Xem lịch sử bàn giao
         [HttpGet("hopdong/{maHD}")]
         public async Task<IActionResult> LayDanhSach(
-            string maHD)
+            string maHD,
+            [FromQuery] int? maUser)
         {
             try
             {
                 var ketQua = await _service.LayDanhSachAsync(
-                    maHD, LayMaUser());
+                    maHD, LayMaUser(maUser));
 
                 return Ok(new
                 {
@@ -107,7 +111,8 @@ namespace FreelancerStudent.API.Controllers
         // 3. Khách hàng gửi yêu cầu chỉnh sửa
         [HttpPost("yeucauchinhsua")]
         public async Task<IActionResult> GuiYeuCau(
-            [FromBody] TaoYeuCauChinhSuaRequestDTO request)
+            [FromBody] TaoYeuCauChinhSuaRequestDTO request,
+            [FromQuery] int? maUser)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -115,7 +120,7 @@ namespace FreelancerStudent.API.Controllers
             try
             {
                 var ketQua = await _service.GuiYeuCauAsync(
-                    request, LayMaUser());
+                    request, LayMaUser(maUser));
 
                 return Ok(new
                 {
@@ -133,12 +138,13 @@ namespace FreelancerStudent.API.Controllers
         // 4. Xem yêu cầu chỉnh sửa theo hợp đồng
         [HttpGet("yeucauchinhsua/{maHD}")]
         public async Task<IActionResult> LayYeuCau(
-            string maHD)
+            string maHD,
+            [FromQuery] int? maUser)
         {
             try
             {
                 var ketQua = await _service.LayYeuCauAsync(
-                    maHD, LayMaUser());
+                    maHD, LayMaUser(maUser));
 
                 return Ok(new
                 {
@@ -155,12 +161,13 @@ namespace FreelancerStudent.API.Controllers
         // 5. Khách hàng nghiệm thu
         [HttpPut("nghiemthu/{maBanGiao:int}")]
         public async Task<IActionResult> NghiemThu(
-            int maBanGiao)
+            int maBanGiao,
+            [FromQuery] int? maUser)
         {
             try
             {
                 var ketQua = await _service.NghiemThuAsync(
-                    maBanGiao, LayMaUser());
+                    maBanGiao, LayMaUser(maUser));
 
                 return Ok(new
                 {

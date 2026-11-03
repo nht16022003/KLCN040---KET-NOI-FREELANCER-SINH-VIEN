@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FreelancerStudent.API.Models
@@ -48,6 +48,8 @@ namespace FreelancerStudent.API.Models
         public double diemDanhGiaTrungBinh { get; set; }
         public int soLuotDanhGia { get; set; }
         public DateTime ngayTao { get; set; } = DateTime.UtcNow;
+        public bool daXacMinhSinhVien { get; set; } = false;
+        public string? trangThaiXacMinh { get; set; }
         public List<string> danhSachKyNang { get; set; } = new();
     }
 }

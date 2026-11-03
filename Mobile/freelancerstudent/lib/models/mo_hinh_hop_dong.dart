@@ -57,6 +57,8 @@ class HopDongModel {
   bool get coTheXacNhan => trangThai == 'DuThao' || trangThai == 'ChoXacNhan';
   bool get coTheKyQuy => trangThai == 'ChoKyQuy';
   bool get dangThucHien => trangThai == 'DangThucHien';
+  bool get daHoanThanh => trangThai == 'DaHoanThanh';
+  bool get daThanhToan => trangThai == 'DaThanhToan';
   bool get daBiTuChoi => trangThai == 'DaHuy' || trangThai == 'TuChoi';
 
   factory HopDongModel.fromJson(Map<String, dynamic> json) {
@@ -162,4 +164,43 @@ class GiaiDoanHopDongModel {
     'hanChot': hanChot?.toIso8601String(),
     'trangThai': trangThai,
   };
+}
+
+/// Dữ liệu chi tiết phục vụ màn hình thanh toán / giải ngân hợp đồng (HopDongController.ThanhToan)
+class HopDongThanhToanModel {
+  final String maHD;
+  final String tenCongViec;
+  final String tenFreelancer;
+  final double sotienkyquy;
+  final double soTienHoaHong;
+  final double soTienFreelancerNhan;
+  final double soDuKhaDung;
+  final double soDuDongBang;
+  final bool daCoDuLieuEscrow;
+
+  const HopDongThanhToanModel({
+    required this.maHD,
+    required this.tenCongViec,
+    required this.tenFreelancer,
+    required this.sotienkyquy,
+    required this.soTienHoaHong,
+    required this.soTienFreelancerNhan,
+    required this.soDuKhaDung,
+    required this.soDuDongBang,
+    required this.daCoDuLieuEscrow,
+  });
+
+  factory HopDongThanhToanModel.fromJson(Map<String, dynamic> json) {
+    return HopDongThanhToanModel(
+      maHD: (json['maHD'] ?? '').toString(),
+      tenCongViec: (json['tenCongViec'] ?? '').toString(),
+      tenFreelancer: (json['tenFreelancer'] ?? '').toString(),
+      sotienkyquy: (json['sotienkyquy'] as num?)?.toDouble() ?? 0,
+      soTienHoaHong: (json['soTienHoaHong'] as num?)?.toDouble() ?? 0,
+      soTienFreelancerNhan: (json['soTienFreelancerNhan'] as num?)?.toDouble() ?? 0,
+      soDuKhaDung: (json['soDuKhaDung'] as num?)?.toDouble() ?? 0,
+      soDuDongBang: (json['soDuDongBang'] as num?)?.toDouble() ?? 0,
+      daCoDuLieuEscrow: json['daCoDuLieuEscrow'] == true,
+    );
+  }
 }

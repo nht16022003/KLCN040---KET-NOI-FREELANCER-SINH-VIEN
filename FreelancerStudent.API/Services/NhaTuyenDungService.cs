@@ -41,6 +41,7 @@ namespace FreelancerStudent.API.Services
                 avatar = ntd.User?.avatarUrl,
                 logo = ntd.logo,
                 sosaodanhgia = ntd.sosaodanhgia,
+                soLuotDanhGia = ntd.soLuotDanhGia,
                 trangthai = ntd.trangthai,
                 ngayDangKy = ntd.ngayDangKy
             }).ToList();

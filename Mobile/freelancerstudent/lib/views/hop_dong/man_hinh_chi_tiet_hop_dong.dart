@@ -15,6 +15,12 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'man_hinh_danh_sach_hop_dong.dart';
 import 'man_hinh_ban_giao_san_pham.dart';
+import 'package:intl/intl.dart';
+import '../../models/mo_hinh_danh_gia.dart';
+import '../../services/dich_vu_danh_gia.dart';
+import '../../services/dich_vu_minh_chung.dart';
+import '../../services/dich_vu_vi_tien.dart';
+import '../danh_gia/man_hinh_danh_gia.dart';
 
 /// Chi tiết hợp đồng của Freelancer: `GET api/HopDong/chi-tiet/{maHD}`,
 /// xác nhận / từ chối: `POST api/HopDong/xac-nhan?maUserFreelancer=`.
@@ -51,6 +57,19 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
     if (user == null) {
       _thongBao('Bạn cần đăng nhập.');
       return;
+    }
+
+    if (dongY) {
+      setState(() => _dangXuLy = true);
+      final check = await MinhChungService().kiemTraTrangThaiXacThuc(user.userId);
+      if (!mounted) return;
+      setState(() => _dangXuLy = false);
+
+      final daXacMinh = check.isSuccess && check.data?['daXacMinh'] == true;
+      if (!daXacMinh) {
+        _thongBao('Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") để xác nhận tham gia hợp đồng!');
+        return;
+      }
     }
 
     String? lyDo;
@@ -112,12 +131,74 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       return;
     }
 
+    setState(() => _dangXuLy = true);
+    final viRes = await WalletService().layViTheoUser(user.userId);
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    final soDuKhaDung = viRes.data?.soDuKhaDung ?? 0.0;
+    final khongDuTien = soDuKhaDung < hd.sotienkyquy;
+
     final xacNhan = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Ký quỹ hợp đồng'),
-        content: Text(
-          'Bạn xác nhận ký quỹ số tiền ${AppFormatters.formatCurrency(hd.sotienkyquy)} từ ví điện tử của mình để bắt đầu hợp đồng?',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Xác nhận ký quỹ số tiền ${AppFormatters.formatCurrency(hd.sotienkyquy)} từ ví điện tử của bạn để kích hoạt hợp đồng?',
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: khongDuTien ? AppColors.error.withValues(alpha: 0.08) : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: khongDuTien ? AppColors.error.withValues(alpha: 0.3) : Colors.grey.shade300,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Số dư khả dụng:', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                      Text(
+                        AppFormatters.formatCurrency(soDuKhaDung),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: khongDuTien ? AppColors.error : AppColors.heading,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Cần ký quỹ:', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                      Text(
+                        AppFormatters.formatCurrency(hd.sotienkyquy),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      ),
+                    ],
+                  ),
+                  if (khongDuTien) ...[
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Số dư ví không đủ để ký quỹ. Vui lòng nạp thêm tiền vào ví trước khi tiếp tục.',
+                      style: TextStyle(fontSize: 12, color: AppColors.error, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -125,7 +206,7 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
             child: const Text('Hủy'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: khongDuTien ? null : () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
             ),
@@ -148,6 +229,209 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       await _tai();
     } else {
       _thongBao(vm.thongBaoLoi ?? 'Ký quỹ thất bại. Vui lòng kiểm tra lại số dư ví.');
+    }
+  }
+
+  Future<void> _moHopThoaiThanhToan(HopDongModel hd) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) {
+      _thongBao('Bạn cần đăng nhập.');
+      return;
+    }
+
+    setState(() => _dangXuLy = true);
+    final vm = context.read<HopDongViewModel>();
+    final thongTin = await vm.taiThongTinThanhToan(hd.maHD, maUser: user.userId);
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    if (thongTin == null) {
+      _thongBao(vm.thongBaoLoi ?? 'Không thể tải thông tin giải ngân thanh toán.');
+      return;
+    }
+
+    final xacNhan = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Xác nhận giải ngân thù lao',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.heading,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx, false),
+                  ),
+                ],
+              ),
+              Text(
+                'Hợp đồng: ${hd.maHD} · Freelancer: ${hd.tenFreelancer}',
+                style: const TextStyle(fontSize: 13, color: AppColors.mutedText),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    _dongTaiChinh('Tiền ký quỹ (Escrow):', AppFormatters.formatCurrency(thongTin.sotienkyquy)),
+                    const SizedBox(height: 8),
+                    _dongTaiChinh('Phí nền tảng (nếu có):', AppFormatters.formatCurrency(thongTin.soTienHoaHong)),
+                    const Divider(height: 18),
+                    _dongTaiChinh(
+                      'Freelancer thực nhận:',
+                      AppFormatters.formatCurrency(thongTin.soTienFreelancerNhan),
+                      isHighlight: true,
+                    ),
+                    const SizedBox(height: 8),
+                    _dongTaiChinh('Số dư đang đóng băng:', AppFormatters.formatCurrency(thongTin.soDuDongBang)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.25)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Xác nhận giải ngân sẽ chuyển khoản tiền ký quỹ đóng băng cho Freelancer và hoàn tất hợp đồng. Thao tác không thể hoàn tác.',
+                        style: TextStyle(fontSize: 12, color: Colors.blueGrey, height: 1.3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text(
+                    'Xác nhận giải ngân ngay',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (xacNhan != true || !mounted) return;
+
+    setState(() => _dangXuLy = true);
+    final ok = await vm.thanhToanHopDong(hd.maHD, maUser: user.userId);
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    if (ok) {
+      _thongBao('Giải ngân thanh toán thành công! Hợp đồng đã hoàn tất.');
+      await _tai();
+    } else {
+      _thongBao(vm.thongBaoLoi ?? 'Giải ngân thanh toán thất bại.');
+    }
+  }
+
+  Widget _dongTaiChinh(String nhan, String giaTri, {bool isHighlight = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          nhan,
+          style: TextStyle(
+            fontSize: isHighlight ? 14 : 13,
+            fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal,
+            color: isHighlight ? AppColors.heading : Colors.black54,
+          ),
+        ),
+        Text(
+          giaTri,
+          style: TextStyle(
+            fontSize: isHighlight ? 15 : 13,
+            fontWeight: FontWeight.bold,
+            color: isHighlight ? Colors.teal : AppColors.heading,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _xoaHopDong(HopDongModel hd) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) {
+      _thongBao('Bạn cần đăng nhập.');
+      return;
+    }
+
+    final xacNhan = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xác nhận xóa hợp đồng'),
+        content: Text(
+          'Bạn chắc chắn muốn xóa hợp đồng "${hd.maHD}" khỏi hệ thống? Thao tác này không thể hoàn tác.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Xóa hợp đồng'),
+          ),
+        ],
+      ),
+    );
+
+    if (xacNhan != true || !mounted) return;
+
+    setState(() => _dangXuLy = true);
+    final vm = context.read<HopDongViewModel>();
+    final ok = await vm.xoaHopDong(hd.maHD, maUserNTD: user.userId);
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    if (ok) {
+      _thongBao('Đã xóa hợp đồng thành công.');
+      Navigator.pop(context);
+    } else {
+      _thongBao(vm.thongBaoLoi ?? 'Không thể xóa hợp đồng.');
     }
   }
 
@@ -632,6 +916,60 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                   ),
                 ),
               ),
+            // GIẢI NGÂN THÙ LAO (KHI HỢP ĐỒNG ĐÃ ĐƯỢC NGHIỆM THU HOÀN THÀNH)
+            if (hd.trangThai == 'DaHoanThanh' && isNTD) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.teal.withValues(alpha: 0.35)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.check_circle_outline, color: Colors.teal, size: 22),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Hợp đồng đã hoàn thành nghiệm thu',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.teal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Tất cả sản phẩm đã được chấp thuận. Vui lòng giải ngân thù lao từ khoản ký quỹ cho Freelancer để hoàn tất hợp đồng.',
+                      style: TextStyle(fontSize: 13, color: AppColors.bodyText, height: 1.3),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _dangXuLy ? null : () => _moHopThoaiThanhToan(hd),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        icon: const Icon(Icons.payments_outlined),
+                        label: Text(
+                          _dangXuLy ? 'Đang xử lý...' : 'Giải ngân thù lao cho Freelancer',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (hd.daBiTuChoi && isNTD) ...[
               const SizedBox(height: 12),
               SizedBox(
@@ -667,6 +1005,29 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _dangXuLy ? null : () => _xoaHopDong(hd),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Xóa dự thảo hợp đồng này'),
+                ),
+              ),
+            ],
+            // ĐÁNH GIÁ ĐỐI TÁC (Khi hợp đồng hoàn thành hoặc đã thanh toán)
+            if (hd.trangThai == 'DaHoanThanh' || hd.trangThai == 'DaThanhToan') ...[
+              const SizedBox(height: 12),
+              _DanhGiaHopDongSection(
+                hd: hd,
+                isNTD: isNTD,
+                laFreelancer: laFreelancerCuaHopDong,
               ),
             ],
             // BÀN GIAO VÀ NGHIỆM THU SẢN PHẨM (Tương tự sectionBanGiaoSanPham bên Web)
@@ -852,6 +1213,12 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       );
     }
 
+    final laNtdChuHopDong = hd != null &&
+        user != null &&
+        (user.role == 'NhaTuyenDung' ||
+            user.role == 'Employer' ||
+            hd.maUserNhaTuyenDung == user.userId);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -859,8 +1226,333 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.heading,
         elevation: 0.5,
+        actions: [
+          if (hd != null &&
+              laNtdChuHopDong &&
+              (hd.trangThai == 'DaHuy' ||
+                  hd.trangThai == 'TuChoi' ||
+                  hd.trangThai == 'DuThao' ||
+                  hd.trangThai == 'ChoXacNhan'))
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              tooltip: 'Xóa hợp đồng',
+              onPressed: _dangXuLy ? null : () => _xoaHopDong(hd),
+            ),
+        ],
       ),
       body: noiDung,
+    );
+  }
+}
+
+
+
+class _DanhGiaHopDongSection extends StatefulWidget {
+  final HopDongModel hd;
+  final bool isNTD;
+  final bool laFreelancer;
+
+  const _DanhGiaHopDongSection({
+    required this.hd,
+    required this.isNTD,
+    required this.laFreelancer,
+  });
+
+  @override
+  State<_DanhGiaHopDongSection> createState() => _DanhGiaHopDongSectionState();
+}
+
+class _DanhGiaHopDongSectionState extends State<_DanhGiaHopDongSection> {
+  final DanhGiaService _service = DanhGiaService();
+  bool _loading = true;
+  FormDanhGiaModel? _formInfo;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRatingInfo();
+  }
+
+  Future<void> _loadRatingInfo() async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) {
+      setState(() => _loading = false);
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    final res = await _service.layFormDanhGia(
+      maHD: widget.hd.maHD,
+      maUser: user.userId,
+    );
+
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        if (res.isSuccess) {
+          _formInfo = res.data;
+        } else {
+          _error = res.message;
+        }
+      });
+    }
+  }
+
+  void _openRatingSheet() {
+    final info = _formInfo;
+    final currentReview = info?.danhGiaHienTai;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: FormDanhGiaWidget(
+          maHD: widget.hd.maHD,
+          tenCongViec: widget.hd.tenCongViec,
+          tenDoiTac: widget.isNTD
+              ? (widget.hd.tenFreelancer.trim().isNotEmpty
+                  ? widget.hd.tenFreelancer.trim()
+                  : 'Freelancer')
+              : ((widget.hd.tenNhaTuyenDung ?? '').trim().isNotEmpty
+                  ? widget.hd.tenNhaTuyenDung!.trim()
+                  : 'Nhà tuyển dụng'),
+          vaiTroDoiTac: widget.isNTD ? 'FreelancerStudent' : 'Nhà tuyển dụng',
+          danhGiaBanDau: currentReview,
+          onThanhCong: () {
+            Navigator.pop(ctx);
+            _loadRatingInfo();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Lưu đánh giá thành công!')),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Card(
+        elevation: 0,
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.primary.withValues(alpha: 0.35)),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(20),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    if (_error != null && _formInfo == null) {
+      return const SizedBox.shrink();
+    }
+
+    final info = _formInfo;
+    final review = info?.danhGiaHienTai;
+    final canRate = info?.coTheDanhGia == true;
+    final canEdit = review?.coTheChinhSua == true;
+
+    return Card(
+      elevation: 0,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: AppColors.primary.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.star_rounded,
+                    color: Colors.amber,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Đánh giá & Nhận xét đối tác',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: AppColors.heading,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        review != null
+                            ? 'Bạn đã gửi đánh giá cho đối tác trên hợp đồng này.'
+                            : 'Chia sẻ trải nghiệm làm việc cùng đối tác sau khi hoàn tất hợp đồng.',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.mutedText,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Đánh giá của mình đã gửi
+            if (review != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Đánh giá của bạn:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Row(
+                              children: List.generate(
+                                5,
+                                (i) => Icon(
+                                  i < review.soSaoTongThe
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  size: 16,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '(${review.soSaoTongThe}/5)',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    if (review.ngayDanhGia != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Ngày gửi: ${DateFormat("dd/MM/yyyy HH:mm").format(review.ngayDanhGia!)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                    if ((review.nhanXet ?? '').trim().isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        '"${review.nhanXet}"',
+                        style: const TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                          color: AppColors.bodyText,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (canEdit) ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _openRatingSheet,
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Chỉnh sửa đánh giá'),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ] else if (canRate) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _openRatingSheet,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.amber.shade700,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.rate_review, size: 18),
+                  label: const Text(
+                    'Gửi đánh giá đối tác',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ] else ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Đã hết thời hạn gửi đánh giá (quá 30 ngày kể từ khi hoàn tất).',
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

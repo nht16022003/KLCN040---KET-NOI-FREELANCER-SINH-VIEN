@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/constants/mau_sac_ung_dung.dart';
 import '../../../models/mo_hinh_nha_tuyen_dung.dart';
 import '../../chat/man_hinh_chi_tiet_chat.dart';
+import '../../profile/man_hinh_ho_so_nha_tuyen_dung.dart';
 
 class NhaTuyenDungDetailBottomSheet extends StatelessWidget {
   final NhaTuyenDungModel ntd;
@@ -187,7 +188,36 @@ class NhaTuyenDungDetailBottomSheet extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NhaTuyenDungProfileScreen(
+                        maNhaTuyenDung: ntd.maNhaTuyenDung,
+                        maUser: ntd.maUser,
+                        initialData: ntd,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.business_outlined, size: 18),
+                label: const Text('Xem hồ sơ đầy đủ & Tin tuyển dụng'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
 
             // Nút hành động
             Row(

@@ -60,11 +60,11 @@ namespace FreelancerStudent.API.Services
         {
             var contracts = await context.HopDongs.AsNoTracking()
                 .Include(h => h.JobPost).ThenInclude(j => j!.NhaTuyenDung)
-                .Where(h => h.trangThai == "DaHoanThanh" && h.ngayHoanThanh.HasValue)
+                .Where(h => h.trangThai == "DaHoanThanh" && (h.ngayKetThuc.HasValue || h.ngayBatDau.HasValue))
                 .ToListAsync(token);
             foreach (var contract in contracts)
             {
-                var nhacLuc = contract.ngayHoanThanh!.Value.AddDays(Math.Max(0, _options.SoNgayTuDongGiaiNgan - 2));
+                var nhacLuc = (contract.ngayHoanThanh ?? contract.ngayKetThuc ?? contract.ngayBatDau ?? DateTime.Now).AddDays(Math.Max(0, _options.SoNgayTuDongGiaiNgan - 2));
                 if (now.Date != nhacLuc.Date || contract.JobPost?.NhaTuyenDung == null)
                     continue;
                 var coTranhChap = await context.TranhChaps.AsNoTracking()
@@ -80,7 +80,7 @@ namespace FreelancerStudent.API.Services
         {
             var han = now.AddDays(-_options.SoNgayTuDongGiaiNgan);
             var contracts = await context.HopDongs.AsNoTracking()
-                .Where(h => h.trangThai == "DaHoanThanh" && h.ngayHoanThanh <= han)
+                .Where(h => h.trangThai == "DaHoanThanh" && (h.ngayKetThuc <= han || h.ngayBatDau <= han))
                 .Select(h => h.maHD)
                 .ToListAsync(token);
             var service = services.GetRequiredService<IHopDongService>();
@@ -104,7 +104,7 @@ namespace FreelancerStudent.API.Services
             var contracts = await context.HopDongs.AsNoTracking()
                 .Include(h => h.JobPost).ThenInclude(j => j!.NhaTuyenDung)
                 .Include(h => h.FreelancerStudent)
-                .Where(h => (h.trangThai == "DaThanhToan" || h.trangThai == "DaHuyHoanTien") && h.ngayDongHopDong.HasValue)
+                .Where(h => (h.trangThai == "DaThanhToan" || h.trangThai == "DaHuyHoanTien") && (h.ngayKetThuc.HasValue || h.ngayBatDau.HasValue))
                 .ToListAsync(token);
             foreach (var contract in contracts)
             {
@@ -113,10 +113,14 @@ namespace FreelancerStudent.API.Services
                 if (!employerUser.HasValue || !freelancerUser.HasValue)
                     continue;
 
+                var closingDate = contract.ngayDongHopDong ?? contract.ngayHoanThanh ?? contract.ngayKetThuc ?? contract.ngayBatDau;
+                if (!closingDate.HasValue)
+                    continue;
+
                 foreach (var days in _options.NgayNhacDanhGia.Distinct())
                 {
-                    var reminderDate = contract.ngayDongHopDong!.Value.AddDays(days);
-                    if (now.Date != reminderDate.Date || now > contract.ngayDongHopDong.Value.AddDays(_options.SoNgayChoDanhGia))
+                    var reminderDate = closingDate.Value.AddDays(days);
+                    if (now.Date != reminderDate.Date || now > closingDate.Value.AddDays(_options.SoNgayChoDanhGia))
                         continue;
                     foreach (var userId in new[] { employerUser.Value, freelancerUser.Value })
                     {

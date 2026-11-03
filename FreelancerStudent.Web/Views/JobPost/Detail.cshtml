@@ -296,47 +296,79 @@
                     </div>
                 </div>
 
-                <!-- 4. Hộp ứng tuyển trực tiếp -->
-                <div class="section-card" id="applyBox">
-                    <h5 class="section-card-title">
-                        Gửi hồ sơ ứng tuyển công việc này
-                    </h5>
+                @{
+                    bool isDaHoanThanh = (ViewBag.DaHoanThanh as bool?) ?? string.Equals(Model.Job.Status, "DaHoanThanh", StringComparison.OrdinalIgnoreCase);
+                    bool isDaTuyenDu = (ViewBag.DaTuyenDu as bool?) ?? Model.Job.DaTuyenDu || string.Equals(Model.Job.Status, "DaTuyenDu", StringComparison.OrdinalIgnoreCase);
+                }
 
-                    <form asp-controller="JobPost" asp-action="UngTuyen" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="maJob" value="@Model.Job.MaJob" />
-                        <input type="hidden" name="tieude" value="@Model.Job.Tieude" />
-                        <input type="hidden" name="thulao" value="@(Model.Job.Thulao ?? 0)" />
+                @if (isDaHoanThanh)
+                {
+                    <div class="section-card" id="applyBox" style="border-left: 4px solid #64748B;">
+                        <h5 class="section-card-title text-secondary">
+                            <i class="bi bi-check-circle-fill text-success" style="display:inline-block !important;"></i>
+                            Dự án đã hoàn thành nghiệm thu
+                        </h5>
+                        <p class="text-secondary small mb-0" style="line-height: 1.6;">
+                            Công việc này đã hoàn tất toàn bộ quy trình bàn giao và nghiệm thu sản phẩm cuối cùng. Hệ thống đã chính thức đóng tiếp nhận hồ sơ ứng tuyển mới. Bạn vẫn có thể tham khảo yêu cầu kỹ năng và mức thù lao của dự án.
+                        </p>
+                    </div>
+                }
+                else if (isDaTuyenDu)
+                {
+                    <div class="section-card" id="applyBox" style="border-left: 4px solid #EAB308;">
+                        <h5 class="section-card-title text-warning">
+                            <i class="bi bi-person-check-fill text-warning" style="display:inline-block !important;"></i>
+                            Công việc đã tuyển đủ ứng viên
+                        </h5>
+                        <p class="text-secondary small mb-0" style="line-height: 1.6;">
+                            Nhà tuyển dụng đã chấp nhận ứng viên Freelancer Sinh Viên phù hợp cho vị trí này (quy tắc mỗi công việc chỉ tuyển tối đa 1 ứng viên). Hệ thống tạm ngưng tiếp nhận thêm hồ sơ ứng tuyển mới.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <!-- 4. Hộp ứng tuyển trực tiếp -->
+                    <div class="section-card" id="applyBox">
+                        <h5 class="section-card-title">
+                            Gửi hồ sơ ứng tuyển công việc này
+                        </h5>
 
-                        <div class="mb-3">
-                            <label class="form-label text-dark fw-bold small">Thư giới thiệu / Đề xuất thực hiện: <span class="text-danger">*</span></label>
-                            <textarea name="thuGioiThieu" class="form-control" rows="4" required
-                                      placeholder="Giới thiệu kinh nghiệm phù hợp, kế hoạch triển khai và cam kết thời gian hoàn thành..."></textarea>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label text-dark fw-bold small">Mức thù lao đề xuất (VNĐ): <span class="text-danger">*</span></label>
-                                <input type="number" name="thulaoDeXuat" class="form-control"
-                                       value="@(Model.Job.Thulao.HasValue ? Convert.ToInt64(Model.Job.Thulao.Value) : 1500000)" required />
+                        <form asp-controller="JobPost" asp-action="UngTuyen" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maJob" value="@Model.Job.MaJob" />
+                            <input type="hidden" name="tieude" value="@Model.Job.Tieude" />
+                            <input type="hidden" name="thulao" value="@(Model.Job.Thulao ?? 0)" />
+
+                            <div class="mb-3">
+                                <label class="form-label text-dark fw-bold small">Thư giới thiệu / Đề xuất thực hiện: <span class="text-danger">*</span></label>
+                                <textarea name="thuGioiThieu" class="form-control" rows="4" required
+                                          placeholder="Giới thiệu kinh nghiệm phù hợp, kế hoạch triển khai và cam kết thời gian hoàn thành..."></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-dark fw-bold small">Thời gian hoàn thành cam kết (Cố định):</label>
-                                <input type="text" name="thoiGianHoanThanhDeXuat" class="form-control"
-                                       value="@(Model.Job.Thoigiandukienhoanthanh.ToString("dd/MM/yyyy"))"
-                                       readonly style="cursor: not-allowed; background-color: #f8f9fa;" />
-                                <small class="text-muted" style="font-size: 0.72rem;">Thời gian cố định theo hạn của Nhà tuyển dụng.</small>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-dark fw-bold small">Mức thù lao đề xuất (VNĐ): <span class="text-danger">*</span></label>
+                                    <input type="number" name="thulaoDeXuat" class="form-control"
+                                           value="@(Model.Job.Thulao.HasValue ? Convert.ToInt64(Model.Job.Thulao.Value) : 1500000)" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-dark fw-bold small">Thời gian hoàn thành cam kết (Cố định):</label>
+                                    <input type="text" name="thoiGianHoanThanhDeXuat" class="form-control"
+                                           value="@(Model.Job.Thoigiandukienhoanthanh.ToString("dd/MM/yyyy"))"
+                                           readonly style="cursor: not-allowed; background-color: #f8f9fa;" />
+                                    <small class="text-muted" style="font-size: 0.72rem;">Thời gian cố định theo hạn của Nhà tuyển dụng.</small>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-dark fw-bold small">Link CV / Sản phẩm mẫu (Google Drive, Canva, Github...) (Tùy chọn):</label>
-                            <input type="text" name="fileCV" class="form-control" placeholder="https://..." />
-                        </div>
-                        <button type="submit" class="btn btn-success rounded-0 px-4 py-2 fw-bold"
-                                style="background-color: #1B5E36; border-color: #1B5E36;">
-                            Xác nhận gửi ứng tuyển
-                        </button>
-                    </form>
-                </div>
+                            <div class="mb-3">
+                                <label class="form-label text-dark fw-bold small">Link CV / Sản phẩm mẫu (Google Drive, Canva, Github...) (Tùy chọn):</label>
+                                <input type="text" name="fileCV" class="form-control" placeholder="https://..." />
+                            </div>
+                            <button type="submit" class="btn btn-success rounded-0 px-4 py-2 fw-bold"
+                                    style="background-color: #1B5E36; border-color: #1B5E36;">
+                                Xác nhận gửi ứng tuyển
+                            </button>
+                        </form>
+                    </div>
+                }
 
             </div>
 
@@ -353,9 +385,32 @@
                         Đã có ký quỹ bảo đảm từ hệ thống
                     </p>
 
-                    <a href="#applyBox" class="btn-apply-job">
-                        Ứng tuyển ngay
-                    </a>
+                    @if (isDaHoanThanh)
+                    {
+                        <div class="w-100 p-2 text-center text-white fw-bold small rounded-0" style="background-color: #64748B;">
+                            Công việc đã hoàn thành
+                        </div>
+                    }
+                    else if (isDaTuyenDu)
+                    {
+                        <div class="w-100 p-2 text-center text-dark fw-bold small rounded-0" style="background-color: #FEF08A; border: 1px solid #FDE047;">
+                            Đã tuyển đủ ứng viên
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="#applyBox" class="btn-apply-job">
+                            Ứng tuyển ngay
+                        </a>
+                    }
+
+                    @{
+                        bool daLuuViecHienTai = (ViewBag.DaLuuViec as bool?) ?? false;
+                    }
+                    <button type="button" class="btn @(daLuuViecHienTai ? "btn-outline-danger" : "btn-outline-success") w-100 rounded-0 mt-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="btnToggleLuuDetail" onclick="toggleLuuViecDetail('@Model.Job.MaJob')">
+                        <i class="bi @(daLuuViecHienTai ? "bi-bookmark-fill" : "bi-bookmark")" id="iconLuuDetail"></i>
+                        <span id="textLuuDetail">@(daLuuViecHienTai ? "Đã lưu công việc" : "Lưu việc này")</span>
+                    </button>
                 </div>
 
                 <!-- Card Thông tin Doanh Nghiệp -->
@@ -424,3 +479,38 @@
 
     </div>
 </div>
+
+<script>
+    async function toggleLuuViecDetail(maJob) {
+        try {
+            const res = await fetch('/JobPost/ToggleLuuViec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maJob: maJob })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const btn = document.getElementById('btnToggleLuuDetail');
+                const icon = document.getElementById('iconLuuDetail');
+                const text = document.getElementById('textLuuDetail');
+                if (data.daLuu) {
+                    btn.classList.remove('btn-outline-success');
+                    btn.classList.add('btn-outline-danger');
+                    icon.classList.remove('bi-bookmark');
+                    icon.classList.add('bi-bookmark-fill');
+                    text.innerText = 'Đã lưu công việc';
+                } else {
+                    btn.classList.remove('btn-outline-danger');
+                    btn.classList.add('btn-outline-success');
+                    icon.classList.remove('bi-bookmark-fill');
+                    icon.classList.add('bi-bookmark');
+                    text.innerText = 'Lưu việc này';
+                }
+            } else {
+                alert(data.message);
+            }
+        } catch (e) {
+            alert('Lỗi: ' + e);
+        }
+    }
+</script>

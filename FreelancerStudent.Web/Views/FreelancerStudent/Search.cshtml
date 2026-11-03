@@ -548,9 +548,22 @@
                                     </span>
                                 </div>
 
-                                <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" class="btn-view-profile">
-                                    Xem hồ sơ
-                                </a>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (User.IsInRole("NhaTuyenDung") || Context.Session.GetString("tenRole") == "NhaTuyenDung")
+                                    {
+                                        var danhSachMaFLDaLuu = ViewBag.DanhSachMaFreelancerDaLuu as List<int> ?? new List<int>();
+                                        bool daLuuFL = danhSachMaFLDaLuu.Contains(item.maFreelancerStudents);
+                                        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none bookmark-fl-btn @(daLuuFL ? "text-danger" : "text-secondary")"
+                                                onclick="toggleLuuFreelancer(@item.maFreelancerStudents, this)" 
+                                                title="@(daLuuFL ? "Bỏ yêu thích" : "Lưu Freelancer yêu thích")">
+                                            <i class="bi @(daLuuFL ? "bi-heart-fill" : "bi-heart") fs-5" style="display:inline-block !important;"></i>
+                                        </button>
+                                    }
+
+                                    <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" class="btn-view-profile">
+                                        Xem hồ sơ
+                                    </a>
+                                </div>
                             </div>
 
                         </div>
@@ -576,3 +589,36 @@
     </div>
 
 </div>
+
+<script>
+    async function toggleLuuFreelancer(maFreelancer, btn) {
+        try {
+            const res = await fetch('/NhaTuyenDung/ToggleLuuFreelancer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maFreelancerStudent: maFreelancer })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.daLuu) {
+                    btn.classList.remove('text-secondary');
+                    btn.classList.add('text-danger');
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                    btn.title = 'Bỏ yêu thích';
+                } else {
+                    btn.classList.remove('text-danger');
+                    btn.classList.add('text-secondary');
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                    btn.title = 'Lưu Freelancer yêu thích';
+                }
+            } else {
+                alert(data.message);
+            }
+        } catch (e) {
+            alert('Lỗi: ' + e);
+        }
+    }
+</script>

@@ -163,25 +163,35 @@
                         }
                         else if (item.trangThaiUngTuyen == "ChoDuyet")
                         {
-                            <!-- Nút duyệt -->
-                            <form asp-controller="JobPost"
-                                asp-action="DuyetUngTuyen"
-                                method="post"
-                                class="d-inline">
+                            bool jobDaTuyenDu = Model.Any(x => x.maJob == item.maJob && x.trangThaiUngTuyen == "ChapNhan");
+                            if (jobDaTuyenDu)
+                            {
+                                <span class="badge bg-warning text-dark rounded-0 p-2 me-1" title="Công việc đã có ứng viên được chấp nhận. Mỗi công việc chỉ tuyển tối đa 1 ứng viên.">
+                                    Đã tuyển đủ
+                                </span>
+                            }
+                            else
+                            {
+                                <!-- Nút duyệt -->
+                                <form asp-controller="JobPost"
+                                    asp-action="DuyetUngTuyen"
+                                    method="post"
+                                    class="d-inline">
 
-                                @Html.AntiForgeryToken()
+                                    @Html.AntiForgeryToken()
 
-                                <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
-                                <input type="hidden" name="trangThai" value="ChapNhan" />
-                                <input type="hidden" name="maJob" value="@item.maJob" />
+                                    <input type="hidden" name="maUngTuyen" value="@item.maUngTuyen" />
+                                    <input type="hidden" name="trangThai" value="ChapNhan" />
+                                    <input type="hidden" name="maJob" value="@item.maJob" />
 
-                                <button type="submit"
-                                        class="btn btn-sm btn-success rounded-0"
-                                        style="background-color: #1B5E36; border-color: #1B5E36;"
-                                        onclick="return confirm('Bạn có chắc chắn muốn duyệt ứng viên này?');">
-                                    Duyệt
-                                </button>
-                            </form>
+                                    <button type="submit"
+                                            class="btn btn-sm btn-success rounded-0"
+                                            style="background-color: #1B5E36; border-color: #1B5E36;"
+                                            onclick="return confirm('Bạn có chắc chắn muốn duyệt ứng viên này? (Công việc sẽ chuyển sang trạng thái đã tuyển đủ)');">
+                                        Duyệt
+                                    </button>
+                                </form>
+                            }
 
                             <!-- Nút từ chối -->
                             <form asp-controller="JobPost"

@@ -14,6 +14,9 @@ namespace FreelancerStudent.API.Services.Interfaces
 
         Task<JobPost_ReponseDTO> taoJobPostAsync(JobPost_RequestDTO request);
 
+        // Lấy mức phí đăng bài hiện tại từ cấu hình
+        Task<decimal> layPhiDangBaiHienTaiAsync();
+
 
         //Tuấn
         Task<List<UngTuyen_ReponseDTO>> layDanhSachUngTuyen_JobPost_TheoMaUser(int maUser);

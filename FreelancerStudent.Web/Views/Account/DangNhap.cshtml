@@ -98,9 +98,23 @@
                     <div class="card-body">
                         <h5 class="card-title">Đăng Nhập <span style="color:white">Tài Khoản</span></h5>
                        
+                        @if (ViewBag.HetHanNienKhoa == true)
+                        {
+                            <div class="alert alert-danger border border-danger shadow-sm rounded-0 p-3 mb-3 text-start">
+                                <div class="fw-bold text-danger mb-2" style="font-size: 0.95rem;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    MINH CHỨNG XÁC NHẬN SINH VIÊN ĐÃ KHÔNG CÒN HỢP LỆ, VÌ NIÊN KHÓA CỦA BẠN ĐÃ VƯỢT QUA THỜI GIAN CHO PHÉP
+                                </div>
+                                <p class="small text-secondary mb-3">Tài khoản sinh viên đã bị khóa toàn bộ chức năng nghiệp vụ do niên khóa không còn hiệu lực theo năm hiện tại (@DateTime.Now.Year). Bạn cần nộp minh chứng thẻ sinh viên mới để được phê duyệt lại.</p>
+                                <a href="/Account/MinhChung" class="btn btn-danger btn-sm rounded-0 fw-semibold w-100 text-white py-2 text-decoration-none d-inline-block text-center">
+                                    <i class="bi bi-card-checklist me-1"></i> Cập nhật / Xác minh lại thẻ sinh viên
+                                </a>
+                            </div>
+                        }
+
                         <form asp-controller="Account" asp-action="DangNhap" method="post">
                             @* Sửa thành asp-validation-summary="All" để hiện TẤT CẢ mọi lỗi lên màn hình *@
-                            <div asp-validation-summary="All" class="alert alert-danger mb-3">
+                            <div asp-validation-summary="All" class="alert alert-danger mb-3" style="@(!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0 ? "" : "display:none;")">
                             </div>
 
                            

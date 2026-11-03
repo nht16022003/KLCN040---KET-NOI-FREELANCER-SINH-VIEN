@@ -12,15 +12,18 @@ namespace FreelancerStudent.Web.Controllers
         private readonly INhaTuyenDungWebService _nhaTuyenDungWebService;
         private readonly IJobPostWebService _jobPostWebService;
         private readonly IDanhGiaWebService _danhGiaWebService;
+        private readonly IYeuThichWebService _yeuThichService;
 
         public NhaTuyenDungController(
             INhaTuyenDungWebService nhaTuyenDungWebService, 
             IJobPostWebService jobPostWebService,
-            IDanhGiaWebService danhGiaWebService)
+            IDanhGiaWebService danhGiaWebService,
+            IYeuThichWebService yeuThichService)
         {
             _nhaTuyenDungWebService = nhaTuyenDungWebService;
             _jobPostWebService = jobPostWebService;
             _danhGiaWebService = danhGiaWebService;
+            _yeuThichService = yeuThichService;
         }
 
         [HttpGet]
@@ -83,7 +86,7 @@ namespace FreelancerStudent.Web.Controllers
             {
                 try
                 {
-                    var stats = await _danhGiaWebService.LayNhaTuyenDungAsync(profile.NhaTuyenDung.MaNhaTuyenDung, 1, 10);
+                    var stats = await _danhGiaWebService.LayNhaTuyenDungAsync(profile.NhaTuyenDung.MaNhaTuyenDung, 1, 50);
                     if (stats?.success == true && stats.data != null)
                     {
                         profile.ThongKeDanhGia = stats.data;
@@ -138,5 +141,56 @@ namespace FreelancerStudent.Web.Controllers
 
             return View(danhsachNTD);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleLuuFreelancer([FromBody] ToggleLuuFreelancerRequest request)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+            var role = HttpContext.Session.GetString("tenRole") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            if (!maUser.HasValue || (role != "NhaTuyenDung" && role != "Employer"))
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập với tư cách Nhà tuyển dụng để lưu Freelancer yêu thích!" });
+            }
+
+            if (request == null || request.MaFreelancerStudent <= 0)
+            {
+                return Json(new { success = false, message = "Thông tin Freelancer không hợp lệ!" });
+            }
+
+            var daLuu = await _yeuThichService.KiemTraLuuFreelancerAsync(maUser.Value, request.MaFreelancerStudent);
+            if (daLuu)
+            {
+                var boLuu = await _yeuThichService.BoLuuFreelancerAsync(maUser.Value, request.MaFreelancerStudent);
+                return Json(new { success = boLuu.success, daLuu = false, message = "Đã bỏ lưu Freelancer khỏi danh sách yêu thích!" });
+            }
+            else
+            {
+                var luu = await _yeuThichService.LuuFreelancerAsync(maUser.Value, request.MaFreelancerStudent, request.GhiChu);
+                return Json(new { success = luu.success, daLuu = true, message = "Đã lưu Freelancer vào danh sách yêu thích!" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> FreelancerYeuThich()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+            var role = HttpContext.Session.GetString("tenRole") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            if (!maUser.HasValue || (role != "NhaTuyenDung" && role != "Employer"))
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập với tư cách Nhà tuyển dụng để xem danh sách Freelancer yêu thích.";
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var danhSach = await _yeuThichService.LayDanhSachFreelancerYeuThichAsync(maUser.Value);
+            return View(danhSach);
+        }
+    }
+
+    public class ToggleLuuFreelancerRequest
+    {
+        public int MaFreelancerStudent { get; set; }
+        public string? GhiChu { get; set; }
     }
 }

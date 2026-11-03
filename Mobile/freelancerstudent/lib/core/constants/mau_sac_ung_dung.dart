@@ -59,4 +59,5 @@ class AppColors {
   static const Color textPrimary = heading;
   static const Color textSecondary = bodyText;
   static const Color surfaceLight = lightGreenSurface;
+  static const Color cardBorder = border;
 }

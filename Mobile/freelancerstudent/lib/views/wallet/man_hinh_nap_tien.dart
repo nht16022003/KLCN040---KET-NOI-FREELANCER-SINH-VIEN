@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../services/dich_vu_vi_tien.dart';
-import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_vi_tien.dart';
+import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../profile/man_hinh_minh_chung_the_sv.dart';
 
 class DepositScreen extends StatefulWidget {
@@ -19,6 +19,8 @@ class _DepositScreenState extends State<DepositScreen> {
   final TextEditingController _soTienController = TextEditingController();
   final WalletService _walletService = WalletService();
   bool _dangXuLy = false;
+  bool _dangXacNhanMoPhong = false;
+  bool _daXacNhanMoPhong = false;
   Map<String, dynamic>? _ketQuaGiaoDich;
 
   final List<double> _mucTienGoiY = [100000, 200000, 500000, 1000000, 2000000];
@@ -62,11 +64,12 @@ class _DepositScreenState extends State<DepositScreen> {
     if (res.isSuccess && res.data != null) {
       setState(() {
         _ketQuaGiaoDich = res.data;
+        _daXacNhanMoPhong = false;
       });
-      // Tải lại số dư ví
       context.read<WalletViewModel>().taiThongTinVi(user.userId);
     } else {
-      final msg = res.message.isNotEmpty ? res.message : 'Tạo giao dịch nạp tiền thất bại.';
+      final msg =
+          res.message.isNotEmpty ? res.message : 'Tạo giao dịch nạp tiền thất bại.';
       if (msg.contains('xác thực') || msg.contains('xác minh')) {
         showDialog(
           context: context,
@@ -76,7 +79,10 @@ class _DepositScreenState extends State<DepositScreen> {
               children: [
                 Icon(Icons.shield_outlined, color: Colors.orange),
                 SizedBox(width: 8),
-                Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Yêu cầu xác thực',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
             content: Text(msg),
@@ -94,7 +100,10 @@ class _DepositScreenState extends State<DepositScreen> {
                     MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
                   );
                 },
-                child: const Text('Xác thực ngay', style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  'Xác thực ngay',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -105,6 +114,31 @@ class _DepositScreenState extends State<DepositScreen> {
         );
       }
     }
+  }
+
+  Future<void> _xacNhanMoPhong(String maGiaoDich) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null || maGiaoDich.isEmpty) return;
+
+    setState(() => _dangXacNhanMoPhong = true);
+
+    final vm = context.read<WalletViewModel>();
+    final res = await vm.xacNhanNapTienMoPhong(maGiaoDich, user.userId);
+
+    if (!mounted) return;
+    setState(() {
+      _dangXacNhanMoPhong = false;
+      if (res.isSuccess) {
+        _daXacNhanMoPhong = true;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(res.message),
+        backgroundColor: res.isSuccess ? AppColors.primary : AppColors.error,
+      ),
+    );
   }
 
   @override
@@ -124,7 +158,11 @@ class _DepositScreenState extends State<DepositScreen> {
               children: [
                 const Text(
                   'Chọn hoặc nhập số tiền cần nạp',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.heading),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.heading,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -154,7 +192,7 @@ class _DepositScreenState extends State<DepositScreen> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Quy định: Số tiền tối thiểu 100.000đ và là bội số của 50.000đ. Hệ thống xác thực tự động qua chuyển khoản SePay.',
+                  'Quy định: Số tiền tối thiểu 100.000đ và là bội số của 50.000đ. Hệ thống xác thực tự động qua chuyển khoản SePay hoặc nút xác nhận mô phỏng bên dưới.',
                   style: TextStyle(fontSize: 12, color: AppColors.bodyText),
                 ),
                 const SizedBox(height: 24),
@@ -187,7 +225,10 @@ class _DepositScreenState extends State<DepositScreen> {
     final kq = _ketQuaGiaoDich!;
     final maGiaoDich = kq['maGiaoDich']?.toString() ?? '';
     final noiDung = kq['noiDungChuyenKhoan']?.toString() ?? maGiaoDich;
-    final soTien = (kq['soTien'] is num) ? (kq['soTien'] as num).toDouble() : 0.0;
+    final soTien =
+        (kq['soTien'] is num) ? (kq['soTien'] as num).toDouble() : 0.0;
+    final qrUrl =
+        'https://img.vietqr.io/image/MB-0378896290-compact2.png?amount=${soTien.toInt()}&addInfo=${Uri.encodeComponent(noiDung)}&accountName=${Uri.encodeComponent('HOANG TUAN')}';
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -200,15 +241,19 @@ class _DepositScreenState extends State<DepositScreen> {
           ),
           child: Column(
             children: [
-              const Icon(
-                Icons.check_circle_outline,
+              Icon(
+                _daXacNhanMoPhong
+                    ? Icons.verified_rounded
+                    : Icons.check_circle_outline,
                 color: AppColors.primary,
                 size: 56,
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Tạo đơn nạp tiền thành công!',
-                style: TextStyle(
+              Text(
+                _daXacNhanMoPhong
+                    ? 'Đã cộng tiền vào ví thành công!'
+                    : 'Tạo đơn nạp tiền thành công!',
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.heading,
@@ -226,8 +271,44 @@ class _DepositScreenState extends State<DepositScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+
+        // Mã QR VietQR
         Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const Text(
+                  'Quét mã VietQR để chuyển khoản',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: AppColors.heading,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    qrUrl,
+                    height: 220,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text('Không thể tải mã QR VietQR'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -260,17 +341,90 @@ class _DepositScreenState extends State<DepositScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Vui lòng ghi đúng nội dung chuyển khoản ở trên để hệ thống tự động cộng tiền vào ví trong vòng 1-3 phút.',
+                  'Vui lòng ghi đúng nội dung chuyển khoản ở trên để hệ thống tự động cộng tiền vào ví.',
                   style: TextStyle(fontSize: 13, color: Colors.black54),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 20),
-        FilledButton(
+        const SizedBox(height: 16),
+
+        // Khối Xác nhận nạp tiền mô phỏng (đồng bộ Web Wallet/Index.cshtml)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade50,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.amber.shade400),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.science_outlined, color: Colors.amber.shade900),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Môi trường Kiểm thử / Demo Khóa luận',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Bấm nút bên dưới để xác nhận nạp tiền mô phỏng ngay lập tức mà không cần chuyển khoản ngân hàng thật.',
+                style: TextStyle(fontSize: 12.5, color: Colors.amber.shade900),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: (_dangXacNhanMoPhong || _daXacNhanMoPhong)
+                      ? null
+                      : () => _xacNhanMoPhong(maGiaoDich),
+                  icon: _dangXacNhanMoPhong
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Icon(
+                          _daXacNhanMoPhong
+                              ? Icons.check_circle
+                              : Icons.bolt_rounded,
+                        ),
+                  label: Text(
+                    _daXacNhanMoPhong
+                        ? 'ĐÃ XÁC NHẬN CỘNG TIỀN MÔ PHỎNG'
+                        : 'XÁC NHẬN NẠP TIỀN MÔ PHỎNG NGAY',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.amber.shade800,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+        OutlinedButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Hoàn tất và quay lại ví'),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+          child: const Text('Quay lại Ví điện tử'),
         ),
       ],
     );

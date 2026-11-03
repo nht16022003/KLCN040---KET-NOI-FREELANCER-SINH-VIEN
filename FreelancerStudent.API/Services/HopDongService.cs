@@ -104,6 +104,19 @@ namespace FreelancerStudent.API.Services
                 throw new ArgumentException("Không tìm thấy bài tuyển dụng tương ứng.");
             }
 
+            if (job.status == "DaHoanThanh")
+            {
+                throw new InvalidOperationException("Công việc này đã hoàn thành nghiệm thu dự án, không thể tạo hợp đồng mới.");
+            }
+
+            // Kiểm tra xem JobPost đã có ứng viên khác được chấp nhận chưa
+            bool daCoUngVienKhacDuyet = await _context.UngTuyens
+                .AnyAsync(u => u.maJob == request.maJob && u.trangThaiUngTuyen == "ChapNhan" && u.maFreelancerStudent != request.maFreelancerStudent);
+            if (daCoUngVienKhacDuyet)
+            {
+                throw new InvalidOperationException("Công việc này đã có ứng viên khác được chấp nhận (đã tuyển đủ). Không thể tạo hợp đồng cho ứng viên mới!");
+            }
+
             // Kiểm tra quyền sở hữu bài đăng nếu có maUserNTD
             if (!maUserNTD.HasValue || maUserNTD.Value <= 0)
             {
@@ -121,14 +134,19 @@ namespace FreelancerStudent.API.Services
             // Tự động xóa các hợp đồng cũ đã bị từ chối / hủy của Job và Freelancer này khỏi SQL
             await _repository.XoaCacHopDongDaHuyTheoJobVaFreelancerAsync(request.maJob, request.maFreelancerStudent);
 
-            // Kiểm tra xem Job đã có hợp đồng chưa
-            var hopDongHienCo = await _repository.LayHopDongMoiNhatTheoJobVaFreelancerAsync(request.maJob, request.maFreelancerStudent);
+            // Kiểm tra xem Job đã có hợp đồng đang hoạt động chưa (bảo vệ ràng buộc Unique maJob)
+            var hopDongHienCo = await _context.HopDongs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h =>
+                    h.maJob == request.maJob &&
+                    h.trangThai != "DaHuy" &&
+                    h.trangThai != "TuChoi");
 
             if (hopDongHienCo != null)
             {
                 throw new InvalidOperationException(
-                    $"Freelancer này đã có hợp đồng {hopDongHienCo.maHD} " +
-                    $"ở trạng thái '{hopDongHienCo.trangThai}'.");
+                    $"Công việc này đã có hợp đồng {hopDongHienCo.maHD} " +
+                    $"ở trạng thái '{hopDongHienCo.trangThai}'. Không thể tạo thêm hợp đồng mới.");
             }
             UngTuyen? donUngTuyen = null;
             if (request.maUngTuyen.HasValue && request.maUngTuyen.Value > 0)
@@ -237,6 +255,12 @@ namespace FreelancerStudent.API.Services
             }
 
             var hopDongMoi = await _repository.TaoHopDongAsync(hopDong, giaiDoans, request.maUngTuyen, thongBao);
+
+            if (job.status == "DangTuyen")
+            {
+                job.status = "DaTuyenDu";
+                await _context.SaveChangesAsync();
+            }
 
             return MapToResponseDTO(hopDongMoi);
         }
@@ -591,7 +615,7 @@ namespace FreelancerStudent.API.Services
             {
                 var soDongCapNhat = await _context.Database.ExecuteSqlInterpolatedAsync($@"
                     UPDATE HopDong
-                    SET trangThai = N'DaHoanThanh', ngayHoanThanh = GETDATE()
+                    SET trangThai = N'DaHoanThanh'
                     WHERE maHD = {maHD} AND trangThai = N'DangThucHien'");
                 if (soDongCapNhat != 1)
                     throw new InvalidOperationException("Không thể ghi nhận trạng thái Đã hoàn thành, vui lòng thao tác lại.");
@@ -683,6 +707,22 @@ namespace FreelancerStudent.API.Services
                 g.noiDung == $"Ký quỹ hợp đồng {maHD}" && g.trangThai == "ThanhCong");
             if (escrow == null)
                 throw new InvalidOperationException("Không tìm thấy dữ liệu ký quỹ của hợp đồng, vui lòng liên hệ hỗ trợ.");
+
+            // Kiểm tra xem hợp đồng đã được giải ngân thành công trước đó chưa (ví dụ qua bước nghiệm thu sản phẩm bàn giao)
+            var daGiaiNgan = walletEmployer != null && await _context.LichSuGiaoDichs.AsNoTracking().AnyAsync(g =>
+                g.maWallet == walletEmployer.maWallet && g.loaiGiaoDich == "GiaiNganHopDong" &&
+                g.noiDung == $"Giải ngân hợp đồng {maHD}" && g.trangThai == "ThanhCong");
+
+            if (daGiaiNgan)
+            {
+                // Hợp đồng này đã được giải ngân tiền xong -> Đồng bộ trạng thái hợp đồng sang 'DaThanhToan'
+                await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                    UPDATE HopDong
+                    SET trangThai = N'DaThanhToan'
+                    WHERE maHD = {maHD} AND trangThai = N'DaHoanThanh'");
+                return true;
+            }
+
             if (walletEmployer == null || (walletEmployer.soDuDongBang ?? 0) < soTienKyQuy)
                 throw new SoDuGiaiNganKhongDuException();
 
@@ -693,7 +733,7 @@ namespace FreelancerStudent.API.Services
             {
                 var soHopDongCapNhat = await _context.Database.ExecuteSqlInterpolatedAsync($@"
                     UPDATE HopDong
-                    SET trangThai = N'DaThanhToan', ngayDongHopDong = GETDATE(), thanhToanTuDong = {tuDong}
+                    SET trangThai = N'DaThanhToan'
                     WHERE maHD = {maHD} AND trangThai = N'DaHoanThanh'");
                 if (soHopDongCapNhat != 1)
                     throw new InvalidOperationException("Hợp đồng đã được thanh toán hoặc trạng thái đã thay đổi.");

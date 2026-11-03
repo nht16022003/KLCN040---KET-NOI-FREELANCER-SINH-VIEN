@@ -15,16 +15,18 @@ namespace FreelancerStudent.Web.Controllers
         private readonly IBaiDangTimViecWebService _baiDangWebService;
         private readonly IDanhGiaWebService _danhGiaWebService;
         private readonly IMinhChungWebService _minhChungWebService;
+        private readonly IYeuThichWebService _yeuThichService;
 
         public FreelancerStudentController(IFreelancerStudentWebService freelancerStudentWebService, IJobPostWebService jobPostWebService,
         IBaiDangTimViecWebService baiDangTimViecWebService, IDanhGiaWebService danhGiaWebService,
-        IMinhChungWebService minhChungWebService)
+        IMinhChungWebService minhChungWebService, IYeuThichWebService yeuThichService)
         {
             _freelancerStudentWebService = freelancerStudentWebService;
             _jobPostWebService = jobPostWebService;
             _baiDangWebService = baiDangTimViecWebService;
             _danhGiaWebService = danhGiaWebService;
             _minhChungWebService = minhChungWebService;
+            _yeuThichService = yeuThichService;
         }
         [HttpGet]
         public async Task<IActionResult> Index(
@@ -63,10 +65,10 @@ namespace FreelancerStudent.Web.Controllers
                 .ToList();
 
             var allSkills = rawList
-                .SelectMany(f => f.danhSachKyNang != null && f.danhSachKyNang.Any() 
-                    ? f.danhSachKyNang 
-                    : (!string.IsNullOrWhiteSpace(f.kyNangCoBan) 
-                        ? f.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()) 
+                .SelectMany(f => f.danhSachKyNang != null && f.danhSachKyNang.Any()
+                    ? f.danhSachKyNang
+                    : (!string.IsNullOrWhiteSpace(f.kyNangCoBan)
+                        ? f.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim())
                         : Enumerable.Empty<string>()))
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -195,8 +197,17 @@ namespace FreelancerStudent.Web.Controllers
 
             if (result.data != null)
             {
-                var stats = await _danhGiaWebService.LayFreelancerAsync(freelancer.maFreelancerStudents, 1, 10);
+                var stats = await _danhGiaWebService.LayFreelancerAsync(freelancer.maFreelancerStudents, 1, 50);
                 result.data.ThongKeDanhGia = stats.data;
+
+                var currentUserId = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+                var currentRole = HttpContext.Session.GetString("tenRole") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                bool daLuu = false;
+                if (currentUserId.HasValue && (currentRole == "NhaTuyenDung" || currentRole == "Employer"))
+                {
+                    daLuu = await _yeuThichService.KiemTraLuuFreelancerAsync(currentUserId.Value, freelancer.maFreelancerStudents);
+                }
+                ViewBag.DaLuuFreelancer = daLuu;
             }
 
             return View(result.data);
@@ -444,7 +455,7 @@ namespace FreelancerStudent.Web.Controllers
         // Cập nhật thông tin cơ bản: Địa điểm, Ngôn ngữ, Kỹ năng cơ bản, Mức giá tham khảo trực tiếp từ trang Profile
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CapNhatThongTinCoBan(string diaDiem, string? ngonNgu, string? kyNangCoBan, decimal? chiPhiTu)
+        public async Task<IActionResult> CapNhatThongTinCoBan(string inputDiaDiem, string? ngonNgu, string? kyNangCoBan, decimal? chiPhiTu)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (!maUser.HasValue)
@@ -452,13 +463,13 @@ namespace FreelancerStudent.Web.Controllers
                 return RedirectToAction("DangNhap", "Account");
             }
 
-            if (string.IsNullOrWhiteSpace(diaDiem))
+            if (string.IsNullOrWhiteSpace(inputDiaDiem))
             {
                 TempData["ErrorMessage"] = "Địa điểm làm việc / sinh sống không được để trống.";
                 return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
             }
 
-            if (diaDiem.Trim().Length > 100)
+            if (inputDiaDiem.Trim().Length > 100)
             {
                 TempData["ErrorMessage"] = "Địa điểm không được vượt quá 100 ký tự.";
                 return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
@@ -485,7 +496,7 @@ namespace FreelancerStudent.Web.Controllers
             var model = new CapNhatThongTinCoBanViewModel
             {
                 MaUser = maUser.Value,
-                DiaDiemFreelancerStudent = diaDiem.Trim(),
+                DiaDiemFreelancerStudent = inputDiaDiem.Trim(),
                 NgonNgu = string.IsNullOrWhiteSpace(ngonNgu) ? null : ngonNgu.Trim(),
                 KyNangCoBan = string.IsNullOrWhiteSpace(kyNangCoBan) ? null : kyNangCoBan.Trim(),
                 ChiPhiTu = chiPhiTu
@@ -575,7 +586,9 @@ namespace FreelancerStudent.Web.Controllers
             var checkXacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
             if (checkXacThuc?.data != null && !checkXacThuc.data.DaXacMinh)
             {
-                TempData["ErrorMessage"] = "Bạn cần được xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!";
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(checkXacThuc.data.ThongBao)
+                    ? checkXacThuc.data.ThongBao
+                    : "Bạn cần được xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!";
                 return RedirectToAction("MinhChung", "Account");
             }
 
@@ -598,7 +611,9 @@ namespace FreelancerStudent.Web.Controllers
             var checkXacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
             if (checkXacThuc?.data != null && !checkXacThuc.data.DaXacMinh)
             {
-                TempData["ErrorMessage"] = "Bạn cần được xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!";
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(checkXacThuc.data.ThongBao)
+                    ? checkXacThuc.data.ThongBao
+                    : "Bạn cần được xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!";
                 return RedirectToAction("MinhChung", "Account");
             }
 
@@ -683,7 +698,24 @@ namespace FreelancerStudent.Web.Controllers
             string? sapXep)
         {
             var model = await LayDanhSachFreelancerDaLoc(tuKhoa, chuyenNganh, kyNang, soSaoMin, gpaMin, namThu, trangThaiNhanViec, sapXep);
+            await PopulatedSavedFreelancerIds();
             return View(model);
+        }
+
+        private async Task PopulatedSavedFreelancerIds()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+            var role = HttpContext.Session.GetString("tenRole") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var dsDaLuu = new HashSet<int>();
+            if (maUser.HasValue && (role == "NhaTuyenDung" || role == "Employer"))
+            {
+                var listSaved = await _yeuThichService.LayDanhSachFreelancerYeuThichAsync(maUser.Value);
+                if (listSaved != null && listSaved.Any())
+                {
+                    dsDaLuu = listSaved.Select(x => x.maFreelancerStudent).ToHashSet();
+                }
+            }
+            ViewBag.DanhSachMaFreelancerDaLuu = dsDaLuu;
         }
 
         //Tuấn

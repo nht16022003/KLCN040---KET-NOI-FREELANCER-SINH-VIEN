@@ -89,6 +89,7 @@ builder.Services.Configure<NghiepVuOptions>(builder.Configuration.GetSection("Ng
 builder.Services.AddScoped<IDanhGiaRepository, DanhGiaRepository>();
 builder.Services.AddScoped<IDanhGiaService, DanhGiaService>();
 builder.Services.AddScoped<IMinhChungService, MinhChungService>();
+builder.Services.AddScoped<IYeuThichService, YeuThichService>();
 builder.Services.AddScoped<DanhGiaPolicy>();
 builder.Services.AddSingleton<NoiDungValidator>();
 builder.Services.AddHostedService<NghiepVuNenHostedService>();
@@ -107,8 +108,11 @@ builder.Services.AddCors(options =>
 });
 
 
-// 2. Đăng ký Controllers
-builder.Services.AddControllers();
+// 2. Đăng ký Controllers kèm Filter kiểm tra niên khóa sinh viên tập trung
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<FreelancerStudent.API.Filters.KiemTraNienKhoaApiFilter>();
+});
 
 // 3. ĐĂNG KÝ SWAGGER
 builder.Services.AddEndpointsApiExplorer();
@@ -131,6 +135,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowWebClient");
 
 // 1.5. PHỤC VỤ FILE TĨNH (AVATAR, LOGO) TỪ THƯ MỤC WWWROOT CỦA WEB ĐỂ MOBILE TẢI ĐƯỢC ẢNH
+app.UseStaticFiles(); // Phục vụ file từ wwwroot của API (uploads/minhchung, ...)
+
 var webWwwRoot = Path.Combine(builder.Environment.ContentRootPath, "..", "FreelancerStudent.Web", "wwwroot");
 if (Directory.Exists(webWwwRoot))
 {

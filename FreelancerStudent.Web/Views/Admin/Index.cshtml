@@ -23,6 +23,9 @@
             <a href="/Admin/QuanLyHopDong" class="btn btn-outline-success btn-sm rounded-0 px-3">
                 Quản lý hợp đồng
             </a>
+            <a href="/Admin/CauHinhHeThong" class="btn btn-primary btn-sm rounded-0 px-3 text-white fw-semibold">
+                Cấu hình Phí hệ thống
+            </a>
         </div>
     </div>
 
@@ -59,7 +62,10 @@
             <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-white">
                 <span class="text-muted small fw-semibold text-uppercase">Doanh Thu Hệ Thống</span>
                 <h3 class="fw-bold text-success mt-2 mb-0">@Model.TongDoanhThuHeThong.ToString("N0") <small class="fs-6">VNĐ</small></h3>
-                <div class="small text-muted mt-2 pt-2 border-top">Ước tính hoa hồng phí sàn 5%</div>
+                <div class="small text-muted mt-2 pt-2 border-top d-flex justify-content-between flex-wrap">
+                    <span>Hoa hồng HĐ: @((Model.TongDoanhThuHeThong - Model.TongDoanhThuPhiDangBai).ToString("N0")) đ</span>
+                    <span class="text-primary fw-semibold">Phí đăng tin: @Model.TongDoanhThuPhiDangBai.ToString("N0") đ</span>
+                </div>
             </div>
         </div>
 
@@ -121,6 +127,12 @@
                         <a href="/Admin/QuanLyHopDong" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light">
                             <div class="fw-bold text-success">Quản lý Hợp đồng & Mẫu Hợp đồng</div>
                             <div class="small text-muted mt-1">Giám sát hợp đồng đang thực hiện và thiết lập điều khoản mẫu chuẩn</div>
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <a href="/Admin/CauHinhHeThong" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light border-start border-primary border-3">
+                            <div class="fw-bold text-primary">Cấu hình Phí sàn & Phí đăng tin</div>
+                            <div class="small text-muted mt-1">Điều chỉnh mức phí đăng bài của NTD và tỷ lệ hoa hồng giải ngân Escrow</div>
                         </a>
                     </div>
                 </div>

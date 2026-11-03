@@ -309,5 +309,24 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
+
+        public async Task<ApiReponse<decimal>> layPhiDangBaiHienTaiAsync()
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync("api/JobPost/PhiDangBaiHienTai");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var res = JsonSerializer.Deserialize<ApiReponse<decimal>>(json, _jsonOptions);
+                    return res ?? new ApiReponse<decimal> { success = true, data = 0m };
+                }
+                return new ApiReponse<decimal> { success = false, message = "Không lấy được phí đăng bài.", data = 0m };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<decimal> { success = false, message = ex.Message, data = 0m };
+            }
+        }
     }
 }

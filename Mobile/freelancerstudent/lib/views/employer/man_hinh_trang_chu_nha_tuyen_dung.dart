@@ -5,14 +5,21 @@ import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_bai_dang_tuyen_dung.dart';
 import '../../services/dich_vu_ung_tuyen.dart';
-import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_cong_viec.dart';
+import '../../viewmodels/viewmodel_thong_bao.dart';
+import '../../viewmodels/viewmodel_xac_thuc.dart';
+import '../../viewmodels/viewmodel_yeu_thich.dart';
 import '../applications/man_hinh_danh_sach_ung_vien.dart';
 import '../auth/man_hinh_dang_nhap.dart';
+import '../danh_gia/man_hinh_danh_gia.dart';
 import '../hop_dong/man_hinh_danh_sach_hop_dong.dart';
 import '../job_detail/man_hinh_chi_tiet_cong_viec.dart';
+import '../profile/man_hinh_ho_so_nha_tuyen_dung.dart';
+import '../student_posts/man_hinh_danh_sach_bai_dang_sinh_vien.dart';
+import '../thong_bao/man_hinh_thong_bao.dart';
 import '../wallet/man_hinh_vi_tien.dart';
 import 'man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
+import 'man_hinh_freelancer_yeu_thich.dart';
 import 'man_hinh_tao_bai_dang_tuyen_dung.dart';
 
 /// Màn hình chính của Nhà tuyển dụng (Employer Dashboard)
@@ -47,6 +54,12 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
     final jobVM = context.read<JobViewModel>();
     jobVM.taiDanhSachJobCuaToi(user.userId);
 
+    // Tải danh sách freelancer yêu thích
+    context.read<YeuThichViewModel>().taiDanhSachFreelancerYeuThich(user.userId);
+
+    // Đếm số lượng thông báo chưa đọc
+    context.read<ThongBaoViewModel>().demChuaDoc(user.userId);
+
     // Tải tổng số ứng viên nộp đơn
     setState(() => _dangTaiUngVien = true);
     final appRes = await _applicationService.getMyApplications(userId: user.userId);
@@ -59,6 +72,7 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
   }
 
   Future<void> _handleMenuAction(BuildContext context, String value) async {
+    final user = context.read<AuthViewModel>().currentUser;
     switch (value) {
       case 'new-job':
         await Navigator.push(
@@ -67,6 +81,22 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
         );
         _taiDuLieu();
         break;
+      case 'company-profile':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => NhaTuyenDungProfileScreen(
+              maUser: user?.userId,
+            ),
+          ),
+        );
+        break;
+      case 'student-posts':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const StudentPostListScreen()),
+        );
+        break;
       case 'applicants':
         await Navigator.push(
           context,
@@ -74,10 +104,22 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
         );
         _taiDuLieu();
         break;
+      case 'favorites':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ManHinhFreelancerYeuThich()),
+        );
+        break;
       case 'contracts':
         await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const HopDongListScreen()),
+        );
+        break;
+      case 'reviews':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DanhGiaListScreen()),
         );
         break;
       case 'wallet':
@@ -177,6 +219,66 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
           ),
         ),
         actions: [
+          // Chuông thông báo + Badge chưa đọc
+          Consumer<ThongBaoViewModel>(
+            builder: (context, thongBaoVM, _) {
+              final chuaDoc = thongBaoVM.soLuongChuaDoc;
+              return IconButton(
+                tooltip: 'Thông báo',
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ThongBaoScreen(),
+                    ),
+                  );
+                  if (context.mounted && user != null) {
+                    context
+                        .read<ThongBaoViewModel>()
+                        .demChuaDoc(user.userId);
+                  }
+                },
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(
+                      Icons.notifications_outlined,
+                      color: AppColors.heading,
+                      size: 25,
+                    ),
+                    if (chuaDoc > 0)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            chuaDoc > 99 ? '99+' : '$chuaDoc',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
           IconButton(
             tooltip: 'Làm mới',
             icon: const Icon(Icons.refresh, color: AppColors.primary),
@@ -196,12 +298,32 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
             onSelected: (value) async => _handleMenuAction(context, value),
             itemBuilder: (context) => const [
               PopupMenuItem(
+                value: 'company-profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.business_outlined, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Hồ sơ doanh nghiệp'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
                 value: 'new-job',
                 child: Row(
                   children: [
                     Icon(Icons.post_add, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text('Đăng bài tuyển dụng'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'student-posts',
+                child: Row(
+                  children: [
+                    Icon(Icons.groups_outlined, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Bài tìm việc Sinh viên'),
                   ],
                 ),
               ),
@@ -216,12 +338,32 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                 ),
               ),
               PopupMenuItem(
+                value: 'favorites',
+                child: Row(
+                  children: [
+                    Icon(Icons.favorite_border, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Freelancer yêu thích'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
                 value: 'contracts',
                 child: Row(
                   children: [
                     Icon(Icons.assignment_outlined, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text('Quản lý hợp đồng'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'reviews',
+                child: Row(
+                  children: [
+                    Icon(Icons.star_outline, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Đánh giá & Nhận xét'),
                   ],
                 ),
               ),
@@ -357,11 +499,11 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                       ),
                       _actionButton(
                         context,
-                        icon: Icons.people_outline,
-                        label: 'Ứng viên',
+                        icon: Icons.star_outline,
+                        label: 'Đánh giá',
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const ApplicantListScreen()),
+                          MaterialPageRoute(builder: (_) => const DanhGiaListScreen()),
                         ),
                       ),
                     ],

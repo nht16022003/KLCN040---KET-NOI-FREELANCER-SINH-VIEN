@@ -55,7 +55,26 @@
             var maMCMoiNhat = Model.TrangThaiXacThuc?.MaMinhChungMoiNhat;
         }
 
-        @if (isDaXacMinh)
+        @if (Model.TrangThaiXacThuc?.HetHanNienKhoa == true || trangThai == "HetHanNienKhoa")
+        {
+            <div class="alert alert-danger border border-danger shadow-sm rounded-0 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-danger text-white rounded-0 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; font-size: 20px; font-weight: bold;">
+                        !
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-danger mb-1">
+                            MINH CHỨNG XÁC NHẬN SINH VIÊN ĐÃ KHÔNG CÒN HỢP LỆ, VÌ NIÊN KHÓA CỦA BẠN ĐÃ VƯỢT QUA THỜI GIAN CHO PHÉP
+                        </h5>
+                        <p class="text-secondary mb-0 small">Niên khóa của bạn ghi nhận: <strong>@(Model.TrangThaiXacThuc?.NienKhoa ?? "Không xác định")</strong> đã hết hạn so với năm hiện tại (@DateTime.Now.Year). Toàn bộ quyền sử dụng chức năng nghiệp vụ sinh viên đã bị tạm khóa. Vui lòng chụp/tải ảnh thẻ sinh viên mới bên dưới để Ban quản trị phê duyệt lại.</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge bg-danger px-3 py-2 rounded-0 fs-6">ĐÃ HẾT HẠN NIÊN KHÓA</span>
+                </div>
+            </div>
+        }
+        else if (isDaXacMinh)
         {
             <div class="alert alert-success border-0 shadow-sm rounded-0 p-4 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-3">

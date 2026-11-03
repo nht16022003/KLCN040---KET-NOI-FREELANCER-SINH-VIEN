@@ -1,0 +1,210 @@
+@model List<FreelancerStudent.Web.ViewModels.CongViecDaLuuViewModel>
+@{
+    ViewData["Title"] = "Công việc đã lưu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-bookmark-fill text-success me-2"></i>Công việc đã lưu
+            </h3>
+            <p class="text-muted small mb-0">
+                Danh sách các công việc bạn đã đánh dấu quan tâm để xem lại hoặc ứng tuyển sau.
+            </p>
+        </div>
+        <div class="mt-2 mt-sm-0">
+            <a href="/JobPost/Index" class="btn btn-outline-success rounded-0">
+                <i class="bi bi-search me-1"></i>Tìm thêm việc làm
+            </a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- Trạng thái trống -->
+        <div class="text-center py-5 border bg-white rounded-0 p-5">
+            <div class="mb-3">
+                <i class="bi bi-bookmark-dash" style="font-size: 3.5rem; color: #adb5bd;"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Bạn chưa lưu công việc nào</h5>
+            <p class="text-muted small mb-4">
+                Khi duyệt danh sách việc làm, hãy nhấn vào biểu tượng lưu để theo dõi các cơ hội phù hợp nhất với bạn.
+            </p>
+            <a href="/JobPost/Index" class="btn btn-success rounded-0 px-4 py-2 fw-semibold">
+                Khám phá việc làm ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <span class="text-muted small">
+                Tổng cộng: <strong class="text-dark">@Model.Count</strong> công việc đã lưu
+            </span>
+        </div>
+
+        <div class="row g-3" id="savedJobsContainer">
+            @foreach (var job in Model)
+            {
+                var isExpired = job.thoiGianDuKienHoanThanh < DateTime.Now;
+                var isOpen = job.status == "DangTuyen" || job.status == "Opening";
+
+                <div class="col-12" id="job-card-@job.maJob">
+                    <div class="card border rounded-0 shadow-sm p-3 p-md-4 bg-white position-relative hover-shadow transition">
+                        <div class="row g-3 align-items-center">
+                            <!-- Cột thông tin chính -->
+                            <div class="col-12 col-md-8">
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="badge bg-light text-secondary border rounded-0 small">
+                                        Mã: @job.maJob
+                                    </span>
+                                    @if (isOpen && !isExpired)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-0">
+                                            Đang tuyển
+                                        </span>
+                                    }
+                                    else if (isExpired)
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-0">
+                                            Hết hạn ứng tuyển
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-0">
+                                            @job.status
+                                        </span>
+                                    }
+
+                                    @if (job.daUngTuyen)
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-0">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Đã ứng tuyển
+                                        </span>
+                                    }
+                                </div>
+
+                                <h5 class="fw-bold mb-2">
+                                    <a href="/JobPost/Detail?maJob=@job.maJob" class="text-dark text-decoration-none hover-text-success">
+                                        @job.tieuDe
+                                    </a>
+                                </h5>
+
+                                <div class="d-flex flex-wrap gap-3 text-muted small mb-2">
+                                    <span>
+                                        <i class="bi bi-building me-1"></i>@(string.IsNullOrWhiteSpace(job.tenCongTy) ? "Nhà tuyển dụng" : job.tenCongTy)
+                                    </span>
+                                    <span>
+                                        <i class="bi bi-calendar-event me-1"></i>Đăng: @job.thoiGianDangTuyen.ToString("dd/MM/yyyy")
+                                    </span>
+                                    <span>
+                                        <i class="bi bi-clock-history me-1"></i>Hạn: @job.thoiGianDuKienHoanThanh.ToString("dd/MM/yyyy")
+                                    </span>
+                                    @if (job.soLuongTuyen.HasValue && job.soLuongTuyen > 0)
+                                    {
+                                        <span>
+                                            <i class="bi bi-people me-1"></i>Tuyển: @job.soLuongTuyen người
+                                        </span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(job.kyNangYeuCau))
+                                {
+                                    <div class="d-flex flex-wrap gap-1 mb-2">
+                                        @foreach (var k in job.kyNangYeuCau.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="badge bg-light text-dark border rounded-0" style="font-size: 0.75rem;">
+                                                @k.Trim()
+                                            </span>
+                                        }
+                                    </div>
+                                }
+
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    <i class="bi bi-bookmark-check me-1"></i>Đã lưu vào: @job.ngayLuu.ToString("dd/MM/yyyy HH:mm")
+                                    @if (!string.IsNullOrWhiteSpace(job.ghiChu))
+                                    {
+                                        <span class="ms-2 fst-italic">(@job.ghiChu)</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Cột thù lao & Nút thao tác -->
+                            <div class="col-12 col-md-4 text-md-end border-top border-md-top-0 pt-3 pt-md-0">
+                                <div class="mb-3">
+                                    <div class="small text-muted">Mức thù lao dự án:</div>
+                                    <div class="fs-5 fw-bold text-success">
+                                        @(job.thuLao.HasValue && job.thuLao > 0 
+                                            ? job.thuLao.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" 
+                                            : "Thỏa thuận")
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-md-column gap-2 justify-content-end">
+                                    <a href="/JobPost/Detail?maJob=@job.maJob" class="btn btn-success btn-sm rounded-0 fw-semibold px-3 py-2">
+                                        Xem chi tiết
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-0 px-3 py-2" onclick="boLuuViec('@job.maJob')">
+                                        <i class="bi bi-bookmark-x me-1"></i>Bỏ lưu
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    async function boLuuViec(maJob) {
+        if (!confirm('Bạn có chắc chắn muốn bỏ lưu công việc này?')) return;
+
+        try {
+            const res = await fetch('/JobPost/ToggleLuuViec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ maJob: maJob })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const el = document.getElementById('job-card-' + maJob);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        el.remove();
+                        const container = document.getElementById('savedJobsContainer');
+                        if (container && container.children.length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                }
+            } else {
+                alert(data.message || 'Không thể bỏ lưu công việc.');
+            }
+        } catch (err) {
+            alert('Lỗi kết nối máy chủ: ' + err);
+        }
+    }
+</script>
+
+<style>
+    .hover-text-success:hover {
+        color: #198754 !important;
+    }
+    .hover-shadow:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+    }
+    .transition {
+        transition: all 0.2s ease-in-out;
+    }
+</style>
+

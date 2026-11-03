@@ -1,4 +1,4 @@
-using System.Reflection.Metadata.Ecma335;
+﻿using System.Reflection.Metadata.Ecma335;
 using FreelancerStudent.API.DTOs.ReponseDTOs;
 using FreelancerStudent.API.DTOs.ReponsesDTO;
 using FreelancerStudent.API.Helper;
@@ -78,6 +78,8 @@ namespace FreelancerStudent.API.Services
                 })
                 .ToListAsync();
 
+            var dsMinhChung = await _context.MinhChung_FreelancerStudents.AsNoTracking().Where(m => userIds.Contains(m.maUser)).OrderByDescending(m => m.ngayNop).ToListAsync();
+
             var dsResult = ds_layTuSQL.Select(free =>
             {
                 var stat = reviewStats.FirstOrDefault(s => s.MaUser == free.maUser);
@@ -124,6 +126,8 @@ namespace FreelancerStudent.API.Services
                     diemDanhGiaTrungBinh = sao,
                     soLuotDanhGia = soLuot,
                     ngayTao = free.User?.ngayTao ?? DateTime.UtcNow,
+                    daXacMinhSinhVien = dsMinhChung.FirstOrDefault(m => m.maUser == free.maUser)?.trangThaiGuiMinhChung == "Đã xác minh",
+                    trangThaiXacMinh = dsMinhChung.FirstOrDefault(m => m.maUser == free.maUser)?.trangThaiGuiMinhChung ?? "Chưa gửi",
                     danhSachKyNang = skills
                 };
             }).ToList();
@@ -229,10 +233,66 @@ namespace FreelancerStudent.API.Services
                 .Include(d => d.HopDong).ThenInclude(h => h!.JobPost)
                 .OrderByDescending(d => d.ngayDanhGia).Take(5).ToListAsync();
 
+                        var latestMC = await _context.MinhChung_FreelancerStudents.AsNoTracking()
+                .Where(m => m.maUser == freelancer.maUser)
+                .OrderByDescending(m => m.ngayNop)
+                .FirstOrDefaultAsync();
+
+            ProfileEvidenceResponse? evidence = null;
+            if (latestMC != null)
+            {
+                string? mssv = null;
+                try
+                {
+                    string cleanUrl = latestMC.fileMinhChung.TrimStart('/', '\\');
+                    string baseDir = Directory.GetCurrentDirectory();
+                    string metaPath = Path.Combine(baseDir, "wwwroot", cleanUrl);
+                    if (!File.Exists(metaPath))
+                    {
+                        metaPath = Path.Combine(baseDir, "..", "FreelancerStudent.Web", "wwwroot", cleanUrl);
+                    }
+                    metaPath = Path.ChangeExtension(metaPath, ".meta.json");
+                    if (File.Exists(metaPath))
+                    {
+                        string json = await File.ReadAllTextAsync(metaPath);
+                        using var doc = System.Text.Json.JsonDocument.Parse(json);
+                        if (doc.RootElement.TryGetProperty("Mssv", out var mssvProp) || doc.RootElement.TryGetProperty("mssv", out mssvProp))
+                        {
+                            mssv = mssvProp.GetString();
+                        }
+                    }
+                }
+                catch { }
+
+                var kqNk = NienKhoaHelper.KiemTraNienKhoa(freelancer.nienKhoa);
+
+                evidence = new ProfileEvidenceResponse
+                {
+                    LoaiMinhChung = latestMC.loaiMinhChung,
+                    TrangThaiGuiMinhChung = latestMC.trangThaiGuiMinhChung,
+                    FileMinhChung = latestMC.fileMinhChung,
+                    NgayNop = latestMC.ngayNop,
+                    NgayXacMinh = latestMC.ngayXacMinh,
+                    LyDoTuChoi = latestMC.lydoTuChoi,
+                    Mssv = mssv,
+                    NienKhoa = freelancer.nienKhoa,
+                    HetHanNienKhoa = kqNk.HetHan,
+                    NamKetThucNienKhoa = kqNk.NamKetThuc,
+                    ThongBao = kqNk.HetHan
+                        ? NienKhoaHelper.ThongBaoHetHan
+                        : (latestMC.trangThaiGuiMinhChung == "Đã xác minh"
+                            ? "Đã xác minh thành công."
+                            : (latestMC.trangThaiGuiMinhChung == "Đang gửi"
+                                ? "Đang chờ Ban quản trị phê duyệt."
+                                : (latestMC.lydoTuChoi ?? "Minh chứng bị từ chối.")))
+                };
+            }
+
             return new FreelancerStudentProfile_ReponseDTO
             {
                 User = new ProfileUserResponse
                 {
+                    MaUser = freelancer.maUser,
                     TenTaiKhoanUser = freelancer.User?.tenTaiKhoanUser ?? string.Empty,
                     HotenUser = freelancer.User?.hotenUser ?? string.Empty,
                     AvatarUrl = freelancer.User?.avatarUrl,
@@ -242,6 +302,7 @@ namespace FreelancerStudent.API.Services
                 FreelancerStudent = new ProfileFreelancerResponse
                 {
                     MaFreelancerStudents = freelancer.maFreelancerStudents,
+                    MaUser = freelancer.maUser,
                     MaChuyenNganh = freelancer.maChuyenNganh,
                     TenTruong = freelancer.tenTruong,
                     MaTruong = freelancer.maTruong,
@@ -305,16 +366,7 @@ namespace FreelancerStudent.API.Services
                     Link_file = project.link_file
                 }).ToList() ?? new List<ProfileProjectResponse>(),
                 TatCaKyNangGoiY = tatCaKyNang,
-                MinhChung = await _context.MinhChung_FreelancerStudents.AsNoTracking()
-                    .Where(m => m.maUser == freelancer.maUser)
-                    .OrderByDescending(m => m.ngayNop)
-                    .Select(m => new ProfileEvidenceResponse
-                    {
-                        LoaiMinhChung = m.loaiMinhChung,
-                        TrangThaiGuiMinhChung = m.trangThaiGuiMinhChung,
-                        FileMinhChung = m.fileMinhChung
-                    })
-                    .FirstOrDefaultAsync()
+                MinhChung = evidence
             };
         }
 

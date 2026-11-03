@@ -257,5 +257,43 @@ namespace FreelancerStudent.Web.Services
                 return new ApiReponse<bool> { success = false, message = "Lỗi kết nối API: " + ex.Message };
             }
         }
+
+        public async Task<ApiReponse<List<AdminCauHinhPhiViewModel>>> LayDanhSachCauHinhPhiAsync()
+        {
+            try
+            {
+                var res = await _guiRequest.GetAsync("api/Admin/CauHinhPhi");
+                if (res.IsSuccessStatusCode)
+                {
+                    var json = await res.Content.ReadAsStringAsync();
+                    var apiRes = JsonSerializer.Deserialize<ApiReponse<List<AdminCauHinhPhiViewModel>>>(json, _jsonOptions);
+                    return apiRes ?? new ApiReponse<List<AdminCauHinhPhiViewModel>> { success = false, message = "Không nhận được phản hồi từ máy chủ." };
+                }
+                return new ApiReponse<List<AdminCauHinhPhiViewModel>> { success = false, message = $"Lỗi máy chủ (HTTP {(int)res.StatusCode})" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<AdminCauHinhPhiViewModel>> { success = false, message = ex.Message };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> CapNhatPhiDangBaiAsync(AdminCapNhatPhiDangBaiViewModel model)
+        {
+            try
+            {
+                var res = await _guiRequest.PostAsJsonAsync("api/Admin/CapNhatPhiDangBai", model);
+                if (res.IsSuccessStatusCode)
+                {
+                    var json = await res.Content.ReadAsStringAsync();
+                    var apiRes = JsonSerializer.Deserialize<ApiReponse<bool>>(json, _jsonOptions);
+                    return apiRes ?? new ApiReponse<bool> { success = false, message = "Không nhận được phản hồi từ máy chủ." };
+                }
+                return new ApiReponse<bool> { success = false, message = $"Lỗi máy chủ (HTTP {(int)res.StatusCode})" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool> { success = false, message = ex.Message };
+            }
+        }
     }
 }

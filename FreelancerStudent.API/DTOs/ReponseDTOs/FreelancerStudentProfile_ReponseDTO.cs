@@ -16,6 +16,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
 
     public class ProfileUserResponse
     {
+        public int MaUser { get; set; }
         public string TenTaiKhoanUser { get; set; } = string.Empty;
         public string HotenUser { get; set; } = string.Empty;
         public string? Email { get; set; }
@@ -28,6 +29,7 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
     public class ProfileFreelancerResponse
     {
         public int MaFreelancerStudents { get; set; }
+        public int MaUser { get; set; }
         public string MaChuyenNganh { get; set; } = string.Empty;
         public string TenTruong { get; set; } = string.Empty;
         public string MaTruong { get; set; } = string.Empty;
@@ -74,7 +76,6 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string Congnghe { get; set; } = string.Empty;
         public string? LinkGithub { get; set; }
         public string? LinkDemo { get; set; }
-
         public string? Link_file { get; set; }
     }
 
@@ -83,5 +84,16 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public string LoaiMinhChung { get; set; } = string.Empty;
         public string TrangThaiGuiMinhChung { get; set; } = string.Empty;
         public string? FileMinhChung { get; set; }
+        public DateTime? NgayNop { get; set; }
+        public DateTime? NgayXacMinh { get; set; }
+        public string? LyDoTuChoi { get; set; }
+        public bool DaXacMinh => TrangThaiGuiMinhChung == "Đã xác minh";
+
+        // Đồng bộ bổ sung cho Web và Mobile
+        public string? Mssv { get; set; }
+        public string? NienKhoa { get; set; }
+        public bool HetHanNienKhoa { get; set; }
+        public int? NamKetThucNienKhoa { get; set; }
+        public string? ThongBao { get; set; }
     }
 }
