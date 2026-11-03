@@ -135,39 +135,37 @@
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold small">Chuyên ngành <span class="text-danger">*</span>
-                                    @if (ViewBag.DaXacMinh == true)
+                                <label class="form-label fw-bold small">Chuyên ngành <span class="text-danger">*</span></label>
+                                @{
+                                    var dsCn = ViewBag.DanhSachChuyenNganh as List<FreelancerStudent.Web.ViewModels.ChuyenNganhOptionViewModel>
+                                               ?? new List<FreelancerStudent.Web.ViewModels.ChuyenNganhOptionViewModel>();
+                                    bool isCoSan = dsCn.Any(c => c.MaChuyenNganh == Model.MaChuyenNganh);
+                                    bool isChonMoi = !string.IsNullOrEmpty(Model.MaChuyenNganh) && !isCoSan;
+                                }
+                                <select id="ddlChuyenNganh" class="form-select rounded-0" onchange="xuLyChonChuyenNganh(this)">
+                                    <option value="">-- Chọn chuyên ngành --</option>
+                                    @foreach (var cn in dsCn)
                                     {
-                                        <span class="badge bg-success-subtle text-success ms-1">Đã khóa</span>
+                                        <option value="@cn.MaChuyenNganh" data-ten="@cn.TenChuyenNganh" selected="@(cn.MaChuyenNganh == Model.MaChuyenNganh)">
+                                            @cn.TenChuyenNganh (@cn.MaChuyenNganh)
+                                        </option>
                                     }
-                                </label>
-                                @if (ViewBag.DaXacMinh == true)
-                                {
-                                    <select class="form-select rounded-0" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
-                                        <option value="KTPM" selected="@(Model.MaChuyenNganh == "KTPM")">Kỹ thuật phần mềm (KTPM)</option>
-                                        <option value="TKDH" selected="@(Model.MaChuyenNganh == "TKDH")">Thiết kế đồ họa (TKDH)</option>
-                                        <option value="CNTT" selected="@(Model.MaChuyenNganh == "CNTT")">Công nghệ thông tin (CNTT)</option>
-                                        <option value="MKT" selected="@(Model.MaChuyenNganh == "MKT")">Digital Marketing</option>
-                                        <option value="TMDT" selected="@(Model.MaChuyenNganh == "TMDT")">Thương mại điện tử</option>
-                                        @if (!string.IsNullOrEmpty(Model.MaChuyenNganh) && !new[] { "KTPM", "TKDH", "CNTT", "MKT", "TMDT" }.Contains(Model.MaChuyenNganh))
-                                        {
-                                            <option value="@Model.MaChuyenNganh" selected>@Model.MaChuyenNganh</option>
-                                        }
-                                    </select>
-                                    <input type="hidden" asp-for="MaChuyenNganh" />
-                                    <small class="text-muted" style="font-size: 0.75rem;">Thông tin chuyên ngành đã được xác minh từ thẻ sinh viên.</small>
-                                }
-                                else
-                                {
-                                    <select asp-for="MaChuyenNganh" class="form-select rounded-0" required>
-                                        <option value="">-- Chọn chuyên ngành --</option>
-                                        <option value="KTPM">Kỹ thuật phần mềm (KTPM)</option>
-                                        <option value="TKDH">Thiết kế đồ họa (TKDH)</option>
-                                        <option value="CNTT">Công nghệ thông tin (CNTT)</option>
-                                        <option value="MKT">Digital Marketing</option>
-                                        <option value="TMDT">Thương mại điện tử</option>
-                                    </select>
-                                }
+                                    <option value="__NEW__" selected="@isChonMoi">
+                                        + Nhập chuyên ngành khác...
+                                    </option>
+                                </select>
+                                <input type="hidden" asp-for="MaChuyenNganh" id="hdnMaChuyenNganh" />
+
+                                <div id="divNhapChuyenNganhMoi" class="mt-2" style="@(isChonMoi ? "" : "display: none;")">
+                                    <label class="form-label small text-muted mb-1">
+                                        Nhập tên chuyên ngành mới (hệ thống sẽ tự động tạo mã viết tắt và lưu vào CSDL):
+                                    </label>
+                                    <input type="text" asp-for="TenChuyenNganh" id="txtTenChuyenNganh" class="form-control rounded-0"
+                                           placeholder="VD: Trí tuệ nhân tạo, Khoa học dữ liệu..." />
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
+                                    Freelancer có thể chọn ngành có sẵn hoặc tự do nhập chuyên ngành mới.
+                                </small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Trường Đại học / Cao đẳng
@@ -278,7 +276,31 @@
                                         </button>
                                     </div>
 
-                                </form>
+                                    <script>
+        function xuLyChonChuyenNganh(selectElem) {
+            var val = selectElem.value;
+            var hdnMa = document.getElementById('hdnMaChuyenNganh');
+            var txtTen = document.getElementById('txtTenChuyenNganh');
+            var divMoi = document.getElementById('divNhapChuyenNganhMoi');
+
+            if (val === '__NEW__') {
+                hdnMa.value = '';
+                divMoi.style.display = 'block';
+                if (txtTen) txtTen.focus();
+            } else if (val) {
+                hdnMa.value = val;
+                var selectedOption = selectElem.options[selectElem.selectedIndex];
+                var ten = selectedOption.getAttribute('data-ten') || '';
+                if (txtTen) txtTen.value = ten;
+                divMoi.style.display = 'none';
+            } else {
+                hdnMa.value = '';
+                if (txtTen) txtTen.value = '';
+                divMoi.style.display = 'none';
+            }
+        }
+    </script>
+</form>
 
                             </div>
                         </div>

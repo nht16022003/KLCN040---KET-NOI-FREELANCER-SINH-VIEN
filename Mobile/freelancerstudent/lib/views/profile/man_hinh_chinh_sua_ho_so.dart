@@ -38,6 +38,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _requestedLoad = false;
   bool _isCardVerified = false;
   bool _checkedVerification = false;
+  List<Map<String, dynamic>> _majors = [];
+  bool _loadedMajors = false;
+  String? _selectedMajorCode;
+  bool _isCustomMajor = false;
 
   @override
   void didChangeDependencies() {
@@ -50,6 +54,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (mounted && res.isSuccess && res.data != null) {
           setState(() {
             _isCardVerified = res.data!['daXacMinh'] == true;
+          });
+        }
+      });
+    }
+
+    if (!_loadedMajors) {
+      _loadedMajors = true;
+      MinhChungService().layDanhSachChuyenNganh().then((res) {
+        if (mounted && res.isSuccess && res.data != null) {
+          setState(() {
+            _majors = res.data!;
           });
         }
       });
@@ -76,6 +91,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController.text = edit.email ?? '';
     _majorCodeController.text = edit.maChuyenNganh;
     _majorNameController.text = edit.tenChuyenNganh;
+    _selectedMajorCode = edit.maChuyenNganh.isNotEmpty ? edit.maChuyenNganh : null;
     _schoolController.text = edit.tenTruong;
     _locationController.text = edit.diaDiemFreelancerStudent;
     _yearController.text = edit.namThu.toString();
@@ -290,8 +306,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _field(_emailController, 'Email', readOnly: true),
             const SizedBox(height: 8),
             _sectionTitle('Học vấn'),
-            _field(_majorCodeController, 'Mã chuyên ngành', readOnly: _isCardVerified),
-            _field(_majorNameController, 'Tên chuyên ngành', readOnly: _isCardVerified),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: DropdownButtonFormField<String>(
+                value: (_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode))
+                    ? _selectedMajorCode
+                    : (_isCustomMajor || (_majorNameController.text.isNotEmpty && _selectedMajorCode != null && _selectedMajorCode!.isNotEmpty))
+                        ? '__NEW__'
+                        : null,
+                decoration: const InputDecoration(
+                  labelText: 'Chuyên ngành',
+                  border: OutlineInputBorder(),
+                  helperText: 'Chọn chuyên ngành có sẵn hoặc chọn nhập mới',
+                ),
+                items: [
+                  ..._majors.map((m) {
+                    final code = (m['maChuyenNganh'] ?? m['MaChuyenNganh'] ?? '').toString();
+                    final name = (m['tenChuyenNganh'] ?? m['TenChuyenNganh'] ?? '').toString();
+                    return DropdownMenuItem<String>(
+                      value: code,
+                      child: Text('$name ($code)'),
+                    );
+                  }),
+                  const DropdownMenuItem<String>(
+                    value: '__NEW__',
+                    child: Text('+ Nhập chuyên ngành khác...'),
+                  ),
+                ],
+                onChanged: (val) {
+                  setState(() {
+                    if (val == '__NEW__') {
+                      _isCustomMajor = true;
+                      _selectedMajorCode = '__NEW__';
+                      _majorCodeController.text = '';
+                    } else if (val != null) {
+                      _isCustomMajor = false;
+                      _selectedMajorCode = val;
+                      _majorCodeController.text = val;
+                      final found = _majors.firstWhere(
+                        (m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == val,
+                        orElse: () => {},
+                      );
+                      _majorNameController.text = (found['tenChuyenNganh'] ?? found['TenChuyenNganh'] ?? '').toString();
+                    }
+                  });
+                },
+              ),
+            ),
+            if (_isCustomMajor || (_selectedMajorCode == '__NEW__') || (_majorNameController.text.isNotEmpty && !_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode)))
+              _field(
+                _majorNameController,
+                'Tên chuyên ngành mới (hệ thống tự tạo mã)',
+                validator: (val) => AppValidators.validateRequired(val, 'Tên chuyên ngành'),
+              ),
             _field(_schoolController, 'Trường', readOnly: _isCardVerified),
             _field(_locationController, 'Địa điểm'),
             _field(

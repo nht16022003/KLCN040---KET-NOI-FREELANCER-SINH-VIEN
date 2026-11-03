@@ -213,3 +213,13 @@ D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\ref\FreelancerStude
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\7hx8w0ew3l-{0}-sd9zwc5r9t-sd9zwc5r9t.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\ztc02btz10-{0}-b0y891cktf-b0y891cktf.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\movkle9ny5-{0}-mok6yw1b85-mok6yw1b85.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\appsettings.Development.json
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\appsettings.json
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.staticwebassets.runtime.json
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.staticwebassets.endpoints.json
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.exe
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.deps.json
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.runtimeconfig.json
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.dll
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.pdb
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\uy8znmcq8d-{0}-s7kmgt37pa-s7kmgt37pa.gz

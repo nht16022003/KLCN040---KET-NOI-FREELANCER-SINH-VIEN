@@ -620,6 +620,8 @@ namespace FreelancerStudent.Web.Controllers
             model.maUser = maUser.Value;
             if (!ModelState.IsValid)
             {
+                var chuyenNganhList = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+                ViewBag.DanhSachChuyenNganh = chuyenNganhList?.data ?? new List<ChuyenNganhOptionViewModel>();
                 return View(model);
             }
             var ketQua = await _baiDangWebService.taoBaiDangAsync(model);
@@ -820,6 +822,10 @@ namespace FreelancerStudent.Web.Controllers
             ViewBag.TrangThaiMinhChung = xacThuc?.data?.TrangThai ?? "ChuaGui";
             ViewBag.ThongBaoMinhChung = xacThuc?.data?.ThongBao ?? string.Empty;
 
+            // Lấy danh sách chuyên ngành đào tạo từ API để hiển thị dropdown
+            var chuyenNganhRes = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+            ViewBag.DanhSachChuyenNganh = chuyenNganhRes?.data ?? new List<ChuyenNganhOptionViewModel>();
+
             return View(model);
         }
 
@@ -845,6 +851,8 @@ namespace FreelancerStudent.Web.Controllers
 
             if (!ModelState.IsValid)
             {
+                var chuyenNganhList = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+                ViewBag.DanhSachChuyenNganh = chuyenNganhList?.data ?? new List<ChuyenNganhOptionViewModel>();
                 return View(model);
             }
 
@@ -864,6 +872,8 @@ namespace FreelancerStudent.Web.Controllers
             }
 
             TempData["ErrorMessage"] = ketQua.message ?? "Có lỗi xảy ra khi lưu hồ sơ.";
+            var chuyenNganhListFail = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+            ViewBag.DanhSachChuyenNganh = chuyenNganhListFail?.data ?? new List<ChuyenNganhOptionViewModel>();
             return View(model);
         }
 
