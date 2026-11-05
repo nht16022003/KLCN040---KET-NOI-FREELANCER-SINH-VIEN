@@ -125,9 +125,20 @@ namespace FreelancerStudent.API.Services
             int soTaskDangThucHien = tasks.Count(t => string.Equals(t.trangThai, "DangThucHien", StringComparison.OrdinalIgnoreCase));
             int soTaskHoanThanh = tasks.Count(t => string.Equals(t.trangThai, "HoanThanh", StringComparison.OrdinalIgnoreCase));
 
-            decimal tyLe = tongSoTask > 0
-                ? Math.Round((decimal)soTaskHoanThanh / tongSoTask * 100, 1)
-                : 0;
+            int tongSoMoc = hopDong.GiaiDoan_HopDongs?.Count ?? 0;
+            int soMocDat = hopDong.GiaiDoan_HopDongs?.Count(g => string.Equals(g.trangThai, "Dat", StringComparison.OrdinalIgnoreCase) || string.Equals(g.trangThai, "DaNghiemThu", StringComparison.OrdinalIgnoreCase)) ?? 0;
+            int soMocChoDanhGia = hopDong.GiaiDoan_HopDongs?.Count(g => string.Equals(g.trangThai, "ChoDanhGia", StringComparison.OrdinalIgnoreCase)) ?? 0;
+            int soMocChuaDat = hopDong.GiaiDoan_HopDongs?.Count(g => string.Equals(g.trangThai, "ChuaDat", StringComparison.OrdinalIgnoreCase)) ?? 0;
+
+            decimal tyLe = 0;
+            if (tongSoMoc > 0)
+            {
+                tyLe = Math.Round((decimal)soMocDat / tongSoMoc * 100, 1);
+            }
+            else if (tongSoTask > 0)
+            {
+                tyLe = Math.Round((decimal)soTaskHoanThanh / tongSoTask * 100, 1);
+            }
 
             bool coQuyenCapNhat = laFreelancer && string.Equals(hopDong.trangThai, "DangThucHien", StringComparison.OrdinalIgnoreCase);
             bool coQuyenDanhGia = laNhaTuyenDung;
@@ -145,13 +156,17 @@ namespace FreelancerStudent.API.Services
                 soTaskChuaThucHien = soTaskChuaThucHien,
                 soTaskDangThucHien = soTaskDangThucHien,
                 soTaskHoanThanh = soTaskHoanThanh,
+                tongSoMoc = tongSoMoc,
+                soMocDat = soMocDat,
+                soMocChuaDat = soMocChuaDat,
+                soMocChoDanhGia = soMocChoDanhGia,
                 tyLeHoanThanh = tyLe,
                 coQuyenCapNhat = coQuyenCapNhat,
                 coQuyenDanhGia = coQuyenDanhGia,
                 duAnDaDat = duAnDaDat,
                 danhSachGiaiDoan = hopDong.GiaiDoan_HopDongs?.Select(g =>
                 {
-                    TachMoTaVaLink(g.moTa, out string moTaSach, out string? link);
+                    TachMoTaVaLink(g.moTa, out string moTaSach, out string? link, out string? lyDoChuaDat);
                     if (string.IsNullOrWhiteSpace(link))
                     {
                         var taskMoc = tasks.FirstOrDefault(t => t.maGiaiDoan == g.maGiaiDoan && !string.IsNullOrWhiteSpace(t.moTa));
@@ -168,7 +183,8 @@ namespace FreelancerStudent.API.Services
                         moTa = moTaSach,
                         linkSanPham = link,
                         hanChot = g.hanChot,
-                        trangThai = g.trangThai ?? "ChuaDat"
+                        trangThai = g.trangThai ?? "ChuaDat",
+                        lyDoChuaDat = lyDoChuaDat
                     };
                 }).ToList() ?? new List<GiaiDoanHopDong_ResponseDTO>(),
                 danhSachTask = tasks.Select(t =>
@@ -421,7 +437,7 @@ namespace FreelancerStudent.API.Services
             return await _taskRepository.XoaTaskAsync(maTask);
         }
 
-        public async Task<bool> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThaiMoi, int maUser)
+        public async Task<bool> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThaiMoi, string? lyDo, int maUser)
         {
             if (string.IsNullOrWhiteSpace(maHD) || maUser <= 0)
             {
@@ -429,6 +445,11 @@ namespace FreelancerStudent.API.Services
             }
 
             var trangThaiChuan = string.Equals(trangThaiMoi, "Dat", StringComparison.OrdinalIgnoreCase) ? "Dat" : "ChuaDat";
+
+            if (trangThaiChuan == "ChuaDat" && string.IsNullOrWhiteSpace(lyDo))
+            {
+                throw new ArgumentException("Vui lòng cung cấp lý do đánh giá chưa đạt.");
+            }
 
             var hopDong = await _hopDongRepository.LayChiTietHopDongTheoMaAsync(maHD);
             if (hopDong == null)
@@ -451,6 +472,13 @@ namespace FreelancerStudent.API.Services
                 throw new InvalidOperationException("Hợp đồng chưa có mốc giai đoạn nào để đánh giá.");
             }
 
+            void CapNhatMoc(GiaiDoan_HopDong gd)
+            {
+                gd.trangThai = trangThaiChuan;
+                TachMoTaVaLink(gd.moTa, out string moTaSach, out string? link, out _);
+                gd.moTa = DongGoiMoTa(moTaSach, link, trangThaiChuan == "ChuaDat" ? lyDo : null);
+            }
+
             if (maGiaiDoan.HasValue && maGiaiDoan.Value > 0)
             {
                 var target = danhSachGiaiDoan.FirstOrDefault(g => g.maGiaiDoan == maGiaiDoan.Value);
@@ -458,14 +486,14 @@ namespace FreelancerStudent.API.Services
                 {
                     throw new ArgumentException("Không tìm thấy mốc giai đoạn cần đánh giá.");
                 }
-                target.trangThai = trangThaiChuan;
+                CapNhatMoc(target);
             }
             else
             {
-                // Đánh giá toàn bộ dự án: nếu đạt thì tất cả các mốc giai đoạn chuyển sang "Dat", ngược lại "ChuaDat"
+                // Đánh giá toàn bộ dự án
                 foreach (var gd in danhSachGiaiDoan)
                 {
-                    gd.trangThai = trangThaiChuan;
+                    CapNhatMoc(gd);
                 }
             }
 
@@ -473,41 +501,131 @@ namespace FreelancerStudent.API.Services
             return true;
         }
 
-        private static string DongGoiMoTa(string moTaGoc, string? linkSanPham)
+        public async Task<bool> CapNhatMocBanGiaoAsync(string maHD, int maGiaiDoan, string? linkSanPham, string? moTa, int maUser)
         {
-            if (string.IsNullOrWhiteSpace(linkSanPham))
+            if (string.IsNullOrWhiteSpace(maHD) || maGiaiDoan <= 0 || maUser <= 0)
             {
-                return moTaGoc.Trim();
+                throw new ArgumentException("Thông tin cập nhật mốc bàn giao không hợp lệ.");
             }
-            return $"{moTaGoc.Trim()}\n[LINK_SAN_PHAM]: {linkSanPham.Trim()}";
+
+            var hopDong = await _context.HopDongs
+                .Include(h => h.FreelancerStudent)
+                .Include(h => h.JobPost)
+                    .ThenInclude(j => j.NhaTuyenDung)
+                .Include(h => h.GiaiDoan_HopDongs)
+                .FirstOrDefaultAsync(h => h.maHD == maHD);
+
+            if (hopDong == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy hợp đồng.");
+            }
+
+            // Chỉ Freelancer sở hữu hợp đồng mới có quyền cập nhật lại mốc bàn giao
+            if (hopDong.FreelancerStudent?.maUser != maUser)
+            {
+                throw new UnauthorizedAccessException("Bạn không có quyền cập nhật mốc bàn giao của hợp đồng này.");
+            }
+
+            if (hopDong.trangThai != "DangThucHien")
+            {
+                throw new InvalidOperationException("Hợp đồng không ở trạng thái đang thực hiện.");
+            }
+
+            var gd = hopDong.GiaiDoan_HopDongs?.FirstOrDefault(g => g.maGiaiDoan == maGiaiDoan);
+            if (gd == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy mốc bàn giao tương ứng.");
+            }
+
+            if (gd.trangThai == "Dat" || gd.trangThai == "DaNghiemThu")
+            {
+                throw new InvalidOperationException("Mốc bàn giao đã được đánh giá Đạt, không thể cập nhật lại.");
+            }
+
+            // Reset trạng thái mốc về trạng thái chờ đánh giá / chưa đánh giá ban đầu
+            gd.trangThai = "ChoDanhGia";
+            
+            // Cập nhật link và mô tả, làm sạch lý do chưa đạt cũ để Nhà tuyển dụng đánh giá lần mới độc lập
+            gd.moTa = DongGoiMoTa(moTa ?? string.Empty, linkSanPham, null);
+
+            // Gửi thông báo cho Nhà tuyển dụng
+            if (hopDong.JobPost?.NhaTuyenDung?.maUser != null)
+            {
+                _context.ThongBaos.Add(new ThongBao
+                {
+                    maUser = hopDong.JobPost.NhaTuyenDung.maUser,
+                    tieuDe = "Freelancer đã cập nhật lại mốc bàn giao",
+                    noiDung = $"Freelancer đã cập nhật lại sản phẩm / nội dung cho mốc '{gd.tenGiaiDoan}' của hợp đồng {maHD}. Vui lòng kiểm tra và đánh giá lại.",
+                    loaiThongBao = "HopDong",
+                    linkDieuHuong = $"/HopDong/ChiTiet?maHD={Uri.EscapeDataString(maHD)}",
+                    daDoc = false,
+                    ngayTao = DateTime.Now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham)
+        private static string DongGoiMoTa(string moTaGoc, string? linkSanPham, string? lyDoChuaDat = null)
         {
+            var sb = new System.Text.StringBuilder(moTaGoc?.Trim() ?? string.Empty);
+            if (!string.IsNullOrWhiteSpace(linkSanPham))
+            {
+                if (sb.Length > 0) sb.Append("\n");
+                sb.Append($"[LINK_SAN_PHAM]: {linkSanPham.Trim()}");
+            }
+            if (!string.IsNullOrWhiteSpace(lyDoChuaDat))
+            {
+                if (sb.Length > 0) sb.Append("\n");
+                sb.Append($"[LY_DO_CHUA_DAT]: {lyDoChuaDat.Trim()}");
+            }
+            return sb.ToString();
+        }
+
+        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham, out string? lyDoChuaDat)
+        {
+            moTaSach = string.Empty;
+            linkSanPham = null;
+            lyDoChuaDat = null;
+
             if (string.IsNullOrWhiteSpace(moTaDb))
             {
-                moTaSach = string.Empty;
-                linkSanPham = null;
                 return;
             }
 
-            const string tag = "[LINK_SAN_PHAM]:";
-            int idx = moTaDb.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
-            if (idx >= 0)
+            var text = moTaDb;
+
+            const string tagLyDo = "[LY_DO_CHUA_DAT]:";
+            int idxLyDo = text.IndexOf(tagLyDo, StringComparison.OrdinalIgnoreCase);
+            if (idxLyDo >= 0)
             {
-                linkSanPham = moTaDb.Substring(idx + tag.Length).Trim();
-                moTaSach = moTaDb.Substring(0, idx).Trim();
+                lyDoChuaDat = text.Substring(idxLyDo + tagLyDo.Length).Trim();
+                text = text.Substring(0, idxLyDo).Trim();
+            }
+
+            const string tagLink = "[LINK_SAN_PHAM]:";
+            int idxLink = text.IndexOf(tagLink, StringComparison.OrdinalIgnoreCase);
+            if (idxLink >= 0)
+            {
+                linkSanPham = text.Substring(idxLink + tagLink.Length).Trim();
+                text = text.Substring(0, idxLink).Trim();
             }
             else
             {
-                moTaSach = moTaDb.Trim();
-                linkSanPham = null;
-                var match = System.Text.RegularExpressions.Regex.Match(moTaDb, @"https?://[^\s]+");
+                var match = System.Text.RegularExpressions.Regex.Match(text, @"https?://[^\s]+");
                 if (match.Success)
                 {
                     linkSanPham = match.Value.Trim();
                 }
             }
+
+            moTaSach = text.Trim();
+        }
+
+        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham)
+        {
+            TachMoTaVaLink(moTaDb, out moTaSach, out linkSanPham, out _);
         }
     }
 }

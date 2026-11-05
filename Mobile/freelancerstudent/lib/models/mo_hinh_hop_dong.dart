@@ -60,6 +60,11 @@ class HopDongModel {
   bool get daHoanThanh => trangThai == 'DaHoanThanh';
   bool get daThanhToan => trangThai == 'DaThanhToan';
   bool get daBiTuChoi => trangThai == 'DaHuy' || trangThai == 'TuChoi';
+  bool get tatCaMocDaDat =>
+      giaiDoans.isNotEmpty &&
+      giaiDoans.every((g) =>
+          g.trangThai.toLowerCase() == 'dat' ||
+          g.trangThai.toLowerCase() == 'danghiemthu');
 
   factory HopDongModel.fromJson(Map<String, dynamic> json) {
     final rawGiaiDoans = json['giaiDoans'] is List ? json['giaiDoans'] as List : <dynamic>[];
@@ -132,6 +137,7 @@ class GiaiDoanHopDongModel {
   final String? linkSanPham;
   final DateTime? hanChot;
   final String trangThai;
+  final String? lyDoChuaDat;
 
   const GiaiDoanHopDongModel({
     required this.maGiaiDoan,
@@ -141,6 +147,7 @@ class GiaiDoanHopDongModel {
     this.linkSanPham,
     this.hanChot,
     this.trangThai = 'ChuaHoanThanh',
+    this.lyDoChuaDat,
   });
 
   factory GiaiDoanHopDongModel.fromJson(Map<String, dynamic> json) {
@@ -152,6 +159,7 @@ class GiaiDoanHopDongModel {
       linkSanPham: json['linkSanPham']?.toString(),
       hanChot: json['hanChot'] != null ? DateTime.tryParse(json['hanChot'].toString()) : null,
       trangThai: (json['trangThai'] ?? 'ChuaHoanThanh').toString(),
+      lyDoChuaDat: json['lyDoChuaDat']?.toString(),
     );
   }
 
@@ -163,6 +171,7 @@ class GiaiDoanHopDongModel {
     'linkSanPham': linkSanPham,
     'hanChot': hanChot?.toIso8601String(),
     'trangThai': trangThai,
+    'lyDoChuaDat': lyDoChuaDat,
   };
 }
 

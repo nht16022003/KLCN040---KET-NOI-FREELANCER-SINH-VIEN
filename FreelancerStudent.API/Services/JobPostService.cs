@@ -730,6 +730,9 @@ namespace FreelancerStudent.API.Services
                     request.maJob,
                     sinhvien.maFreelancerStudents);
 
+            // Lấy thời gian dự kiến hoàn thành chuẩn từ JobPost của Nhà tuyển dụng
+            string thoiGianHoanThanhTuJob = jobPost.thoigiandukienhoanthanh.ToString("dd/MM/yyyy");
+
             if (donCu != null)
             {
                 if (donCu.trangThaiUngTuyen == "ChoDuyet")
@@ -756,8 +759,8 @@ namespace FreelancerStudent.API.Services
 
                 donCu.thulaoDeXuat = request.thulaoDeXuat;
 
-                donCu.thoiGianHoanThanhDeXuat =
-                    request.thoiGianHoanThanhDeXuat;
+                // Ràng buộc cố định theo thời gian của JobPost, không tin tưởng giá trị client gửi lên
+                donCu.thoiGianHoanThanhDeXuat = thoiGianHoanThanhTuJob;
 
                 donCu.fileCV = request.fileCV;
 
@@ -778,8 +781,8 @@ namespace FreelancerStudent.API.Services
                 thuGioiThieu =
                     (request.thuGioiThieu ?? string.Empty).Trim(),
                 thulaoDeXuat = request.thulaoDeXuat,
-                thoiGianHoanThanhDeXuat =
-                    request.thoiGianHoanThanhDeXuat,
+                // Ràng buộc cố định theo thời gian của JobPost, không tin tưởng giá trị client gửi lên
+                thoiGianHoanThanhDeXuat = thoiGianHoanThanhTuJob,
                 fileCV = request.fileCV,
                 ngayUngTuyen = DateTime.UtcNow,
                 trangThaiUngTuyen = "ChoDuyet"

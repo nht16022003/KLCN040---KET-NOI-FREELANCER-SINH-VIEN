@@ -640,6 +640,7 @@ CREATE TABLE GiaoDichNapTien
         REFERENCES Wallet(maWallet)
 );
 
+
 -- 1. ROLES (Phân quyền người dùng)
 
 INSERT INTO Roles (maRole, tenRole) VALUES 
@@ -1154,6 +1155,13 @@ SELECT * FROM GiaiDoan_HopDong;
 SELECT * FROM Task_CongViec;
 SELECT * FROM GiaoDichNapTien;
 
+SELECT
+    TABLE_SCHEMA AS SchemaName,
+    TABLE_NAME AS TableName,
+    COLUMN_NAME AS ColumnName,
+    DATA_TYPE AS DataType
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE COLUMN_NAME = 'soLuotDanhGia';
 
 -- 1. Bổ sung cột điều khoản hợp đồng nếu chưa có
 IF COL_LENGTH('dbo.HopDong', 'dieuKhoan') IS NULL

@@ -14,6 +14,10 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
         public int soTaskDangThucHien { get; set; }
         public int soTaskHoanThanh { get; set; }
         public decimal tyLeHoanThanh { get; set; } // % tính từ 0 đến 100
+        public int tongSoMoc { get; set; }
+        public int soMocDat { get; set; }
+        public int soMocChuaDat { get; set; }
+        public int soMocChoDanhGia { get; set; }
         public bool coQuyenCapNhat { get; set; } // true nếu là Freelancer của hợp đồng và hợp đồng DangThucHien
         public bool coQuyenDanhGia { get; set; } // true nếu là Nhà tuyển dụng của hợp đồng
         public bool duAnDaDat { get; set; } // true nếu tất cả giai đoạn đều có trạng thái Dat

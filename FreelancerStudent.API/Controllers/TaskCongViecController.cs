@@ -184,9 +184,14 @@ namespace FreelancerStudent.API.Controllers
                 return BadRequest(new { success = false, message = "Dữ liệu yêu cầu không hợp lệ." });
             }
 
+            if (string.Equals(request.trangThai, "ChuaDat", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(request.lyDo))
+            {
+                return BadRequest(new { success = false, message = "Vui lòng nhập lý do đánh giá chưa đạt." });
+            }
+
             try
             {
-                var result = await _taskService.DanhGiaGiaiDoanAsync(maHD, request.maGiaiDoan, request.trangThai, maUser);
+                var result = await _taskService.DanhGiaGiaiDoanAsync(maHD, request.maGiaiDoan, request.trangThai, request.lyDo, maUser);
                 var thongBao = string.Equals(request.trangThai, "Dat", StringComparison.OrdinalIgnoreCase)
                     ? "Đã xác nhận dự án đạt yêu cầu! Các mốc giai đoạn đã chuyển sang trạng thái Đạt."
                     : "Đã cập nhật trạng thái dự án sang Chưa đạt.";
@@ -207,6 +212,37 @@ namespace FreelancerStudent.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, message = "Lỗi hệ thống khi đánh giá giai đoạn: " + ex.Message });
+            }
+        }
+
+        [HttpPost("hop-dong/{maHD}/cap-nhat-moc")]
+        public async Task<IActionResult> CapNhatMocBanGiao(string maHD, [FromBody] CapNhatMocBanGiao_RequestDTO request, [FromQuery] int maUser)
+        {
+            if (string.IsNullOrWhiteSpace(maHD) || request == null || maUser <= 0)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu yêu cầu không hợp lệ." });
+            }
+
+            try
+            {
+                var result = await _taskService.CapNhatMocBanGiaoAsync(maHD, request.maGiaiDoan, request.linkSanPham, request.moTa, maUser);
+                return Ok(new { success = result, message = "Cập nhật và nộp lại mốc bàn giao thành công. Trạng thái đã chuyển về chờ đánh giá." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi hệ thống khi cập nhật mốc bàn giao: " + ex.Message });
             }
         }
     }

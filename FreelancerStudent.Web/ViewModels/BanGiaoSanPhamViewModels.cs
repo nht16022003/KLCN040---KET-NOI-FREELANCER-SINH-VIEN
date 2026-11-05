@@ -62,6 +62,12 @@ namespace FreelancerStudent.Web.ViewModels
 
         public bool LaKhachHang { get; set; }
 
+        public bool TatCaMocDaDat { get; set; } = false;
+
+        public string? LyDoChuaDuDieuKien { get; set; }
+        
+        public bool CheDoCapNhatLai { get; set; } = false;
+
         public List<BanGiaoResponseViewModel>
             DanhSachBanGiao { get; set; } = new();
 

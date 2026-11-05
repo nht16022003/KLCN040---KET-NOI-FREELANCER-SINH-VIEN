@@ -7,10 +7,11 @@ class BanGiaoService {
   final ApiClient _apiClient = ApiClient();
 
   /// Lấy danh sách các phiên bản bàn giao của hợp đồng (GET api/BanGiaoSanPham/hopdong/{maHD})
-  Future<ApiResponse<List<BanGiaoModel>>> layDanhSachBanGiao(String maHD) async {
+  Future<ApiResponse<List<BanGiaoModel>>> layDanhSachBanGiao(String maHD, {int? maUser}) async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
         '${ApiEndpoints.banGiaoSanPhamHopDong}/$maHD',
+        queryParameters: maUser != null && maUser > 0 ? {'maUser': maUser} : null,
       );
 
       final resData = response.data;
@@ -37,10 +38,11 @@ class BanGiaoService {
   }
 
   /// Lấy danh sách yêu cầu chỉnh sửa của hợp đồng (GET api/BanGiaoSanPham/yeucauchinhsua/{maHD})
-  Future<ApiResponse<List<YeuCauChinhSuaModel>>> layDanhSachYeuCau(String maHD) async {
+  Future<ApiResponse<List<YeuCauChinhSuaModel>>> layDanhSachYeuCau(String maHD, {int? maUser}) async {
     try {
       final response = await _apiClient.get<Map<String, dynamic>>(
         '${ApiEndpoints.yeuCauChinhSua}/$maHD',
+        queryParameters: maUser != null && maUser > 0 ? {'maUser': maUser} : null,
       );
 
       final resData = response.data;
@@ -72,6 +74,7 @@ class BanGiaoService {
     required String fileSanPhamUrl,
     String? linkDemo,
     required String moTaBanGiao,
+    int? maUser,
   }) async {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
@@ -82,6 +85,7 @@ class BanGiaoService {
           if (linkDemo != null && linkDemo.isNotEmpty) 'linkDemo': linkDemo,
           'moTaBanGiao': moTaBanGiao,
         },
+        queryParameters: maUser != null && maUser > 0 ? {'maUser': maUser} : null,
       );
 
       final resData = response.data;
@@ -109,6 +113,7 @@ class BanGiaoService {
   Future<ApiResponse<dynamic>> guiYeuCauChinhSua({
     required int maBanGiao,
     required String noiDungYeuCau,
+    int? maUser,
   }) async {
     try {
       final response = await _apiClient.post<Map<String, dynamic>>(
@@ -117,6 +122,7 @@ class BanGiaoService {
           'maBanGiao': maBanGiao,
           'noiDungYeuCau': noiDungYeuCau,
         },
+        queryParameters: maUser != null && maUser > 0 ? {'maUser': maUser} : null,
       );
 
       final resData = response.data;
@@ -134,11 +140,12 @@ class BanGiaoService {
   }
 
   /// Nhà tuyển dụng nghiệm thu sản phẩm (PUT api/BanGiaoSanPham/nghiemthu/{maBanGiao})
-  Future<ApiResponse<dynamic>> nghiemThu(int maBanGiao) async {
+  Future<ApiResponse<dynamic>> nghiemThu(int maBanGiao, {int? maUser}) async {
     try {
       final response = await _apiClient.put<Map<String, dynamic>>(
         '${ApiEndpoints.nghiemThuBanGiao}/$maBanGiao',
         {},
+        queryParameters: maUser != null && maUser > 0 ? {'maUser': maUser} : null,
       );
 
       final resData = response.data;

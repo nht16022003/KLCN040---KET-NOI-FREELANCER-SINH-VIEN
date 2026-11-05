@@ -223,3 +223,5 @@ D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.r
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.dll
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.pdb
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\uy8znmcq8d-{0}-s7kmgt37pa-s7kmgt37pa.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\se34cd9x9x-{0}-hgosgh5hl2-hgosgh5hl2.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\fs4ohpxt9l-{0}-a5c5cshv0d-a5c5cshv0d.gz

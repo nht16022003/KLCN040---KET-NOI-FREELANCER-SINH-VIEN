@@ -30,7 +30,6 @@ namespace FreelancerStudent.Web.Services
 
             try
             {
-                using var request = new HttpRequestMessage(method, url);
                 var context = _httpContextAccessor.HttpContext;
 
                 if (context == null ||
@@ -40,6 +39,19 @@ namespace FreelancerStudent.Web.Services
                     result.message = "Vui lòng đăng nhập lại.";
                     return result;
                 }
+
+                int? maUser = context.Session.GetInt32("maUser");
+                if (!maUser.HasValue && int.TryParse(context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int id))
+                {
+                    maUser = id;
+                }
+
+                if (maUser.HasValue && !url.Contains("maUser="))
+                {
+                    url += (url.Contains("?") ? "&" : "?") + $"maUser={maUser.Value}";
+                }
+
+                using var request = new HttpRequestMessage(method, url);
 
                 var cookieName = "FreelancerStudent.Cookie";
 

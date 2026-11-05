@@ -501,6 +501,12 @@ namespace FreelancerStudent.Web.Controllers
 
             model.maUser = maUser.Value;
 
+            // Ràng buộc thời gian hoàn thành theo JobPost
+            if (model.thoigiandukienhoanthanh != DateTime.MinValue)
+            {
+                model.thoiGianHoanThanhDeXuat = model.thoigiandukienhoanthanh.ToString("dd/MM/yyyy");
+            }
+
             var ketQua = await _jobPostService.nopDonUngTuyenAsync(model);
 
             if (ketQua.success)

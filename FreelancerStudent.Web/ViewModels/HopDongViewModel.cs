@@ -12,6 +12,7 @@ namespace FreelancerStudent.Web.ViewModels
         public string? linkSanPham { get; set; }
         public DateTime hanChot { get; set; }
         public string trangThai { get; set; } = string.Empty;
+        public string? lyDoChuaDat { get; set; }
     }
 
     public class HopDongViewModel
@@ -56,6 +57,12 @@ namespace FreelancerStudent.Web.ViewModels
         public bool LaFreelancerCuaHopDong { get; set; } = false;
         public bool CoQuyenKyQuy { get; set; } = false;
         public bool LaNhaTuyenDungCuaHopDong { get; set; } = false;
+        public bool TatCaMocDaDat => giaiDoans != null && giaiDoans.Count > 0 && giaiDoans.All(g => g.trangThai == "Dat" || g.trangThai == "DaNghiemThu");
+        public bool CoSanPhamBanGiaoChoNghiemThu { get; set; } = false;
+        public int? MaBanGiaoMoiNhat { get; set; }
+        public string? TrangThaiBanGiaoMoiNhat { get; set; }
+        public string? PhanHoiBanGiaoMoiNhat { get; set; }
+        public string? PhienBanBanGiaoMoiNhat { get; set; }
 
         public decimal? SoDuKhaDung { get; set; }
         public bool DaTaiThongTinVi { get; set; } = false;
@@ -67,6 +74,7 @@ namespace FreelancerStudent.Web.ViewModels
     public class HopDongThanhToanViewModel
     {
         public string maHD { get; set; } = string.Empty;
+        public int? maBanGiao { get; set; }
         public string tenCongViec { get; set; } = string.Empty;
         public string tenFreelancer { get; set; } = string.Empty;
         public decimal sotienkyquy { get; set; }
@@ -170,6 +178,10 @@ namespace FreelancerStudent.Web.ViewModels
         public int soTaskDangThucHien { get; set; }
         public int soTaskHoanThanh { get; set; }
         public decimal tyLeHoanThanh { get; set; }
+        public int tongSoMoc { get; set; }
+        public int soMocDat { get; set; }
+        public int soMocChuaDat { get; set; }
+        public int soMocChoDanhGia { get; set; }
         public bool coQuyenCapNhat { get; set; }
         public List<GiaiDoanHopDongViewModel> danhSachGiaiDoan { get; set; } = new List<GiaiDoanHopDongViewModel>();
         public List<TaskCongViecViewModel> danhSachTask { get; set; } = new List<TaskCongViecViewModel>();

@@ -1101,7 +1101,7 @@
     else
                                                                 {
                                                                     <!-- ==================== HEADER DEFAULT / GUEST ==================== -->
-                                                                    <header class="auth-header">
+                                                                    <header class="auth-header sticky-top bg-white">
                                                                         <div class="container">
                                                                             <div class="d-flex align-items-center justify-content-between">
 
@@ -1110,14 +1110,16 @@
                                                                                     Freelancer <span>Students</span>
                                                                                 </a>
 
-                                                                                <!-- Nav Links -->
-                                                                                <nav class="d-none d-lg-flex align-items-center gap-2">
-                                                                                    <a href="/JobPost" class="nav-link-custom">Tìm công việc</a>
-                                                                                    <a href="/FreelancerStudent" class="nav-link-custom">Tìm Freelancer</a>
+                                                                                <!-- Nav Links (Điều hướng tới các khu vực của trang Overview) -->
+                                                                                <nav class="d-none d-lg-flex align-items-center gap-1">
+                                                                                    <a href="/#gioi-thieu" class="nav-link-custom">Giới thiệu</a>
+                                                                                    <a href="/#cach-hoat-dong" class="nav-link-custom">Cơ hội & Nhân tài mẫu</a>
+                                                                                    <a href="/#danh-cho-freelancer" class="nav-link-custom">Dành cho Freelancer</a>
+                                                                                    <a href="/#danh-cho-nha-tuyen-dung" class="nav-link-custom">Dành cho Nhà tuyển dụng</a>
                                                                                 </nav>
 
                                                                                 <!-- Right -->
-                                                                                <div class="d-flex align-items-center gap-3">
+                                                                                <div class="d-flex align-items-center gap-2 gap-sm-3">
                                                                                     <span class="badge bg-light text-secondary border px-2 py-1 small d-none d-sm-inline-block">VI</span>
 
                                                                                     <a asp-controller="Account" asp-action="DangNhap" class="btn-header-login">

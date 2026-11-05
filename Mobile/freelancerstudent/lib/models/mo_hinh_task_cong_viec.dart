@@ -57,6 +57,10 @@ class TienDoDuAnModel {
   final int soTaskChuaThucHien;
   final int soTaskDangThucHien;
   final int soTaskHoanThanh;
+  final int tongSoMoc;
+  final int soMocDat;
+  final int soMocChuaDat;
+  final int soMocChoDanhGia;
   final double tyLeHoanThanh;
   final bool coQuyenCapNhat;
   final bool coQuyenDanhGia;
@@ -73,6 +77,10 @@ class TienDoDuAnModel {
     required this.soTaskChuaThucHien,
     required this.soTaskDangThucHien,
     required this.soTaskHoanThanh,
+    this.tongSoMoc = 0,
+    this.soMocDat = 0,
+    this.soMocChuaDat = 0,
+    this.soMocChoDanhGia = 0,
     required this.tyLeHoanThanh,
     required this.coQuyenCapNhat,
     this.coQuyenDanhGia = false,
@@ -96,7 +104,9 @@ class TienDoDuAnModel {
         .toList();
 
     final bool allDat = dsGiaiDoanParsed.isNotEmpty &&
-        dsGiaiDoanParsed.every((g) => g.trangThai.toLowerCase() == 'dat');
+        dsGiaiDoanParsed.every((g) =>
+            g.trangThai.toLowerCase() == 'dat' ||
+            g.trangThai.toLowerCase() == 'danghiemthu');
 
     return TienDoDuAnModel(
       maHD: (json['maHD'] ?? '').toString(),
@@ -111,6 +121,12 @@ class TienDoDuAnModel {
       soTaskChuaThucHien: asInt(json['soTaskChuaThucHien']),
       soTaskDangThucHien: asInt(json['soTaskDangThucHien']),
       soTaskHoanThanh: asInt(json['soTaskHoanThanh']),
+      tongSoMoc: asInt(json['tongSoMoc']) > 0
+          ? asInt(json['tongSoMoc'])
+          : dsGiaiDoanParsed.length,
+      soMocDat: asInt(json['soMocDat']),
+      soMocChuaDat: asInt(json['soMocChuaDat']),
+      soMocChoDanhGia: asInt(json['soMocChoDanhGia']),
       tyLeHoanThanh: (json['tyLeHoanThanh'] as num?)?.toDouble() ?? 0,
       coQuyenCapNhat: json['coQuyenCapNhat'] == true,
       coQuyenDanhGia: json['coQuyenDanhGia'] == true,

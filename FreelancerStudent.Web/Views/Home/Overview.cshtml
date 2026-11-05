@@ -1,0 +1,1144 @@
+@{
+    ViewData["Title"] = "Giới thiệu tổng quan nền tảng - Freelancer Students";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var maUser = Context.Session.GetInt32("maUser");
+    var tenRole = Context.Session.GetString("tenRole");
+    var userName = Context.Session.GetString("hovaten");
+}
+
+<style>
+    :root {
+        --overview-green: #3B6E53;
+        --overview-green-dark: #2A523E;
+        --overview-green-light: #EBF4F0;
+        --overview-border: #E2E8F0;
+        --overview-card-bg: #FFFFFF;
+        --overview-bg: #FAFCFB;
+        --overview-heading: #1E293B;
+        --overview-text: #64748B;
+    }
+
+    .overview-wrapper {
+        background-color: var(--overview-bg);
+        color: var(--overview-heading);
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* SECTION PADDING & TITLES */
+    .overview-section {
+        padding: 64px 0;
+        border-bottom: 1px solid var(--overview-border);
+    }
+
+    .overview-section-alt {
+        background-color: #FFFFFF;
+    }
+
+    .section-badge {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--overview-green);
+        background-color: var(--overview-green-light);
+        padding: 5px 14px;
+        margin-bottom: 12px;
+        border: 1px solid #D1E5DB;
+    }
+
+    .section-title {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: var(--overview-heading);
+        letter-spacing: -0.5px;
+        margin-bottom: 14px;
+    }
+
+    .section-desc {
+        color: var(--overview-text);
+        font-size: 1.02rem;
+        line-height: 1.65;
+        max-width: 720px;
+        margin: 0 auto 36px;
+    }
+
+    /* HERO SECTION */
+    .hero-box {
+        padding: 70px 0 60px;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F4F8F5 100%);
+        border-bottom: 1px solid var(--overview-border);
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.25;
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+    }
+
+    .hero-title span {
+        color: var(--overview-green);
+    }
+
+    .hero-desc {
+        font-size: 1.15rem;
+        color: #475569;
+        line-height: 1.7;
+        margin-bottom: 32px;
+        max-width: 780px;
+    }
+
+    .btn-hero-primary {
+        background-color: var(--overview-green);
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 13px 30px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid var(--overview-green);
+        box-shadow: 0 4px 14px rgba(59, 110, 83, 0.25);
+    }
+
+    .btn-hero-primary:hover {
+        background-color: var(--overview-green-dark);
+        border-color: var(--overview-green-dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-hero-secondary {
+        background-color: #FFFFFF;
+        color: #1E293B !important;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 13px 30px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid #CBD5E1;
+    }
+
+    .btn-hero-secondary:hover {
+        background-color: var(--overview-green-light);
+        border-color: var(--overview-green);
+        color: var(--overview-green) !important;
+        transform: translateY(-2px);
+    }
+
+    /* STATS & HIGHLIGHT CHIPS */
+    .hero-highlight-card {
+        background: #FFFFFF;
+        border: 1px solid var(--overview-border);
+        padding: 22px 20px;
+        transition: transform 0.2s;
+        height: 100%;
+    }
+
+    .hero-highlight-card:hover {
+        border-color: var(--overview-green);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    }
+
+    .highlight-icon-box {
+        width: 44px;
+        height: 44px;
+        background-color: var(--overview-green-light);
+        color: var(--overview-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 14px;
+        border: 1px solid #D1E5DB;
+    }
+
+    .highlight-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--overview-heading);
+        margin-bottom: 6px;
+    }
+
+    .highlight-desc {
+        font-size: 0.88rem;
+        color: var(--overview-text);
+        line-height: 1.5;
+        margin-bottom: 0;
+    }
+
+    /* FEATURE CARDS */
+    .feature-card {
+        background: #FFFFFF;
+        border: 1px solid var(--overview-border);
+        padding: 26px 22px;
+        height: 100%;
+        transition: all 0.2s ease;
+    }
+
+    .feature-card:hover {
+        border-color: var(--overview-green);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .feature-step-num {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: var(--overview-green);
+        background-color: var(--overview-green-light);
+        padding: 3px 10px;
+        display: inline-block;
+        margin-bottom: 12px;
+        border: 1px solid #D1E5DB;
+    }
+
+    .feature-title {
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: var(--overview-heading);
+        margin-bottom: 8px;
+    }
+
+    .feature-desc {
+        font-size: 0.9rem;
+        color: var(--overview-text);
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    /* SAMPLE SHOWCASE CARDS (JOB & FREELANCER) */
+    .showcase-nav-pills {
+        display: inline-flex;
+        background-color: #EEF4F0;
+        border: 1px solid #D1E5DB;
+        padding: 4px;
+        margin-bottom: 28px;
+    }
+
+    .showcase-nav-pills .nav-link {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #475569;
+        border-radius: 0 !important;
+        border: none;
+        padding: 9px 22px;
+        transition: all 0.2s ease;
+        background: transparent;
+    }
+
+    .showcase-nav-pills .nav-link.active {
+        background-color: var(--overview-green) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 8px rgba(59, 110, 83, 0.25);
+    }
+
+    .sample-showcase-card {
+        background: #FFFFFF;
+        border: 1px solid var(--overview-border);
+        padding: 24px 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.2s ease;
+        text-align: left;
+    }
+
+    .sample-showcase-card:hover {
+        border-color: var(--overview-green);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .sample-top-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .sample-avatar-box {
+        width: 44px;
+        height: 44px;
+        background-color: var(--overview-green-light);
+        color: var(--overview-green);
+        font-weight: 800;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #D1E5DB;
+        flex-shrink: 0;
+    }
+
+    .sample-meta-name {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: var(--overview-heading);
+        line-height: 1.3;
+    }
+
+    .sample-meta-sub {
+        font-size: 0.8rem;
+        color: var(--overview-text);
+    }
+
+    .sample-card-title {
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: var(--overview-heading);
+        margin-bottom: 8px;
+        line-height: 1.35;
+    }
+
+    .sample-card-desc {
+        font-size: 0.86rem;
+        color: var(--overview-text);
+        line-height: 1.5;
+        margin-bottom: 14px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .sample-metrics-panel {
+        background-color: #FAFCFA;
+        border: 1px solid #EDF2EE;
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sample-metric-highlight {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--overview-green);
+    }
+
+    .sample-metric-secondary {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .sample-chip-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 18px;
+    }
+
+    .sample-chip {
+        background-color: #F1F5F9;
+        color: #334155;
+        font-size: 0.74rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border: 1px solid #E2E8F0;
+        display: inline-block;
+    }
+
+    .sample-verified-tag {
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #15803D;
+        background-color: #DCFCE7;
+        padding: 2px 7px;
+        border: 1px solid #BBF7D0;
+        display: inline-block;
+    }
+
+    .btn-sample-action {
+        width: 100%;
+        border-radius: 0;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    /* CATEGORY BOX */
+    .category-card {
+        background: #FFFFFF;
+        border: 1px solid var(--overview-border);
+        padding: 22px 18px;
+        text-align: center;
+        transition: all 0.2s ease;
+        height: 100%;
+    }
+
+    .category-card:hover {
+        border-color: var(--overview-green);
+        background-color: var(--overview-green-light);
+    }
+
+    .category-icon {
+        font-size: 1.8rem;
+        color: var(--overview-green);
+        margin-bottom: 12px;
+        font-weight: 800;
+    }
+
+    .category-name {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: var(--overview-heading);
+        margin-bottom: 6px;
+    }
+
+    .category-tags {
+        font-size: 0.82rem;
+        color: var(--overview-text);
+        line-height: 1.4;
+        margin-bottom: 0;
+    }
+
+    /* CTA FOOTER BANNER */
+    .cta-banner {
+        background: linear-gradient(135deg, #244835 0%, #3B6E53 100%);
+        color: #FFFFFF;
+        padding: 60px 30px;
+        text-align: center;
+        border: 1px solid #1E3D2C;
+    }
+
+    .cta-title {
+        font-size: 2.1rem;
+        font-weight: 800;
+        margin-bottom: 14px;
+        letter-spacing: -0.5px;
+    }
+
+    .cta-desc {
+        font-size: 1.05rem;
+        color: #DDEBE2;
+        max-width: 650px;
+        margin: 0 auto 30px;
+        line-height: 1.6;
+    }
+
+    .btn-cta-white {
+        background-color: #FFFFFF;
+        color: #1E3D2C !important;
+        font-weight: 700;
+        font-size: 0.98rem;
+        padding: 12px 28px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        border: 1px solid #FFFFFF;
+    }
+
+    .btn-cta-white:hover {
+        background-color: #E2E8F0;
+        transform: translateY(-2px);
+    }
+
+    .btn-cta-outline {
+        background-color: transparent;
+        color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 0.98rem;
+        padding: 12px 28px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .btn-cta-outline:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-color: #FFFFFF;
+        transform: translateY(-2px);
+    }
+
+    /* LOGGED IN NOTICE BANNER */
+    .logged-in-banner {
+        background-color: #EBF4F0;
+        border-bottom: 1px solid #C4D9CD;
+        padding: 12px 0;
+        font-size: 0.92rem;
+    }
+</style>
+
+<div class="overview-wrapper">
+
+    @if (maUser.HasValue)
+    {
+        <!-- BANNER THÔNG BÁO CHO NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP -->
+        <div class="logged-in-banner">
+            <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div>
+                    <span class="fw-bold text-success">Xin chào @userName!</span>
+                    <span class="text-secondary ms-1">Bạn đang đăng nhập với vai trò: <strong>@tenRole</strong>.</span>
+                </div>
+                <div>
+                    @if (tenRole == "FreelancerStudent")
+                    {
+                        <a href="/JobPost" class="btn btn-sm btn-success fw-bold px-3">Đến trang tìm việc làm</a>
+                    }
+                    else if (tenRole == "NhaTuyenDung")
+                    {
+                        <a href="/FreelancerStudent" class="btn btn-sm btn-success fw-bold px-3">Đến trang quản lý tuyển dụng</a>
+                    }
+                    else if (tenRole == "Admin")
+                    {
+                        <a href="/Admin" class="btn btn-sm btn-success fw-bold px-3">Đến bảng điều khiển Quản trị</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ==================== KHU VỰC 2: HERO SECTION ==================== -->
+    <section class="hero-box">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="section-badge">Nền tảng kết nối nhân sự sinh viên & Doanh nghiệp</span>
+                    <h1 class="hero-title">
+                        Kết nối Freelancer sinh viên với <span>cơ hội việc làm phù hợp</span>
+                    </h1>
+                    <p class="hero-desc">
+                        FreelancerStudent là nền tảng giúp sinh viên tìm kiếm cơ hội việc làm tự do, phát triển kỹ năng và xây dựng kinh nghiệm thực tế, đồng thời hỗ trợ Nhà tuyển dụng tìm kiếm và hợp tác với Freelancer phù hợp với nhu cầu dự án.
+                    </p>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <a asp-controller="Account" asp-action="DangKy" asp-route-role="1" class="btn-hero-primary">
+                            Tôi là Freelancer
+                        </a>
+                        <a asp-controller="Account" asp-action="DangKy" asp-route-role="2" class="btn-hero-secondary">
+                            Tôi là Nhà tuyển dụng
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="d-flex flex-column gap-3">
+                        <!-- Card 1 -->
+                        <div class="hero-highlight-card">
+                            <div class="highlight-icon-box">01</div>
+                            <h3 class="highlight-title">100% Sinh viên xác thực</h3>
+                            <p class="highlight-desc">
+                                Tự động nhận diện thẻ sinh viên bằng công nghệ OCR và đối soát niên khóa học tập chính quy.
+                            </p>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="hero-highlight-card">
+                            <div class="highlight-icon-box">02</div>
+                            <h3 class="highlight-title">Hợp đồng & Ký quỹ an toàn</h3>
+                            <p class="highlight-desc">
+                                Kinh phí dự án được ký quỹ (Escrow) vào ví hệ thống, đảm bảo quyền lợi thanh toán hai chiều.
+                            </p>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="hero-highlight-card">
+                            <div class="highlight-icon-box">03</div>
+                            <h3 class="highlight-title">Tiến độ theo mốc rõ ràng</h3>
+                            <p class="highlight-desc">
+                                Theo dõi công việc theo từng mốc bàn giao (milestones), nghiệm thu sản phẩm minh bạch.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHU VỰC 3: GIỚI THIỆU NỀN TẢNG ==================== -->
+    <section id="gioi-thieu" class="overview-section overview-section-alt">
+        <div class="container text-center">
+            <span class="section-badge">Về FreelancerStudent</span>
+            <h2 class="section-title">Nền tảng việc làm tự do dành cho thế hệ sinh viên</h2>
+            <p class="section-desc">
+                FreelancerStudent thu hẹp khoảng cách giữa môi trường đào tạo và thị trường lao động thực tế. Chúng tôi tạo ra không gian làm việc an toàn, nơi sinh viên cọ xát năng lực thực tế và doanh nghiệp tiếp cận nguồn nhân sự trẻ, sáng tạo với chi phí hợp lý.
+            </p>
+
+            <div class="row g-4 text-start mt-2">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <span class="feature-step-num">TRỤ CỘT 01</span>
+                        <h3 class="feature-title">Xác minh danh tính minh bạch</h3>
+                        <p class="feature-desc">
+                            Tụi mình xác minh qua thẻ sinh viên thật, thấy rõ trường và ngành học, nên bạn không phải lo gặp tài khoản ảo hay spam.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <span class="feature-step-num">TRỤ CỘT 02</span>
+                        <h3 class="feature-title">Cơ chế bảo chứng tài chính</h3>
+                        <p class="feature-desc">
+                            Bên thuê sẽ gửi tiền vào ví hệ thống giữ hộ trước khi làm. Cứ xong mốc nào đạt yêu cầu là bạn nhận tiền mốc đó, không sợ bị bùng công.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <span class="feature-step-num">TRỤ CỘT 03</span>
+                        <h3 class="feature-title">Hồ sơ năng lực thực chiến</h3>
+                        <p class="feature-desc">
+                            Làm xong dự án nào là được lưu ngay vào Portfolio và nhận đánh giá thật từ khách. Đi xin việc sau này có sẵn sản phẩm thực tế để khoe.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHU VỰC 4: DÀNH CHO FREELANCER SINH VIÊN ==================== -->
+    <section id="danh-cho-freelancer" class="overview-section">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-badge">Dành cho sinh viên</span>
+                <h2 class="section-title">Chắp cánh kỹ năng và tích lũy thu nhập</h2>
+                <p class="section-desc">
+                    Trải nghiệm quy trình làm việc tự do chuyên nghiệp với đầy đủ công cụ hỗ trợ từ nộp đơn, ký hợp đồng đến nhận thù lao về tài khoản.
+                </p>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Hồ sơ & Portfolio cá nhân</h3>
+                        <p class="feature-desc">
+                            Tự tạo trang cá nhân gọn gàng: ghi rõ bạn học trường nào, mạnh kỹ năng gì, kèm link và ảnh các bài tập, sản phẩm bạn từng làm.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Xác thực minh chứng sinh viên</h3>
+                        <p class="feature-desc">
+                            Chỉ cần chụp ảnh thẻ sinh viên tải lên, hệ thống tự đọc thông tin và kiểm tra niên khóa là bạn có thể bắt đầu nộp đơn nhận việc ngay.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Tìm kiếm & Ứng tuyển công việc</h3>
+                        <p class="feature-desc">
+                            Lướt xem các việc đang tuyển, chọn việc vừa sức và gửi giá thù lao bạn mong muốn. Hạn chót làm bài được lấy rõ ràng từ bài đăng.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Ký kết hợp đồng điện tử</h3>
+                        <p class="feature-desc">
+                            Khi bên thuê chọn bạn, hai bên sẽ xem lại yêu cầu, các mốc nộp bài và bấm xác nhận hợp đồng trực tuyến ngay trên web.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Báo cáo tiến độ & Bàn giao</h3>
+                        <p class="feature-desc">
+                            Làm đến đâu gửi link demo đến đó để khách xem và góp ý. Khi xong xuôi toàn bộ thì gửi link sản phẩm hoàn chỉnh để nghiệm thu.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Ví thu nhập & Đánh giá năng lực</h3>
+                        <p class="feature-desc">
+                            Tiền công cộng thẳng vào ví cá nhân, bạn có thể rút về tài khoản ngân hàng bất cứ lúc nào và tích lũy thêm điểm sao đánh giá.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHU VỰC 5: DÀNH CHO NHÀ TUYỂN DỤNG ==================== -->
+    <section id="danh-cho-nha-tuyen-dung" class="overview-section overview-section-alt">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-badge">Dành cho Nhà tuyển dụng</span>
+                <h2 class="section-title">Tiếp cận nhân tài sinh viên, tối ưu ngân sách</h2>
+                <p class="section-desc">
+                    Giải pháp tuyển dụng linh hoạt cho doanh nghiệp, startup và cá nhân cần nhân sự triển khai dự án ngắn hạn với quy trình quản lý minh bạch.
+                </p>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Đăng tin tuyển dụng nhanh chóng</h3>
+                        <p class="feature-desc">
+                            Điền nhanh những việc bạn cần làm, kỹ năng cần có, mức thù lao dự kiến và ngày cần nhận bài để sinh viên vào ứng tuyển.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Tra cứu & Lọc ứng viên</h3>
+                        <p class="feature-desc">
+                            Tìm sinh viên theo trường, ngành học hoặc kỹ năng bạn cần. Xem trước những sản phẩm các bạn ấy từng làm để dễ chọn mặt gửi vàng.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Quản lý & Duyệt đơn ứng tuyển</h3>
+                        <p class="feature-desc">
+                            Đọc thư giới thiệu, xem mức giá các bạn sinh viên đề xuất và chọn người bạn thấy phù hợp nhất để bắt đầu hợp tác.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Tạo hợp đồng & Ký quỹ an toàn</h3>
+                        <p class="feature-desc">
+                            Chia nhỏ công việc thành các mốc nộp bài và nạp trước tiền vào ví giữ hộ để sinh viên yên tâm bắt tay vào làm.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Theo dõi tiến độ & Nghiệm thu</h3>
+                        <p class="feature-desc">
+                            Xem sản phẩm sinh viên nộp ở từng mốc, bấm Đạt hoặc góp ý nếu cần sửa lại, rồi duyệt nhận sản phẩm cuối cùng khi đã ưng ý.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <h3 class="feature-title">Đánh giá & Lưu hồ sơ yêu thích</h3>
+                        <p class="feature-desc">
+                            Chấm điểm sao và để lại vài dòng nhận xét cho bạn sinh viên, hoặc bấm lưu hồ sơ lại để lần sau có việc cần làm thì gọi tiếp.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHU VỰC 6: CƠ HỘI & NHÂN TÀI TIÊU BIỂU (CARD MẪU) ==================== -->
+    <section id="cach-hoat-dong" class="overview-section">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-badge">Cơ hội & Nhân tài mẫu</span>
+                <h2 class="section-title">Khám phá việc làm & Freelancer sinh viên tiêu biểu</h2>
+                <p class="section-desc">
+                    Trải nghiệm các cơ hội dự án hấp dẫn từ Nhà tuyển dụng và hồ sơ năng lực chất lượng cao của sinh viên trên nền tảng FreelancerStudent.
+                </p>
+
+                <!-- TAB SWITCH BUTTONS -->
+                <ul class="nav nav-pills showcase-nav-pills justify-content-center" id="showcaseTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="jobs-tab" data-bs-toggle="pill" data-bs-target="#jobs-content" type="button" role="tab" aria-controls="jobs-content" aria-selected="true">
+                            Việc làm dự án nổi bật (Mẫu)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="freelancers-tab" data-bs-toggle="pill" data-bs-target="#freelancers-content" type="button" role="tab" aria-controls="freelancers-content" aria-selected="false">
+                            Freelancer sinh viên tiêu biểu (Mẫu)
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content" id="showcaseTabContent">
+                <!-- ==================== TAB 1: JOBPOST CARDS ==================== -->
+                <div class="tab-pane fade show active" id="jobs-content" role="tabpanel" aria-labelledby="jobs-tab">
+                    <div class="row g-4 text-start">
+                        <!-- Job Card 1 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="sample-showcase-card">
+                                <div>
+                                    <div class="sample-top-meta">
+                                        <div class="sample-avatar-box">TN</div>
+                                        <div>
+                                            <div class="sample-meta-name">TechNova Solutions</div>
+                                            <div class="sample-meta-sub">⭐ 4.9 • 18 dự án đã đăng</div>
+                                        </div>
+                                        <span class="sample-badge-open ms-auto">Đang tuyển</span>
+                                    </div>
+
+                                    <h3 class="sample-card-title">Phát triển Website Thương Mại Điện Tử Sinh Viên</h3>
+                                    <p class="sample-card-desc">
+                                        Xây dựng website bán tài liệu và giáo trình cho sinh viên, tích hợp giỏ hàng, API quản lý đơn hàng và giao diện chuẩn responsive trên mọi thiết bị.
+                                    </p>
+
+                                    <div class="sample-metrics-panel">
+                                        <div>
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Ngân sách đề xuất</span>
+                                            <span class="sample-metric-highlight">4.500.000 VNĐ</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Hạn hoàn thành</span>
+                                            <span class="sample-metric-secondary">15/12/2026</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="sample-chip-list">
+                                        <span class="sample-chip">ASP.NET Core</span>
+                                        <span class="sample-chip">React</span>
+                                        <span class="sample-chip">SQL Server</span>
+                                        <span class="sample-chip">REST API</span>
+                                    </div>
+                                </div>
+
+                                <a href="/JobPost" class="btn btn-outline-success btn-sample-action">
+                                    Xem chi tiết & Khám phá việc làm
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Job Card 2 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="sample-showcase-card">
+                                <div>
+                                    <div class="sample-top-meta">
+                                        <div class="sample-avatar-box">CM</div>
+                                        <div>
+                                            <div class="sample-meta-name">Creative Media Agency</div>
+                                            <div class="sample-meta-sub">⭐ 5.0 • 12 dự án đã đăng</div>
+                                        </div>
+                                        <span class="sample-badge-open ms-auto">Đang tuyển</span>
+                                    </div>
+
+                                    <h3 class="sample-card-title">Thiết Kế Bộ Nhận Diện & Banner Sự Kiện Festival</h3>
+                                    <p class="sample-card-desc">
+                                        Thiết kế bộ ấn phẩm truyền thông sự kiện bao gồm 2 poster đứng, 5 banner Facebook, vé mời và voucher ưu đãi theo phong cách trẻ trung, hiện đại.
+                                    </p>
+
+                                    <div class="sample-metrics-panel">
+                                        <div>
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Ngân sách đề xuất</span>
+                                            <span class="sample-metric-highlight">2.200.000 VNĐ</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Hạn hoàn thành</span>
+                                            <span class="sample-metric-secondary">30/11/2026</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="sample-chip-list">
+                                        <span class="sample-chip">Photoshop</span>
+                                        <span class="sample-chip">Illustrator</span>
+                                        <span class="sample-chip">Figma</span>
+                                        <span class="sample-chip">Banner</span>
+                                    </div>
+                                </div>
+
+                                <a href="/JobPost" class="btn btn-outline-success btn-sample-action">
+                                    Xem chi tiết & Khám phá việc làm
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Job Card 3 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="sample-showcase-card">
+                                <div>
+                                    <div class="sample-top-meta">
+                                        <div class="sample-avatar-box">SE</div>
+                                        <div>
+                                            <div class="sample-meta-name">SmartEdu App Studio</div>
+                                            <div class="sample-meta-sub">⭐ 4.8 • 9 dự án đã đăng</div>
+                                        </div>
+                                        <span class="sample-badge-open ms-auto">Đang tuyển</span>
+                                    </div>
+
+                                    <h3 class="sample-card-title">Lập Trình App Di Động Quản Lý Lịch Học & Task</h3>
+                                    <p class="sample-card-desc">
+                                        Phát triển ứng dụng Flutter ghi chú và thông báo lịch học, lịch thi, đồng bộ cơ sở dữ liệu cloud. Đảm bảo chạy mượt mà trên cả Android và iOS.
+                                    </p>
+
+                                    <div class="sample-metrics-panel">
+                                        <div>
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Ngân sách đề xuất</span>
+                                            <span class="sample-metric-highlight">3.800.000 VNĐ</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Hạn hoàn thành</span>
+                                            <span class="sample-metric-secondary">20/12/2026</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="sample-chip-list">
+                                        <span class="sample-chip">Flutter</span>
+                                        <span class="sample-chip">Dart</span>
+                                        <span class="sample-chip">Mobile App</span>
+                                        <span class="sample-chip">Firebase</span>
+                                    </div>
+                                </div>
+
+                                <a href="/JobPost" class="btn btn-outline-success btn-sample-action">
+                                    Xem chi tiết & Khám phá việc làm
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TAB 2: FREELANCER CARDS ==================== -->
+                <div class="tab-pane fade" id="freelancers-content" role="tabpanel" aria-labelledby="freelancers-tab">
+                    <div class="row g-4 text-start">
+                        <!-- Freelancer Card 1 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="sample-showcase-card">
+                                <div>
+                                    <div class="sample-top-meta">
+                                        <div class="sample-avatar-box" style="background-color: #E8F5E9; color: #2E7D32;">VA</div>
+                                        <div>
+                                            <div class="sample-meta-name">Nguyễn Văn An</div>
+                                            <div class="sample-meta-sub">ĐH Bách Khoa TP.HCM</div>
+                                        </div>
+                                        <span class="sample-verified-tag ms-auto">✓ Đã xác thực</span>
+                                    </div>
+
+                                    <div class="fw-bold text-success small mb-2" style="font-size: 0.85rem;">
+                                        Kỹ thuật Phần mềm • Năm 4
+                                    </div>
+
+                                    <p class="sample-card-desc">
+                                        Lập trình viên Fullstack đam mê công nghệ .NET và React. Đã hoàn thành xuất sắc các dự án website doanh nghiệp và quản lý tiến độ chuẩn xác.
+                                    </p>
+
+                                    <div class="sample-metrics-panel">
+                                        <div>
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Đánh giá</span>
+                                            <span class="sample-metric-highlight" style="color: #B45309;">⭐ 4.9 / 5.0</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Kinh nghiệm</span>
+                                            <span class="sample-metric-secondary">14 dự án hoàn thành</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="sample-chip-list">
+                                        <span class="sample-chip">C#</span>
+                                        <span class="sample-chip">.NET Core</span>
+                                        <span class="sample-chip">React</span>
+                                        <span class="sample-chip">Flutter</span>
+                                        <span class="sample-chip">SQL</span>
+                                    </div>
+                                </div>
+
+                                <a href="/FreelancerStudent" class="btn btn-outline-success btn-sample-action">
+                                    Xem hồ sơ năng lực & Portfolio
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Freelancer Card 2 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="sample-showcase-card">
+                                <div>
+                                    <div class="sample-top-meta">
+                                        <div class="sample-avatar-box" style="background-color: #FDF2E9; color: #C2410C;">TM</div>
+                                        <div>
+                                            <div class="sample-meta-name">Trần Thị Thảo Mai</div>
+                                            <div class="sample-meta-sub">ĐH Mỹ Thuật & Thiết Kế</div>
+                                        </div>
+                                        <span class="sample-verified-tag ms-auto">✓ Đã xác thực</span>
+                                    </div>
+
+                                    <div class="fw-bold text-success small mb-2" style="font-size: 0.85rem;">
+                                        Thiết kế Đồ họa (Graphic Design)
+                                    </div>
+
+                                    <p class="sample-card-desc">
+                                        Thiết kế ấn phẩm truyền thông, bộ nhận diện thương hiệu, banner mạng xã hội và layout UI/UX hiện đại, phong cách sáng tạo và thẩm mỹ cao.
+                                    </p>
+
+                                    <div class="sample-metrics-panel">
+                                        <div>
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Đánh giá</span>
+                                            <span class="sample-metric-highlight" style="color: #B45309;">⭐ 5.0 / 5.0</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Kinh nghiệm</span>
+                                            <span class="sample-metric-secondary">10 dự án hoàn thành</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="sample-chip-list">
+                                        <span class="sample-chip">Figma</span>
+                                        <span class="sample-chip">Photoshop</span>
+                                        <span class="sample-chip">Illustrator</span>
+                                        <span class="sample-chip">UI/UX</span>
+                                        <span class="sample-chip">Canva</span>
+                                    </div>
+                                </div>
+
+                                <a href="/FreelancerStudent" class="btn btn-outline-success btn-sample-action">
+                                    Xem hồ sơ năng lực & Portfolio
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Freelancer Card 3 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="sample-showcase-card">
+                                <div>
+                                    <div class="sample-top-meta">
+                                        <div class="sample-avatar-box" style="background-color: #EFF6FF; color: #1D4ED8;">LM</div>
+                                        <div>
+                                            <div class="sample-meta-name">Lê Hoàng Minh</div>
+                                            <div class="sample-meta-sub">ĐH Công Nghệ Thông Tin (UIT)</div>
+                                        </div>
+                                        <span class="sample-verified-tag ms-auto">✓ Đã xác thực</span>
+                                    </div>
+
+                                    <div class="fw-bold text-success small mb-2" style="font-size: 0.85rem;">
+                                        Khoa học Máy tính & Backend
+                                    </div>
+
+                                    <p class="sample-card-desc">
+                                        Chuyên xây dựng API hiệu năng cao, tối ưu cơ sở dữ liệu lớn và tích hợp cổng thanh toán trực tuyến. Luôn kiểm thử kỹ lưỡng và bàn giao đúng hạn.
+                                    </p>
+
+                                    <div class="sample-metrics-panel">
+                                        <div>
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Đánh giá</span>
+                                            <span class="sample-metric-highlight" style="color: #B45309;">⭐ 4.8 / 5.0</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="d-block text-muted small" style="font-size: 0.72rem;">Kinh nghiệm</span>
+                                            <span class="sample-metric-secondary">8 dự án hoàn thành</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="sample-chip-list">
+                                        <span class="sample-chip">Python</span>
+                                        <span class="sample-chip">Node.js</span>
+                                        <span class="sample-chip">REST API</span>
+                                        <span class="sample-chip">Docker</span>
+                                        <span class="sample-chip">VueJS</span>
+                                    </div>
+                                </div>
+
+                                <a href="/FreelancerStudent" class="btn btn-outline-success btn-sample-action">
+                                    Xem hồ sơ năng lực & Portfolio
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHU VỰC 7: KHÁM PHÁ NỀN TẢNG ==================== -->
+    <section id="kham-pha" class="overview-section overview-section-alt">
+        <div class="container text-center">
+            <span class="section-badge">Lĩnh vực hoạt động</span>
+            <h2 class="section-title">Khám phá các chuyên môn nổi bật trên nền tảng</h2>
+            <p class="section-desc">
+                Đa dạng các đầu việc phù hợp với chuyên ngành đào tạo đại học, giúp sinh viên phát huy tối đa thế mạnh chuyên môn.
+            </p>
+
+            <div class="row g-3 text-start mt-2">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="category-card">
+                        <div class="category-icon">&lt;/&gt;</div>
+                        <h3 class="category-name">CNTT & Lập trình</h3>
+                        <p class="category-tags">Web Development, Mobile App, Frontend, Backend, Database, Bug Fixing</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="category-card">
+                        <div class="category-icon">&#9998;</div>
+                        <h3 class="category-name">Thiết kế & Đồ họa</h3>
+                        <p class="category-tags">Photoshop, Illustrator, Banner, Poster, UI/UX, Nhận diện thương hiệu</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="category-card">
+                        <div class="category-icon">&#9993;</div>
+                        <h3 class="category-name">Marketing & Nội dung</h3>
+                        <p class="category-tags">Content Writing, Copywriting, Quản trị Fanpage, SEO, Biên tập bài viết</p>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="category-card">
+                        <div class="category-icon">&#9776;</div>
+                        <h3 class="category-name">Dịch thuật & Nhập liệu</h3>
+                        <p class="category-tags">Biên dịch Anh - Việt, Soạn thảo văn bản, Xử lý số liệu Excel, Data Entry</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NÚT DẪN XEM CÔNG KHAI -->
+            <div class="d-flex flex-wrap justify-content-center gap-3 mt-4 pt-2">
+                <a href="/JobPost" class="btn btn-outline-success fw-bold px-4 py-2">
+                    Xem danh sách công việc đang tuyển
+                </a>
+                <a href="/FreelancerStudent" class="btn btn-outline-secondary fw-bold px-4 py-2">
+                    Xem danh sách Freelancer sinh viên
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHU VỰC 8: KÊU GỌI THAM GIA (CTA) ==================== -->
+    <section class="overview-section p-0">
+        <div class="cta-banner">
+            <div class="container">
+                <h2 class="cta-title">Bắt đầu hành trình của bạn cùng FreelancerStudent</h2>
+                <p class="cta-desc">
+                    Cho dù bạn là sinh viên đang tìm kiếm cơ hội cọ xát thực tế hay Nhà tuyển dụng đang tìm kiếm nhân sự năng động cho dự án, FreelancerStudent luôn sẵn sàng đồng hành cùng bạn.
+                </p>
+
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-3">
+                    <a asp-controller="Account" asp-action="DangKy" asp-route-role="1" class="btn-cta-white">
+                        Đăng ký làm Freelancer
+                    </a>
+                    <a asp-controller="Account" asp-action="DangKy" asp-route-role="2" class="btn-cta-outline">
+                        Đăng ký làm Nhà tuyển dụng
+                    </a>
+                </div>
+
+                <div class="mt-3">
+                    <span class="text-white-50 small">Đã có tài khoản?</span>
+                    <a asp-controller="Account" asp-action="DangNhap" class="text-white fw-bold text-decoration-underline ms-1 small">
+                        Đăng nhập ngay
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+

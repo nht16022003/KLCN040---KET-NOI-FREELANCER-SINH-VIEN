@@ -1,4 +1,3 @@
-
 @model FreelancerStudent.Web.ViewModels.ChiTietBanGiaoViewModel
 
 @{
@@ -11,14 +10,18 @@
 
     var moiNhat = danhSach.FirstOrDefault();
 
+    var laChuaDat = moiNhat != null && (moiNhat.TrangThai == "YeuCauChinhSua" || moiNhat.TrangThai == "ChuaDat");
+
     var coTheNop = Model.LaFreelancer
         && Model.TrangThaiHopDong == "DangThucHien"
-        && (moiNhat == null
-            || moiNhat.TrangThai == "YeuCauChinhSua");
+        && Model.TatCaMocDaDat
+        && (moiNhat == null || laChuaDat);
 
     var coTheDanhGia = Model.LaKhachHang
         && Model.TrangThaiHopDong == "DangThucHien"
         && moiNhat?.TrangThai == "ChoNghiemThu";
+
+    bool moSanForm = moiNhat == null || Model.CheDoCapNhatLai;
 }
 
 <div class="container py-4">
@@ -50,7 +53,7 @@
             </div>
 
             <div class="mt-2">
-                @if (Model.TrangThaiHopDong == "DaHoanThanh")
+                @if (Model.TrangThaiHopDong == "DaHoanThanh" || Model.TrangThaiHopDong == "DaThanhToan")
                 {
                     <span class="badge bg-success">
                         Hợp đồng đã hoàn thành
@@ -66,7 +69,7 @@
         </div>
     </div>
 
-    @if (Model.LaKhachHang && Model.TrangThaiHopDong == "DaHoanThanh")
+    @if (Model.LaKhachHang && (Model.TrangThaiHopDong == "DaHoanThanh"))
     {
         <div class="alert alert-primary d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 shadow-sm rounded-0">
             <div class="d-flex align-items-center gap-2">
@@ -83,31 +86,58 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
+        <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
+        <div class="alert alert-danger alert-dismissible fade show rounded-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.LaFreelancer && Model.TrangThaiHopDong == "DangThucHien" && !Model.TatCaMocDaDat)
+    {
+        <div class="alert alert-warning border-warning shadow-sm rounded-0 mb-4 p-3">
+            <h6 class="fw-bold mb-1 text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Chưa đủ điều kiện bàn giao sản phẩm</h6>
+            <p class="mb-0 small text-dark">
+                @(Model.LyDoChuaDuDieuKien ?? "Toàn bộ các mốc tiến độ của dự án phải được Nhà tuyển dụng đánh giá Đạt được trước khi bạn được phép bàn giao sản phẩm.")
+            </p>
         </div>
     }
 
     @* FORM FREELANCER BÀN GIAO *@
     @if (coTheNop)
     {
-        <div class="card border-0 shadow-sm rounded-0 mb-4">
-            <div class="card-header bg-light py-3">
-                <h5 class="fw-bold mb-0">
+        <div class="card border-0 shadow-sm rounded-0 mb-4" id="formBanGiaoContainer" style="@(moSanForm ? "" : "display: none;")">
+            <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-success">
+                    <i class="bi bi-cloud-arrow-up-fill me-1"></i>
                     @(moiNhat == null
-                        ? "Bàn giao sản phẩm lần đầu"
-                        : "Nộp lại sản phẩm sau chỉnh sửa")
+                        ? "Bàn giao sản phẩm lần đầu (v1.0)"
+                        : $"Cập nhật lại bàn giao sản phẩm ({moiNhat.PhienBan} -> Phiên bản mới)")
                 </h5>
+                @if (laChuaDat)
+                {
+                    <span class="badge bg-warning text-dark rounded-0 fw-semibold">
+                        Nộp lại sau đánh giá Chưa đạt
+                    </span>
+                }
             </div>
 
             <div class="card-body p-4">
+                @if (laChuaDat)
+                {
+                    <div class="alert alert-warning border-warning rounded-0 p-3 mb-3 small">
+                        <i class="bi bi-info-circle-fill text-warning me-1"></i>
+                        <strong>Hướng dẫn nộp lại:</strong> Vui lòng cập nhật và hoàn thiện sản phẩm theo lý do đánh giá Chưa đạt của Nhà tuyển dụng. Khi nhấn <strong>"Gửi bàn giao lại"</strong>, hệ thống sẽ tự động tạo một phiên bản bàn giao mới độc lập để Nhà tuyển dụng đánh giá lại. Lịch sử các lần bàn giao trước đó sẽ được lưu giữ đầy đủ.
+                    </div>
+                }
+
                 <form asp-controller="BanGiaoSanPham"
                       asp-action="TaoBanGiao"
                       method="post">
@@ -120,7 +150,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">
-                            Đường dẫn sản phẩm
+                            Đường dẫn sản phẩm hoàn chỉnh
                             <span class="text-danger">*</span>
                         </label>
 
@@ -128,11 +158,11 @@
                                name="FileSanPhamUrl"
                                class="form-control rounded-0"
                                placeholder="https://drive.google.com/..."
+                               value="@(laChuaDat ? moiNhat?.FileSanPhamUrl : "")"
                                required />
 
                         <div class="form-text">
-                            Nhập đường dẫn Google Drive, GitHub
-                            hoặc nơi lưu trữ sản phẩm.
+                            Nhập đường dẫn Google Drive, GitHub hoặc nơi lưu trữ sản phẩm / mã nguồn đã cập nhật.
                         </div>
                     </div>
 
@@ -144,12 +174,13 @@
                         <input type="url"
                                name="LinkDemo"
                                class="form-control rounded-0"
-                               placeholder="https://..." />
+                               placeholder="https://..."
+                               value="@(laChuaDat ? moiNhat?.LinkDemo : "")" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">
-                            Mô tả bàn giao
+                            Mô tả bàn giao &amp; nội dung đã hoàn thiện
                             <span class="text-danger">*</span>
                         </label>
 
@@ -157,13 +188,14 @@
                                   class="form-control rounded-0"
                                   rows="4"
                                   required
-                                  placeholder="Mô tả những nội dung đã hoàn thành..."></textarea>
+                                  placeholder="Mô tả cụ thể những nội dung, tính năng đã hoàn thiện hoặc các điểm đã sửa đổi theo yêu cầu...">@(laChuaDat ? moiNhat?.MoTaBanGiao : "")</textarea>
                     </div>
 
                     <button type="submit"
-                            class="btn btn-success rounded-0 px-4"
-                            onclick="return confirm('Xác nhận bàn giao sản phẩm?');">
-                        Gửi bàn giao
+                            class="btn btn-success rounded-0 px-4 fw-bold"
+                            onclick="return confirm('Xác nhận gửi bàn giao sản phẩm?');">
+                        <i class="bi bi-send-fill me-1"></i>
+                        @(moiNhat == null ? "Gửi bàn giao" : "Gửi bàn giao lại (Tạo phiên bản mới)")
                     </button>
                 </form>
             </div>
@@ -172,61 +204,66 @@
 
     @* DANH SÁCH PHIÊN BẢN BÀN GIAO *@
     <div class="card border-0 shadow-sm rounded-0 mb-4">
-        <div class="card-header bg-light py-3">
+        <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
             <h5 class="fw-bold mb-0">
-                Lịch sử bàn giao sản phẩm
+                <i class="bi bi-clock-history me-1"></i> Lịch sử bàn giao sản phẩm
             </h5>
+            <span class="badge bg-secondary rounded-0">@danhSach.Count phiên bản</span>
         </div>
 
         <div class="card-body p-4">
             @if (!danhSach.Any())
             {
                 <div class="text-center text-muted py-4">
-                    Chưa có sản phẩm nào được bàn giao.
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Chưa có sản phẩm nào được bàn giao cho hợp đồng này.
                 </div>
             }
             else
             {
                 @foreach (var item in danhSach)
                 {
-                    var laBanMoiNhat =
-                        moiNhat?.MaBanGiao == item.MaBanGiao;
+                    var laBanMoiNhat = moiNhat?.MaBanGiao == item.MaBanGiao;
+                    var itemLaChuaDat = item.TrangThai == "YeuCauChinhSua" || item.TrangThai == "ChuaDat";
 
                     var yeuCau = Model.DanhSachYeuCau
                         .Where(x => x.MaBanGiao == item.MaBanGiao)
                         .OrderByDescending(x => x.NgayYeuCau)
                         .ToList();
 
-                    <div class="border rounded-0 p-3 mb-3">
-                        <div class="d-flex justify-content-between
-                                    align-items-center flex-wrap gap-2 mb-3">
+                    <div class="border rounded-0 p-3 mb-3 @(laBanMoiNhat ? "border-primary" : "")">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                             <div>
-                                <h6 class="fw-bold mb-1">
+                                <h6 class="fw-bold mb-1 text-dark">
                                     Phiên bản @item.PhienBan
+                                    @if (laBanMoiNhat)
+                                    {
+                                        <span class="badge bg-info text-dark ms-1">Mới nhất</span>
+                                    }
                                 </h6>
 
                                 <small class="text-muted">
-                                    Ngày nộp:
+                                    <i class="bi bi-calendar3 me-1"></i>Ngày nộp:
                                     @item.NgayNop.ToString("dd/MM/yyyy HH:mm")
                                 </small>
                             </div>
 
                             @if (item.TrangThai == "DaNghiemThu")
                             {
-                                <span class="badge bg-success">
-                                    Đã nghiệm thu
+                                <span class="badge bg-success px-3 py-2 fs-6 rounded-0">
+                                    <i class="bi bi-check2-all me-1"></i>Đã nghiệm thu
                                 </span>
                             }
-                            else if (item.TrangThai == "YeuCauChinhSua")
+                            else if (itemLaChuaDat)
                             {
-                                <span class="badge bg-warning text-dark">
-                                    Yêu cầu chỉnh sửa
+                                <span class="badge bg-danger px-3 py-2 fs-6 rounded-0">
+                                    <i class="bi bi-x-circle me-1"></i>Chưa đạt
                                 </span>
                             }
                             else
                             {
-                                <span class="badge bg-primary">
-                                    Chờ nghiệm thu
+                                <span class="badge bg-primary px-3 py-2 fs-6 rounded-0">
+                                    <i class="bi bi-hourglass-split me-1"></i>Chờ nghiệm thu
                                 </span>
                             }
                         </div>
@@ -240,8 +277,9 @@
                             <strong>Sản phẩm:</strong>
                             <a href="@item.FileSanPhamUrl"
                                target="_blank"
-                               rel="noopener noreferrer">
-                                Xem sản phẩm
+                               rel="noopener noreferrer"
+                               class="fw-semibold text-primary">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Xem sản phẩm bàn giao
                             </a>
                         </p>
 
@@ -251,30 +289,73 @@
                                 <strong>Demo:</strong>
                                 <a href="@item.LinkDemo"
                                    target="_blank"
-                                   rel="noopener noreferrer">
-                                    Xem demo
+                                   rel="noopener noreferrer"
+                                   class="fw-semibold text-info">
+                                    <i class="bi bi-play-circle me-1"></i>Xem demo
                                 </a>
                             </p>
                         }
 
+                        @* HIỂN THỊ LÝ DO ĐÁNH GIÁ CHƯA ĐẠT NỔI BẬT *@
+                        @if (itemLaChuaDat)
+                        {
+                            var lyDo = !string.IsNullOrWhiteSpace(item.PhanHoi) 
+                                ? item.PhanHoi 
+                                : (yeuCau.FirstOrDefault()?.NoiDungYeuCau ?? "Yêu cầu chỉnh sửa và hoàn thiện lại sản phẩm.");
+
+                            <div class="alert alert-danger border-danger rounded-0 mt-3 mb-2 p-3">
+                                <h6 class="fw-bold text-danger mb-1">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Lý do Nhà tuyển dụng đánh giá Chưa đạt:
+                                </h6>
+                                <div class="text-dark">@lyDo</div>
+                                @if (item.NgayPhanHoi.HasValue)
+                                {
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="bi bi-clock me-1"></i>Thời gian đánh giá: @item.NgayPhanHoi.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                }
+                            </div>
+
+                            @* NÚT CẬP NHẬT LẠI BÀN GIAO CHO FREELANCER *@
+                            @if (Model.LaFreelancer && laBanMoiNhat && Model.TrangThaiHopDong == "DangThucHien")
+                            {
+                                <div class="p-3 bg-light border d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3" id="boxCapNhatLai">
+                                    <div>
+                                        <div class="fw-bold text-dark">
+                                            <i class="bi bi-arrow-clockwise text-warning me-1"></i> Sản phẩm đang ở trạng thái Chưa đạt
+                                        </div>
+                                        <div class="small text-muted">
+                                            Bạn có thể mở lại biểu mẫu để cập nhật thông tin và gửi bàn giao lại theo phản hồi của Nhà tuyển dụng.
+                                        </div>
+                                    </div>
+                                    <button type="button" 
+                                            class="btn btn-warning rounded-0 fw-bold px-4 py-2 shadow-sm" 
+                                            id="btnCapNhatLaiBanGiao" 
+                                            onclick="kichHoatCapNhatLai('@(item.FileSanPhamUrl ?? "")', '@(item.LinkDemo ?? "")', '@(System.Web.HttpUtility.JavaScriptStringEncode(item.MoTaBanGiao ?? ""))')">
+                                        <i class="bi bi-pencil-square me-1"></i> Cập nhật lại bàn giao
+                                    </button>
+                                </div>
+                            }
+                        }
+
+                        @* LỊCH SỬ CÁC YÊU CẦU CHỈNH SỬA *@
                         @if (yeuCau.Any())
                         {
                             <div class="mt-3">
-                                <h6 class="fw-semibold">
-                                    Yêu cầu chỉnh sửa
+                                <h6 class="fw-semibold text-muted small text-uppercase">
+                                    Chi tiết các lần yêu cầu chỉnh sửa (@yeuCau.Count)
                                 </h6>
 
                                 @foreach (var yc in yeuCau)
                                 {
-                                    <div class="alert alert-warning mb-2">
-                                        <div>
-                                            @yc.NoiDungYeuCau
+                                    <div class="alert alert-warning mb-2 py-2 px-3 rounded-0 small">
+                                        <div class="text-dark">@yc.NoiDungYeuCau</div>
+                                        <div class="text-muted mt-1" style="font-size: 0.8rem;">
+                                            <i class="bi bi-clock me-1"></i>@yc.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")
+                                            <span class="badge @(yc.TrangThai == "DaNopLai" ? "bg-success" : "bg-secondary") ms-1">
+                                                @(yc.TrangThai == "DaNopLai" ? "Đã nộp lại" : "Chờ sửa")
+                                            </span>
                                         </div>
-
-                                        <small class="text-muted">
-                                            @yc.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")
-                                            - @yc.TrangThai
-                                        </small>
                                     </div>
                                 }
                             </div>
@@ -285,65 +366,77 @@
                         {
                             <hr />
 
-                            <div class="row g-3">
-                                <div class="col-md-7">
-                                    <form asp-controller="BanGiaoSanPham"
-                                          asp-action="GuiYeuCau"
-                                          method="post">
+                            <div class="card bg-light border-0 rounded-0 mt-3 p-3">
+                                <h6 class="fw-bold text-dark mb-2">
+                                    <i class="bi bi-clipboard-check text-primary me-1"></i> Đánh giá phiên bản bàn giao @item.PhienBan
+                                </h6>
+                                <p class="small text-muted mb-3">
+                                    Vui lòng kiểm tra sản phẩm cẩn thận. Nếu sản phẩm chưa đạt yêu cầu, bạn bắt buộc phải nhập lý do cụ thể để Freelancer điều chỉnh và nộp lại. Nếu đạt, tiến hành nghiệm thu và chuyển sang bước thanh toán.
+                                </p>
 
-                                        @Html.AntiForgeryToken()
+                                <div class="row g-3">
+                                    <!-- Cột 1: Đánh giá Chưa đạt -->
+                                    <div class="col-md-7">
+                                        <div class="p-3 bg-white border rounded-0 h-100">
+                                            <h6 class="fw-bold text-danger mb-2">
+                                                <i class="bi bi-x-circle me-1"></i> Đánh giá Chưa đạt &amp; Yêu cầu chỉnh sửa
+                                            </h6>
+                                            <form asp-controller="BanGiaoSanPham"
+                                                  asp-action="GuiYeuCau"
+                                                  method="post">
 
-                                        <input type="hidden"
-                                               name="maHD"
-                                               value="@Model.MaHD" />
+                                                @Html.AntiForgeryToken()
 
-                                        <input type="hidden"
-                                               name="MaBanGiao"
-                                               value="@item.MaBanGiao" />
+                                                <input type="hidden"
+                                                       name="maHD"
+                                                       value="@Model.MaHD" />
 
-                                        <label class="form-label fw-semibold">
-                                            Nội dung cần chỉnh sửa
-                                        </label>
+                                                <input type="hidden"
+                                                       name="MaBanGiao"
+                                                       value="@item.MaBanGiao" />
 
-                                        <textarea name="NoiDungYeuCau"
-                                                  class="form-control rounded-0 mb-2"
-                                                  rows="3"
-                                                  required></textarea>
+                                                <div class="mb-2">
+                                                    <label class="form-label small fw-semibold">
+                                                        Lý do đánh giá Chưa đạt <span class="text-danger">* (Bắt buộc)</span>
+                                                    </label>
 
-                                        <button type="submit"
-                                                class="btn btn-warning rounded-0"
-                                                onclick="return confirm('Gửi yêu cầu chỉnh sửa?');">
-                                            Yêu cầu chỉnh sửa
-                                        </button>
-                                    </form>
-                                </div>
+                                                    <textarea name="NoiDungYeuCau"
+                                                              class="form-control rounded-0"
+                                                              rows="3"
+                                                              required
+                                                              placeholder="Nêu rõ các lỗi cần sửa, tính năng chưa đạt hoặc yêu cầu bổ sung để Freelancer nắm rõ..."></textarea>
+                                                </div>
 
-                                <div class="col-md-5">
-                                    <form asp-controller="BanGiaoSanPham"
-                                          asp-action="NghiemThu"
-                                          method="post">
-
-                                        @Html.AntiForgeryToken()
-
-                                        <input type="hidden"
-                                               name="maHD"
-                                               value="@Model.MaHD" />
-
-                                        <input type="hidden"
-                                               name="maBanGiao"
-                                               value="@item.MaBanGiao" />
-
-                                        <div class="alert alert-info small">
-                                            Chỉ nghiệm thu khi sản phẩm
-                                             đáp ứng yêu cầu hợp đồng.
+                                                <button type="submit"
+                                                        class="btn btn-danger rounded-0 fw-bold"
+                                                        onclick="return confirm('Xác nhận đánh giá Chưa đạt phiên bản bàn giao này?');">
+                                                    <i class="bi bi-send me-1"></i> Xác nhận Chưa đạt
+                                                </button>
+                                            </form>
                                         </div>
+                                    </div>
 
-                                        <button type="submit"
-                                                class="btn btn-success rounded-0"
-                                                onclick="return confirm('Xác nhận nghiệm thu sản phẩm?');">
-                                            Nghiệm thu sản phẩm
-                                        </button>
-                                    </form>
+                                    <!-- Cột 2: Đánh giá Đạt & Nghiệm thu -->
+                                    <div class="col-md-5">
+                                        <div class="p-3 bg-white border rounded-0 h-100 d-flex flex-column justify-content-between">
+                                            <div>
+                                                <h6 class="fw-bold text-success mb-2">
+                                                    <i class="bi bi-check-circle me-1"></i> Đánh giá Đạt &amp; Nghiệm thu
+                                                </h6>
+                                                <div class="alert alert-info small mb-3">
+                                                    Sản phẩm đáp ứng đầy đủ yêu cầu hợp đồng. Nhấn nút bên dưới để chuyển sang màn hình nghiệm thu và kiểm tra bảng kê chi tiết thanh toán trước khi giải ngân.
+                                                </div>
+                                            </div>
+
+                                            <a asp-controller="HopDong"
+                                               asp-action="ThanhToan"
+                                               asp-route-maHD="@Model.MaHD"
+                                               asp-route-maBanGiao="@item.MaBanGiao"
+                                               class="btn btn-success rounded-0 w-100 fw-bold py-2 shadow-sm">
+                                                <i class="bi bi-check2-circle me-1"></i> Đánh giá Đạt &amp; Xem chi tiết thanh toán
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -357,6 +450,43 @@
        asp-action="ChiTiet"
        asp-route-maHD="@Model.MaHD"
        class="btn btn-outline-secondary rounded-0">
-        Quay lại hợp đồng
+        <i class="bi bi-arrow-left me-1"></i> Quay lại hợp đồng
     </a>
 </div>
+
+@section Scripts {
+    <script>
+        function kichHoatCapNhatLai(fileUrl, linkDemo, moTa) {
+            const container = document.getElementById('formBanGiaoContainer');
+            const box = document.getElementById('boxCapNhatLai');
+
+            if (container) {
+                container.style.display = 'block';
+
+                const inputFile = container.querySelector('input[name="FileSanPhamUrl"]');
+                const inputDemo = container.querySelector('input[name="LinkDemo"]');
+                const txtMoTa = container.querySelector('textarea[name="MoTaBanGiao"]');
+
+                if (inputFile && fileUrl) inputFile.value = fileUrl;
+                if (inputDemo && linkDemo) inputDemo.value = linkDemo;
+                if (txtMoTa && moTa) txtMoTa.value = moTa;
+
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (inputFile) inputFile.focus();
+            }
+
+            if (box) {
+                box.innerHTML = '<span class="badge bg-warning text-dark p-2 rounded-0 fs-6"><i class="bi bi-pencil-square me-1"></i> Đang mở biểu mẫu cập nhật lại bàn giao bên trên</span>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (Model.CheDoCapNhatLai && laChuaDat && moiNhat != null)
+            {
+                <text>
+                kichHoatCapNhatLai('@(moiNhat.FileSanPhamUrl ?? "")', '@(moiNhat.LinkDemo ?? "")', '@(System.Web.HttpUtility.JavaScriptStringEncode(moiNhat.MoTaBanGiao ?? ""))');
+                </text>
+            }
+        });
+    </script>
+}

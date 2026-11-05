@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
+import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_ung_tuyen.dart';
 import '../../viewmodels/viewmodel_ung_tuyen.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
@@ -155,6 +156,41 @@ class _ApplicationCard extends StatelessWidget {
                 color: statusColor,
               ),
             ),
+            if (application.proposedBudget > 0 ||
+                (application.thoiGianHoanThanhDeXuat != null &&
+                    application.thoiGianHoanThanhDeXuat!.isNotEmpty)) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  if (application.proposedBudget > 0)
+                    Text(
+                      'Đề xuất: ${AppFormatters.formatCurrency(application.proposedBudget)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  if (application.proposedBudget > 0 &&
+                      application.thoiGianHoanThanhDeXuat != null &&
+                      application.thoiGianHoanThanhDeXuat!.isNotEmpty)
+                    const Text(' • ', style: TextStyle(color: AppColors.mutedText)),
+                  if (application.thoiGianHoanThanhDeXuat != null &&
+                      application.thoiGianHoanThanhDeXuat!.isNotEmpty)
+                    Expanded(
+                      child: Text(
+                        'Hạn cam kết: ${application.thoiGianHoanThanhDeXuat}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.bodyText,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+            ],
             if (application.coverLetter.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(

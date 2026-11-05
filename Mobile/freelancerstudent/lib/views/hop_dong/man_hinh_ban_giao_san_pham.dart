@@ -7,12 +7,14 @@ import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_ban_giao.dart';
 import '../../viewmodels/viewmodel_ban_giao.dart';
+import '../../viewmodels/viewmodel_xac_thuc.dart';
 
 class ManHinhBanGiaoSanPham extends StatefulWidget {
   final String maHD;
   final String trangThaiHopDong;
   final bool laFreelancer;
   final bool laKhachHang;
+  final bool tatCaMocDaDat;
 
   const ManHinhBanGiaoSanPham({
     super.key,
@@ -20,6 +22,7 @@ class ManHinhBanGiaoSanPham extends StatefulWidget {
     required this.trangThaiHopDong,
     required this.laFreelancer,
     required this.laKhachHang,
+    this.tatCaMocDaDat = true,
   });
 
   @override
@@ -36,7 +39,8 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BanGiaoViewModel>().taiDuLieu(widget.maHD);
+      final user = context.read<AuthViewModel>().currentUser;
+      context.read<BanGiaoViewModel>().taiDuLieu(widget.maHD, maUser: user?.userId);
     });
   }
 
@@ -111,6 +115,7 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
 
     if (xacNhan != true || !mounted) return;
 
+    final user = context.read<AuthViewModel>().currentUser;
     final vm = context.read<BanGiaoViewModel>();
     final ok = await vm.taoBanGiao(
       maHD: widget.maHD,
@@ -119,6 +124,7 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
           ? _linkDemoController.text.trim()
           : null,
       moTaBanGiao: _moTaController.text.trim(),
+      maUser: user?.userId,
     );
 
     if (!mounted) return;
@@ -227,11 +233,13 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
 
     if (xacNhan != true || !mounted) return;
 
+    final user = context.read<AuthViewModel>().currentUser;
     final vm = context.read<BanGiaoViewModel>();
     final ok = await vm.guiYeuCauChinhSua(
       maHD: widget.maHD,
       maBanGiao: banGiao.maBanGiao,
       noiDungYeuCau: controller.text.trim(),
+      maUser: user?.userId,
     );
 
     if (!mounted) return;
@@ -269,10 +277,12 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
 
     if (xacNhan != true || !mounted) return;
 
+    final user = context.read<AuthViewModel>().currentUser;
     final vm = context.read<BanGiaoViewModel>();
     final ok = await vm.nghiemThu(
       maHD: widget.maHD,
       maBanGiao: banGiao.maBanGiao,
+      maUser: user?.userId,
     );
 
     if (!mounted) return;
@@ -285,8 +295,13 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthViewModel>().currentUser;
     final vm = context.watch<BanGiaoViewModel>();
-    final coTheNop = vm.coTheNop(widget.laFreelancer, widget.trangThaiHopDong);
+    final coTheNop = vm.coTheNop(
+      widget.laFreelancer,
+      widget.trangThaiHopDong,
+      tatCaMocDaDat: widget.tatCaMocDaDat,
+    );
     final coTheDanhGia =
         vm.coTheDanhGia(widget.laKhachHang, widget.trangThaiHopDong);
 
@@ -312,7 +327,7 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => vm.taiDuLieu(widget.maHD),
+            onPressed: () => vm.taiDuLieu(widget.maHD, maUser: user?.userId),
             tooltip: 'Làm mới',
           ),
         ],
@@ -320,7 +335,7 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
       body: vm.dangTai
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: () => vm.taiDuLieu(widget.maHD),
+              onRefresh: () => vm.taiDuLieu(widget.maHD, maUser: user?.userId),
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -330,6 +345,12 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
                   // BANNER NẾU ĐÃ HOÀN THÀNH
                   if (widget.trangThaiHopDong == 'DaHoanThanh')
                     _buildCompletedBanner(),
+
+                  // CẢNH BÁO NẾU CHƯA ĐẠT TOÀN BỘ CÁC MỐC TIẾN ĐỘ
+                  if (widget.laFreelancer &&
+                      widget.trangThaiHopDong == 'DangThucHien' &&
+                      !widget.tatCaMocDaDat)
+                    _buildMilestonesIncompleteBanner(),
 
                   const SizedBox(height: 16),
 
@@ -344,6 +365,45 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildMilestonesIncompleteBanner() {
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.amber.shade400),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.amber.shade900, size: 24),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Chưa đủ điều kiện nộp bàn giao sản phẩm!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber.shade900,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Toàn bộ các mốc tiến độ của hợp đồng phải được Nhà tuyển dụng đánh giá "Đạt" trước khi nộp sản phẩm hoàn chỉnh.',
+                  style: TextStyle(fontSize: 13, color: Colors.black87, height: 1.3),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -505,6 +565,49 @@ class _ManHinhBanGiaoSanPhamState extends State<ManHinhBanGiaoSanPham> {
                 ],
               ),
               const Divider(height: 20),
+              if (isRevision &&
+                  ((vm.moiNhat?.phanHoi ?? '').isNotEmpty ||
+                      vm.moiNhat?.trangThai == 'YeuCauChinhSua' ||
+                      vm.moiNhat?.trangThai == 'ChuaDat')) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange.shade300),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.feedback_outlined, color: Colors.orange.shade800, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Yêu cầu chỉnh sửa từ Nhà tuyển dụng:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.orange.shade900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              (vm.moiNhat?.phanHoi ?? '').isNotEmpty
+                                  ? vm.moiNhat!.phanHoi!
+                                  : 'Nhà tuyển dụng đã đánh giá Chưa đạt phiên bản trước. Vui lòng kiểm tra và cập nhật lại sản phẩm.',
+                              style: TextStyle(fontSize: 13, color: Colors.orange.shade900, height: 1.3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               // ĐƯỜNG DẪN SẢN PHẨM
               TextFormField(
                 controller: _fileUrlController,

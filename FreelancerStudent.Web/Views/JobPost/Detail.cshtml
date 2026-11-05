@@ -351,11 +351,11 @@
                                            value="@(Model.Job.Thulao.HasValue ? Convert.ToInt64(Model.Job.Thulao.Value) : 1500000)" required />
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label text-dark fw-bold small">Thời gian hoàn thành cam kết (Cố định):</label>
+                                    <label class="form-label text-dark fw-bold small"><i class="fas fa-lock text-secondary me-1"></i>Thời gian hoàn thành cam kết (Cố định):</label>
                                     <input type="text" name="thoiGianHoanThanhDeXuat" class="form-control"
                                            value="@(Model.Job.Thoigiandukienhoanthanh.ToString("dd/MM/yyyy"))"
                                            readonly style="cursor: not-allowed; background-color: #f8f9fa;" />
-                                    <small class="text-muted" style="font-size: 0.72rem;">Thời gian cố định theo hạn của Nhà tuyển dụng.</small>
+                                    <small class="text-muted" style="font-size: 0.72rem;"><i class="fas fa-info-circle me-1"></i>Thời gian hoàn thành do Nhà tuyển dụng quy định và không thể thay đổi khi ứng tuyển.</small>
                                 </div>
                             </div>
                             <div class="mb-3">

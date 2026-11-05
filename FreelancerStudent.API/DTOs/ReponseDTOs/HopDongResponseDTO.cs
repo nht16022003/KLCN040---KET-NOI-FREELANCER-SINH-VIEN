@@ -67,5 +67,6 @@ namespace FreelancerStudent.API.DTOs.ReponseDTOs
         public string? linkSanPham { get; set; }
         public DateTime hanChot { get; set; }
         public string trangThai { get; set; } = string.Empty;
+        public string? lyDoChuaDat { get; set; }
     }
 }

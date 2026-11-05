@@ -135,7 +135,7 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
-        public async Task<ApiReponse<bool>> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThai, int maUser)
+        public async Task<ApiReponse<bool>> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThai, string? lyDo, int maUser)
         {
             try
             {
@@ -144,7 +144,8 @@ namespace FreelancerStudent.Web.Services
                 {
                     maHD,
                     maGiaiDoan,
-                    trangThai
+                    trangThai,
+                    lyDo
                 });
 
                 var apiResult = await response.Content.ReadFromJsonAsync<ApiReponse<bool>>();
@@ -154,6 +155,39 @@ namespace FreelancerStudent.Web.Services
                     data = response.IsSuccessStatusCode,
                     message = response.IsSuccessStatusCode
                         ? "Cập nhật nghiệm thu giai đoạn thành công."
+                        : $"Lỗi từ máy chủ ({(int)response.StatusCode})."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Không thể kết nối đến máy chủ: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> CapNhatMocBanGiaoAsync(string maHD, int maGiaiDoan, string? linkSanPham, string? moTa, int maUser)
+        {
+            try
+            {
+                var url = $"api/TaskCongViec/hop-dong/{Uri.EscapeDataString(maHD)}/cap-nhat-moc?maUser={maUser}";
+                using var response = await _httpClient.PostAsJsonAsync(url, new
+                {
+                    maHD,
+                    maGiaiDoan,
+                    linkSanPham,
+                    moTa
+                });
+
+                var apiResult = await response.Content.ReadFromJsonAsync<ApiReponse<bool>>();
+                return apiResult ?? new ApiReponse<bool>
+                {
+                    success = response.IsSuccessStatusCode,
+                    data = response.IsSuccessStatusCode,
+                    message = response.IsSuccessStatusCode
+                        ? "Cập nhật lại mốc bàn giao thành công."
                         : $"Lỗi từ máy chủ ({(int)response.StatusCode})."
                 };
             }

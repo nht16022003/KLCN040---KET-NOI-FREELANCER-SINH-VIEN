@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/diem_cuoi_api.dart';
 import '../../core/constants/mau_sac_ung_dung.dart';
+import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_ung_tuyen.dart';
 import '../../services/dich_vu_ung_tuyen.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
@@ -320,6 +321,41 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                               : 'Công việc: ${applicant.tieude}',
                           style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.heading),
                         ),
+                        if (applicant.proposedBudget > 0 ||
+                            (applicant.thoiGianHoanThanhDeXuat != null &&
+                                applicant.thoiGianHoanThanhDeXuat!.isNotEmpty)) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              if (applicant.proposedBudget > 0)
+                                Text(
+                                  'Đề xuất: ${AppFormatters.formatCurrency(applicant.proposedBudget)}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              if (applicant.proposedBudget > 0 &&
+                                  applicant.thoiGianHoanThanhDeXuat != null &&
+                                  applicant.thoiGianHoanThanhDeXuat!.isNotEmpty)
+                                const Text(' • ', style: TextStyle(color: AppColors.mutedText)),
+                              if (applicant.thoiGianHoanThanhDeXuat != null &&
+                                  applicant.thoiGianHoanThanhDeXuat!.isNotEmpty)
+                                Expanded(
+                                  child: Text(
+                                    'Cam kết: ${applicant.thoiGianHoanThanhDeXuat}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.bodyText,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 8),
                         Text(
                           applicant.coverLetter.isNotEmpty

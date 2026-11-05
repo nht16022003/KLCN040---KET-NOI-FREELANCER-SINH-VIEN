@@ -24,7 +24,7 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string maHD)
+        public async Task<IActionResult> Index(string maHD, string? mode = null)
         {
             if (string.IsNullOrWhiteSpace(maHD))
                 return BadRequest();
@@ -60,14 +60,19 @@ namespace FreelancerStudent.Web.Controllers
                     new { maHD });
             }
 
+            bool cheDoCapNhatLai = string.Equals(mode, "capnhat", StringComparison.OrdinalIgnoreCase);
+
             var model = new ChiTietBanGiaoViewModel
             {
                 MaHD = maHD,
                 TrangThaiHopDong = hopDong.trangThai,
                 LaFreelancer = laFreelancer,
                 LaKhachHang = laKhachHang,
+                TatCaMocDaDat = hopDong.TatCaMocDaDat,
+                LyDoChuaDuDieuKien = hopDong.TatCaMocDaDat ? null : "Bạn chưa thể bàn giao sản phẩm vì còn mốc tiến độ chưa được Nhà tuyển dụng đánh giá Đạt được. Vui lòng hoàn thiện và chờ Nhà tuyển dụng đánh giá đạt tất cả các mốc trước khi bàn giao.",
                 DanhSachBanGiao = banGiao.data ?? new(),
-                DanhSachYeuCau = yeuCau.data ?? new()
+                DanhSachYeuCau = yeuCau.data ?? new(),
+                CheDoCapNhatLai = cheDoCapNhatLai
             };
 
             return View(model);
@@ -97,6 +102,19 @@ namespace FreelancerStudent.Web.Controllers
 
                 return RedirectToAction("Index",
                     new { maHD = model.MaHD });
+            }
+
+            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(model.MaHD);
+            if (hopDong == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy thông tin hợp đồng.";
+                return RedirectToAction("Index", new { maHD = model.MaHD });
+            }
+
+            if (!hopDong.TatCaMocDaDat)
+            {
+                TempData["ErrorMessage"] = "Chưa đủ điều kiện bàn giao: Toàn bộ các mốc tiến độ của dự án phải được Nhà tuyển dụng đánh giá Đạt được!";
+                return RedirectToAction("Index", new { maHD = model.MaHD });
             }
 
             var ketQua = await _service.TaoBanGiaoAsync(model);

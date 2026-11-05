@@ -24,11 +24,15 @@ class BanGiaoViewModel extends ChangeNotifier {
   /// Điều kiện cho phép Freelancer nộp bài bàn giao:
   /// - Là Freelancer
   /// - Hợp đồng ở trạng thái DangThucHien
-  /// - Chưa nộp bản nào HOẶC bản mới nhất có trạng thái YeuCauChinhSua
-  bool coTheNop(bool laFreelancer, String trangThaiHopDong) {
+  /// - Toàn bộ các mốc tiến độ đã đạt (tatCaMocDaDat == true)
+  /// - Chưa nộp bản nào HOẶC bản mới nhất có trạng thái YeuCauChinhSua / ChuaDat
+  bool coTheNop(bool laFreelancer, String trangThaiHopDong, {bool tatCaMocDaDat = true}) {
     if (!laFreelancer) return false;
     if (trangThaiHopDong != 'DangThucHien') return false;
-    return moiNhat == null || moiNhat!.trangThai == 'YeuCauChinhSua';
+    if (!tatCaMocDaDat) return false;
+    return moiNhat == null ||
+        moiNhat!.trangThai == 'YeuCauChinhSua' ||
+        moiNhat!.trangThai == 'ChuaDat';
   }
 
   /// Điều kiện cho phép Khách hàng (NTD) đánh giá / nghiệm thu:
@@ -42,14 +46,14 @@ class BanGiaoViewModel extends ChangeNotifier {
   }
 
   /// Tải dữ liệu các phiên bản bàn giao và yêu cầu chỉnh sửa
-  Future<void> taiDuLieu(String maHD) async {
+  Future<void> taiDuLieu(String maHD, {int? maUser}) async {
     _dangTai = true;
     _thongBaoLoi = null;
     notifyListeners();
 
     try {
-      final resBanGiao = await _service.layDanhSachBanGiao(maHD);
-      final resYeuCau = await _service.layDanhSachYeuCau(maHD);
+      final resBanGiao = await _service.layDanhSachBanGiao(maHD, maUser: maUser);
+      final resYeuCau = await _service.layDanhSachYeuCau(maHD, maUser: maUser);
 
       if (resBanGiao.isSuccess) {
         _danhSachBanGiao = (resBanGiao.data ?? [])
@@ -75,6 +79,7 @@ class BanGiaoViewModel extends ChangeNotifier {
     required String fileSanPhamUrl,
     String? linkDemo,
     required String moTaBanGiao,
+    int? maUser,
   }) async {
     _dangXuLy = true;
     _thongBaoLoi = null;
@@ -86,10 +91,11 @@ class BanGiaoViewModel extends ChangeNotifier {
         fileSanPhamUrl: fileSanPhamUrl,
         linkDemo: linkDemo,
         moTaBanGiao: moTaBanGiao,
+        maUser: maUser,
       );
 
       if (res.isSuccess) {
-        await taiDuLieu(maHD);
+        await taiDuLieu(maHD, maUser: maUser);
         return true;
       } else {
         _thongBaoLoi = res.message;
@@ -109,6 +115,7 @@ class BanGiaoViewModel extends ChangeNotifier {
     required String maHD,
     required int maBanGiao,
     required String noiDungYeuCau,
+    int? maUser,
   }) async {
     _dangXuLy = true;
     _thongBaoLoi = null;
@@ -118,10 +125,11 @@ class BanGiaoViewModel extends ChangeNotifier {
       final res = await _service.guiYeuCauChinhSua(
         maBanGiao: maBanGiao,
         noiDungYeuCau: noiDungYeuCau,
+        maUser: maUser,
       );
 
       if (res.isSuccess) {
-        await taiDuLieu(maHD);
+        await taiDuLieu(maHD, maUser: maUser);
         return true;
       } else {
         _thongBaoLoi = res.message;
@@ -140,16 +148,17 @@ class BanGiaoViewModel extends ChangeNotifier {
   Future<bool> nghiemThu({
     required String maHD,
     required int maBanGiao,
+    int? maUser,
   }) async {
     _dangXuLy = true;
     _thongBaoLoi = null;
     notifyListeners();
 
     try {
-      final res = await _service.nghiemThu(maBanGiao);
+      final res = await _service.nghiemThu(maBanGiao, maUser: maUser);
 
       if (res.isSuccess) {
-        await taiDuLieu(maHD);
+        await taiDuLieu(maHD, maUser: maUser);
         return true;
       } else {
         _thongBaoLoi = res.message;

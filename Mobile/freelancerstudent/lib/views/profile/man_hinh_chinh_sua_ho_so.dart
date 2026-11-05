@@ -309,7 +309,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: DropdownButtonFormField<String>(
-                value: (_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode))
+                initialValue: (_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode))
                     ? _selectedMajorCode
                     : (_isCustomMajor || (_majorNameController.text.isNotEmpty && _selectedMajorCode != null && _selectedMajorCode!.isNotEmpty))
                         ? '__NEW__'

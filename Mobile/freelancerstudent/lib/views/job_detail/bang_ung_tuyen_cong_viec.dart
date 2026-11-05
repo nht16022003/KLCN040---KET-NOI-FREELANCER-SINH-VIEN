@@ -33,7 +33,10 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
         ? widget.job.budget.toInt().toString()
         : '';
     _thuLaoController = TextEditingController(text: mucLuongMacDinh);
-    _thoiGianController = TextEditingController(text: '7 ngày');
+    final han = widget.job.hanHoanThanh;
+    final thoiGianMacDinh =
+        '${han.day.toString().padLeft(2, '0')}/${han.month.toString().padLeft(2, '0')}/${han.year}';
+    _thoiGianController = TextEditingController(text: thoiGianMacDinh);
   }
 
   @override
@@ -65,22 +68,28 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
     // Kiểm tra trạng thái xác minh thẻ sinh viên
     final minhChungService = MinhChungService();
     final xacThuc = await minhChungService.kiemTraTrangThaiXacThuc(user.userId);
-    if (xacThuc.isSuccess && xacThuc.data != null && xacThuc.data!['daXacMinh'] != true) {
+    if (xacThuc.isSuccess &&
+        xacThuc.data != null &&
+        xacThuc.data!['daXacMinh'] != true) {
       if (!mounted) return;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Row(
             children: [
               Icon(Icons.shield_outlined, color: Colors.orange),
               SizedBox(width: 8),
-              Text('Yêu cầu xác thực', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                'Yêu cầu xác thực',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           content: Text(
-            xacThuc.data!['thongBao']?.toString() ??
-                'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi ứng tuyển công việc!',
+            xacThuc.data!['thongBao']?.toString() ?? 'Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái "Đã xác minh") trước khi ứng tuyển công việc!',
           ),
           actions: [
             TextButton(
@@ -88,16 +97,23 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
               child: const Text('Để sau'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
               onPressed: () {
                 Navigator.pop(ctx);
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ManHinhMinhChungTheSV()),
+                  MaterialPageRoute(
+                    builder: (_) => const ManHinhMinhChungTheSV(),
+                  ),
                 );
               },
-              child: const Text('Xác thực thẻ SV', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Xác thực thẻ SV',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -285,16 +301,21 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
                 controller: _coverLetterController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  hintText:
-                      'Giới thiệu bản thân, kỹ năng và cách bạn sẽ hoàn thành công việc...',
-                  hintStyle: const TextStyle(fontSize: 13, color: AppColors.bodyText),
+                  hintText: 'Giới thiệu bản thân, kỹ năng và cách bạn sẽ hoàn thành công việc...',
+                  hintStyle: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.bodyText,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
                   ),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -335,7 +356,9 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
                             hintText: 'VD: 5000000',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -351,30 +374,86 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Thời gian hoàn thành',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            color: AppColors.heading,
-                          ),
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.lock_outline,
+                              size: 13,
+                              color: AppColors.mutedText,
+                            ),
+                            SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Thời gian hoàn thành',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: AppColors.heading,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         TextFormField(
                           controller: _thoiGianController,
+                          readOnly: true,
+                          enabled: false,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.heading,
+                            fontWeight: FontWeight.w600,
+                          ),
                           decoration: InputDecoration(
-                            hintText: 'VD: 7 ngày',
+                            filled: true,
+                            fillColor: const Color(0xFFF1F5F9),
+                            prefixIcon: const Icon(
+                              Icons.lock,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: AppColors.border),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
+                            ),
+                            disabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
+                              horizontal: 10,
                               vertical: 10,
                             ),
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 13,
+                    color: AppColors.mutedText,
+                  ),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Thời gian hoàn thành do Nhà tuyển dụng quy định và không thể thay đổi khi ứng tuyển.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.mutedText,
+                        height: 1.3,
+                      ),
                     ),
                   ),
                 ],
@@ -386,7 +465,9 @@ class _ApplyJobBottomSheetState extends State<ApplyJobBottomSheet> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 13),
                         side: const BorderSide(color: AppColors.border),

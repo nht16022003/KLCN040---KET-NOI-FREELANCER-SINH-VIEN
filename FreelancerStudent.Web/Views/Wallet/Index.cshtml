@@ -10,6 +10,117 @@
 }
 
 <style>
+    /* Popup nap tien thanh cong */
+    .wallet-success-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .wallet-success-overlay.show {
+        display: flex;
+    }
+
+    .wallet-success-popup {
+        background: #fff;
+        border-radius: 20px;
+        padding: 35px 28px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, .15);
+        animation: walletPopupIn .4s ease both;
+    }
+
+    .wallet-success-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        background: #e8f8ee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: walletIconPop .55s cubic-bezier(.2, 1.5, .5, 1) both;
+    }
+
+    .wallet-success-icon svg {
+        width: 70px;
+        height: 70px;
+    }
+
+    .wallet-success-check {
+        fill: none;
+        stroke: white;
+        stroke-width: 5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 50;
+        stroke-dashoffset: 50;
+    }
+
+    .wallet-success-overlay.show .wallet-success-check {
+        animation: walletDrawCheck .6s ease .4s forwards;
+    }
+
+    .wallet-success-amount {
+        font-size: 28px;
+        font-weight: 700;
+        color: #16a34a;
+        margin: 12px 0;
+    }
+
+    .wallet-success-btn {
+        background: #234E36;
+        color: white;
+        border: 0;
+        border-radius: 10px;
+        padding: 12px 25px;
+        width: 100%;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    .wallet-success-btn:hover {
+        background: #173c28;
+    }
+
+    @@keyframes walletPopupIn {
+        from {
+            opacity: 0;
+            transform: translateY(25px) scale(.94);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes walletIconPop {
+        from {
+            transform: scale(.2);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes walletDrawCheck {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
     .wallet-page {
         background-color: #F8FAF9;
         min-height: 85vh;
@@ -85,11 +196,13 @@
         width: 100%;
         transition: all 0.15s;
     }
+
     .amount-pick-btn:hover {
         border-color: #234E36;
         color: #234E36;
         background: #F0FDF4;
     }
+
     .amount-pick-btn.active {
         background: #234E36;
         border-color: #234E36;
@@ -104,12 +217,14 @@
         padding: 16px;
         font-size: 0.9rem;
     }
+
     .bank-info-row {
         display: flex;
         justify-content: space-between;
         padding: 7px 0;
         border-bottom: 1px dashed #E2E8F0;
     }
+
     .bank-info-row:last-child {
         border-bottom: none;
     }
@@ -120,6 +235,7 @@
         border-collapse: collapse;
         font-size: 0.88rem;
     }
+
     .custom-table th {
         background: #F1F5F9;
         color: #475569;
@@ -128,11 +244,13 @@
         border-bottom: 2px solid #CBD5E1;
         text-align: left;
     }
+
     .custom-table td {
         padding: 12px 14px;
         border-bottom: 1px solid #E2E8F0;
         vertical-align: middle;
     }
+
     .custom-table tr:hover {
         background-color: #F8FAFC;
     }
@@ -146,12 +264,36 @@
         text-transform: uppercase;
         letter-spacing: 0.3px;
     }
-    .badge-soft-green { background: #E6F4EA; color: #1E7E34; }
-    .badge-soft-yellow { background: #FEF3C7; color: #B45309; }
-    .badge-soft-blue { background: #E0F2FE; color: #0369A1; }
-    .badge-soft-red { background: #FEE2E2; color: #B91C1C; }
-    .badge-soft-purple { background: #F3E8FF; color: #6B21A8; }
-    .badge-soft-gray { background: #F1F5F9; color: #475569; }
+
+    .badge-soft-green {
+        background: #E6F4EA;
+        color: #1E7E34;
+    }
+
+    .badge-soft-yellow {
+        background: #FEF3C7;
+        color: #B45309;
+    }
+
+    .badge-soft-blue {
+        background: #E0F2FE;
+        color: #0369A1;
+    }
+
+    .badge-soft-red {
+        background: #FEE2E2;
+        color: #B91C1C;
+    }
+
+    .badge-soft-purple {
+        background: #F3E8FF;
+        color: #6B21A8;
+    }
+
+    .badge-soft-gray {
+        background: #F1F5F9;
+        color: #475569;
+    }
 
     .sim-banner {
         background: #F0FDF4;
@@ -169,7 +311,8 @@
 
         <!-- ==================== BANNER MÔ PHỎNG ==================== -->
         <div class="sim-banner">
-            <strong>Hệ thống thanh toán mô phỏng nội bộ:</strong> Tất cả giao dịch nạp tiền, giữ tiền ký quỹ hợp đồng, giải ngân và rút tiền được quản lý và cập nhật an toàn trực tiếp trong SQL Server.
+            <strong>Hệ thống thanh toán mô phỏng nội bộ:</strong> Tất cả giao dịch nạp tiền, giữ tiền ký quỹ hợp đồng,
+            giải ngân và rút tiền được quản lý và cập nhật an toàn trực tiếp trong SQL Server.
         </div>
 
         @if (ViewBag.DaXacMinhSinhVien == false)
@@ -178,660 +321,788 @@
                 <div class="d-flex align-items-center gap-3">
                     <div>
                         <strong class="d-block text-dark fs-6">Yêu cầu xác thực thẻ sinh viên!</strong>
-                        <span class="text-secondary small">Trạng thái minh chứng: <strong class="text-dark">@(ViewBag.TrangThaiXacMinh ?? "Chưa gửi")</strong>. Bạn cần được xác thực Thẻ sinh viên (trạng thái 'Đã xác minh') để thực hiện nạp tiền và rút tiền ví.</span>
-                    </div>
-                </div>
-                <a href="@Url.Action("MinhChung", "Account")" class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm text-nowrap rounded-0">
-                    Xác thực ngay
-                </a>
-            </div>
-        }
-
-        <!-- ==================== THẺ VÍ TỔNG QUAN ==================== -->
-        <div class="wallet-hero-box">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <div style="font-size: 0.85rem; opacity: 0.85;">Ví tài khoản cá nhân</div>
-                    <h4 class="fw-bold text-white mb-0">@chuVi</h4>
-                </div>
-                <div class="text-end">
-                    <span class="badge bg-light text-dark px-3 py-1 fw-bold" style="font-size: 0.82rem;">
-                        @(Model?.maWallet > 0 ? $"Mã ví: #{Model.maWallet}" : "Tài khoản nội bộ")
-                    </span>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <div style="font-size: 0.84rem; opacity: 0.85;">Số dư khả dụng (Có thể sử dụng / rút)</div>
-                <div class="fs-1 fw-bold text-white">
-                    @soDuKhaDung.ToString("#,##0") <span style="font-size: 1.15rem; font-weight: normal;">VNĐ</span>
-                </div>
-            </div>
-
-            <div class="row g-3">
-                <div class="col-sm-6">
-                    <div class="wallet-sub-card">
-                        <div style="font-size: 0.78rem; opacity: 0.85;">Số dư đóng băng (Ký quỹ HĐ / Chờ rút):</div>
-                        <div class="fw-bold fs-5 text-white">@soDuDongBang.ToString("#,##0") VNĐ</div>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="wallet-sub-card">
-                        <div style="font-size: 0.78rem; opacity: 0.85;">Tổng tài sản trong ví:</div>
-                        <div class="fw-bold fs-5 text-white">@tongTaiSan.ToString("#,##0") VNĐ</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== ĐIỀU HƯỚNG TABS ==================== -->
-        <div class="wallet-tabs">
-            <button class="wallet-tab-btn active" onclick="switchWalletTab('nap-tien')">Nạp tiền vào ví</button>
-            <button class="wallet-tab-btn" onclick="switchWalletTab('rut-tien')">Rút tiền mô phỏng</button>
-            <button class="wallet-tab-btn" onclick="switchWalletTab('lich-su')">Lịch sử giao dịch (@lichSu.Count)</button>
-            <button class="wallet-tab-btn" onclick="switchWalletTab('ds-rut')">Yêu cầu rút tiền (@danhSachRut.Count)</button>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- TAB 1: NẠP TIỀN VÀO VÍ                                    -->
-        <!-- ========================================================= -->
-        <div id="tab-nap-tien" class="wallet-tab-pane">
-            <div class="content-box">
-                <h5 class="fw-bold text-dark mb-2">Tạo yêu cầu nạp tiền</h5>
-                <p class="text-muted small mb-3">Chọn số tiền nạp nhanh hoặc tự nhập số tiền cần nạp vào ví (Tối thiểu 100.000 VNĐ):</p>
-
-                <!-- Các mức tiền gợi ý -->
-                <div class="row g-2 mb-3">
-                    <div class="col-6 col-sm-3">
-                        <button type="button" class="amount-pick-btn amount-btn" data-amount="100000">100.000 đ</button>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <button type="button" class="amount-pick-btn amount-btn" data-amount="200000">200.000 đ</button>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <button type="button" class="amount-pick-btn amount-btn" data-amount="500000">500.000 đ</button>
-                    </div>
-                    <div class="col-6 col-sm-3">
-                        <button type="button" class="amount-pick-btn amount-btn" data-amount="1000000">1.000.000 đ</button>
-                    </div>
-                </div>
-
-                <!-- Nhập số tiền khác -->
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold text-dark">Số tiền cần nạp (VNĐ):</label>
-                    <div class="input-group">
-                        <input type="number" id="soTien" class="form-control" placeholder="Tối thiểu 100.000 đ" />
-                        <span class="input-group-text bg-light">VNĐ</span>
-                    </div>
-                    <div id="thongBaoLoiNap" class="text-danger small mt-1"></div>
-                </div>
-
-                <button type="button" id="btnXacNhanNap" class="btn btn-success fw-semibold px-4 py-2" style="background:#234E36; border-color:#234E36;">
-                    Tạo mã nạp tiền
-                </button>
-            </div>
-
-            <!-- Khung thông tin giao dịch sau khi tạo -->
-            <div id="thongTinGiaoDich" class="content-box" style="display:none;">
-                <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Thông tin chuyển khoản & Xác nhận</h5>
-
-                <div class="row g-4 align-items-center">
-                    <div class="col-md-5 text-center">
-                        <p class="fw-semibold small text-dark mb-2">Mã QR VietQR chuyển khoản:</p>
-                        <div class="p-2 border rounded bg-white d-inline-block">
-                            <img id="qrThanhToan" src="" alt="Mã QR thanh toán" style="width:230px; max-width:100%; height:auto;" />
-                        </div>
-                        <div class="small text-muted mt-2">
-                            Hiệu lực còn lại: <b id="thoiGianConLai" class="text-danger">30:00</b>
+                        <span class="text-secondary small">Trạng thái minh chứng: <strong
+                            class="text-dark">@(ViewBag.TrangThaiXacMinh ?? "Chưa gửi")</strong>. Bạn cần được xác thực
+                            Thẻ sinh viên (trạng thái 'Đã xác minh') để thực hiện nạp tiền và rút tiền ví.</span>
                         </div>
                     </div>
+                    <a href="@Url.Action("MinhChung", "Account")"
+                       class="btn btn-warning fw-semibold btn-sm px-3 shadow-sm text-nowrap rounded-0">
+                        Xác thực ngay
+                    </a>
+                </div>
+            }
 
-                    <div class="col-md-7">
-                        <div class="bank-info-box mb-3">
-                            <div class="bank-info-row">
-                                <span class="text-muted">Ngân hàng thụ hưởng:</span>
-                                <strong class="text-dark">MB Bank</strong>
-                            </div>
-                            <div class="bank-info-row">
-                                <span class="text-muted">Số tài khoản:</span>
-                                <strong class="text-dark">0378896290</strong>
-                            </div>
-                            <div class="bank-info-row">
-                                <span class="text-muted">Chủ tài khoản:</span>
-                                <strong class="text-dark">DANG TUAN ANH</strong>
-                            </div>
-                            <div class="bank-info-row">
-                                <span class="text-muted">Mã giao dịch:</span>
-                                <strong id="maGiaoDichHienThi" class="text-dark"></strong>
-                            </div>
-                            <div class="bank-info-row">
-                                <span class="text-muted">Số tiền:</span>
-                                <strong id="soTienGiaoDich" class="text-danger fw-bold fs-6"></strong>
-                            </div>
-                            <div class="bank-info-row">
-                                <span class="text-muted">Nội dung CK:</span>
-                                <strong id="noiDungChuyenKhoan" class="text-primary fw-bold"></strong>
-                            </div>
-                            <div class="bank-info-row">
-                                <span class="text-muted">Trạng thái:</span>
-                                <span id="trangThaiGiaoDich" class="badge bg-warning text-dark">Đang xử lý</span>
-                            </div>
+            <!-- ==================== THẺ VÍ TỔNG QUAN ==================== -->
+            <div class="wallet-hero-box">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div style="font-size: 0.85rem; opacity: 0.85;">Ví tài khoản cá nhân</div>
+                        <h4 class="fw-bold text-white mb-0">@chuVi</h4>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-dark px-3 py-1 fw-bold" style="font-size: 0.82rem;">
+                            @(Model?.maWallet > 0 ? $"Mã ví: #{Model.maWallet}" : "Tài khoản nội bộ")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div style="font-size: 0.84rem; opacity: 0.85;">Số dư khả dụng (Có thể sử dụng / rút)</div>
+                    <div class="fs-1 fw-bold text-white">
+                        @soDuKhaDung.ToString("#,##0") <span style="font-size: 1.15rem; font-weight: normal;">VNĐ</span>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="wallet-sub-card">
+                            <div style="font-size: 0.78rem; opacity: 0.85;">Số dư đóng băng (Ký quỹ HĐ / Chờ rút):</div>
+                            <div class="fw-bold fs-5 text-white">@soDuDongBang.ToString("#,##0") VNĐ</div>
                         </div>
-
-                        <!-- Khối xác nhận mô phỏng demo -->
-                        <div class="p-3 border rounded bg-light mb-3">
-                            <div class="fw-semibold small text-dark mb-1">Môi trường kiểm thử Demo:</div>
-                            <p class="small text-muted mb-2">
-                                Trong môi trường thử nghiệm, bạn có thể bấm nút dưới để hệ thống cập nhật tiền vào ví và ghi nhận lịch sử giao dịch trong SQL Server ngay lập tức:
-                            </p>
-                            <button type="button" id="btnXacNhanMoPhong" class="btn btn-outline-success fw-semibold btn-sm px-3 py-2">
-                                Xác nhận nạp tiền mô phỏng
-                            </button>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="wallet-sub-card">
+                            <div style="font-size: 0.78rem; opacity: 0.85;">Tổng tài sản trong ví:</div>
+                            <div class="fw-bold fs-5 text-white">@tongTaiSan.ToString("#,##0") VNĐ</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ========================================================= -->
-        <!-- TAB 2: RÚT TIỀN MÔ PHỎNG                                  -->
-        <!-- ========================================================= -->
-        <div id="tab-rut-tien" class="wallet-tab-pane" style="display:none;">
-            <div class="content-box">
-                <h5 class="fw-bold text-dark mb-2">Tạo yêu cầu rút tiền mô phỏng</h5>
-                <p class="text-muted small mb-3">
-                    Số tiền rút sẽ được tạm chuyển sang <strong>Số dư đóng băng</strong> trong thời gian chờ duyệt mô phỏng.
-                </p>
-
-                <div class="alert alert-light border small text-dark mb-3">
-                    Số dư khả dụng hiện tại: <strong>@soDuKhaDung.ToString("N0") VNĐ</strong> (Rút tối thiểu 50.000 VNĐ).
-                </div>
-
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold text-dark">Số tiền cần rút (VNĐ):</label>
-                        <input type="number" id="rutSoTien" class="form-control" placeholder="Ví dụ: 100000" />
+            <!-- ==================== ĐIỀU HƯỚNG TABS ==================== -->
+            <div class="wallet-tabs">
+                <button class="wallet-tab-btn active" onclick="switchWalletTab('nap-tien')">Nạp tiền vào ví</button>
+                <button class="wallet-tab-btn" onclick="switchWalletTab('rut-tien')">Rút tiền mô phỏng</button>
+                <button class="wallet-tab-btn" onclick="switchWalletTab('lich-su')">Lịch sử giao dịch
+                    (@lichSu.Count)</button>
+                    <button class="wallet-tab-btn" onclick="switchWalletTab('ds-rut')">Yêu cầu rút tiền
+                        (@danhSachRut.Count)</button>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold text-dark">Tên ngân hàng thụ hưởng:</label>
-                        <input type="text" id="rutNganHang" class="form-control" placeholder="Ví dụ: Vietcombank, MB Bank, Techcombank..." />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold text-dark">Số tài khoản ngân hàng:</label>
-                        <input type="text" id="rutSoTaiKhoan" class="form-control" placeholder="Nhập số tài khoản thụ hưởng" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-semibold text-dark">Tên chủ tài khoản:</label>
-                        <input type="text" id="rutTenChuTaiKhoan" class="form-control" placeholder="Ví dụ: NGUYEN VAN A" />
-                    </div>
-                </div>
 
-                <div id="thongBaoLoiRut" class="text-danger small mb-3"></div>
+                    <!-- ========================================================= -->
+                    <!-- TAB 1: NẠP TIỀN VÀO VÍ                                    -->
+                    <!-- ========================================================= -->
+                    <div id="tab-nap-tien" class="wallet-tab-pane">
+                        <div class="content-box">
+                            <h5 class="fw-bold text-dark mb-2">Tạo yêu cầu nạp tiền</h5>
+                            <p class="text-muted small mb-3">Chọn số tiền nạp nhanh hoặc tự nhập số tiền cần nạp vào ví (Tối thiểu
+                                100.000 VNĐ):</p>
 
-                <button type="button" id="btnGuiYeuCauRut" class="btn btn-primary fw-semibold px-4 py-2" style="background:#234E36; border-color:#234E36;">
-                    Gửi yêu cầu rút tiền
-                </button>
-            </div>
-        </div>
+                                <!-- Các mức tiền gợi ý -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6 col-sm-3">
+                                        <button type="button" class="amount-pick-btn amount-btn" data-amount="100000">100.000 đ</button>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <button type="button" class="amount-pick-btn amount-btn" data-amount="200000">200.000 đ</button>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <button type="button" class="amount-pick-btn amount-btn" data-amount="500000">500.000 đ</button>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <button type="button" class="amount-pick-btn amount-btn" data-amount="1000000">1.000.000
+                                            đ</button>
+                                        </div>
+                                    </div>
 
-        <!-- ========================================================= -->
-        <!-- TAB 3: LỊCH SỬ BIẾN ĐỘNG SỐ DƯ                             -->
-        <!-- ========================================================= -->
-        <div id="tab-lich-su" class="wallet-tab-pane" style="display:none;">
-            <div class="content-box p-0 overflow-hidden">
-                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-                    <h6 class="fw-bold mb-0 text-dark">Lịch sử biến động số dư (SQL Server)</h6>
-                    <span class="small text-muted">Tổng cộng: @lichSu.Count bản ghi</span>
-                </div>
+                                    <!-- Nhập số tiền khác -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold text-dark">Số tiền cần nạp (VNĐ):</label>
+                                        <div class="input-group">
+                                            <input type="number" id="soTien" class="form-control" placeholder="Tối thiểu 100.000 đ" />
+                                            <span class="input-group-text bg-light">VNĐ</span>
+                                        </div>
+                                        <div id="thongBaoLoiNap" class="text-danger small mt-1"></div>
+                                    </div>
 
-                @if (lichSu.Count == 0)
-                {
-                    <div class="p-4 text-center text-muted">
-                        Chưa có biến động số dư nào được ghi nhận cho ví của bạn.
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="custom-table">
-                            <thead>
-                                <tr>
-                                    <th>Mã GD</th>
-                                    <th>Thời gian</th>
-                                    <th>Loại giao dịch</th>
-                                    <th>Số tiền</th>
-                                    <th>Số dư sau</th>
-                                    <th>Nội dung</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in lichSu)
-                                {
-                                    var isCong = item.loaiGiaoDich is "NapTien" or "NhanThuLao" or "NhanTienHopDong" or "AdminCongTien" or "HoanTienRut";
-                                    var badgeClass = item.loaiGiaoDich switch
-                                    {
-                                        "NapTien" => "badge-soft-green",
-                                        "NhanThuLao" or "NhanTienHopDong" => "badge-soft-green",
-                                        "KyQuyHopDong" => "badge-soft-yellow",
-                                        "GiaiNganHopDong" => "badge-soft-blue",
-                                        "GiuTienRut" => "badge-soft-yellow",
-                                        "RutTien" => "badge-soft-blue",
-                                        "HoanTienRut" => "badge-soft-green",
-                                        "AdminCongTien" => "badge-soft-purple",
-                                        "AdminTruTien" => "badge-soft-red",
-                                        _ => "badge-soft-gray"
-                                    };
+                                    <button type="button" id="btnXacNhanNap" class="btn btn-success fw-semibold px-4 py-2"
+                                            style="background:#234E36; border-color:#234E36;">
+                                        Tạo mã nạp tiền
+                                    </button>
+                                </div>
 
-                                    var loaiHienThi = item.loaiGiaoDich switch
-                                    {
-                                        "NapTien" => "Nạp tiền",
-                                        "NhanThuLao" or "NhanTienHopDong" => "Nhận thù lao",
-                                        "KyQuyHopDong" => "Ký quỹ HĐ",
-                                        "GiaiNganHopDong" => "Giải ngân HĐ",
-                                        "GiuTienRut" => "Khóa tiền rút",
-                                        "RutTien" => "Rút tiền",
-                                        "HoanTienRut" => "Hoàn tiền rút",
-                                        "AdminCongTien" => "Admin cộng tiền",
-                                        "AdminTruTien" => "Admin trừ tiền",
-                                        _ => item.loaiGiaoDich
-                                    };
+                                <!-- Khung thông tin giao dịch sau khi tạo -->
+                                <div id="thongTinGiaoDich" class="content-box" style="display:none;">
+                                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Thông tin chuyển khoản & Xác nhận</h5>
 
-                                    <tr>
-                                        <td>#@item.maGiaoDich</td>
-                                        <td class="text-muted small">@item.ngayTao?.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td><span class="badge-soft @badgeClass">@loaiHienThi</span></td>
-                                        <td class="fw-bold @(isCong ? "text-success" : "text-danger")">
-                                            @(isCong ? "+" : "-")@item.soTien.ToString("N0") đ
-                                        </td>
-                                        <td class="text-muted">@item.soDuSauGD.ToString("N0") đ</td>
-                                        <td>@item.noiDung</td>
-                                        <td>
-                                            @if (item.trangThai == "ThanhCong")
-                                            {
-                                                <span class="badge bg-success">Thành công</span>
-                                            }
-                                            else if (item.trangThai == "ChoXuLy")
-                                            {
-                                                <span class="badge bg-warning text-dark">Chờ xử lý</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-secondary">@item.trangThai</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-        </div>
+                                    <div class="row g-4 align-items-center">
+                                        <div class="col-md-5 text-center">
+                                            <p class="fw-semibold small text-dark mb-2">Mã QR VietQR chuyển khoản:</p>
+                                            <div class="p-2 border rounded bg-white d-inline-block">
+                                                <img id="qrThanhToan" src="" alt="Mã QR thanh toán"
+                                                     style="width:230px; max-width:100%; height:auto;" />
+                                            </div>
+                                            <div class="small text-muted mt-2">
+                                                Hiệu lực còn lại: <b id="thoiGianConLai" class="text-danger">30:00</b>
+                                            </div>
+                                        </div>
 
-        <!-- ========================================================= -->
-        <!-- TAB 4: DANH SÁCH YÊU CẦU RÚT TIỀN                         -->
-        <!-- ========================================================= -->
-        <div id="tab-ds-rut" class="wallet-tab-pane" style="display:none;">
-            <div class="content-box p-0 overflow-hidden">
-                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-                    <h6 class="fw-bold mb-0 text-dark">Danh sách yêu cầu rút tiền mô phỏng</h6>
-                    <span class="small text-muted">Tổng cộng: @danhSachRut.Count yêu cầu</span>
-                </div>
-
-                @if (danhSachRut.Count == 0)
-                {
-                    <div class="p-4 text-center text-muted">
-                        Bạn chưa gửi yêu cầu rút tiền nào.
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="custom-table">
-                            <thead>
-                                <tr>
-                                    <th>Mã yêu cầu</th>
-                                    <th>Ngày gửi</th>
-                                    <th>Số tiền rút</th>
-                                    <th>Ngân hàng</th>
-                                    <th>Số tài khoản</th>
-                                    <th>Chủ tài khoản</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác mô phỏng</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var r in danhSachRut)
-                                {
-                                    <tr>
-                                        <td>#@r.maRutTien</td>
-                                        <td class="text-muted small">@r.ngayYeuCau?.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td class="fw-bold text-dark">@r.soTienRut.ToString("N0") đ</td>
-                                        <td>@r.tenNganHang</td>
-                                        <td class="text-muted">@r.soTaiKhoan</td>
-                                        <td class="fw-semibold">@r.tenChuTaiKhoan</td>
-                                        <td>
-                                            @if (r.trangThai == "HoanThanh")
-                                            {
-                                                <span class="badge bg-success">Đã hoàn thành</span>
-                                            }
-                                            else if (r.trangThai == "ChoXuLy")
-                                            {
-                                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">Từ chối / Hủy</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (r.trangThai == "ChoXuLy")
-                                            {
-                                                <div class="btn-group btn-group-sm">
-                                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="xacNhanRutTienMoPhong(@r.maRutTien, true)">
-                                                        Duyệt mô phỏng
-                                                    </button>
-                                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="xacNhanRutTienMoPhong(@r.maRutTien, false)">
-                                                        Hủy yêu cầu
-                                                    </button>
+                                        <div class="col-md-7">
+                                            <div class="bank-info-box mb-3">
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Ngân hàng thụ hưởng:</span>
+                                                    <strong class="text-dark">MB Bank</strong>
                                                 </div>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted small">@(r.ngayXuLy?.ToString("dd/MM/yyyy HH:mm") ?? "—")</span>
-                                            }
-                                        </td>
-                                    </tr>
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Số tài khoản:</span>
+                                                    <strong class="text-dark">0378896290</strong>
+                                                </div>
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Chủ tài khoản:</span>
+                                                    <strong class="text-dark">DANG TUAN ANH</strong>
+                                                </div>
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Mã giao dịch:</span>
+                                                    <strong id="maGiaoDichHienThi" class="text-dark"></strong>
+                                                </div>
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Số tiền:</span>
+                                                    <strong id="soTienGiaoDich" class="text-danger fw-bold fs-6"></strong>
+                                                </div>
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Nội dung CK:</span>
+                                                    <strong id="noiDungChuyenKhoan" class="text-primary fw-bold"></strong>
+                                                </div>
+                                                <div class="bank-info-row">
+                                                    <span class="text-muted">Trạng thái:</span>
+                                                    <span id="trangThaiGiaoDich" class="badge bg-warning text-dark">Đang xử lý</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Khối xác nhận mô phỏng demo -->
+                                            <div class="p-3 border rounded bg-light mb-3">
+                                                <div class="fw-semibold small text-dark mb-1">Môi trường kiểm thử Demo:</div>
+                                                <p class="small text-muted mb-2">
+                                                    Trong môi trường thử nghiệm, bạn có thể bấm nút dưới để hệ thống cập nhật tiền vào ví và
+                                                    ghi nhận lịch sử giao dịch trong SQL Server ngay lập tức:
+                                                </p>
+                                                <button type="button" id="btnXacNhanMoPhong"
+                                                        class="btn btn-outline-success fw-semibold btn-sm px-3 py-2">
+                                                    Xác nhận nạp tiền mô phỏng
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========================================================= -->
+                            <!-- TAB 2: RÚT TIỀN MÔ PHỎNG                                  -->
+                            <!-- ========================================================= -->
+                            <div id="tab-rut-tien" class="wallet-tab-pane" style="display:none;">
+                                <div class="content-box">
+                                    <h5 class="fw-bold text-dark mb-2">Tạo yêu cầu rút tiền mô phỏng</h5>
+                                    <p class="text-muted small mb-3">
+                                        Số tiền rút sẽ được tạm chuyển sang <strong>Số dư đóng băng</strong> trong thời gian chờ duyệt mô
+                                        phỏng.
+                                    </p>
+
+                                    <div class="alert alert-light border small text-dark mb-3">
+                                        Số dư khả dụng hiện tại: <strong>@soDuKhaDung.ToString("N0") VNĐ</strong> (Rút tối thiểu 50.000
+                                        VNĐ).
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-dark">Số tiền cần rút (VNĐ):</label>
+                                            <input type="number" id="rutSoTien" class="form-control" placeholder="Ví dụ: 100000" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-dark">Tên ngân hàng thụ hưởng:</label>
+                                            <input type="text" id="rutNganHang" class="form-control"
+                                                   placeholder="Ví dụ: Vietcombank, MB Bank, Techcombank..." />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-dark">Số tài khoản ngân hàng:</label>
+                                            <input type="text" id="rutSoTaiKhoan" class="form-control"
+                                                   placeholder="Nhập số tài khoản thụ hưởng" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-semibold text-dark">Tên chủ tài khoản:</label>
+                                            <input type="text" id="rutTenChuTaiKhoan" class="form-control"
+                                                   placeholder="Ví dụ: NGUYEN VAN A" />
+                                        </div>
+                                    </div>
+
+                                    <div id="thongBaoLoiRut" class="text-danger small mb-3"></div>
+
+                                    <button type="button" id="btnGuiYeuCauRut" class="btn btn-primary fw-semibold px-4 py-2"
+                                            style="background:#234E36; border-color:#234E36;">
+                                        Gửi yêu cầu rút tiền
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ========================================================= -->
+                            <!-- TAB 3: LỊCH SỬ BIẾN ĐỘNG SỐ DƯ                             -->
+                            <!-- ========================================================= -->
+                            <div id="tab-lich-su" class="wallet-tab-pane" style="display:none;">
+                                <div class="content-box p-0 overflow-hidden">
+                                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                                        <h6 class="fw-bold mb-0 text-dark">Lịch sử biến động số dư (SQL Server)</h6>
+                                        <span class="small text-muted">Tổng cộng: @lichSu.Count bản ghi</span>
+                                    </div>
+
+                                    @if (lichSu.Count == 0)
+                                    {
+                                        <div class="p-4 text-center text-muted">
+                                            Chưa có biến động số dư nào được ghi nhận cho ví của bạn.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="custom-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Mã GD</th>
+                                                        <th>Thời gian</th>
+                                                        <th>Loại giao dịch</th>
+                                                        <th>Số tiền</th>
+                                                        <th>Số dư sau</th>
+                                                        <th>Nội dung</th>
+                                                        <th>Trạng thái</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in lichSu)
+                                                    {
+                                                        var isCong = item.loaiGiaoDich is "NapTien" or "NhanThuLao" or "NhanTienHopDong" or
+                      "AdminCongTien" or "HoanTienRut";
+                                                        var badgeClass = item.loaiGiaoDich switch
+                                                        {
+                                                            "NapTien" => "badge-soft-green",
+                                                            "NhanThuLao" or "NhanTienHopDong" => "badge-soft-green",
+                                                            "KyQuyHopDong" => "badge-soft-yellow",
+                                                            "GiaiNganHopDong" => "badge-soft-blue",
+                                                            "GiuTienRut" => "badge-soft-yellow",
+                                                            "RutTien" => "badge-soft-blue",
+                                                            "HoanTienRut" => "badge-soft-green",
+                                                            "AdminCongTien" => "badge-soft-purple",
+                                                            "AdminTruTien" => "badge-soft-red",
+                                                            _ => "badge-soft-gray"
+                                                        };
+
+                                                        var loaiHienThi = item.loaiGiaoDich switch
+                                                        {
+                                                            "NapTien" => "Nạp tiền",
+                                                            "NhanThuLao" or "NhanTienHopDong" => "Nhận thù lao",
+                                                            "KyQuyHopDong" => "Ký quỹ HĐ",
+                                                            "GiaiNganHopDong" => "Giải ngân HĐ",
+                                                            "GiuTienRut" => "Khóa tiền rút",
+                                                            "RutTien" => "Rút tiền",
+                                                            "HoanTienRut" => "Hoàn tiền rút",
+                                                            "AdminCongTien" => "Admin cộng tiền",
+                                                            "AdminTruTien" => "Admin trừ tiền",
+                                                            _ => item.loaiGiaoDich
+                                                        };
+
+                                                        <tr>
+                                                            <td>#@item.maGiaoDich</td>
+                                                            <td class="text-muted small">@item.ngayTao?.ToString("dd/MM/yyyy HH:mm")</td>
+                                                            <td><span class="badge-soft @badgeClass">@loaiHienThi</span></td>
+                                                            <td class="fw-bold @(isCong ? "text-success" : "text-danger")">
+                                                                @(isCong ? "+" : "-")@item.soTien.ToString("N0") đ
+                                                            </td>
+                                                            <td class="text-muted">@item.soDuSauGD.ToString("N0") đ</td>
+                                                            <td>@item.noiDung</td>
+                                                            <td>
+                                                                @if (item.trangThai == "ThanhCong")
+                                                                {
+                                                                    <span class="badge bg-success">Thành công</span>
+                                                                }
+                                                                else if (item.trangThai == "ChoXuLy")
+                                                                {
+                                                                    <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-secondary">@item.trangThai</span>
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- ========================================================= -->
+                            <!-- TAB 4: DANH SÁCH YÊU CẦU RÚT TIỀN                         -->
+                            <!-- ========================================================= -->
+                            <div id="tab-ds-rut" class="wallet-tab-pane" style="display:none;">
+                                <div class="content-box p-0 overflow-hidden">
+                                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                                        <h6 class="fw-bold mb-0 text-dark">Danh sách yêu cầu rút tiền mô phỏng</h6>
+                                        <span class="small text-muted">Tổng cộng: @danhSachRut.Count yêu cầu</span>
+                                    </div>
+
+                                    @if (danhSachRut.Count == 0)
+                                    {
+                                        <div class="p-4 text-center text-muted">
+                                            Bạn chưa gửi yêu cầu rút tiền nào.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="custom-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Mã yêu cầu</th>
+                                                        <th>Ngày gửi</th>
+                                                        <th>Số tiền rút</th>
+                                                        <th>Ngân hàng</th>
+                                                        <th>Số tài khoản</th>
+                                                        <th>Chủ tài khoản</th>
+                                                        <th>Trạng thái</th>
+                                                        <th>Thao tác mô phỏng</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var r in danhSachRut)
+                                                    {
+                                                        <tr>
+                                                            <td>#@r.maRutTien</td>
+                                                            <td class="text-muted small">@r.ngayYeuCau?.ToString("dd/MM/yyyy HH:mm")</td>
+                                                            <td class="fw-bold text-dark">@r.soTienRut.ToString("N0") đ</td>
+                                                            <td>@r.tenNganHang</td>
+                                                            <td class="text-muted">@r.soTaiKhoan</td>
+                                                            <td class="fw-semibold">@r.tenChuTaiKhoan</td>
+                                                            <td>
+                                                                @if (r.trangThai == "HoanThanh")
+                                                                {
+                                                                    <span class="badge bg-success">Đã hoàn thành</span>
+                                                                }
+                                                                else if (r.trangThai == "ChoXuLy")
+                                                                {
+                                                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-danger">Từ chối / Hủy</span>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                @if (r.trangThai == "ChoXuLy")
+                                                                {
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <button type="button" class="btn btn-outline-success btn-sm"
+                                                                                onclick="xacNhanRutTienMoPhong(@r.maRutTien, true)">
+                                                                            Duyệt mô phỏng
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                                                onclick="xacNhanRutTienMoPhong(@r.maRutTien, false)">
+                                                                            Hủy yêu cầu
+                                                                        </button>
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted small">@(r.ngayXuLy?.ToString("dd/MM/yyyy HH:mm") ??
+                                                                             "—")</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Popup nap tien thanh cong -->
+                        <div id="walletSuccessOverlay" class="wallet-success-overlay" role="dialog" aria-modal="true"
+                             aria-labelledby="walletSuccessTitle">
+
+                            <div class="wallet-success-popup">
+                                <div class="wallet-success-icon">
+                                    <svg viewBox="0 0 64 64" aria-hidden="true">
+                                        <circle cx="32" cy="32" r="30" fill="#22c55e" />
+                                        <path class="wallet-success-check" d="M17 32 L28 43 L47 22" />
+                                    </svg>
+                                </div>
+
+                                <h3 id="walletSuccessTitle" class="fw-bold">
+                                    Nạp tiền thành công!
+                                </h3>
+
+                                <p class="text-secondary">
+                                    Số tiền đã được cộng vào ví của bạn.
+                                </p>
+
+                                <div id="walletSuccessAmount" class="wallet-success-amount"></div>
+
+                                <p style="color:#16a34a">
+                                    Giao dịch đã hoàn tất
+                                </p>
+
+                                <button type="button" class="wallet-success-btn" onclick="dongPopupNapTien()">
+                                    Hoàn tất
+                                </button>
+                            </div>
+                        </div>
+
+                        <script>
+    
+                            function hienPopupNapTienThanhCong(soTien) {
+                                const overlay = document.getElementById(
+                                    "walletSuccessOverlay"
+                                );
+
+                                document.getElementById(
+                                    "walletSuccessAmount"
+                                ).innerText =
+                                    Number(soTien).toLocaleString("vi-VN") + " VNĐ";
+
+                                overlay.classList.remove("show");
+
+                                // Chạy lại hiệu ứng mỗi khi popup xuất hiện
+                                void overlay.offsetWidth;
+
+                                overlay.classList.add("show");
+                            }
+
+                            function dongPopupNapTien() {
+                                document.getElementById(
+                                    "walletSuccessOverlay"
+                                ).classList.remove("show");
+
+                                window.location.reload();
+                            }
+
+                            let maGiaoDichHienTai = "";
+                            let intervalKiemTra = null;
+                            let intervalDemNguoc = null;
+
+                            function switchWalletTab(tabName) {
+                                document.querySelectorAll('.wallet-tab-btn').forEach(btn => btn.classList.remove('active'));
+                                document.querySelectorAll('.wallet-tab-pane').forEach(pane => pane.style.display = 'none');
+
+                                const activeBtn = event ? event.target : null;
+                                if (activeBtn) activeBtn.classList.add('active');
+
+                                const targetPane = document.getElementById('tab-' + tabName);
+                                if (targetPane) targetPane.style.display = 'block';
+                            }
+
+                            document.addEventListener("DOMContentLoaded", function () {
+                                // Amount buttons
+                                const amountButtons = document.querySelectorAll(".amount-btn");
+                                const soTienInput = document.getElementById("soTien");
+                                const thongBaoLoiNap = document.getElementById("thongBaoLoiNap");
+                                const btnXacNhanNap = document.getElementById("btnXacNhanNap");
+                                const btnXacNhanMoPhong = document.getElementById("btnXacNhanMoPhong");
+
+                                amountButtons.forEach(button => {
+                                    button.addEventListener("click", function () {
+                                        amountButtons.forEach(b => b.classList.remove("active"));
+                                        this.classList.add("active");
+                                        soTienInput.value = this.dataset.amount;
+                                        thongBaoLoiNap.innerText = "";
+                                    });
+                                });
+
+                                if (soTienInput) {
+                                    soTienInput.addEventListener("input", function () {
+                                        amountButtons.forEach(b => b.classList.remove("active"));
+                                    });
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-        </div>
 
-    </div>
-</div>
+                                // Tạo mã nạp tiền
+                                btnXacNhanNap.addEventListener("click", async function () {
+                                    const daXacMinhSinhVien = @(ViewBag.DaXacMinhSinhVien == false ? "false" : "true");
+                                    if (!daXacMinhSinhVien) {
+                                        if (confirm("Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi nạp tiền vào ví!\n\nBạn có muốn chuyển đến trang Xác thực minh chứng ngay bây giờ không?")) {
+                                            window.location.href = "/Account/MinhChung";
+                                        }
+                                        return;
+                                    }
 
-<script>
-    let maGiaoDichHienTai = "";
-    let intervalKiemTra = null;
-    let intervalDemNguoc = null;
+                                    const soTien = Number(soTienInput.value);
+                                    if (soTien < 100000 || soTien % 50000 !== 0) {
+                                        thongBaoLoiNap.innerText = "Số tiền nạp phải từ 100.000 VNĐ trở lên và là bội số của 50.000 VNĐ.";
+                                        return;
+                                    }
+                                    thongBaoLoiNap.innerText = "";
 
-    function switchWalletTab(tabName) {
-        document.querySelectorAll('.wallet-tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.wallet-tab-pane').forEach(pane => pane.style.display = 'none');
+                                    try {
+                                        btnXacNhanNap.disabled = true;
+                                        btnXacNhanNap.innerText = "Đang tạo mã...";
 
-        const activeBtn = event ? event.target : null;
-        if (activeBtn) activeBtn.classList.add('active');
+                                        const response = await fetch("/Wallet/TaoGiaoDich", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ soTien: soTien })
+                                        });
 
-        const targetPane = document.getElementById('tab-' + tabName);
-        if (targetPane) targetPane.style.display = 'block';
-    }
+                                        const result = await response.json();
+                                        btnXacNhanNap.disabled = false;
+                                        btnXacNhanNap.innerText = "Tạo mã nạp tiền";
 
-    document.addEventListener("DOMContentLoaded", function () {
-        // Amount buttons
-        const amountButtons = document.querySelectorAll(".amount-btn");
-        const soTienInput = document.getElementById("soTien");
-        const thongBaoLoiNap = document.getElementById("thongBaoLoiNap");
-        const btnXacNhanNap = document.getElementById("btnXacNhanNap");
-        const btnXacNhanMoPhong = document.getElementById("btnXacNhanMoPhong");
+                                        if (!result.success) {
+                                            thongBaoLoiNap.innerText = result.message;
+                                            return;
+                                        }
 
-        amountButtons.forEach(button => {
-            button.addEventListener("click", function () {
-                amountButtons.forEach(b => b.classList.remove("active"));
-                this.classList.add("active");
-                soTienInput.value = this.dataset.amount;
-                thongBaoLoiNap.innerText = "";
-            });
-        });
+                                        const gd = result.data;
+                                        maGiaoDichHienTai = gd.maGiaoDich;
 
-        if (soTienInput) {
-            soTienInput.addEventListener("input", function () {
-                amountButtons.forEach(b => b.classList.remove("active"));
-            });
-        }
+                                        document.getElementById("thongTinGiaoDich").style.display = "block";
+                                        document.getElementById("maGiaoDichHienThi").innerText = gd.maGiaoDich;
+                                        document.getElementById("soTienGiaoDich").innerText = Number(gd.soTien).toLocaleString("vi-VN") + " VNĐ";
+                                        document.getElementById("noiDungChuyenKhoan").innerText = gd.noiDungChuyenKhoan;
+                                        document.getElementById("trangThaiGiaoDich").innerText = "Đang xử lý";
+                                        document.getElementById("trangThaiGiaoDich").className = "badge bg-warning text-dark";
 
-        // Tạo mã nạp tiền
-        btnXacNhanNap.addEventListener("click", async function () {
-            const daXacMinhSinhVien = @(ViewBag.DaXacMinhSinhVien == false ? "false" : "true");
-            if (!daXacMinhSinhVien) {
-                if (confirm("Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi nạp tiền vào ví!\n\nBạn có muốn chuyển đến trang Xác thực minh chứng ngay bây giờ không?")) {
-                    window.location.href = "/Account/MinhChung";
-                }
-                return;
-            }
+                                        // Render VietQR
+                                        const qrUrl = "https://img.vietqr.io/image/MB-0378896290-compact2.png?amount="
+                                            + gd.soTien + "&addInfo=" + encodeURIComponent(gd.noiDungChuyenKhoan)
+                                            + "&accountName=" + encodeURIComponent("DANG TUAN ANH");
+                                        document.getElementById("qrThanhToan").src = qrUrl;
 
-            const soTien = Number(soTienInput.value);
-            if (soTien < 100000 || soTien % 50000 !== 0) {
-                thongBaoLoiNap.innerText = "Số tiền nạp phải từ 100.000 VNĐ trở lên và là bội số của 50.000 VNĐ.";
-                return;
-            }
-            thongBaoLoiNap.innerText = "";
+                                        document.getElementById("thongTinGiaoDich").scrollIntoView({ behavior: "smooth" });
 
-            try {
-                btnXacNhanNap.disabled = true;
-                btnXacNhanNap.innerText = "Đang tạo mã...";
+                                        batDauDemNguoc(gd.ngayHetHan);
+                                        batDauPolling(gd.maGiaoDich, gd.soTien);
+                                    } catch (err) {
+                                        btnXacNhanNap.disabled = false;
+                                        btnXacNhanNap.innerText = "Tạo mã nạp tiền";
+                                        thongBaoLoiNap.innerText = "Lỗi kết nối khi tạo mã nạp tiền: " + err.message;
+                                    }
+                                });
 
-                const response = await fetch("/Wallet/TaoGiaoDich", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ soTien: soTien })
-                });
+                                // Xác nhận nạp tiền mô phỏng (Demo)
+                                if (btnXacNhanMoPhong) {
+                                    btnXacNhanMoPhong.addEventListener("click", async function () {
+                                        if (!maGiaoDichHienTai) {
+                                            alert("Chưa có mã giao dịch nào được tạo.");
+                                            return;
+                                        }
 
-                const result = await response.json();
-                btnXacNhanNap.disabled = false;
-                btnXacNhanNap.innerText = "Tạo mã nạp tiền";
+                                        if (!confirm("Xác nhận cộng " + document.getElementById("soTienGiaoDich").innerText + " vào ví mô phỏng của bạn?")) {
+                                            return;
+                                        }
 
-                if (!result.success) {
-                    thongBaoLoiNap.innerText = result.message;
-                    return;
-                }
+                                        btnXacNhanMoPhong.disabled = true;
+                                        btnXacNhanMoPhong.innerText = "Đang ghi nhận...";
 
-                const gd = result.data;
-                maGiaoDichHienTai = gd.maGiaoDich;
+                                        try {
+                                            const response = await fetch("/Wallet/XacNhanNapTienMoPhong", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({ maGiaoDich: maGiaoDichHienTai })
+                                            });
 
-                document.getElementById("thongTinGiaoDich").style.display = "block";
-                document.getElementById("maGiaoDichHienThi").innerText = gd.maGiaoDich;
-                document.getElementById("soTienGiaoDich").innerText = Number(gd.soTien).toLocaleString("vi-VN") + " VNĐ";
-                document.getElementById("noiDungChuyenKhoan").innerText = gd.noiDungChuyenKhoan;
-                document.getElementById("trangThaiGiaoDich").innerText = "Đang xử lý";
-                document.getElementById("trangThaiGiaoDich").className = "badge bg-warning text-dark";
+                                            const res = await response.json();
+                                            if (res.success) {
+                                                alert("Thành công! " + res.message);
+                                                window.location.reload();
+                                            } else {
+                                                alert("Thất bại: " + res.message);
+                                                btnXacNhanMoPhong.disabled = false;
+                                                btnXacNhanMoPhong.innerText = "Xác nhận nạp tiền mô phỏng";
+                                            }
+                                        } catch (err) {
+                                            alert("Lỗi khi xác nhận nạp tiền mô phỏng: " + err.message);
+                                            btnXacNhanMoPhong.disabled = false;
+                                            btnXacNhanMoPhong.innerText = "Xác nhận nạp tiền mô phỏng";
+                                        }
+                                    });
+                                }
 
-                // Render VietQR
-                const qrUrl = "https://img.vietqr.io/image/MB-0378896290-compact2.png?amount=" 
-                    + gd.soTien + "&addInfo=" + encodeURIComponent(gd.noiDungChuyenKhoan) 
-                    + "&accountName=" + encodeURIComponent("DANG TUAN ANH");
-                document.getElementById("qrThanhToan").src = qrUrl;
+                                // Tạo yêu cầu rút tiền mô phỏng
+                                const btnGuiYeuCauRut = document.getElementById("btnGuiYeuCauRut");
+                                if (btnGuiYeuCauRut) {
+                                    btnGuiYeuCauRut.addEventListener("click", async function () {
+                                        const daXacMinhSinhVien = @(ViewBag.DaXacMinhSinhVien == false ? "false" : "true");
+                                        if (!daXacMinhSinhVien) {
+                                            if (confirm("Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi tạo yêu cầu rút tiền!\n\nBạn có muốn chuyển đến trang Xác thực minh chứng ngay bây giờ không?")) {
+                                                window.location.href = "/Account/MinhChung";
+                                            }
+                                            return;
+                                        }
 
-                document.getElementById("thongTinGiaoDich").scrollIntoView({ behavior: "smooth" });
+                                        const soTien = Number(document.getElementById("rutSoTien").value);
+                                        const tenNganHang = document.getElementById("rutNganHang").value.trim();
+                                        const soTaiKhoan = document.getElementById("rutSoTaiKhoan").value.trim();
+                                        const tenChuTaiKhoan = document.getElementById("rutTenChuTaiKhoan").value.trim();
+                                        const thongBaoLoiRut = document.getElementById("thongBaoLoiRut");
 
-                batDauDemNguoc(gd.ngayHetHan);
-                batDauPolling(gd.maGiaoDich, gd.soTien);
-            } catch (err) {
-                btnXacNhanNap.disabled = false;
-                btnXacNhanNap.innerText = "Tạo mã nạp tiền";
-                thongBaoLoiNap.innerText = "Lỗi kết nối khi tạo mã nạp tiền: " + err.message;
-            }
-        });
+                                        if (soTien < 50000) {
+                                            thongBaoLoiRut.innerText = "Số tiền rút tối thiểu là 50.000 VNĐ.";
+                                            return;
+                                        }
+                                        if (!tenNganHang || !soTaiKhoan || !tenChuTaiKhoan) {
+                                            thongBaoLoiRut.innerText = "Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng thụ hưởng.";
+                                            return;
+                                        }
+                                        thongBaoLoiRut.innerText = "";
 
-        // Xác nhận nạp tiền mô phỏng (Demo)
-        if (btnXacNhanMoPhong) {
-            btnXacNhanMoPhong.addEventListener("click", async function () {
-                if (!maGiaoDichHienTai) {
-                    alert("Chưa có mã giao dịch nào được tạo.");
-                    return;
-                }
+                                        if (!confirm("Xác nhận tạo yêu cầu rút " + soTien.toLocaleString("vi-VN") + " VNĐ về ngân hàng " + tenNganHang + "?")) {
+                                            return;
+                                        }
 
-                if (!confirm("Xác nhận cộng " + document.getElementById("soTienGiaoDich").innerText + " vào ví mô phỏng của bạn?")) {
-                    return;
-                }
+                                        btnGuiYeuCauRut.disabled = true;
+                                        btnGuiYeuCauRut.innerText = "Đang gửi yêu cầu...";
 
-                btnXacNhanMoPhong.disabled = true;
-                btnXacNhanMoPhong.innerText = "Đang ghi nhận...";
+                                        try {
+                                            const response = await fetch("/Wallet/TaoYeuCauRutTien", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({
+                                                    soTienRut: soTien,
+                                                    tenNganHang: tenNganHang,
+                                                    soTaiKhoan: soTaiKhoan,
+                                                    tenChuTaiKhoan: tenChuTaiKhoan
+                                                })
+                                            });
 
-                try {
-                    const response = await fetch("/Wallet/XacNhanNapTienMoPhong", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ maGiaoDich: maGiaoDichHienTai })
-                    });
+                                            const res = await response.json();
+                                            btnGuiYeuCauRut.disabled = false;
+                                            btnGuiYeuCauRut.innerText = "Gửi yêu cầu rút tiền";
 
-                    const res = await response.json();
-                    if (res.success) {
-                        alert("Thành công! " + res.message);
-                        window.location.reload();
-                    } else {
-                        alert("Thất bại: " + res.message);
-                        btnXacNhanMoPhong.disabled = false;
-                        btnXacNhanMoPhong.innerText = "Xác nhận nạp tiền mô phỏng";
-                    }
-                } catch (err) {
-                    alert("Lỗi khi xác nhận nạp tiền mô phỏng: " + err.message);
-                    btnXacNhanMoPhong.disabled = false;
-                    btnXacNhanMoPhong.innerText = "Xác nhận nạp tiền mô phỏng";
-                }
-            });
-        }
+                                            if (res.success) {
+                                                alert(res.message);
+                                                window.location.reload();
+                                            } else {
+                                                thongBaoLoiRut.innerText = res.message;
+                                            }
+                                        } catch (err) {
+                                            btnGuiYeuCauRut.disabled = false;
+                                            btnGuiYeuCauRut.innerText = "Gửi yêu cầu rút tiền";
+                                            thongBaoLoiRut.innerText = "Lỗi kết nối khi gửi yêu cầu rút tiền: " + err.message;
+                                        }
+                                    });
+                                }
+                            });
 
-        // Tạo yêu cầu rút tiền mô phỏng
-        const btnGuiYeuCauRut = document.getElementById("btnGuiYeuCauRut");
-        if (btnGuiYeuCauRut) {
-            btnGuiYeuCauRut.addEventListener("click", async function () {
-                const daXacMinhSinhVien = @(ViewBag.DaXacMinhSinhVien == false ? "false" : "true");
-                if (!daXacMinhSinhVien) {
-                    if (confirm("Tài khoản sinh viên cần hoàn tất xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi tạo yêu cầu rút tiền!\n\nBạn có muốn chuyển đến trang Xác thực minh chứng ngay bây giờ không?")) {
-                        window.location.href = "/Account/MinhChung";
-                    }
-                    return;
-                }
+                            // Duyệt / Hủy yêu cầu rút tiền mô phỏng
+                            async function xacNhanRutTienMoPhong(maRutTien, chapNhan) {
+                                const actionText = chapNhan ? "duyệt hoàn thành" : "hủy và hoàn tiền";
+                                if (!confirm("Bạn có chắc chắn muốn " + actionText + " yêu cầu rút tiền #" + maRutTien + "?")) {
+                                    return;
+                                }
 
-                const soTien = Number(document.getElementById("rutSoTien").value);
-                const tenNganHang = document.getElementById("rutNganHang").value.trim();
-                const soTaiKhoan = document.getElementById("rutSoTaiKhoan").value.trim();
-                const tenChuTaiKhoan = document.getElementById("rutTenChuTaiKhoan").value.trim();
-                const thongBaoLoiRut = document.getElementById("thongBaoLoiRut");
+                                try {
+                                    const response = await fetch("/Wallet/XacNhanRutTienMoPhong", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ maRutTien: maRutTien, chapNhan: chapNhan })
+                                    });
 
-                if (soTien < 50000) {
-                    thongBaoLoiRut.innerText = "Số tiền rút tối thiểu là 50.000 VNĐ.";
-                    return;
-                }
-                if (!tenNganHang || !soTaiKhoan || !tenChuTaiKhoan) {
-                    thongBaoLoiRut.innerText = "Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng thụ hưởng.";
-                    return;
-                }
-                thongBaoLoiRut.innerText = "";
+                                    const res = await response.json();
+                                    if (res.success) {
+                                        alert(res.message);
+                                        window.location.reload();
+                                    } else {
+                                        alert("Thao tác thất bại: " + res.message);
+                                    }
+                                } catch (err) {
+                                    alert("Lỗi khi xử lý yêu cầu rút tiền: " + err.message);
+                                }
+                            }
 
-                if (!confirm("Xác nhận tạo yêu cầu rút " + soTien.toLocaleString("vi-VN") + " VNĐ về ngân hàng " + tenNganHang + "?")) {
-                    return;
-                }
+                            function batDauDemNguoc(ngayHetHan) {
+                                if (intervalDemNguoc) clearInterval(intervalDemNguoc);
+                                const thoiGianEl = document.getElementById("thoiGianConLai");
 
-                btnGuiYeuCauRut.disabled = true;
-                btnGuiYeuCauRut.innerText = "Đang gửi yêu cầu...";
+                                function update() {
+                                    const now = new Date();
+                                    const exp = new Date(ngayHetHan);
+                                    const diff = exp - now;
 
-                try {
-                    const response = await fetch("/Wallet/TaoYeuCauRutTien", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            soTienRut: soTien,
-                            tenNganHang: tenNganHang,
-                            soTaiKhoan: soTaiKhoan,
-                            tenChuTaiKhoan: tenChuTaiKhoan
-                        })
-                    });
+                                    if (diff <= 0) {
+                                        thoiGianEl.innerText = "00:00";
+                                        clearInterval(intervalDemNguoc);
+                                        return;
+                                    }
 
-                    const res = await response.json();
-                    btnGuiYeuCauRut.disabled = false;
-                    btnGuiYeuCauRut.innerText = "Gửi yêu cầu rút tiền";
+                                    const totalSec = Math.floor(diff / 1000);
+                                    const min = Math.floor(totalSec / 60);
+                                    const sec = totalSec % 60;
+                                    thoiGianEl.innerText = String(min).padStart(2, '0') + ":" + String(sec).padStart(2, '0');
+                                }
+                                update();
+                                intervalDemNguoc = setInterval(update, 1000);
+                            }
 
-                    if (res.success) {
-                        alert(res.message);
-                        window.location.reload();
-                    } else {
-                        thongBaoLoiRut.innerText = res.message;
-                    }
-                } catch (err) {
-                    btnGuiYeuCauRut.disabled = false;
-                    btnGuiYeuCauRut.innerText = "Gửi yêu cầu rút tiền";
-                    thongBaoLoiRut.innerText = "Lỗi kết nối khi gửi yêu cầu rút tiền: " + err.message;
-                }
-            });
-        }
-    });
+    
+                            function batDauPolling(maGiaoDich, soTien) {
+                                if (intervalKiemTra) {
+                                    clearInterval(intervalKiemTra);
+                                }
 
-    // Duyệt / Hủy yêu cầu rút tiền mô phỏng
-    async function xacNhanRutTienMoPhong(maRutTien, chapNhan) {
-        const actionText = chapNhan ? "duyệt hoàn thành" : "hủy và hoàn tiền";
-        if (!confirm("Bạn có chắc chắn muốn " + actionText + " yêu cầu rút tiền #" + maRutTien + "?")) {
-            return;
-        }
+                                let dangKiemTra = false;
 
-        try {
-            const response = await fetch("/Wallet/XacNhanRutTienMoPhong", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ maRutTien: maRutTien, chapNhan: chapNhan })
-            });
+                                intervalKiemTra = setInterval(async function () {
+                                    if (dangKiemTra) return;
+                                    dangKiemTra = true;
 
-            const res = await response.json();
-            if (res.success) {
-                alert(res.message);
-                window.location.reload();
-            } else {
-                alert("Thao tác thất bại: " + res.message);
-            }
-        } catch (err) {
-            alert("Lỗi khi xử lý yêu cầu rút tiền: " + err.message);
-        }
-    }
+                                    try {
+                                        const response = await fetch(
+                                            "/Wallet/TrangThai?maGiaoDich="
+                                            + encodeURIComponent(maGiaoDich)
+                                        );
 
-    function batDauDemNguoc(ngayHetHan) {
-        if (intervalDemNguoc) clearInterval(intervalDemNguoc);
-        const thoiGianEl = document.getElementById("thoiGianConLai");
+                                        if (!response.ok) {
+                                            throw new Error("Không thể kiểm tra giao dịch");
+                                        }
 
-        function update() {
-            const now = new Date();
-            const exp = new Date(ngayHetHan);
-            const diff = exp - now;
+                                        const res = await response.json();
 
-            if (diff <= 0) {
-                thoiGianEl.innerText = "00:00";
-                clearInterval(intervalDemNguoc);
-                return;
-            }
+                                        if (res.success && res.data) {
+                                            if (res.data.trangThai === "HoanThanh") {
+                                                clearInterval(intervalKiemTra);
+                                                intervalKiemTra = null;
 
-            const totalSec = Math.floor(diff / 1000);
-            const min = Math.floor(totalSec / 60);
-            const sec = totalSec % 60;
-            thoiGianEl.innerText = String(min).padStart(2, '0') + ":" + String(sec).padStart(2, '0');
-        }
-        update();
-        intervalDemNguoc = setInterval(update, 1000);
-    }
+                                                if (intervalDemNguoc) {
+                                                    clearInterval(intervalDemNguoc);
+                                                    intervalDemNguoc = null;
+                                                }
 
-    function batDauPolling(maGiaoDich, soTien) {
-        if (intervalKiemTra) clearInterval(intervalKiemTra);
+                                                document.getElementById(
+                                                    "trangThaiGiaoDich"
+                                                ).innerText = "Hoàn thành";
 
-        intervalKiemTra = setInterval(async function () {
-            try {
-                const response = await fetch("/Wallet/TrangThai?maGiaoDich=" + encodeURIComponent(maGiaoDich));
-                const res = await response.json();
-                if (res.success && res.data) {
-                    if (res.data.trangThai === "HoanThanh") {
-                        clearInterval(intervalKiemTra);
-                        alert("Đã nhận được tiền nạp " + Number(soTien).toLocaleString("vi-VN") + " VNĐ vào ví!");
-                        window.location.reload();
-                    } else if (res.data.trangThai === "HetHan") {
-                        clearInterval(intervalKiemTra);
-                        document.getElementById("trangThaiGiaoDich").innerText = "Hết hạn";
-                        document.getElementById("trangThaiGiaoDich").className = "badge bg-danger";
-                    }
-                }
-            } catch (err) {
-                console.error("Polling error:", err);
-            }
-        }, 5000);
-    }
-</script>
+                                                document.getElementById(
+                                                    "trangThaiGiaoDich"
+                                                ).className = "badge bg-success";
+
+                                                // Hiện popup tick xanh chuyển động
+                                                hienPopupNapTienThanhCong(soTien);
+
+                                            } else if (res.data.trangThai === "HetHan") {
+                                                clearInterval(intervalKiemTra);
+                                                intervalKiemTra = null;
+
+                                                if (intervalDemNguoc) {
+                                                    clearInterval(intervalDemNguoc);
+                                                    intervalDemNguoc = null;
+                                                }
+
+                                                document.getElementById(
+                                                    "trangThaiGiaoDich"
+                                                ).innerText = "Hết hạn";
+
+                                                document.getElementById(
+                                                    "trangThaiGiaoDich"
+                                                ).className = "badge bg-danger";
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.error("Polling error:", err);
+                                    } finally {
+                                        dangKiemTra = false;
+                                    }
+                                }, 5000);
+                            }
+
+                        </script>

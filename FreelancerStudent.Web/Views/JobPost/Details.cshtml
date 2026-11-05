@@ -19,9 +19,11 @@
         </div>
         <!-- Thời gian cam kết -->
         <div class="col-md-6">
-            <label class="form-label small fw-bold">Thời gian hoàn thành cam kết:</label>
+            <label class="form-label small fw-bold"><i class="fas fa-lock text-secondary me-1"></i>Thời gian hoàn thành cam kết (Cố định):</label>
             <input type="text" name="thoiGianHoanThanhDeXuat" class="form-control"
-                   placeholder="Ví dụ: 3 ngày, 1 tuần..." />
+                   value="@(Model.thoigiandukienhoanthanh != null ? ((DateTime)Model.thoigiandukienhoanthanh).ToString("dd/MM/yyyy") : "")"
+                   readonly style="cursor: not-allowed; background-color: #f8f9fa;" />
+            <small class="text-muted" style="font-size: 0.72rem;"><i class="fas fa-info-circle me-1"></i>Thời gian hoàn thành do Nhà tuyển dụng quy định và không thể thay đổi khi ứng tuyển.</small>
         </div>
     </div>
 

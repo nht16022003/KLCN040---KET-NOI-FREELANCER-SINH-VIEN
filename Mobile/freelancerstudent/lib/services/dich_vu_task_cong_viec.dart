@@ -166,6 +166,7 @@ class TaskCongViecService {
     required int maUser,
     int? maGiaiDoan,
     required String trangThai,
+    String? lyDo,
   }) async {
     try {
       final res = await _apiClient.post<Map<String, dynamic>>(
@@ -174,6 +175,7 @@ class TaskCongViecService {
           'maHD': maHD,
           'maGiaiDoan': maGiaiDoan,
           'trangThai': trangThai,
+          'lyDo': lyDo,
         },
         queryParameters: {'maUser': maUser},
       );
@@ -190,6 +192,39 @@ class TaskCongViecService {
       return ApiResponse<bool>(
         isSuccess: false,
         message: layThongBaoLoiApi(e, macDinh: 'Không thể đánh giá giai đoạn.'),
+      );
+    }
+  }
+
+  Future<ApiResponse<bool>> capNhatMocBanGiao({
+    required String maHD,
+    required int maGiaiDoan,
+    required String linkSanPham,
+    String? moTa,
+    required int maUser,
+  }) async {
+    try {
+      final res = await _apiClient.post<Map<String, dynamic>>(
+        '${ApiEndpoints.taskCongViec}/hop-dong/$maHD/cap-nhat-moc',
+        {
+          'maHD': maHD,
+          'maGiaiDoan': maGiaiDoan,
+          'linkSanPham': linkSanPham,
+          'moTa': moTa,
+        },
+        queryParameters: {'maUser': maUser},
+      );
+      final body = _body(res.data);
+      return ApiResponse<bool>(
+        isSuccess: body['success'] == true,
+        data: true,
+        message: body['message']?.toString() ??
+            'Cập nhật lại mốc bàn giao thành công! Mốc đã chuyển về trạng thái chờ đánh giá.',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        message: layThongBaoLoiApi(e, macDinh: 'Không thể cập nhật mốc bàn giao.'),
       );
     }
   }

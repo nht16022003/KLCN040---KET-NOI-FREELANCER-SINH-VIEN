@@ -20,7 +20,7 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> DangKy()
+        public async Task<IActionResult> DangKy(int? role = null)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (User.Identity?.IsAuthenticated == true && maUser.HasValue)
@@ -33,7 +33,13 @@ namespace FreelancerStudent.Web.Controllers
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
-            return View(new DangKyViewModel());
+            var model = new DangKyViewModel();
+            if (role.HasValue && (role.Value == 1 || role.Value == 2))
+            {
+                model.marole = role.Value;
+            }
+
+            return View(model);
         }
 
         [HttpPost]

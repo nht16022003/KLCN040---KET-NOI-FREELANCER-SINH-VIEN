@@ -606,6 +606,14 @@ namespace FreelancerStudent.API.Services
             if (giaiDoans.Count == 0 || giaiDoans.Any(g => g.trangThai != "Dat"))
                 throw new InvalidOperationException("Chưa nghiệm thu đạt toàn bộ mốc giai đoạn.");
 
+            var banGiaoMoiNhat = await _context.BanGiao_SanPhams
+                .Where(b => b.maHD == maHD)
+                .OrderByDescending(b => b.maBanGiao)
+                .FirstOrDefaultAsync();
+
+            if (banGiaoMoiNhat == null || banGiaoMoiNhat.trangThai != "ChoNghiemThu")
+                throw new InvalidOperationException("Freelancer chưa bàn giao sản phẩm hoàn chỉnh hoặc sản phẩm chưa ở trạng thái chờ nghiệm thu.");
+
             var maUserFreelancer = hopDong.FreelancerStudent?.maUser;
             if (!maUserFreelancer.HasValue)
                 throw new InvalidOperationException("Không tìm thấy tài khoản Freelancer.");
@@ -619,6 +627,9 @@ namespace FreelancerStudent.API.Services
                     WHERE maHD = {maHD} AND trangThai = N'DangThucHien'");
                 if (soDongCapNhat != 1)
                     throw new InvalidOperationException("Không thể ghi nhận trạng thái Đã hoàn thành, vui lòng thao tác lại.");
+
+                banGiaoMoiNhat.trangThai = "DaNghiemThu";
+                banGiaoMoiNhat.ngayPhanHoi = DateTime.Now;
 
                 _context.ThongBaos.Add(new ThongBao
                 {
@@ -653,8 +664,8 @@ namespace FreelancerStudent.API.Services
                 throw new ArgumentException("Không tìm thấy hợp đồng.");
             if (hopDong.JobPost?.NhaTuyenDung?.maUser != maUserNTD.Value)
                 throw new UnauthorizedAccessException("Bạn không có quyền thanh toán hợp đồng này.");
-            if (hopDong.trangThai != "DaHoanThanh")
-                throw new InvalidOperationException("Hợp đồng chưa ở trạng thái chờ thanh toán.");
+            if (hopDong.trangThai != "DaHoanThanh" && hopDong.trangThai != "DangThucHien")
+                throw new InvalidOperationException("Hợp đồng chưa ở trạng thái chờ thanh toán hoặc nghiệm thu.");
 
             var soTienKyQuy = hopDong.sotienkyquy ?? 0;
             var soTienHoaHong = await TinhHoaHongAsync(soTienKyQuy);
@@ -692,8 +703,16 @@ namespace FreelancerStudent.API.Services
                 throw new UnauthorizedAccessException("Không xác định được tài khoản nhà tuyển dụng.");
             if (!tuDong && hopDong.JobPost?.NhaTuyenDung?.maUser != maUserNTD.Value)
                 throw new UnauthorizedAccessException("Bạn không có quyền thanh toán hợp đồng này.");
-            if (hopDong.trangThai != "DaHoanThanh")
-                throw new InvalidOperationException("Hợp đồng chưa ở trạng thái chờ thanh toán.");
+            if (hopDong.trangThai != "DaHoanThanh" && hopDong.trangThai != "DangThucHien")
+                throw new InvalidOperationException("Hợp đồng chưa ở trạng thái chờ thanh toán hoặc nghiệm thu.");
+
+            var giaiDoans = hopDong.GiaiDoan_HopDongs ?? new List<GiaiDoan_HopDong>();
+            if (giaiDoans.Count == 0 || giaiDoans.Any(g => g.trangThai != "Dat"))
+                throw new InvalidOperationException("Chưa đủ điều kiện thanh toán: Toàn bộ mốc giai đoạn của dự án phải đạt yêu cầu.");
+
+            var coBanGiao = await _context.BanGiao_SanPhams.AnyAsync(b => b.maHD == maHD);
+            if (!coBanGiao)
+                throw new InvalidOperationException("Freelancer chưa bàn giao sản phẩm hoàn chỉnh.");
 
             var maUserEmployer = hopDong.JobPost?.NhaTuyenDung?.maUser;
             var maUserFreelancer = hopDong.FreelancerStudent?.maUser;
@@ -719,7 +738,7 @@ namespace FreelancerStudent.API.Services
                 await _context.Database.ExecuteSqlInterpolatedAsync($@"
                     UPDATE HopDong
                     SET trangThai = N'DaThanhToan'
-                    WHERE maHD = {maHD} AND trangThai = N'DaHoanThanh'");
+                    WHERE maHD = {maHD} AND (trangThai = N'DaHoanThanh' OR trangThai = N'DangThucHien')");
                 return true;
             }
 
@@ -734,9 +753,24 @@ namespace FreelancerStudent.API.Services
                 var soHopDongCapNhat = await _context.Database.ExecuteSqlInterpolatedAsync($@"
                     UPDATE HopDong
                     SET trangThai = N'DaThanhToan'
-                    WHERE maHD = {maHD} AND trangThai = N'DaHoanThanh'");
+                    WHERE maHD = {maHD} AND (trangThai = N'DaHoanThanh' OR trangThai = N'DangThucHien')");
                 if (soHopDongCapNhat != 1)
                     throw new InvalidOperationException("Hợp đồng đã được thanh toán hoặc trạng thái đã thay đổi.");
+
+                // Cập nhật trạng thái sản phẩm bàn giao sang 'DaNghiemThu'
+                await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                    UPDATE BanGiao_SanPham
+                    SET trangThai = N'DaNghiemThu', ngayPhanHoi = GETDATE()
+                    WHERE maHD = {maHD} AND trangThai = N'ChoNghiemThu'");
+
+                // Cập nhật trạng thái JobPost sang 'DaHoanThanh'
+                if (!string.IsNullOrWhiteSpace(hopDong.maJob))
+                {
+                    await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                        UPDATE JobPost
+                        SET status = N'DaHoanThanh'
+                        WHERE maJob = {hopDong.maJob}");
+                }
 
                 var soViNtdCapNhat = await _context.Database.ExecuteSqlInterpolatedAsync($@"
                     UPDATE Wallet SET soDuDongBang = soDuDongBang - {soTienKyQuy}
@@ -901,7 +935,7 @@ namespace FreelancerStudent.API.Services
                 trangThai = h.trangThai ?? string.Empty,
                 giaiDoans = h.GiaiDoan_HopDongs?.Select(g =>
                 {
-                    TachMoTaVaLink(g.moTa, out string moTaSach, out string? linkSanPham);
+                    TachMoTaVaLink(g.moTa, out string moTaSach, out string? linkSanPham, out string? lyDoChuaDat);
                     return new GiaiDoanHopDong_ResponseDTO
                     {
                         maGiaiDoan = g.maGiaiDoan,
@@ -910,47 +944,72 @@ namespace FreelancerStudent.API.Services
                         moTa = moTaSach,
                         linkSanPham = linkSanPham,
                         hanChot = g.hanChot,
-                        trangThai = g.trangThai ?? "ChuaDat"
+                        trangThai = g.trangThai ?? "ChuaDat",
+                        lyDoChuaDat = lyDoChuaDat
                     };
                 }).ToList() ?? new List<GiaiDoanHopDong_ResponseDTO>()
             };
         }
 
-        private static string DongGoiMoTa(string moTaGoc, string? linkSanPham)
+        private static string DongGoiMoTa(string moTaGoc, string? linkSanPham, string? lyDoChuaDat = null)
         {
-            if (string.IsNullOrWhiteSpace(linkSanPham))
+            var sb = new System.Text.StringBuilder(moTaGoc?.Trim() ?? string.Empty);
+            if (!string.IsNullOrWhiteSpace(linkSanPham))
             {
-                return moTaGoc.Trim();
+                if (sb.Length > 0) sb.Append("\n");
+                sb.Append($"[LINK_SAN_PHAM]: {linkSanPham.Trim()}");
             }
-            return $"{moTaGoc.Trim()}\n[LINK_SAN_PHAM]: {linkSanPham.Trim()}";
+            if (!string.IsNullOrWhiteSpace(lyDoChuaDat))
+            {
+                if (sb.Length > 0) sb.Append("\n");
+                sb.Append($"[LY_DO_CHUA_DAT]: {lyDoChuaDat.Trim()}");
+            }
+            return sb.ToString();
         }
 
-        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham)
+        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham, out string? lyDoChuaDat)
         {
+            moTaSach = string.Empty;
+            linkSanPham = null;
+            lyDoChuaDat = null;
+
             if (string.IsNullOrWhiteSpace(moTaDb))
             {
-                moTaSach = string.Empty;
-                linkSanPham = null;
                 return;
             }
 
-            const string tag = "[LINK_SAN_PHAM]:";
-            int idx = moTaDb.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
-            if (idx >= 0)
+            var text = moTaDb;
+
+            const string tagLyDo = "[LY_DO_CHUA_DAT]:";
+            int idxLyDo = text.IndexOf(tagLyDo, StringComparison.OrdinalIgnoreCase);
+            if (idxLyDo >= 0)
             {
-                linkSanPham = moTaDb.Substring(idx + tag.Length).Trim();
-                moTaSach = moTaDb.Substring(0, idx).Trim();
+                lyDoChuaDat = text.Substring(idxLyDo + tagLyDo.Length).Trim();
+                text = text.Substring(0, idxLyDo).Trim();
+            }
+
+            const string tagLink = "[LINK_SAN_PHAM]:";
+            int idxLink = text.IndexOf(tagLink, StringComparison.OrdinalIgnoreCase);
+            if (idxLink >= 0)
+            {
+                linkSanPham = text.Substring(idxLink + tagLink.Length).Trim();
+                text = text.Substring(0, idxLink).Trim();
             }
             else
             {
-                moTaSach = moTaDb.Trim();
-                linkSanPham = null;
-                var match = System.Text.RegularExpressions.Regex.Match(moTaDb, @"https?://[^\s]+");
+                var match = System.Text.RegularExpressions.Regex.Match(text, @"https?://[^\s]+");
                 if (match.Success)
                 {
                     linkSanPham = match.Value.Trim();
                 }
             }
+
+            moTaSach = text.Trim();
+        }
+
+        private static void TachMoTaVaLink(string? moTaDb, out string moTaSach, out string? linkSanPham)
+        {
+            TachMoTaVaLink(moTaDb, out moTaSach, out linkSanPham, out _);
         }
     }
 }

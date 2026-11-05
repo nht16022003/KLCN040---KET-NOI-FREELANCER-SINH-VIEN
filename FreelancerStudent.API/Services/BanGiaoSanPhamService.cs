@@ -71,6 +71,17 @@ namespace FreelancerStudent.API.Services
                 throw new InvalidOperationException(
                     "Hợp đồng không ở trạng thái đang thực hiện.");
 
+            // Kiểm tra điều kiện tiên quyết: TẤT CẢ các mốc tiến độ phải được Nhà tuyển dụng đánh giá Đạt
+            var giaiDoans = await _context.GiaiDoan_HopDongs
+                .Where(g => g.maHD == request.MaHD)
+                .ToListAsync();
+
+            if (giaiDoans.Count == 0 || giaiDoans.Any(g => g.trangThai != "Dat" && g.trangThai != "DaNghiemThu"))
+            {
+                throw new InvalidOperationException(
+                    "Chưa đủ điều kiện bàn giao: Toàn bộ các mốc tiến độ của dự án phải được Nhà tuyển dụng đánh giá Đạt được!");
+            }
+
             if (string.IsNullOrWhiteSpace(request.FileSanPhamUrl))
                 throw new ArgumentException(
                     "Vui lòng cung cấp đường dẫn sản phẩm.");
@@ -81,10 +92,15 @@ namespace FreelancerStudent.API.Services
             var moiNhat = await _banGiaoRepo
                 .GetLatestAsync(request.MaHD);
 
-            if (moiNhat != null &&
-                moiNhat.trangThai != "YeuCauChinhSua")
+            if (moiNhat != null && moiNhat.trangThai == "DaNghiemThu")
                 throw new InvalidOperationException(
-                    "Phiên bản hiện tại chưa có yêu cầu chỉnh sửa.");
+                    "Sản phẩm bàn giao đã được nghiệm thu thành công. Không thể bàn giao lại.");
+
+            if (moiNhat != null &&
+                moiNhat.trangThai != "YeuCauChinhSua" &&
+                moiNhat.trangThai != "ChuaDat")
+                throw new InvalidOperationException(
+                    "Phiên bản hiện tại chưa có yêu cầu chỉnh sửa hoặc đánh giá Chưa đạt. Chỉ có thể cập nhật lại bàn giao khi Nhà tuyển dụng đánh giá Chưa đạt.");
 
             int soPhienBan = 1;
 
@@ -129,6 +145,23 @@ namespace FreelancerStudent.API.Services
                 }
             }
 
+            // Gửi thông báo cho Nhà tuyển dụng
+            if (hd.JobPost?.NhaTuyenDung?.maUser != null)
+            {
+                _context.ThongBaos.Add(new ThongBao
+                {
+                    maUser = hd.JobPost.NhaTuyenDung.maUser,
+                    tieuDe = moiNhat == null ? "Freelancer đã bàn giao sản phẩm" : $"Freelancer đã cập nhật lại bàn giao ({banGiao.phienBan})",
+                    noiDung = moiNhat == null
+                        ? $"Freelancer đã bàn giao sản phẩm hoàn chỉnh cho hợp đồng {request.MaHD}. Vui lòng kiểm tra và đánh giá."
+                        : $"Freelancer đã cập nhật và nộp lại sản phẩm phiên bản {banGiao.phienBan} cho hợp đồng {request.MaHD}. Vui lòng kiểm tra và đánh giá lại.",
+                    loaiThongBao = "HopDong",
+                    linkDieuHuong = $"/BanGiaoSanPham?maHD={Uri.EscapeDataString(request.MaHD)}",
+                    daDoc = false,
+                    ngayTao = DateTime.Now
+                });
+            }
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
@@ -147,7 +180,7 @@ namespace FreelancerStudent.API.Services
             return danhSach.Select(MapBanGiao).ToList();
         }
 
-        // 3. Khách hàng gửi yêu cầu chỉnh sửa
+        // 3. Khách hàng gửi yêu cầu chỉnh sửa / đánh giá Chưa đạt
         public async Task<YeuCauChinhSuaResponseDTO>
             GuiYeuCauAsync(
                 TaoYeuCauChinhSuaRequestDTO request,
@@ -160,16 +193,16 @@ namespace FreelancerStudent.API.Services
                 throw new KeyNotFoundException(
                     "Không tìm thấy sản phẩm bàn giao.");
 
-            await KiemTraQuyenAsync(
+            var hd = await KiemTraQuyenAsync(
                 banGiao.maHD, maUser, false);
 
             if (string.IsNullOrWhiteSpace(request.NoiDungYeuCau))
                 throw new ArgumentException(
-                    "Nội dung yêu cầu không được để trống.");
+                    "Lý do đánh giá Chưa đạt không được để trống.");
 
             if (banGiao.trangThai != "ChoNghiemThu")
                 throw new InvalidOperationException(
-                    "Sản phẩm không ở trạng thái chờ nghiệm thu.");
+                    "Sản phẩm không ở trạng thái chờ nghiệm thu (đang ở trạng thái Chưa đạt hoặc đã nghiệm thu).");
 
             using var transaction =
                 await _context.Database.BeginTransactionAsync();
@@ -187,6 +220,22 @@ namespace FreelancerStudent.API.Services
             banGiao.ngayPhanHoi = DateTime.Now;
 
             await _yeuCauRepo.AddAsync(yc);
+
+            // Gửi thông báo cho Freelancer về lý do Chưa đạt
+            if (hd.FreelancerStudent?.maUser != null)
+            {
+                _context.ThongBaos.Add(new ThongBao
+                {
+                    maUser = hd.FreelancerStudent.maUser,
+                    tieuDe = $"Sản phẩm bàn giao {banGiao.phienBan} được đánh giá Chưa đạt",
+                    noiDung = $"Nhà tuyển dụng đã đánh giá sản phẩm {banGiao.phienBan} của hợp đồng {banGiao.maHD} là Chưa đạt. Lý do: {request.NoiDungYeuCau}. Vui lòng nhấn 'Cập nhật lại bàn giao' để nộp lại sản phẩm.",
+                    loaiThongBao = "HopDong",
+                    linkDieuHuong = $"/BanGiaoSanPham?maHD={Uri.EscapeDataString(banGiao.maHD)}&mode=capnhat",
+                    daDoc = false,
+                    ngayTao = DateTime.Now
+                });
+            }
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
@@ -225,7 +274,7 @@ namespace FreelancerStudent.API.Services
 
             if (banGiao.trangThai != "ChoNghiemThu")
                 throw new InvalidOperationException(
-                    "Sản phẩm không ở trạng thái chờ nghiệm thu.");
+                    "Sản phẩm không ở trạng thái chờ nghiệm thu (đang ở trạng thái Chưa đạt). Không thể nghiệm thu!");
 
             decimal soTien = hd.sotienkyquy ?? 0;
 

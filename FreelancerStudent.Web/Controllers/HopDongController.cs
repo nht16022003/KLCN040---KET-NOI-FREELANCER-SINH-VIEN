@@ -18,6 +18,7 @@ namespace FreelancerStudent.Web.Controllers
         private readonly ITaskCongViecWebService _taskWebService;
         private readonly IDanhGiaWebService _danhGiaWebService;
         private readonly IMinhChungWebService _minhChungWebService;
+        private readonly IBanGiaoSanPhamWebService _banGiaoWebService;
 
         public HopDongController(
             IHopDongWebService hopDongService,
@@ -27,7 +28,8 @@ namespace FreelancerStudent.Web.Controllers
             IWalletWebService walletWebService,
             ITaskCongViecWebService taskWebService,
             IDanhGiaWebService danhGiaWebService,
-            IMinhChungWebService minhChungWebService)
+            IMinhChungWebService minhChungWebService,
+            IBanGiaoSanPhamWebService banGiaoWebService)
         {
             _hopDongService = hopDongService;
             _ntdService = ntdService;
@@ -37,6 +39,7 @@ namespace FreelancerStudent.Web.Controllers
             _taskWebService = taskWebService;
             _danhGiaWebService = danhGiaWebService;
             _minhChungWebService = minhChungWebService;
+            _banGiaoWebService = banGiaoWebService;
         }
 
         [HttpGet]
@@ -446,6 +449,28 @@ namespace FreelancerStudent.Web.Controllers
                 if (tienDoRes.success && tienDoRes.data != null)
                 {
                     hopDong.TienDoDuAn = tienDoRes.data;
+
+                    // Đồng bộ dữ liệu mốc tiến độ giữa 2 khu vực (đảm bảo luôn dùng chung 1 nguồn dữ liệu)
+                    if (hopDong.TienDoDuAn.danhSachGiaiDoan != null && hopDong.TienDoDuAn.danhSachGiaiDoan.Count > 0)
+                    {
+                        hopDong.giaiDoans = hopDong.TienDoDuAn.danhSachGiaiDoan;
+                    }
+                }
+            }
+            catch { }
+
+            // Tải thông tin sản phẩm bàn giao
+            try
+            {
+                var banGiaoRes = await _banGiaoWebService.LayDanhSachAsync(maHD);
+                if (banGiaoRes.success && banGiaoRes.data != null && banGiaoRes.data.Count > 0)
+                {
+                    var banGiaoMoiNhat = banGiaoRes.data.OrderByDescending(b => b.MaBanGiao).FirstOrDefault();
+                    hopDong.CoSanPhamBanGiaoChoNghiemThu = banGiaoMoiNhat?.TrangThai == "ChoNghiemThu";
+                    hopDong.MaBanGiaoMoiNhat = banGiaoMoiNhat?.MaBanGiao;
+                    hopDong.TrangThaiBanGiaoMoiNhat = banGiaoMoiNhat?.TrangThai;
+                    hopDong.PhanHoiBanGiaoMoiNhat = banGiaoMoiNhat?.PhanHoi;
+                    hopDong.PhienBanBanGiaoMoiNhat = banGiaoMoiNhat?.PhienBan;
                 }
             }
             catch { }
@@ -596,7 +621,7 @@ namespace FreelancerStudent.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DanhGiaGiaiDoan(string maHD, int? maGiaiDoan, string trangThai)
+        public async Task<IActionResult> DanhGiaGiaiDoan(string maHD, int? maGiaiDoan, string trangThai, string? lyDo)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (!maUser.HasValue)
@@ -609,13 +634,19 @@ namespace FreelancerStudent.Web.Controllers
                 return RedirectToAction("ChiTiet", new { maHD });
             }
 
-            var result = await _taskWebService.DanhGiaGiaiDoanAsync(maHD, maGiaiDoan, trangThai, maUser.Value);
+            if (trangThai == "ChuaDat" && string.IsNullOrWhiteSpace(lyDo))
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập lý do đánh giá chưa đạt yêu cầu.";
+                return RedirectToAction("ChiTiet", new { maHD });
+            }
+
+            var result = await _taskWebService.DanhGiaGiaiDoanAsync(maHD, maGiaiDoan, trangThai, lyDo, maUser.Value);
             TempData[result.success ? "SuccessMessage" : "ErrorMessage"] = result.message;
             return RedirectToAction("ChiTiet", new { maHD });
         }
 
         [HttpGet]
-        public async Task<IActionResult> ThanhToan(string maHD)
+        public async Task<IActionResult> ThanhToan(string maHD, int? maBanGiao)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (!maUser.HasValue)
@@ -629,12 +660,13 @@ namespace FreelancerStudent.Web.Controllers
                 TempData["ErrorMessage"] = result.message;
                 return RedirectToAction("ChiTiet", new { maHD });
             }
+            result.data.maBanGiao = maBanGiao;
             return View(result.data);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> XacNhanThanhToan(string maHD)
+        public async Task<IActionResult> XacNhanThanhToan(string maHD, int? maBanGiao)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (!maUser.HasValue)
@@ -748,6 +780,40 @@ namespace FreelancerStudent.Web.Controllers
 
             var result = await _taskWebService.LayTienDoDuAnAsync(maHD, maUser.Value);
             return Json(result);
+        }
+
+        // POST: /HopDong/CapNhatMocBanGiao
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatMocBanGiao(string maHD, int maGiaiDoan, string? linkSanPham, string? moTa)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+                return RedirectToAction("DangNhap", "Account");
+
+            if (string.IsNullOrWhiteSpace(maHD) || maGiaiDoan <= 0)
+            {
+                TempData["ErrorMessage"] = "Thông tin mốc bàn giao không hợp lệ.";
+                return RedirectToAction("ChiTiet", new { maHD });
+            }
+
+            if (string.IsNullOrWhiteSpace(linkSanPham))
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập đường dẫn sản phẩm bàn giao của mốc.";
+                return RedirectToAction("ChiTiet", new { maHD });
+            }
+
+            var result = await _taskWebService.CapNhatMocBanGiaoAsync(maHD, maGiaiDoan, linkSanPham, moTa, maUser.Value);
+            if (result.success)
+            {
+                TempData["SuccessMessage"] = result.message ?? "Đã cập nhật lại mốc bàn giao thành công! Mốc đã chuyển về trạng thái chờ đánh giá.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.message ?? "Không thể cập nhật mốc bàn giao.";
+            }
+
+            return RedirectToAction("ChiTiet", new { maHD });
         }
     }
 }

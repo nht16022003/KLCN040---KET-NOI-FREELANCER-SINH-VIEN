@@ -105,9 +105,9 @@
                             @* 1. Thêm ô chọn loại tài khoản *@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Loại tài khoản</label>
-                                <select name="marole" class="form-select">
-                                    <option value="1">Sinh viên Freelancer (Tìm việc)</option>
-                                    <option value="2">Nhà tuyển dụng (Đăng việc)</option>
+                                <select asp-for="marole" name="marole" class="form-select">
+                                    <option value="1" selected="@(Model?.marole != 2)">Sinh viên Freelancer (Tìm việc)</option>
+                                    <option value="2" selected="@(Model?.marole == 2)">Nhà tuyển dụng (Đăng việc)</option>
                                 </select>
                             </div>
                             <div class="mb-3">

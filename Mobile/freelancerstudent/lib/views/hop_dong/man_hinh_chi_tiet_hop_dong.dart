@@ -494,6 +494,70 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       return;
     }
 
+    String? lyDo;
+    if (trangThai == 'ChuaDat') {
+      final lyDoController = TextEditingController();
+      final formKeyLyDo = GlobalKey<FormState>();
+      final ok = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.report_problem_outlined, color: Colors.orange.shade800),
+              const SizedBox(width: 8),
+              const Text('Đánh giá Chưa đạt', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Form(
+            key: formKeyLyDo,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Vui lòng nêu rõ lý do mốc "${gd.tenGiaiDoan}" chưa đạt yêu cầu để Freelancer chỉnh sửa:'),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: lyDoController,
+                  maxLines: 3,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Lý do đánh giá chưa đạt *',
+                    hintText: 'Ví dụ: Thiếu tài liệu hướng dẫn, chức năng X bị lỗi...',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Vui lòng nhập lý do chưa đạt';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Hủy'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKeyLyDo.currentState!.validate()) {
+                  Navigator.of(ctx).pop(true);
+                }
+              },
+              style: FilledButton.styleFrom(backgroundColor: Colors.orange.shade800),
+              child: const Text('Xác nhận Chưa đạt'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+      lyDo = lyDoController.text.trim();
+    }
+
     setState(() => _dangXuLy = true);
     final vm = context.read<TaskViewModel>();
     final loi = await vm.danhGiaGiaiDoan(
@@ -501,6 +565,7 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       maUser: user.userId,
       maGiaiDoan: gd.maGiaiDoan,
       trangThai: trangThai,
+      lyDo: lyDo,
     );
     if (!mounted) return;
     setState(() => _dangXuLy = false);
@@ -509,6 +574,172 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       _thongBao(trangThai == 'Dat'
           ? 'Đã xác nhận mốc "${gd.tenGiaiDoan}" là Đạt.'
           : 'Đã đánh dấu mốc "${gd.tenGiaiDoan}" là Chưa đạt.');
+      await _tai();
+    } else {
+      _thongBao(loi);
+    }
+  }
+
+  /// Freelancer cập nhật lại bàn giao cho một mốc tiến độ
+  Future<void> _hienFormCapNhatMoc(HopDongModel hd, GiaiDoanHopDongModel gd) async {
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null) {
+      _thongBao('Bạn cần đăng nhập.');
+      return;
+    }
+
+    final linkController = TextEditingController(text: gd.linkSanPham ?? '');
+    final moTaClean = (gd.moTa ?? '').replaceAll(RegExp(r'\[Lý do chưa đạt: [^\]]+\]\s*'), '').trim();
+    final moTaController = TextEditingController(text: moTaClean);
+    final formKey = GlobalKey<FormState>();
+
+    final xacNhan = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+        ),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.sync_problem, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Cập nhật bàn giao: ${gd.tenGiaiDoan}',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx, false),
+                  ),
+                ],
+              ),
+              if ((gd.lyDoChuaDat ?? '').isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade300),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Lý do Nhà tuyển dụng đánh giá Chưa đạt:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.red.shade800,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              gd.lyDoChuaDat!,
+                              style: TextStyle(fontSize: 13, color: Colors.red.shade900),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: linkController,
+                decoration: const InputDecoration(
+                  labelText: 'Link sản phẩm / tài liệu mốc *',
+                  hintText: 'https://github.com/... hoặc Drive link',
+                  prefixIcon: Icon(Icons.link),
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.url,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Vui lòng nhập link sản phẩm hoặc tài liệu';
+                  }
+                  if (!v.trim().startsWith('http://') && !v.trim().startsWith('https://')) {
+                    return 'Link phải bắt đầu bằng http:// hoặc https://';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: moTaController,
+                decoration: const InputDecoration(
+                  labelText: 'Ghi chú / Mô tả nội dung cập nhật (Tùy chọn)',
+                  hintText: 'Mô tả nội dung đã chỉnh sửa hoặc hoàn thiện thêm...',
+                  prefixIcon: Icon(Icons.notes),
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      Navigator.pop(ctx, true);
+                    }
+                  },
+                  icon: const Icon(Icons.send_rounded),
+                  label: const Text('Gửi bàn giao lại mốc này'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (xacNhan != true || !mounted) return;
+
+    setState(() => _dangXuLy = true);
+    final vm = context.read<TaskViewModel>();
+    final loi = await vm.capNhatMocBanGiao(
+      maHD: hd.maHD,
+      maGiaiDoan: gd.maGiaiDoan,
+      linkSanPham: linkController.text.trim(),
+      moTa: moTaController.text.trim().isNotEmpty ? moTaController.text.trim() : null,
+      maUser: user.userId,
+    );
+    if (!mounted) return;
+    setState(() => _dangXuLy = false);
+
+    if (loi == null) {
+      _thongBao('Đã cập nhật lại mốc bàn giao "${gd.tenGiaiDoan}" thành công! Mốc đã chuyển sang trạng thái Chờ NTD đánh giá.');
       await _tai();
     } else {
       _thongBao(loi);
@@ -708,7 +939,9 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
               const SizedBox(height: 8),
               ...hd.giaiDoans.map(
                 (g) {
-                  final daDat = g.trangThai == 'Dat' || g.trangThai == 'DaNghiemThu';
+                  final bool daDat = g.trangThai == 'Dat' || g.trangThai == 'DaNghiemThu';
+                  final bool choDanhGia = g.trangThai == 'ChoDanhGia';
+                  final bool chuaDat = g.trangThai == 'ChuaDat';
                   final moTaSach = _lamSachMoTaGiaiDoan(g.moTa);
                   final linkMoc = (g.linkSanPham != null && g.linkSanPham!.trim().isNotEmpty)
                       ? g.linkSanPham!.trim()
@@ -718,7 +951,14 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade200),
+                      side: BorderSide(
+                        color: daDat
+                            ? Colors.green.shade300
+                            : (chuaDat
+                                ? Colors.red.shade300
+                                : (choDanhGia ? Colors.blue.shade300 : Colors.grey.shade200)),
+                        width: (daDat || chuaDat || choDanhGia) ? 1.5 : 1.0,
+                      ),
                     ),
                     color: AppColors.surface,
                     child: Padding(
@@ -742,15 +982,34 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: daDat ? AppColors.lightGreenSurface : Colors.orange.withAlpha(25),
+                                  color: daDat
+                                      ? AppColors.lightGreenSurface
+                                      : (choDanhGia
+                                          ? Colors.blue.shade50
+                                          : (chuaDat ? Colors.red.shade50 : Colors.orange.withAlpha(25))),
                                   borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: daDat
+                                        ? AppColors.primary
+                                        : (choDanhGia
+                                            ? Colors.blue.shade400
+                                            : (chuaDat ? Colors.red.shade400 : Colors.orange.shade400)),
+                                  ),
                                 ),
                                 child: Text(
-                                  daDat ? 'Đạt' : 'Chưa đạt',
+                                  daDat
+                                      ? 'ĐÃ ĐẠT'
+                                      : (choDanhGia
+                                          ? 'CHỜ NTD ĐÁNH GIÁ'
+                                          : (chuaDat ? 'CHƯA ĐẠT' : 'CHƯA ĐẠT')),
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: daDat ? AppColors.primary : Colors.orange.shade800,
+                                    color: daDat
+                                        ? AppColors.primaryDark
+                                        : (choDanhGia
+                                            ? Colors.blue.shade900
+                                            : (chuaDat ? Colors.red.shade900 : Colors.orange.shade800)),
                                   ),
                                 ),
                               ),
@@ -761,6 +1020,48 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                             Text(
                               moTaSach,
                               style: const TextStyle(fontSize: 13, color: AppColors.bodyText),
+                            ),
+                          ],
+                          // HỘP LÝ DO CHƯA ĐẠT NẾU CÓ
+                          if ((g.lyDoChuaDat ?? '').isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.info_outline, color: Colors.red.shade700, size: 16),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: 'Lý do Chưa đạt: ',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.red.shade900,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: g.lyDoChuaDat!,
+                                            style: TextStyle(
+                                              color: Colors.red.shade800,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                           if (linkMoc != null && linkMoc.isNotEmpty) ...[
@@ -836,6 +1137,40 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                             Text(
                               'Hạn bàn giao: ${_ngay(g.hanChot)}',
                               style: const TextStyle(fontSize: 12, color: AppColors.mutedText),
+                            ),
+                          ],
+                          // NÚT CẬP NHẬT LẠI BÀN GIAO CHO FREELANCER KHI CHƯA ĐẠT HOẶC CẦN NỘP
+                          if (laFreelancerCuaHopDong && hd.trangThai == 'DangThucHien' && !daDat) ...[
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: _dangXuLy ? null : () => _hienFormCapNhatMoc(hd, g),
+                                icon: Icon(
+                                  chuaDat ? Icons.sync_problem : Icons.upload_file,
+                                  size: 15,
+                                  color: chuaDat ? Colors.red.shade700 : AppColors.primary,
+                                ),
+                                label: Text(
+                                  chuaDat
+                                      ? 'Cập nhật lại bàn giao mốc này'
+                                      : (choDanhGia
+                                          ? 'Chỉnh sửa lại link bàn giao'
+                                          : 'Bàn giao mốc này'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: chuaDat ? Colors.red.shade800 : AppColors.primary,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                  side: BorderSide(
+                                    color: chuaDat ? Colors.red.shade400 : AppColors.primary,
+                                  ),
+                                  backgroundColor: chuaDat ? Colors.red.shade50 : AppColors.surface,
+                                ),
+                              ),
                             ),
                           ],
                           if (isNTD && hd.trangThai == 'DangThucHien') ...[
@@ -1093,6 +1428,35 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 14),
+                      if (hd.trangThai == 'DangThucHien' && !hd.tatCaMocDaDat) ...[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.amber.shade400),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.warning_amber_rounded, color: Colors.amber.shade900, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Chưa đủ điều kiện bàn giao sản phẩm: Toàn bộ ${hd.giaiDoans.length} mốc tiến độ của dự án phải được Nhà tuyển dụng đánh giá Đạt trước khi bàn giao sản phẩm hoàn chỉnh.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.amber.shade900,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
@@ -1105,6 +1469,7 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                                   trangThaiHopDong: hd.trangThai,
                                   laFreelancer: laFreelancerCuaHopDong,
                                   laKhachHang: isNTD,
+                                  tatCaMocDaDat: hd.tatCaMocDaDat,
                                 ),
                               ),
                             );

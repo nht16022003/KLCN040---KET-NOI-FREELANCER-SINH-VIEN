@@ -11,6 +11,7 @@ namespace FreelancerStudent.API.Services.Interfaces
         Task<bool> CapNhatTaskAsync(CapNhatTaskCongViec_RequestDTO request, int maUser);
         Task<bool> CapNhatTrangThaiTaskAsync(int maTask, string trangThaiMoi, int maUser);
         Task<bool> XoaTaskAsync(int maTask, int maUser);
-        Task<bool> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThaiMoi, int maUser);
+        Task<bool> DanhGiaGiaiDoanAsync(string maHD, int? maGiaiDoan, string trangThaiMoi, string? lyDo, int maUser);
+        Task<bool> CapNhatMocBanGiaoAsync(string maHD, int maGiaiDoan, string? linkSanPham, string? moTa, int maUser);
     }
 }

@@ -122,12 +122,32 @@ class TaskViewModel extends ChangeNotifier {
     required int maUser,
     int? maGiaiDoan,
     required String trangThai,
+    String? lyDo,
   }) => _ghi(
         () => _service.danhGiaGiaiDoan(
           maHD: maHD,
           maUser: maUser,
           maGiaiDoan: maGiaiDoan,
           trangThai: trangThai,
+          lyDo: lyDo,
+        ),
+        maHD,
+        maUser,
+      );
+
+  Future<String?> capNhatMocBanGiao({
+    required String maHD,
+    required int maGiaiDoan,
+    required String linkSanPham,
+    String? moTa,
+    required int maUser,
+  }) => _ghi(
+        () => _service.capNhatMocBanGiao(
+          maHD: maHD,
+          maGiaiDoan: maGiaiDoan,
+          linkSanPham: linkSanPham,
+          moTa: moTa,
+          maUser: maUser,
         ),
         maHD,
         maUser,
