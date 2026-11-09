@@ -1,0 +1,111 @@
+.home-overview__hero {
+  padding-block: var(--space-7);
+  border-bottom: var(--border-card);
+  background: var(--color-surface);
+}
+
+.home-overview__hero-content {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+
+.home-overview__eyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+}
+
+.home-overview__hero h1 {
+  max-width: 24ch;
+  margin: 0;
+  font-size: var(--text-3xl);
+  line-height: var(--leading-heading);
+}
+
+.home-overview__lead {
+  max-width: 65ch;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+}
+
+.home-overview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.home-overview__notice {
+  margin: 0;
+}
+
+.home-overview__section {
+  padding-block: var(--space-6);
+  border-bottom: var(--border-card);
+}
+
+.home-overview__section--surface {
+  background: var(--color-surface);
+}
+
+.home-overview__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.home-overview__cards .app-card {
+  margin: 0;
+}
+
+.home-overview__cards h3 {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-xl);
+}
+
+.home-overview__cards p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+}
+
+.home-overview__note {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4);
+  border-inline-start: var(--border-card);
+  border-inline-start-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.home-overview__faq {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.home-overview__faq details {
+  margin: 0;
+}
+
+.home-overview__faq summary {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: var(--text-base);
+}
+
+.home-overview__faq p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 767.98px) {
+  .home-overview__hero h1 {
+    font-size: var(--text-2xl);
+  }
+
+  .home-overview__cards {
+    grid-template-columns: 1fr;
+  }
+}

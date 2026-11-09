@@ -18,5 +18,12 @@ namespace FreelancerStudent.Web.ViewModels.Account
 
         public string status { get; set; } = string.Empty;
         public string? avatarUrl { get; set; }
+
+        // Bổ sung kiểm soát niên khóa sinh viên
+        public bool hetHanNienKhoa { get; set; } = false;
+        public bool nienKhoaHopLe { get; set; } = true;
+        public string? thongBaoNienKhoa { get; set; }
+        public string? nienKhoa { get; set; }
+        public int? namKetThucNienKhoa { get; set; }
     }
 }

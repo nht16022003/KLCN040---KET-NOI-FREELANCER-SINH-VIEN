@@ -1,213 +1,1444 @@
 @using FreelancerStudent.Web.ViewModels
-@model List<FreelancerStudent.Web.ViewModels.FreelacerStudentViewModel>
+@model FreelancerStudent.Web.ViewModels.FreelancerFilterViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Danh sách Freelancer Sinh viên";
 }
 
-<div class="container py-4">
-    <!-- TIÊU ĐỀ TRANG -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <h4 class="text-success fw-bold mb-1">
-                Tìm kiếm & Tuyển chọn Freelancer Sinh viên
-            </h4>
-            <span class="text-muted small">Khám phá thông tin, hồ sơ năng lực và kết nối trực tiếp với các bạn sinh
-                viên</span>
+<style>
+    .ntd-dashboard-root {
+        --ntd-deep-forest: #0D2818;
+        --ntd-forest-mid: #144327;
+        --ntd-forest-rich: #1B5E36;
+        --ntd-primary: #2B7A4B;
+        --ntd-primary-hover: #23653E;
+        --ntd-accent-bright: #4ADE80;
+        --ntd-mint-soft: #EAF5EE;
+        --ntd-mint-border: #C8E6C9;
+        --ntd-surface-dark: #0A2013;
+        --ntd-surface-card-bottom: #0E2B1A;
+        --ntd-text-dark: #0F172A;
+        --ntd-text-body: #334155;
+        --ntd-text-muted: #64748B;
+        --ntd-border-light: #E2E8F0;
+        --accent: #2B7A4B;
+        --accent-hover: #1E5C37;
+        --ink: #0F172A;
+        --muted: #64748B;
+        --border: #E2E8F0;
+        --card-bg: #FFFFFF;
+        font-family: var(--font-sans);
+        color: var(--ntd-text-dark);
+        background-color: #F4F8F5;
+        min-height: 100vh;
+        padding-bottom: 72px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-showcase {
+        position: relative;
+        background: #064321e4;
+        border-radius: 24px !important;
+        padding: 48px 44px 40px 44px;
+        margin-top: 24px;
+        margin-bottom: 36px;
+        overflow: hidden;
+        box-shadow: 0 24px 54px rgba(13, 40, 24, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(74, 222, 128, 0.18);
+    }
+
+    .ntd-dashboard-root .ntd-hero-showcase::before {
+        content: "";
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 68%;
+        height: 165%;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.0) 20%, rgba(74, 222, 128, 0.08) 48%, rgba(43, 122, 75, 0.22) 52%, rgba(13, 40, 24, 0.0) 80%);
+        transform: rotate(-14deg);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ntd-dashboard-root .ntd-hero-showcase::after {
+        content: "";
+        position: absolute;
+        bottom: -25%;
+        left: 18%;
+        width: 55%;
+        height: 90%;
+        background: radial-gradient(circle, rgba(59, 178, 105, 0.24) 0%, rgba(13, 40, 24, 0) 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ntd-dashboard-root .ntd-hero-inner {
+        position: relative;
+        z-index: 2;
+    }
+
+    .ntd-dashboard-root .ntd-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(74, 222, 128, 0.14);
+        color: #FFFFFF;
+        border: 1px solid rgba(167, 243, 208, 0.28);
+        border-radius: 8px !important;
+        padding: 6px 14px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50% !important;
+        background: #4ADE80;
+        box-shadow: 0 0 8px #4ADE80;
+    }
+
+    .ntd-dashboard-root .ntd-hero-title {
+        font-size: clamp(1.95rem, 3.2vw, 2.75rem);
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1.18;
+        letter-spacing: -0.02em;
+        max-width: 760px;
+        margin-bottom: 14px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-desc {
+        font-size: 1.02rem;
+        color: rgba(234, 245, 238, 0.84);
+        line-height: 1.6;
+        max-width: none;
+        width: 100%;
+        margin-bottom: 26px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 34px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-cta-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-primary {
+        background: #FFFFFF !important;
+        color: #0D2818 !important;
+        border: 1px solid #FFFFFF !important;
+        border-radius: 12px !important;
+        padding: 12px 24px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+        transition: all 0.22s ease;
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-primary:hover {
+        background: #EAF5EE !important;
+        color: #091E12 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-secondary {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        border-radius: 12px !important;
+        padding: 12px 22px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(8px);
+        transition: all 0.22s ease;
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: #FFFFFF !important;
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+    }
+
+    .ntd-dashboard-root .ntd-carousel-nav-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ntd-dashboard-root .ntd-btn-toggle-view {
+        background: rgba(255, 255, 255, 0.08);
+        color: #D1FAE5;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px !important;
+        padding: 9px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-btn-toggle-view:hover {
+        background: rgba(255, 255, 255, 0.18);
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-nav-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50% !important;
+        background: #FFFFFF;
+        color: #0D2818;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-nav-circle:hover {
+        background: #4ADE80;
+        color: #091E12;
+        transform: scale(1.06);
+    }
+
+    .ntd-dashboard-root .ntd-functions-header-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        margin-bottom: 18px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .ntd-dashboard-root .ntd-functions-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 2px;
+    }
+
+    .ntd-dashboard-root .ntd-functions-subtitle {
+        font-size: 0.86rem;
+        color: rgba(234, 245, 238, 0.74);
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track {
+        display: flex;
+        gap: 22px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scroll-snap-type: x mandatory;
+        padding: 6px 4px 18px 4px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track.is-grid-mode {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        overflow-x: visible;
+    }
+
+    .ntd-dashboard-root .ntd-feature-card {
+        flex: 0 0 calc(33.333% - 15px);
+        min-width: 300px;
+        scroll-snap-align: start;
+        background: var(--ntd-surface-card-bottom);
+        border: 1px solid rgba(167, 243, 208, 0.16);
+        border-radius: 18px !important;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 16px 36px rgba(5, 18, 10, 0.38);
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track.is-grid-mode .ntd-feature-card {
+        flex: unset;
+        min-width: 0;
+    }
+
+    .ntd-dashboard-root .ntd-feature-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(74, 222, 128, 0.55);
+        box-shadow: 0 22px 44px rgba(5, 18, 10, 0.52);
+    }
+
+    .ntd-dashboard-root .ntd-card-visual-top {
+        position: relative;
+        height: 168px;
+        padding: 18px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-1 {
+        background: #EAF5EE;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-2 {
+      background: #EAF5EE;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-3 {
+       background: #EAF5EE;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-4 {
+      background: #EAF5EE;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-visual-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 2;
+    }
+
+    .ntd-dashboard-root .ntd-visual-tag {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 4px 10px;
+        border-radius: 6px !important;
+        background: rgba(13, 40, 24, 0.12);
+        color: inherit;
+        backdrop-filter: blur(4px);
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-2 .ntd-visual-tag,
+    .ntd-dashboard-root .ntd-visual-theme-4 .ntd-visual-tag {
+        background: rgba(255, 255, 255, 0.16);
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-visual-step-num {
+        font-size: 0.75rem;
+        font-weight: 800;
+        opacity: 0.75;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-window {
+        background: rgba(255, 255, 255, 0.94);
+        border-radius: 10px !important;
+        padding: 12px 14px;
+        box-shadow: 0 10px 24px rgba(13, 40, 24, 0.15);
+        color: #0F172A;
+        z-index: 2;
+        border: 1px solid rgba(43, 122, 75, 0.15);
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-title {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-pill {
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px !important;
+        background: #E8F5E9;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-bar {
+        height: 6px;
+        border-radius: 4px !important;
+        background: #E2E8F0;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #1B5E36, #4ADE80);
+        border-radius: 4px !important;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-sub {
+        font-size: 0.71rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .ntd-dashboard-root .ntd-card-body-bottom {
+        padding: 22px 22px 20px 22px;
+        background: linear-gradient(180deg, rgba(16, 49, 30, 0.96) 0%, #091D11 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-title {
+        font-size: 1.12rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-desc {
+        font-size: 0.85rem;
+        color: rgba(226, 242, 232, 0.76);
+        line-height: 1.55;
+        margin-bottom: 18px;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 16px;
+        background: rgba(43, 122, 75, 0.28);
+        color: #FFFFFF !important;
+        border: 1px solid rgba(74, 222, 128, 0.32);
+        border-radius: 10px !important;
+        font-size: 0.84rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-btn:hover {
+        background: #2B7A4B;
+        color: #FFFFFF !important;
+        border-color: #4ADE80;
+    }
+
+    .ntd-dashboard-root .ntd-hero-dots-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-dot {
+        flex: 0 0 8px;
+        width: 8px !important;
+        height: 8px !important;
+        min-width: 8px;
+        min-height: 8px !important;
+        aspect-ratio: 1;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.26);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-hero-dot.active {
+        width: 8px !important;
+        height: 8px !important;
+        min-height: 8px !important;
+        border-radius: 50% !important;
+        background: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-directory-section {
+        margin-bottom: 44px;
+    }
+
+    .ntd-dashboard-root .ntd-section-heading-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .ntd-dashboard-root .ntd-section-badge {
+        display: inline-block;
+        background: #EAF5EE;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+        border-radius: 6px !important;
+        padding: 4px 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 6px;
+    }
+
+    .ntd-dashboard-root .page-title {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #0D2818;
+        margin-bottom: 4px;
+    }
+
+    .ntd-dashboard-root .page-subtitle {
+        color: #475569;
+        font-size: 0.92rem;
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .filter-card,
+    .ntd-dashboard-root .filter-sidebar-card {
+        background: #FFFFFF;
+        border: 1px solid #D5E6DC;
+        border-radius: 16px !important;
+        padding: 20px;
+        box-shadow: 0 4px 18px rgba(13, 40, 24, 0.04);
+    }
+
+    .ntd-dashboard-root .filter-sidebar-title {
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: #144327;
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .filter-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .ntd-dashboard-root .form-control-custom,
+    .ntd-dashboard-root .form-select-custom {
+        border: 1px solid #CBD5E1;
+        border-radius: 10px !important;
+        font-size: 0.88rem;
+        color: #0F172A;
+        padding: 10px 14px;
+        background-color: #F8FAFC;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .form-control-custom:focus,
+    .ntd-dashboard-root .form-select-custom:focus {
+        border-color: #2B7A4B;
+        background-color: #FFFFFF;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(43, 122, 75, 0.14) !important;
+    }
+
+    .ntd-dashboard-root .btn-search-main {
+        background: linear-gradient(135deg, #1B5E36 0%, #2B7A4B 100%);
+        color: #FFFFFF !important;
+        border: 1px solid #1B5E36;
+        border-radius: 10px !important;
+        padding: 10px 22px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        box-shadow: 0 6px 16px rgba(27, 94, 54, 0.2);
+    }
+
+    .ntd-dashboard-root .btn-search-main:hover {
+        background: linear-gradient(135deg, #144327 0%, #1B5E36 100%);
+        color: #FFFFFF !important;
+        transform: translateY(-1px);
+    }
+
+    .ntd-dashboard-root .btn-reset-filter {
+        background-color: #F1F5F9;
+        color: #475569;
+        border: 1px solid #CBD5E1;
+        border-radius: 10px !important;
+        padding: 10px 18px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .ntd-dashboard-root .btn-reset-filter:hover {
+        background-color: #E2E8F0;
+        color: #0F172A;
+    }
+
+    .ntd-dashboard-root .results-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px !important;
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .ntd-dashboard-root .results-count {
+        font-weight: 800;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .freelancer-card {
+        background: #FFFFFF;
+        border: 1px solid #DCE8E0;
+        border-radius: 16px !important;
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        box-shadow: 0 8px 24px rgba(13, 40, 24, 0.05);
+        transition: all 0.24s ease;
+    }
+
+    .ntd-dashboard-root .freelancer-card:hover {
+        border-color: #2B7A4B;
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(13, 40, 24, 0.12);
+    }
+
+    .ntd-dashboard-root .freelancer-card-top-banner {
+        background: linear-gradient(135deg, #0D2818 0%, #1B5E36 60%, #2B7A4B 100%);
+        padding: 18px 20px 14px 20px;
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .card-top-profile {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .student-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px !important;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        background: #FFFFFF;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .ntd-dashboard-root .student-name-link {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #FFFFFF;
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .ntd-dashboard-root .student-name-link:hover {
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .student-major-sub {
+        color: #FFFFFF;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-top: 3px;
+    }
+
+    .ntd-dashboard-root .student-school-sub {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.78rem;
+        margin-top: 2px;
+    }
+
+    .ntd-dashboard-root .freelancer-card-body {
+        padding: 18px 20px 14px 20px;
+        flex-grow: 1;
+    }
+
+    .ntd-dashboard-root .metrics-grid-compact {
+        background-color: #F4F9F6;
+        border: 1px solid #D5E8DC;
+        border-radius: 10px !important;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+
+    .ntd-dashboard-root .metric-compact-val {
+        font-weight: 800;
+        color: #0D2818;
+        display: block;
+    }
+
+    .ntd-dashboard-root .metric-compact-val.rating {
+        color: #B45309;
+    }
+
+    .ntd-dashboard-root .metric-compact-val.rating-none {
+        color: #64748B;
+        font-weight: 600;
+    }
+
+    .ntd-dashboard-root .student-bio-text {
+        font-size: 0.84rem;
+        color: #334155;
+        line-height: 1.5;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .ntd-dashboard-root .skill-tag-item {
+        background-color: #EAF5EE;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+        border-radius: 6px !important;
+        font-size: 0.74rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .ntd-dashboard-root .card-bottom-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        background: #FAFCFB;
+        border-top: 1px solid #E2E8F0;
+        margin-top: auto;
+    }
+
+    .ntd-dashboard-root .fee-refer-text {
+        font-size: 0.75rem;
+        color: #64748B;
+    }
+
+    .ntd-dashboard-root .fee-refer-amount {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #1B5E36;
+    }
+
+    .ntd-dashboard-root .btn-view-profile {
+        background-color: #2B7A4B;
+        color: #FFFFFF !important;
+        border: 1px solid #2B7A4B;
+        border-radius: 8px !important;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+
+    .ntd-dashboard-root .btn-view-profile:hover {
+        background-color: #144327;
+        border-color: #144327;
+        color: #FFFFFF !important;
+    }
+
+    .ntd-dashboard-root .status-badge-inline {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px !important;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .ntd-dashboard-root .status-available {
+        background-color: rgba(74, 222, 128, 0.22);
+        color: #FFFFFF;
+        border: 1px solid rgba(167, 243, 208, 0.4);
+    }
+
+    .ntd-dashboard-root .status-busy {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #E2E8F0;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .ntd-dashboard-root .empty-state-box {
+        background: #FFFFFF;
+        border: 1px solid #DCE8E0;
+        border-radius: 16px !important;
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    .ntd-dashboard-root .ntd-workflow-section {
+        background: linear-gradient(180deg, #FFFFFF 0%, #EAF5EE 100%);
+        border: 1px solid #C8E6C9;
+        border-radius: 22px !important;
+        padding: 36px 34px;
+        box-shadow: 0 12px 32px rgba(13, 40, 24, 0.06);
+    }
+
+    .ntd-dashboard-root .ntd-workflow-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 26px;
+    }
+
+    .ntd-dashboard-root .ntd-workflow-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0D2818;
+        margin-bottom: 4px;
+    }
+
+    .ntd-dashboard-root .ntd-workflow-sub {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .ntd-step-card {
+        position: relative;
+        background: #FFFFFF;
+        border: 1px solid #D5E8DC;
+        border-radius: 16px !important;
+        padding: 24px 20px;
+        height: 100%;
+        box-shadow: 0 6px 18px rgba(13, 40, 24, 0.04);
+        transition: all 0.22s ease;
+    }
+
+    .ntd-dashboard-root .ntd-step-card:hover {
+        transform: translateY(-4px);
+        border-color: #2B7A4B;
+        box-shadow: 0 14px 28px rgba(13, 40, 24, 0.1);
+    }
+
+    .ntd-dashboard-root .ntd-step-number-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #0D2818 0%, #1B5E36 100%);
+        color: #FFFFFF;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 6px 14px;
+        border-radius: 99px !important;
+        margin-bottom: 14px;
+    }
+
+    .ntd-dashboard-root .ntd-step-heading {
+        font-size: 1.04rem;
+        font-weight: 800;
+        color: #0D2818;
+        margin-bottom: 8px;
+    }
+
+    .ntd-dashboard-root .ntd-step-desc {
+        font-size: 0.86rem;
+        color: #475569;
+        line-height: 1.55;
+        margin-bottom: 0;
+    }
+
+    @@media (max-width: 1199.98px) {
+        .ntd-dashboard-root .ntd-feature-card {
+            flex: 0 0 calc(50% - 12px);
+        }
+        .ntd-dashboard-root .ntd-cards-track.is-grid-mode {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .ntd-dashboard-root .ntd-hero-showcase {
+            padding: 28px 20px 26px 20px;
+        }
+        .ntd-dashboard-root .ntd-feature-card {
+            flex: 0 0 88%;
+        }
+        .ntd-dashboard-root .ntd-cards-track.is-grid-mode {
+            grid-template-columns: 1fr;
+        }
+        .ntd-dashboard-root .ntd-workflow-section {
+            padding: 24px 18px;
+        }
+    }
+
+    /* =====================================================================
+       FADE UP ANIMATION (IntersectionObserver)
+       ===================================================================== */
+    .fade-up-element {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 500ms ease-out, transform 500ms ease-out;
+        will-change: opacity, transform;
+    }
+    .fade-up-element.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    @@media (prefers-reduced-motion: reduce) {
+        .fade-up-element {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+        }
+    }
+</style>
+
+<div class="ntd-dashboard-root freelancer-search-wrapper">
+    <div class="container-fluid px-lg-5">
+
+        <!-- ===============================================================
+             KHU VỰC 1 & KHU VỰC 2: PHÂN CHIA THEO VAI TRÒ
+             - FREELANCER: Hiển thị Trung tâm điều khiển & 8 chức năng Sinh viên Freelancer
+             - NHÀ TUYỂN DỤNG: Hiển thị Trung tâm điều khiển & 8 chức năng Nhà tuyển dụng
+             =============================================================== -->
+        
+
+        <!-- KHU VỰC TÌM KIẾM & TUYỂN CHỌN FREELANCER SINH VIÊN -->
+        <section class="ntd-directory-section">
+            <div class="ntd-section-heading-box mb-4">
+                <div>
+                  
+                    
+                </div>
             </div>
-            <span class="badge bg-light text-success border border-success px-3 py-2 rounded-0">
-                Tổng cộng: @(Model?.Count ?? 0) sinh viên
-            </span>
-        </div>
 
-        <!-- THANH BỘ LỌC TÌM KIẾM FREELANCER (FLAT DESIGN, ROUNDED-0) -->
-        <div class="card border rounded-0 p-3 mb-4 bg-light shadow-sm">
-            <div class="row g-2 align-items-center">
-                <!-- 1. Từ khoá -->
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white rounded-0 border-end-0 text-muted small">Tìm</span>
-                        <input type="text" id="filterKeyword" class="form-control rounded-0 border-start-0"
-                               placeholder="Tìm theo tên, trường học, kỹ năng...">
-                    </div>
-                </div>
+            <!-- BỐ CỤC 2 CỘT: BỘ LỌC BÊN TRÁI & KẾT QUẢ BÊN PHẢI -->
+            <div class="row g-4 align-items-start">
 
-                <!-- 2. Chuyên ngành -->
-                <div class="col-md-4">
-                    <select id="filterMajor" class="form-select rounded-0">
-                        <option value="">-- Tất cả chuyên ngành --</option>
-                        @if (Model != null)
-                        {
-                            var chuyenNganhs = Model.Where(x => !string.IsNullOrEmpty(x.tenChuyenNganh))
-                                                    .Select(x => x.tenChuyenNganh!)
-                                                    .Distinct()
-                                                    .OrderBy(x => x);
-                            foreach (var cn in chuyenNganhs)
-                            {
-                                <option value="@cn">@cn</option>
-                            }
-                        }
-                    </select>
-                </div>
-
-                <!-- 3. Trạng thái nhận việc -->
-                <div class="col-md-3">
-                    <select id="filterStatus" class="form-select rounded-0">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <option value="true">Sẵn sàng nhận việc</option>
-                        <option value="false">Tạm ngưng</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- DANH SÁCH SINH VIÊN (CARD VUÔNG VỨC) -->
-        <div class="row g-3" id="freelancerListContainer">
-            @if (Model != null && Model.Count > 0)
-            {
-                @foreach (var sv in Model)
-                {
-                    var avatarUrl = !string.IsNullOrEmpty(sv.avatar)
-                        ? sv.avatar
-                        : "./assets/image/Trong_NTD.jpg";
-
-                    <div class="col-md-6 col-lg-4 freelancer-card-wrapper" data-name="@((sv.tenUser ?? "").ToLower())"
-                         data-school="@((sv.tenTruong ?? "").ToLower())" data-skills="@((sv.kyNangCoBan ?? "").ToLower())"
-                         data-major="@(sv.tenChuyenNganh ?? "")" data-ready="@(sv.trangthaiNhanViec ? "true" : "false")">
-                        <div class="card h-100 border p-3 bg-white rounded-0 d-flex flex-column shadow-sm">
-                        
-                            <!-- Header Card: Avatar vuông + Tên + Năm học -->
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <img src="@avatarUrl" alt="@sv.tenUser" class="border rounded-0"
-                                     style="width: 55px; height: 55px; object-fit: cover; flex-shrink: 0;" />
+                <!-- CỘT TRÁI: KHU VỰC TÌM KIẾM & BỘ LỌC FREELANCER -->
+                <div class="col-12 col-lg-4 col-xl-3">
+                    <div class="sidebar-filter-wrapper sticky-lg-top" style="top: 90px; z-index: 10;">
+                        <form method="get" class="filter-sidebar-card">
                             
-                                <div class="overflow-hidden">
-                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="@sv.tenUser">
-                                        @(sv.tenUser ?? "Sinh viên ẩn danh")
-                                    </h6>
-                                    <span class="text-muted small d-block" style="font-size: 0.8rem;">
-                                        Sinh viên năm @sv.namThu
-                                    </span>
-                                    <span class="badge bg-light text-success border rounded-0" style="font-size: 0.72rem;">
-                                        @(string.IsNullOrEmpty(sv.tenChuyenNganh) ? "Đa ngành" : sv.tenChuyenNganh)
-                                    </span>
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <h3 class="filter-sidebar-title d-flex align-items-center gap-2">
+                                    <i class="bi bi-funnel-fill text-success" style="font-size: 0.95rem;"></i>
+                                    <span>Bộ lọc ứng viên</span>
+                                </h3>
+                                <a href="@Context.Request.Path" class="btn-clear-filter-link text-muted small text-decoration-none" title="Đặt lại bộ lọc">
+                                    Xóa lọc
+                                </a>
+                            </div>
+
+                            <div class="d-flex flex-column gap-3">
+                                <!-- 1. Từ khóa tìm kiếm -->
+                                <div>
+                                    <label class="filter-label">Tìm theo tên hoặc kỹ năng</label>
+                                    <input type="text" name="tuKhoa" class="form-control form-control-custom"
+                                           value="@Model.TuKhoa"
+                                           placeholder="Họ tên sinh viên, trường, kỹ năng..." />
+                                </div>
+
+                                <!-- 2. Thứ tự sắp xếp -->
+                                <div>
+                                    <label class="filter-label">Thứ tự sắp xếp</label>
+                                    <select name="sapXep" class="form-select form-select-custom">
+                                        <option value="moi-nhat" selected="@(Model.SapXep == "moi-nhat" ? "selected" : null)">Hồ sơ mới nhất (Mặc định)</option>
+                                        <option value="sao-cao" selected="@(Model.SapXep == "sao-cao" ? "selected" : null)">Đánh giá cao nhất</option>
+                                        <option value="gpa-cao" selected="@(Model.SapXep == "gpa-cao" ? "selected" : null)">Điểm GPA cao nhất</option>
+                                    </select>
+                                </div>
+
+                                <!-- 3. Chuyên ngành đào tạo -->
+                                <div>
+                                    <label class="filter-label">Chuyên ngành đào tạo</label>
+                                    <select name="chuyenNganh" class="form-select form-select-custom">
+                                        <option value="">Tất cả chuyên ngành</option>
+                                        @foreach (var cn in Model.DanhSachChuyenNganh)
+                                        {
+                                            <option value="@cn" selected="@(string.Equals(Model.ChuyenNganh, cn, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                                                @cn
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <!-- 4. Kỹ năng chuyên môn -->
+                                <div>
+                                    <label class="filter-label">Kỹ năng chuyên môn</label>
+                                    <select name="kyNang" class="form-select form-select-custom">
+                                        <option value="">Tất cả kỹ năng</option>
+                                        @foreach (var kn in Model.DanhSachKyNang)
+                                        {
+                                            <option value="@kn" selected="@(string.Equals(Model.KyNang, kn, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                                                @kn
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <!-- 5. Mức đánh giá sao -->
+                                <div>
+                                    <label class="filter-label">Mức đánh giá sao</label>
+                                    <select name="soSaoMin" class="form-select form-select-custom">
+                                        <option value="">Tất cả đánh giá</option>
+                                        <option value="3" selected="@(Model.SoSaoMin == 3 ? "selected" : null)">Từ 3.0 sao trở lên</option>
+                                        <option value="4" selected="@(Model.SoSaoMin == 4 ? "selected" : null)">Từ 4.0 sao trở lên</option>
+                                        <option value="5" selected="@(Model.SoSaoMin == 5 ? "selected" : null)">5.0 sao tuyệt đối</option>
+                                    </select>
+                                </div>
+
+                                <!-- 6. Điểm học tập (GPA) -->
+                                <div>
+                                    <label class="filter-label">Điểm học tập (GPA)</label>
+                                    <select name="gpaMin" class="form-select form-select-custom">
+                                        <option value="">Tất cả mức GPA</option>
+                                        <option value="3.0" selected="@(Model.GpaMin == 3.0 ? "selected" : null)">GPA từ 3.0 trở lên</option>
+                                        <option value="3.2" selected="@(Model.GpaMin == 3.2 ? "selected" : null)">GPA từ 3.2 trở lên</option>
+                                        <option value="3.5" selected="@(Model.GpaMin == 3.5 ? "selected" : null)">GPA từ 3.5 (Giỏi/Xuất sắc)</option>
+                                    </select>
+                                </div>
+
+                                <!-- 7. Năm thứ -->
+                                <div>
+                                    <label class="filter-label">Năm thứ</label>
+                                    <select name="namThu" class="form-select form-select-custom">
+                                        <option value="">Tất cả</option>
+                                        <option value="1" selected="@(Model.NamThu == 1 ? "selected" : null)">Năm 1</option>
+                                        <option value="2" selected="@(Model.NamThu == 2 ? "selected" : null)">Năm 2</option>
+                                        <option value="3" selected="@(Model.NamThu == 3 ? "selected" : null)">Năm 3</option>
+                                        <option value="4" selected="@(Model.NamThu == 4 ? "selected" : null)">Năm 4</option>
+                                    </select>
+                                </div>
+
+                                <!-- 8. Trạng thái nhận việc -->
+                                <div>
+                                    <label class="filter-label">Trạng thái nhận việc</label>
+                                    <select name="trangThaiNhanViec" class="form-select form-select-custom">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="true" selected="@(Model.TrangThaiNhanViec == true ? "selected" : null)">Sẵn sàng nhận việc</option>
+                                        <option value="false" selected="@(Model.TrangThaiNhanViec == false ? "selected" : null)">Tạm ngưng nhận việc</option>
+                                    </select>
+                                </div>
+
+                                <!-- 9. Cụm nút Thao tác -->
+                                <div class="pt-2 d-flex flex-column gap-2">
+                                    <button type="submit" class="btn-search-main w-100 py-2">
+                                        <i class="bi bi-search me-1"></i> Tìm kiếm
+                                    </button>
+                                    <a href="@Context.Request.Path" class="btn-reset-filter w-100 py-2 text-center">
+                                        Xóa bộ lọc
+                                    </a>
                                 </div>
                             </div>
 
-                            <!-- Khung thông tin trường học & GPA (Vuông góc) -->
-                            <div class="p-2 mb-2 bg-light border rounded-0 small" style="font-size: 0.82rem;">
-                                <div class="mb-1 text-truncate">
-                                    <strong>Trường:</strong> @(string.IsNullOrEmpty(sv.tenTruong) ? "Chưa cập nhật" : sv.tenTruong)
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span><strong>GPA:</strong> @sv.GPA/4.0</span>
-                                    <span>Khu vực: @(string.IsNullOrEmpty(sv.diaDiemFreelancerStudent) ? "Toàn quốc" :
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    sv.diaDiemFreelancerStudent)</span>
-                                    </div>
-                                </div>
+                        </form>
+                    </div>
+                </div>
 
-                                <!-- Kỹ năng (Tag vuông) -->
-                                @if (!string.IsNullOrEmpty(sv.kyNangCoBan))
-                                {
-                                    <div class="mb-2">
-                                        <span class="text-muted small d-block mb-1" style="font-size: 0.75rem;">Kỹ năng:</span>
-                                        <div class="d-flex flex-wrap gap-1">
-                                            @foreach (var kn in sv.kyNangCoBan.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                                            {
-                                                <span class="badge bg-light text-dark border rounded-0"
-                                                      style="font-size: 0.72rem;">@kn.Trim()</span>
-                                            }
+                <!-- CỘT PHẢI: KHU VỰC KẾT QUẢ TÌM KIẾM -->
+                <div class="col-12 col-lg-8 col-xl-9">
+
+                    <div class="results-bar">
+                        <span class="results-count">
+                            Tìm thấy @Model.TongSoFreelancer sinh viên phù hợp
+                        </span>
+                        <span class="text-muted small">
+                            Thứ tự: @(Model.SapXep == "sao-cao" ? "Đánh giá cao nhất" : Model.SapXep == "gpa-cao" ? "Điểm GPA cao nhất" : "Hồ sơ mới nhất trước")
+                        </span>
+                    </div>
+
+                    @if (Model.DanhSachFreelancer != null && Model.DanhSachFreelancer.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var item in Model.DanhSachFreelancer)
+                            {
+                                var tenUser = !string.IsNullOrWhiteSpace(item.tenUser) ? item.tenUser : "Sinh viên";
+                                var rawAvt = item.avatar;
+                                var avatarUrl = !string.IsNullOrEmpty(rawAvt)
+                                    ? (rawAvt.StartsWith("http", StringComparison.OrdinalIgnoreCase) || rawAvt.StartsWith("/") ? rawAvt : "/" + rawAvt)
+                                    : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenUser)}&background=E8F5E9&color=1B5E36";
+
+                                <div class="col-12 col-md-6">
+                            <div class="freelancer-card fade-up-element">
+                                
+                                <div class="freelancer-card-top-banner">
+                                    <div class="card-top-profile">
+                                        <img src="@avatarUrl" alt="@tenUser" class="student-avatar"
+                                             onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(tenUser)&background=E8F5E9&color=1B5E36';" />
+                                        
+                                        <div class="overflow-hidden flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start gap-1">
+                                                <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" class="student-name-link text-truncate" title="@tenUser">
+                                                    @tenUser
+                                                </a>
+                                                <span class="status-badge-inline @(item.trangthaiNhanViec ? "status-available" : "status-busy")">
+                                                    @(item.trangthaiNhanViec ? "Nhận việc" : "Tạm ngưng")
+                                                </span>
+                                            </div>
+
+                                            <div class="student-major-sub text-truncate">
+                                                @(string.IsNullOrWhiteSpace(item.tenChuyenNganh) ? "Công nghệ thông tin" : item.tenChuyenNganh)
+                                            </div>
+
+                                            <div class="student-school-sub text-truncate">
+                                                @(string.IsNullOrWhiteSpace(item.tenTruong) ? "Đại học" : item.tenTruong) · Năm @item.namThu
+                                            </div>
                                         </div>
                                     </div>
-                                }
-
-                                <!-- Trạng thái nhận việc & Mức thù lao -->
-                                <div class="d-flex justify-content-between align-items-center mb-3 mt-auto">
-                                    <div>
-                                        @if (sv.trangthaiNhanViec)
-                                        {
-                                            <span class="badge bg-success-subtle text-success border border-success px-2 py-1 rounded-0"
-                                                  style="font-size: 0.75rem;">
-                                                Sẵn sàng nhận việc
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-0"
-                                                  style="font-size: 0.75rem;">
-                                                Tạm ngưng
-                                            </span>
-                                        }
-                                    </div>
-                                    <span class="text-danger fw-bold small">
-                                        @(sv.chiPhiTu.HasValue && sv.chiPhiTu > 0 ? $"{sv.chiPhiTu.Value.ToString("#,##0")} đ" : "Thỏa thuận")
-                                    </span>
                                 </div>
 
-                                <!-- Footer Card: 2 Nút (Xem Chi Tiết & Nhắn Tin Trao Đổi) Vuông góc -->
-                                <div class="pt-2 border-top d-flex gap-2">
-                                    <!-- 1. Nút Xem chi tiết -->
-                                    <a asp-controller="FreelancerStudent" asp-action="Profile" asp-route-maUser="@sv.maUser"
-                                       class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-0 fw-semibold">
-                                        Xem hồ sơ
-                                    </a>
+                                <div class="freelancer-card-body">
+                                    <div class="metrics-grid-compact">
+                                        <div>
+                                            <span class="text-muted" style="font-size: 0.72rem;">Điểm đánh giá:</span>
+                                            @if (item.soLuotDanhGia > 0)
+                                            {
+                                                <span class="metric-compact-val rating">
+                                                    ★ @item.diemDanhGiaTrungBinh.ToString("0.0")/5.0 (@item.soLuotDanhGia)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="metric-compact-val rating-none">Chưa có đánh giá</span>
+                                            }
+                                        </div>
 
-                                    <!-- 2. Nút Nhắn tin trao đổi -->
-                                    <a href="/Chat?maFreelancerStudent=@sv.maUser"
-                                       class="btn btn-sm btn-success flex-grow-1 rounded-0 fw-semibold"
-                                       style="background-color: #1B5E36; border-color: #1B5E36;">
-                                        Nhắn tin
+                                        <div>
+                                            <span class="text-muted" style="font-size: 0.72rem;">Điểm học tập:</span>
+                                            <span class="metric-compact-val">
+                                                @(item.GPA > 0 ? $"GPA {item.GPA:0.00}/4.0" : "Đang cập nhật")
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <p class="student-bio-text">
+                                        @(string.IsNullOrWhiteSpace(item.gioithieu) 
+                                            ? "Sinh viên chuyên ngành nhiệt tình, chủ động học hỏi và cam kết hoàn thành dự án đúng tiến độ bàn giao." 
+                                            : item.gioithieu)
+                                    </p>
+
+                                    <div class="mb-1">
+                                        @{
+                                            var skills = item.danhSachKyNang != null && item.danhSachKyNang.Any()
+                                                ? item.danhSachKyNang
+                                                : (!string.IsNullOrWhiteSpace(item.kyNangCoBan) 
+                                                    ? item.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList() 
+                                                    : new List<string>());
+                                        }
+                                        @if (skills.Any())
+                                        {
+                                            @foreach (var sk in skills.Take(4))
+                                            {
+                                                <span class="skill-tag-item">@sk</span>
+                                            }
+                                            @if (skills.Count > 4)
+                                            {
+                                                <span class="skill-tag-item text-muted">+@(skills.Count - 4)</span>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="card-bottom-actions">
+                                    <div>
+                                        <span class="fee-refer-text d-block">Thù lao từ:</span>
+                                        <span class="fee-refer-amount">
+                                            @(item.chiPhiTu.HasValue && item.chiPhiTu > 0 
+                                                ? item.chiPhiTu.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" 
+                                                : "Thỏa thuận")
+                                        </span>
+                                    </div>
+
+                                    <a href="/FreelancerStudent/Profile?maFreelancerStudents=@item.maFreelancerStudents" class="btn-view-profile">
+                                        Xem hồ sơ
                                     </a>
                                 </div>
 
                             </div>
                         </div>
                     }
-                }
-        else
-                {
-                    <div class="col-12">
-                        <div class="alert alert-light border rounded-0 text-center py-5 text-muted">
-                            Hiện tại chưa có hồ sơ sinh viên nào trong hệ thống.
+                </div>
+            }
+            else
+            {
+                <div class="empty-state-box">
+                    <h3 class="fw-bold mb-2" style="font-size: 1.15rem; color: var(--ink);">
+                        Không tìm thấy Freelancer phù hợp
+                    </h3>
+                    <p class="text-muted small mb-4">
+                        Thử điều chỉnh lại từ khóa hoặc xóa bớt tiêu chí lọc để xem thêm nhiều hồ sơ sinh viên khác.
+                    </p>
+                    <a href="@Context.Request.Path" class="btn-search-main">
+                        Xóa bộ lọc để xem tất cả
+                    </a>
+                </div>
+            }
+
+                </div> <!-- Đóng Cột phải col-12 col-lg-8 col-xl-9 -->
+            </div> <!-- Đóng Bố cục 2 cột row g-4 -->
+        </section>
+
+        <!-- KHU VỰC 3: QUY TRÌNH HỢP TÁC (4 BƯỚC THEO VAI TRÒ) -->
+        @if (User.IsInRole("FreelancerStudent") || Context.Session.GetString("tenRole") == "FreelancerStudent")
+        {
+            <section class="ntd-workflow-section" aria-label="Quy trình nhận việc chuẩn cho Sinh viên Freelancer">
+                <div class="ntd-workflow-header">
+                    <div>
+                        <span class="ntd-section-badge">Chuẩn hóa Nghề nghiệp</span>
+                        <h2 class="ntd-workflow-title">Quy trình nhận việc chuẩn cho Sinh viên Freelancer</h2>
+                        <p class="ntd-workflow-sub">Tìm việc, gửi đề xuất, ký hợp đồng và bàn giao sản phẩm theo từng bước.</p>
+                    </div>
+                    <a asp-controller="FreelancerStudent" asp-action="DangTinTimViec" class="btn-search-main">
+                        + Đăng bài tìm việc ngay
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 01</span>
+                            <h3 class="ntd-step-heading">1. Hoàn thiện Hồ sơ &amp; Portfolio</h3>
+                            <p class="ntd-step-desc">
+                                Thêm kỹ năng, GPA, dự án đã thực hiện và minh chứng sinh viên để Nhà tuyển dụng tham khảo.
+                            </p>
                         </div>
                     </div>
-                }
-            </div>
-        </div>
 
-        @section Scripts {
-            <script>
-                const filterKeyword = document.getElementById("filterKeyword");
-                const filterMajor = document.getElementById("filterMajor");
-                const filterStatus = document.getElementById("filterStatus");
-                const cards = document.querySelectorAll(".freelancer-card-wrapper");
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 02</span>
+                            <h3 class="ntd-step-heading">2. Tìm việc &amp; Gửi đề xuất</h3>
+                            <p class="ntd-step-desc">
+                                Lựa chọn dự án phù hợp chuyên ngành, gửi báo giá thù lao và trao đổi trực tiếp với Nhà tuyển dụng.
+                            </p>
+                        </div>
+                    </div>
 
-                function applyFilter() {
-                    const kw = filterKeyword.value.toLowerCase().trim();
-                    const major = filterMajor.value;
-                    const status = filterStatus.value;
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 03</span>
+                            <h3 class="ntd-step-heading">3. Ký hợp đồng &amp; Triển khai</h3>
+                            <p class="ntd-step-desc">
+                                Bắt đầu thực hiện dự án khi hợp đồng điện tử đã được ký kết và Nhà tuyển dụng đã ký quỹ 100% thù lao.
+                            </p>
+                        </div>
+                    </div>
 
-                    cards.forEach(card => {
-                        const name = card.getAttribute("data-name") || "";
-                        const school = card.getAttribute("data-school") || "";
-                        const skills = card.getAttribute("data-skills") || "";
-                        const cardMajor = card.getAttribute("data-major") || "";
-                        const ready = card.getAttribute("data-ready") || "";
-
-                        let matchKw = !kw || name.includes(kw) || school.includes(kw) || skills.includes(kw);
-                        let matchMajor = !major || cardMajor === major;
-                        let matchStatus = !status || ready === status;
-
-                        if (matchKw && matchMajor && matchStatus) {
-                            card.classList.remove("d-none");
-                        } else {
-                            card.classList.add("d-none");
-                        }
-                    });
-                }
-
-                if (filterKeyword) filterKeyword.addEventListener("input", applyFilter);
-                if (filterMajor) filterMajor.addEventListener("change", applyFilter);
-                if (filterStatus) filterStatus.addEventListener("change", applyFilter);
-            </script>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 04</span>
+                            <h3 class="ntd-step-heading">4. Bàn giao &amp; Nhận thù lao</h3>
+                            <p class="ntd-step-desc">
+                                Nộp sản phẩm hoàn thiện đúng thời hạn, nghiệm thu trực tuyến và nhận thanh toán ngay về Ví điện tử.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         }
+        else
+        {
+            <section class="ntd-workflow-section" aria-label="Quy trình làm việc chuẩn cho Nhà tuyển dụng">
+                <div class="ntd-workflow-header">
+                    <div>
+                        <span class="ntd-section-badge">Chuẩn hóa Hợp tác</span>
+                        <h2 class="ntd-workflow-title">Quy trình làm việc chuẩn cho Nhà tuyển dụng</h2>
+                        <p class="ntd-workflow-sub">Đăng việc, chọn ứng viên, ký hợp đồng và nghiệm thu sản phẩm theo từng bước.</p>
+                    </div>
+                    <a asp-controller="JobPost" asp-action="Create" class="btn-search-main">
+                        Bắt đầu đăng việc ngay
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 01</span>
+                            <h3 class="ntd-step-heading">1. Đăng việc chi tiết</h3>
+                            <p class="ntd-step-desc">
+                                Nêu rõ yêu cầu dự án, kỹ năng cần thiết, thời hạn và ngân sách dự kiến.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 02</span>
+                            <h3 class="ntd-step-heading">2. Chọn ứng viên &amp; Trao đổi</h3>
+                            <p class="ntd-step-desc">
+                                Xem đề xuất, hồ sơ năng lực của sinh viên và nhắn tin trao đổi chi tiết.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 03</span>
+                            <h3 class="ntd-step-heading">3. Ký hợp đồng &amp; Ký quỹ</h3>
+                            <p class="ntd-step-desc">
+                                Hai bên ký hợp đồng điện tử; Nhà tuyển dụng nộp khoản ký quỹ theo giá trị và điều khoản hợp đồng.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 04</span>
+                            <h3 class="ntd-step-heading">4. Nghiệm thu &amp; Giải ngân</h3>
+                            <p class="ntd-step-desc">
+                                Kiểm tra sản phẩm bàn giao, xác nhận hoàn thành và chấm điểm đánh giá ứng viên.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+
+    </div>
+</div>
+
+<script>
+    function initFadeUpAnimation() {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.querySelectorAll('.fade-up-element').forEach(el => el.classList.add('is-visible'));
+            return;
+        }
+        if (!('IntersectionObserver' in window)) {
+            document.querySelectorAll('.fade-up-element').forEach(el => el.classList.add('is-visible'));
+            return;
+        }
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -30px 0px',
+            threshold: 0.05
+        };
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up-element:not(.is-visible)').forEach((el, idx) => {
+            const delay = (idx % 4) * 60;
+            el.style.transitionDelay = delay + 'ms';
+            observer.observe(el);
+        });
+    }
+
+    function scrollNtdCards(direction) {
+        const track = document.getElementById('ntdFeatureCardsTrack');
+        if (!track || track.classList.contains('is-grid-mode')) return;
+        const cardWidth = 340;
+        track.scrollBy({ left: direction * cardWidth * 2, behavior: 'smooth' });
+        setTimeout(updateNtdDotsOnScroll, 350);
+    }
+
+    function scrollToNtdGroup(groupIndex) {
+        const track = document.getElementById('ntdFeatureCardsTrack');
+        if (!track || track.classList.contains('is-grid-mode')) return;
+        const maxScroll = track.scrollWidth - track.clientWidth;
+        const targetScroll = (maxScroll / 2) * groupIndex;
+        track.scrollTo({ left: targetScroll, behavior: 'smooth' });
+        setActiveNtdDot(groupIndex);
+    }
+
+    function setActiveNtdDot(activeIndex) {
+        const dots = document.querySelectorAll('#ntdHeroDotsBar .ntd-hero-dot');
+        dots.forEach((dot, idx) => {
+            dot.classList.toggle('active', idx === activeIndex);
+        });
+    }
+
+    function updateNtdDotsOnScroll() {
+        const track = document.getElementById('ntdFeatureCardsTrack');
+        if (!track) return;
+        const maxScroll = Math.max(1, track.scrollWidth - track.clientWidth);
+        const ratio = track.scrollLeft / maxScroll;
+        const activeIdx = ratio < 0.34 ? 0 : (ratio < 0.75 ? 1 : 2);
+        setActiveNtdDot(activeIdx);
+    }
+
+    function toggleNtdCardsLayout() {
+        const track = document.getElementById('ntdFeatureCardsTrack');
+        const btn = document.getElementById('ntdToggleViewBtn');
+        const dotsBar = document.getElementById('ntdHeroDotsBar');
+        if (!track || !btn) return;
+        const isGrid = track.classList.toggle('is-grid-mode');
+        btn.textContent = isGrid ? 'Thu gọn dạng trượt ngang' : 'Xem tất cả 8 chức năng';
+        setTimeout(initFadeUpAnimation, 50);
+        if (dotsBar) {
+            dotsBar.style.display = isGrid ? 'none' : 'flex';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initFadeUpAnimation();
+        const track = document.getElementById('ntdFeatureCardsTrack');
+        if (track) {
+            track.addEventListener('scroll', updateNtdDotsOnScroll, { passive: true });
+        }
+    });
+</script>

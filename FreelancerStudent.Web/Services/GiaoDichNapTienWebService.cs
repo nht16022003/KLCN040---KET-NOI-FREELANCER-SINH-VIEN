@@ -129,5 +129,97 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+        // =====================================================
+        // XÁC NHẬN NẠP TIỀN MÔ PHỎNG (DEMO)
+        // =====================================================
+        public async Task<ApiReponse<GiaoDichNapTienViewModel>> xacNhanNapTienMoPhong(string maGiaoDich, int maUser)
+        {
+            try
+            {
+                var response = await _guiRequest.PostAsync(
+                    $"api/GiaoDichNapTien/XacNhanMoPhong/{maGiaoDich}?maUser={maUser}",
+                    null
+                );
+
+                var noiDungJson = await response.Content.ReadAsStringAsync();
+
+                var ketQua = JsonSerializer.Deserialize<ApiReponse<GiaoDichNapTienViewModel>>(noiDungJson, _jsonOptions);
+
+                if (ketQua == null)
+                {
+                    return new ApiReponse<GiaoDichNapTienViewModel>
+                    {
+                        success = false,
+                        message = "Không đọc được dữ liệu phản hồi xác nhận nạp tiền."
+                    };
+                }
+
+                return ketQua;
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<GiaoDichNapTienViewModel>
+                {
+                    success = false,
+                    message = "Lỗi kết nối API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<string>> uploadBienLai(string maGiaoDich, IFormFile file)
+        {
+            try
+            {
+                using var formData = new MultipartFormDataContent();
+                using var stream = file.OpenReadStream();
+                using var streamContent = new StreamContent(stream);
+                streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(
+                    string.IsNullOrWhiteSpace(file.ContentType) ? "image/jpeg" : file.ContentType);
+                formData.Add(streamContent, "file", file.FileName);
+
+                var response = await _guiRequest.PostAsync($"api/GiaoDichNapTien/UploadBienLai/{maGiaoDich}", formData);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ApiReponse<string>
+                    {
+                        success = false,
+                        message = !string.IsNullOrWhiteSpace(content) ? content : $"Máy chủ API trả về mã lỗi: HTTP {(int)response.StatusCode} {response.ReasonPhrase}"
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    return new ApiReponse<string>
+                    {
+                        success = false,
+                        message = "Phản hồi từ API rỗng."
+                    };
+                }
+
+                using var doc = JsonDocument.Parse(content);
+                var root = doc.RootElement;
+                bool success = root.TryGetProperty("success", out var s) && s.GetBoolean();
+                string message = root.TryGetProperty("message", out var m) ? m.GetString() ?? "" : "";
+                string fileUrl = root.TryGetProperty("fileUrl", out var f) ? f.GetString() ?? "" : "";
+
+                return new ApiReponse<string>
+                {
+                    success = success,
+                    message = message,
+                    data = fileUrl
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<string>
+                {
+                    success = false,
+                    message = "Lỗi tải ảnh biên lai: " + ex.Message
+                };
+            }
+        }
     }
 }

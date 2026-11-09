@@ -1,0 +1,150 @@
+@model FreelancerStudent.Web.ViewModels.AdminHopDongItemViewModel
+@{
+    ViewData["Title"] = $"Chi tiết hợp đồng #{Model.MaHD}";
+    var totalAmount = Model.SoTienKyQuy;
+    var platformFee = totalAmount * 0.05m;
+    var netFreelancer = totalAmount - platformFee;
+
+    var statusBadgeClass = Model.TrangThai switch
+    {
+        "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "badge bg-light text-success border border-success",
+        "DangThucHien" or "DANG_THUC_HIEN" => "badge bg-light text-primary border border-primary",
+        "DaHuy" or "DA_HUY" => "badge bg-light text-danger border border-danger",
+        _ => "badge bg-light text-warning border border-warning"
+    };
+
+    var statusText = Model.TrangThai switch
+    {
+        "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "Đã hoàn thành",
+        "DangThucHien" or "DANG_THUC_HIEN" => "Đang thực hiện",
+        "DaHuy" or "DA_HUY" => "Đã hủy bỏ",
+        _ => Model.TrangThai
+    };
+}
+
+<div class="container-fluid px-3 px-md-4 py-3" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Tiêu đề và điều hướng -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1">
+                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
+                    <li class="breadcrumb-item"><a href="/Admin/QuanLyHopDong" class="text-decoration-none text-muted">Quản lý hợp đồng</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">HĐ #@Model.MaHD</li>
+                </ol>
+            </nav>
+            <h1 class="h4 fw-bold text-dark mb-0">Hồ sơ hợp đồng dịch vụ #@Model.MaHD</h1>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-2 mt-md-0">
+            <a href="/Admin/QuanLyHopDong" class="btn btn-sm btn-outline-secondary px-3">Danh sách hợp đồng</a>
+            <a href="/Admin/DieuChinhSoDu" class="btn btn-sm btn-outline-secondary px-3">Điều chỉnh ví</a>
+        </div>
+    </div>
+
+    <!-- Thông tin tổng quan hợp đồng -->
+    <div class="border bg-white p-3 mb-3">
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-md-8">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="@statusBadgeClass px-2 py-1 small">@statusText</span>
+                    <span class="badge bg-light text-secondary border">Hình thức: @(Model.HinhThucLamViec ?? "Remote")</span>
+                    <span class="badge bg-light text-secondary border">Mã bài đăng: #@Model.MaJob</span>
+                </div>
+                <h2 class="h5 fw-bold text-dark mb-2">@Model.TenCongViec</h2>
+                <div class="d-flex flex-wrap gap-3 text-muted small">
+                    <span>Ngày bắt đầu: <strong class="text-dark">@(Model.NgayBatDau?.ToString("dd/MM/yyyy") ?? "-")</strong></span>
+                    <span>Hạn hoàn thành: <strong class="text-dark">@(Model.NgayKetThuc?.ToString("dd/MM/yyyy") ?? "-")</strong></span>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 text-md-end">
+                <div class="border bg-light p-2 text-md-end text-start">
+                    <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Tổng giá trị hợp đồng</span>
+                    <div class="h4 fw-bold text-dark mb-0">@totalAmount.ToString("N0") <span class="fs-6 fw-normal text-muted">VNĐ</span></div>
+                    <span class="badge bg-light text-success border border-success mt-1">Ký quỹ bảo chứng 100%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hai bên tham gia hợp đồng -->
+    <div class="row g-3 mb-3">
+        <!-- Bên A: Nhà tuyển dụng -->
+        <div class="col-12 col-lg-6">
+            <div class="border bg-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <h2 class="h6 fw-bold text-dark mb-0">Bên thuê (Bên A - Nhà tuyển dụng)</h2>
+                    <span class="badge bg-light text-dark border">Bên A</span>
+                </div>
+                <div class="mb-3">
+                    <div class="fw-bold text-dark">@Model.TenNhaTuyenDung</div>
+                    <div class="text-muted small">Mã đối tác: #@Model.MaNhaTuyenDung</div>
+                </div>
+                <div class="border bg-light p-2 small">
+                    <span class="fw-semibold text-dark d-block mb-1">Nghĩa vụ Bên A:</span>
+                    <ul class="mb-0 ps-3 text-muted">
+                        <li>Ký quỹ đủ 100% kinh phí vào tài khoản ký quỹ trung gian.</li>
+                        <li>Cung cấp đầy đủ yêu cầu dự án, tài liệu và môi trường thử nghiệm.</li>
+                        <li>Nghiệm thu và phản hồi kết quả bàn giao theo thỏa thuận.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bên B: Freelancer Sinh viên -->
+        <div class="col-12 col-lg-6">
+            <div class="border bg-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <h2 class="h6 fw-bold text-dark mb-0">Bên nhận việc (Bên B - Freelancer sinh viên)</h2>
+                    <span class="badge bg-light text-dark border">Bên B</span>
+                </div>
+                <div class="mb-3">
+                    <div class="fw-bold text-dark">@Model.TenFreelancer</div>
+                    <div class="text-muted small">Mã Freelancer: #@Model.MaFreelancer</div>
+                </div>
+                <div class="border bg-light p-2 small">
+                    <span class="fw-semibold text-dark d-block mb-1">Nghĩa vụ Bên B:</span>
+                    <ul class="mb-0 ps-3 text-muted">
+                        <li>Cam kết triển khai đúng tiến độ và tiêu chuẩn kỹ thuật.</li>
+                        <li>Bàn giao toàn bộ mã nguồn, tài liệu và sản phẩm hoàn chỉnh.</li>
+                        <li>Bảo hành và khắc phục lỗi phát sinh theo yêu cầu nghiệm thu hợp lý.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hạch toán tài chính ký quỹ -->
+    <div class="border bg-white p-3 mb-3">
+        <h2 class="h6 fw-bold text-dark mb-3 pb-2 border-bottom">Hạch toán tài chính ký quỹ</h2>
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="border bg-light p-2 text-center">
+                    <span class="small text-muted d-block mb-1">Số tiền ký quỹ Bên A</span>
+                    <div class="h5 fw-bold text-dark mb-0">@totalAmount.ToString("N0") VNĐ</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="border bg-light p-2 text-center">
+                    <span class="small text-muted d-block mb-1">Phí sàn dịch vụ (5%)</span>
+                    <div class="h5 fw-bold text-dark mb-0">@platformFee.ToString("N0") VNĐ</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="border bg-light p-2 text-center">
+                    <span class="small text-muted d-block mb-1">Thực nhận Bên B (Dự kiến)</span>
+                    <div class="h5 fw-bold text-success mb-0">@netFreelancer.ToString("N0") VNĐ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toàn văn điều khoản hợp đồng -->
+    <div class="border bg-white p-3">
+        <h2 class="h6 fw-bold text-dark mb-3 pb-2 border-bottom">Toàn văn điều khoản hợp đồng</h2>
+        <div class="border bg-light p-3 font-monospace small text-dark" style="white-space: pre-line; line-height: 1.6;">
+            @(string.IsNullOrWhiteSpace(Model.DieuKhoan) 
+                ? "Hai bên thỏa thuận tuân thủ các quy định về quyền tác giả, bảo mật thông tin dự án, bàn giao đúng hạn và tiến hành giải ngân qua ví trung gian của hệ thống Freelancer Students."
+                : Model.DieuKhoan)
+        </div>
+    </div>
+</div>

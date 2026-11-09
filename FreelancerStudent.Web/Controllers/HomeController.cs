@@ -11,7 +11,8 @@ namespace FreelancerStudent.Web.Controllers
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (maUser == null)
             {
-                return RedirectToAction("DangNhap", "Account");
+                // Khách chưa đăng nhập: hiển thị trang Overview giới thiệu nền tảng
+                return View("Overview");
             }
 
             var tenRole = HttpContext.Session.GetString("tenRole");
@@ -20,12 +21,18 @@ namespace FreelancerStudent.Web.Controllers
                 case "Admin":
                     return RedirectToAction("Index", "Admin");
                 case "NhaTuyenDung":
-                    return RedirectToAction("Index", "FreelancerStudent");
+                    return RedirectToAction("Search", "FreelancerStudent");
                 case "FreelancerStudent":
                     return RedirectToAction("Index", "JobPost");
                 default:
                     return RedirectToAction("DangNhap", "Account");
             }
+        }
+
+        [HttpGet]
+        public IActionResult Overview()
+        {
+            return View();
         }
 
         public IActionResult Privacy()

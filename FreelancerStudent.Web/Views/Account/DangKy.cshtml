@@ -4,193 +4,527 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
-    .containerdecor {}
+    /* ==========================================================================
+       AUTH REDESIGN SYSTEM – BALANCED PROPORTIONS & SOFT BORDER-RADIUS
+       Project IMPROVE Green Palette + Harmonized 2-Column Layout
+       ========================================================================== */
+    .auth-reference-page {
+        background-color: #F8FAFC;
+        min-height: calc(100vh - 130px);
+        overflow-x: hidden;
+    }
 
-    input {
-        width: 100% !important;
-        text-align: left;
+    /* --------------------------------------------------------------------------
+       1. MINIMALIST TOP HEADER ZONE
+       -------------------------------------------------------------------------- */
+    .auth-reference-page .auth-top-hero {
+        background: linear-gradient(180deg, #F1F5F9 0%, #F8FAFC 65%, #FFFFFF 100%);
+        padding: 28px 20px 24px;
+        text-align: center;
+    }
+
+    .auth-reference-page .auth-top-container {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .auth-reference-page .auth-header-subtext {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #475569;
+        margin: 0 0 8px;
+        line-height: 1.5;
+    }
+
+    .auth-reference-page .auth-hero-main-title {
+        font-size: clamp(1.75rem, 2.8vw, 2.3rem);
+        font-weight: 800;
+        color: #0F172A;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+
+    .auth-reference-page .auth-pillar-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #2B7A4B;
+        display: inline-block;
+        border-radius: 50% !important;
+    }
+
+    /* --------------------------------------------------------------------------
+       2. TWO-COLUMN MAIN CONTENT SECTION ON WHITE CANVAS
+       -------------------------------------------------------------------------- */
+    .auth-reference-page .auth-main-section {
+        background-color: #F8FAFC;
+        padding: 8px 20px 76px;
+    }
+
+    .auth-reference-page .auth-split-container {
+        max-width: 1120px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+        gap: 40px;
         align-items: center;
-        border: solid rgba(230, 230, 230, 0.817) 1px;
-        border-radius: 8px;
-        padding: 5px;
     }
 
-    .card {
-        margin-top: 40px;
-        width: 100% !important;
-        border-radius: 10px;
+    /* --------------------------------------------------------------------------
+       3. LEFT COLUMN – SOFT-TINTED SHOWCASE CARD FOR REGISTER FORM
+       (Border-radius: Outer 14px, Inner 10px, Inputs/Buttons 8px)
+       -------------------------------------------------------------------------- */
+    .auth-reference-page .auth-showcase-card {
+        background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 14px !important;
+        padding: 36px 32px 30px;
+        box-shadow: 0 18px 44px rgba(13, 40, 24, 0.06);
+        position: relative;
     }
 
-    .card-title {
-        font-size: 35px;
+    .auth-reference-page .auth-showcase-header {
         text-align: center;
-        background-color: #3b6e53;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 10px;
+        margin-bottom: 22px;
     }
 
-    button {
-        background-color: #57ae80;
-        padding: 10px;
-        border-radius: 10px;
-        border: solid gainsboro;
-        color: white;
-        text-align: center;
+    .auth-reference-page .auth-showcase-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
     }
 
-    button:hover {
-        background-color: #4f9b72;
+    .auth-reference-page .auth-showcase-subtitle {
+        font-size: 0.88rem;
+        color: #475569;
+        margin: 0;
+    }
+
+    .auth-reference-page .auth-form-inner {
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px !important;
+        padding: 28px 26px;
+        box-shadow: 0 8px 24px rgba(15, 38, 24, 0.03);
+    }
+
+    .auth-reference-page .auth-field-group {
+        margin-bottom: 18px;
+    }
+
+    .auth-reference-page .auth-field-row-2col {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .auth-reference-page .auth-label {
+        display: block;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 7px;
+    }
+
+    .auth-reference-page .auth-input,
+    .auth-reference-page .auth-select {
+        width: 100%;
+        height: 48px;
+        padding: 11px 15px;
+        font-size: 0.93rem;
+        color: #0F172A;
+        background-color: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .auth-reference-page .auth-select {
+        font-weight: 700;
+        color: #0F172A;
+        background-color: #F8FAFC;
+        border-color: #CBD5E1;
+    }
+
+    .auth-reference-page .auth-input::placeholder {
+        color: #94A3B8;
+    }
+
+    .auth-reference-page .auth-input:hover,
+    .auth-reference-page .auth-select:hover {
+        border-color: #94A3B8;
+    }
+
+    .auth-reference-page .auth-input:focus,
+    .auth-reference-page .auth-select:focus {
+        outline: none;
+        background-color: #FFFFFF;
+        border-color: #2B7A4B !important;
+        box-shadow: 0 0 0 3px rgba(43, 122, 75, 0.14) !important;
+    }
+
+    .auth-reference-page .auth-validation-error {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #DC2626;
+        margin-top: 5px;
+    }
+
+    .auth-reference-page .alert {
+        border-radius: 8px !important;
+    }
+
+    .validation-summary-valid {
+        display: none !important;
+    }
+
+    .validation-summary-errors {
+        display: block !important;
+        font-size: 0.86rem;
+        font-weight: 600;
+        border-radius: 8px !important;
+    }
+
+    .validation-summary-errors ul {
+        margin-bottom: 0;
+        padding-left: 18px;
+    }
+
+    .auth-reference-page .auth-btn-submit {
+        width: 100%;
+        height: 50px;
+        background-color: #2B7A4B;
+        border: 1px solid #2B7A4B;
+        border-radius: 8px !important;
+        color: #FFFFFF;
+        font-size: 0.96rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 6px;
+        transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+        box-shadow: 0 6px 16px rgba(43, 122, 75, 0.22);
+    }
+
+    .auth-reference-page .auth-btn-submit:hover {
+        background-color: #1E5C37;
+        border-color: #1E5C37;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(30, 92, 55, 0.28);
+    }
+
+    .auth-reference-page .auth-showcase-tags {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 18px;
+        padding: 0 4px;
+    }
+
+    .auth-reference-page .auth-mini-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #F1F5F9;
+        color: #334155;
+        font-size: 0.76rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px !important;
+    }
+
+    .auth-reference-page .auth-link-accent {
+        color: #2B7A4B;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.86rem;
+        transition: color 0.15s ease;
+    }
+
+    .auth-reference-page .auth-link-accent:hover {
+        color: #1E5C37;
+        text-decoration: none;
+    }
+
+    /* --------------------------------------------------------------------------
+       4. RIGHT COLUMN – OVERVIEW & 01–04 NUMBERED CARDS
+       (Balanced height with Register Form Card)
+       -------------------------------------------------------------------------- */
+    .auth-reference-page .auth-overview-col {
+        padding: 6px 0;
+    }
+
+    .auth-reference-page .auth-overview-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px !important;
+        color: #334155;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        margin-bottom: 14px;
+    }
+
+    .auth-reference-page .auth-overview-title {
+        font-size: clamp(1.6rem, 2.3vw, 2.05rem);
+        font-weight: 800;
+        color: #0D2818;
+        line-height: 1.22;
+        letter-spacing: -0.02em;
+        margin: 0 0 12px;
+    }
+
+    .auth-reference-page .auth-overview-desc {
+        font-size: 0.92rem;
+        color: #475569;
+        line-height: 1.58;
+        margin: 0 0 22px;
+    }
+
+    .auth-reference-page .auth-numbered-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .auth-reference-page .auth-numbered-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 15px 17px;
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px !important;
+        transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .auth-reference-page .auth-numbered-card:hover {
+        background-color: #FFFFFF;
+        border-color: #2B7A4B;
+        transform: translateX(3px);
+        box-shadow: 0 6px 16px rgba(15, 38, 24, 0.05);
+    }
+
+    .auth-reference-page .auth-num-badge {
+        width: 30px;
+        height: 30px;
+        background-color: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px !important;
+        color: #334155;
+        font-size: 0.78rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .auth-reference-page .auth-num-title {
+        font-size: 0.91rem;
+        font-weight: 700;
+        color: #0F172A;
+        margin: 0 0 3px;
+    }
+
+    .auth-reference-page .auth-num-desc {
+        font-size: 0.83rem;
+        color: #64748B;
+        margin: 0;
+        line-height: 1.48;
+    }
+
+    .auth-reference-page .auth-overview-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #2B7A4B;
+        border-radius: 8px !important;
+        color: #334155;
+        font-size: 0.88rem;
+        font-weight: 700;
+        padding: 11px 22px;
+        text-decoration: none;
+        transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 12px rgba(43, 122, 75, 0.2);
+    }
+
+    .auth-reference-page .auth-overview-cta:hover {
+        background-color: #1E5C37;
+        color: #FFFFFF;
+        transform: translateY(-1px);
+    }
+
+    /* --------------------------------------------------------------------------
+       5. RESPONSIVE BREAKPOINTS (DESKTOP / TABLET / MOBILE)
+       -------------------------------------------------------------------------- */
+    @@media (max-width: 991.98px) {
+        .auth-reference-page .auth-top-hero {
+            padding: 22px 16px 20px;
+        }
+
+        .auth-reference-page .auth-split-container {
+            grid-template-columns: 1fr;
+            gap: 32px;
+            max-width: 660px;
+        }
+
+        .auth-reference-page .auth-showcase-card {
+            padding: 30px 24px;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .auth-reference-page .auth-hero-main-title {
+            font-size: 1.6rem;
+        }
+
+        .auth-reference-page .auth-showcase-card {
+            padding: 22px 16px;
+        }
+
+        .auth-reference-page .auth-form-inner {
+            padding: 22px 16px;
+        }
+
+        .auth-reference-page .auth-field-row-2col {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .auth-reference-page .auth-showcase-tags {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
     }
 </style>
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="col-12 col-lg-12 pe-lg-4">
-                <!-- Big Hero Title -->
-                <h1 class="hero-title-main">
-                    FREELANCER<br />
-                    <span class="hero-title-outlined">FOR</span> STUDENTS
-                </h1>
-                <p class="hero-subtitle">Kết nối sinh viên tài năng với cơ hội thực tế</p>
 
-                <!-- 3 Feature Points -->
-                <div class="features-list mt-4">
-                    <!-- Feature 1 -->
-                    <div class="feature-item">
-                        <div>
-                            <div class="feature-title fw-bold">Cơ hội thực tế</div>
-                            <div class="feature-desc text-muted small">Tìm công việc phù hợp, phát triển kỹ năng</div>
-                        </div>
-                    </div>
-
-                    <!-- Feature 2 -->
-                    <div class="feature-item mt-3">
-                        <div>
-                            <div class="feature-title fw-bold">Thu nhập linh hoạt</div>
-                            <div class="feature-desc text-muted small">Làm chủ thời gian, tăng thu nhập</div>
-                        </div>
-                    </div>
-
-                    <!-- Feature 3 -->
-                    <div class="feature-item mt-3">
-                        <div>
-                            <div class="feature-title fw-bold">Xây dựng tương lai</div>
-                            <div class="feature-desc text-muted small">Tạo portfolio, tích lũy kinh nghiệm</div>
-                        </div>
-                    </div>
+<div class="auth-reference-page">
+    <section class="auth-main-section" aria-label="Đăng ký">
+        <div class="auth-split-container">
+            <div class="auth-showcase-card">
+                <div class="auth-showcase-header">
+                    <h2 class="auth-showcase-title">Đăng ký tài khoản</h2>
+                    <p class="auth-showcase-subtitle">Chọn vai trò và điền thông tin để khởi tạo tài khoản mới</p>
                 </div>
 
-                <!-- Banner Illustration & Hand-drawn text -->
-                <div class="hero-illustration-box d-none d-md-block">
-                    <div class="doodle-badge">
-                        Small Skills<br />Big Opportunities 👑
-                    </div>
-                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=700&q=80"
-                         alt="Freelancer Students" class="hero-student-img" />
-                </div>
-            </div>
-        </div>
-        <div class="col-5">
-            <div class="containerdecor">
-                <div class="card" style="width: 18rem;">
-                    <div class="card-body">
-                        <h5 class="card-title">Đăng Ký <span style="color:white">Tài Khoản</span></h5>
-                       
-                        <form asp-controller="Account" asp-action="DangKy" method="post">
-                            @* Sửa thành asp-validation-summary="All" để hiện TẤT CẢ mọi lỗi lên màn hình *@
-                            <div asp-validation-summary="All" class="alert alert-danger mb-3" style="display:none;">
-                            </div>
+                <div class="auth-form-inner">
+                    <form asp-controller="Account" asp-action="DangKy" method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger mb-3" role="alert"
+                             style="@(!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0 ? "" : "display:none;")">
+                        </div>
 
-                            @* 1. Thêm ô chọn loại tài khoản *@
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Loại tài khoản</label>
-                                <select name="marole" class="form-select">
-                                    <option value="1">Sinh viên Freelancer (Tìm việc)</option>
-                                    <option value="2">Nhà tuyển dụng (Đăng việc)</option>
-                                </select>
+                        <div class="auth-field-group">
+                            <label for="marole" class="auth-label">Loại tài khoản</label>
+                            <div class="auth-role-options">
+                                <label class="auth-role-option" for="marole">
+                                    <input id="marole" name="marole" type="radio" value="1" checked="@(Model?.marole != 2)" />
+                                    <span>Tôi là sinh viên – tìm việc</span>
+                                </label>
+                                <label class="auth-role-option" for="marole-employer">
+                                    <input id="marole-employer" name="marole" type="radio" value="2" checked="@(Model?.marole == 2)" />
+                                    <span>Tôi là nhà tuyển dụng – cần người làm</span>
+                                </label>
                             </div>
-                            <div class="mb-3">
-                      
-                                <label type="hovaten" class="form-label fw-semibold">Họ và tên</label>
-                                
-                                <input type="text" class="form-control" id="hovaten" name="hovaten"
+                            <span asp-validation-for="marole" class="text-danger auth-validation-error"></span>
+                        </div>
+
+                        <div class="auth-field-row-2col">
+                            <div class="auth-field-group">
+                                <label for="hovaten" class="auth-label">Họ và tên</label>
+                                <input type="text" class="form-control auth-input" id="hovaten" name="hovaten"
                                        value="@Model?.hovaten" placeholder="Nhập họ và tên" />
                                 @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
-                                <span asp-validation-for="hovaten" class="text-danger"></span>
-                       
+                                <span asp-validation-for="hovaten" class="text-danger auth-validation-error"></span>
                             </div>
 
-                            <div class="mb-3">
-                      
-                                <label type="tentaikhoan" class="form-label fw-semibold">Tên tài khoản</label>
-                                
-                                <input type="text" class="form-control" id="tentaikhoan" name="tentaikhoan"
+                            <div class="auth-field-group">
+                                <label for="tentaikhoan" class="auth-label">Tên tài khoản</label>
+                                <input type="text" class="form-control auth-input" id="tentaikhoan" name="tentaikhoan"
                                        value="@Model?.tentaikhoan" placeholder="Nhập tên tài khoản" />
                                 @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
-                                <span asp-validation-for="tentaikhoan" class="text-danger"></span>
-                       
+                                <span asp-validation-for="tentaikhoan" class="text-danger auth-validation-error"></span>
                             </div>
+                        </div>
 
-                            <div class="row">
-                                <div class="col">
-                                    <div class="mb-3">
-                      
-                                        <label type="email" class="form-label fw-semibold">Email</label>
-                                
-                                        <input type="email" class="form-control" id="email" name="email"
-                                               value="@Model?.email" placeholder="Nhập Email" />
-                                        @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
-                                        <span asp-validation-for="email" class="text-danger"></span>
-                       
-                                    </div>
-                            
-                                </div>
-                                <div class="col">
-                                    <div class="mb-3">
-                      
-                                        <label type="sodienthoai" class="form-label fw-semibold">Số điện thoại</label>
-                                
-                                        <input type="text" class="form-control" id="sodienthoai" name="sodienthoai"
-                                               value="@Model?.sodienthoai" placeholder="Nhập số điện thoại" />
-                                        @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
-                                        <span asp-validation-for="sodienthoai" class="text-danger"></span>
-                       
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                      
-                                <label type="password" class="form-label fw-semibold">Mật khẩu</label>
-                                
-                                <input type="password" class="form-control" id="password" name="password"
-                                       value="@Model?.password" placeholder="Nhập mật khẩu" />
+                        <div class="auth-field-row-2col">
+                            <div class="auth-field-group">
+                                <label for="email" class="auth-label">Email</label>
+                                <input type="email" class="form-control auth-input" id="email" name="email"
+                                       value="@Model?.email" placeholder="Nhập Email" />
                                 @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
-                                <span asp-validation-for="password" class="text-danger"></span>
-                       
+                                <span asp-validation-for="email" class="text-danger auth-validation-error"></span>
                             </div>
 
-                            <div class="mb-3">
-                      
-                                <label type="xacnhanmatkhau" class="form-label fw-semibold">Xác nhận mật khẩu</label>
-                                
-                                <input type="password" class="form-control" id="xacnhanmatkhau" name="xacnhanmatkhau"
-                                       value="@Model?.xacnhanmatkhau" placeholder="Nhập lại mật khẩu" />
+                            <div class="auth-field-group">
+                                <label for="sodienthoai" class="auth-label">Số điện thoại</label>
+                                <input type="text" class="form-control auth-input" id="sodienthoai" name="sodienthoai"
+                                       value="@Model?.sodienthoai" placeholder="Nhập số điện thoại" />
                                 @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
-                                <span asp-validation-for="xacnhanmatkhau" class="text-danger"></span>
-                       
+                                <span asp-validation-for="sodienthoai" class="text-danger auth-validation-error"></span>
                             </div>
-                            <div class="text-center mt-3">
-                                <button type="submit">Đăng ký</button>
+                        </div>
+
+                        <div class="auth-field-row-2col">
+                            <div class="auth-field-group">
+                                <label for="password" class="auth-label">Mật khẩu</label>
+                                <div class="auth-password-control">
+                                    <input type="password" class="form-control auth-input" id="password" name="password"
+                                           placeholder="Nhập mật khẩu" aria-describedby="passwordHint" />
+                                    <button type="button" class="auth-password-toggle" data-password-toggle="password" aria-controls="password" aria-label="Hiện mật khẩu" aria-pressed="false"><i class="bi bi-eye" aria-hidden="true"></i></button>
+                                </div>
+                                <small id="passwordHint" class="auth-password-hint">Mật khẩu cần có ít nhất 6 ký tự.</small>
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="password" class="text-danger auth-validation-error"></span>
                             </div>
 
-                        </form>
-                    </div>
-                    
+                            <div class="auth-field-group">
+                                <label for="xacnhanmatkhau" class="auth-label">Xác nhận mật khẩu</label>
+                                <div class="auth-password-control">
+                                    <input type="password" class="form-control auth-input" id="xacnhanmatkhau" name="xacnhanmatkhau"
+                                           placeholder="Nhập lại mật khẩu" />
+                                    <button type="button" class="auth-password-toggle" data-password-toggle="xacnhanmatkhau" aria-controls="xacnhanmatkhau" aria-label="Hiện mật khẩu" aria-pressed="false"><i class="bi bi-eye" aria-hidden="true"></i></button>
+                                </div>
+                                @* 3. Tự động hiện câu báo lỗi màu đỏ nếu nhập sai *@
+                                <span asp-validation-for="xacnhanmatkhau" class="text-danger auth-validation-error"></span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" class="auth-btn-submit">
+                                <span>Đăng ký</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="auth-showcase-tags">
+                    <a asp-controller="Account" asp-action="DangNhap" class="auth-link-accent">Đã có tài khoản? Đăng nhập</a>
                 </div>
             </div>
-  
         </div>
-    </div>
+    </section>
+
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages/account-pages.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/account-pages.js" asp-append-version="true"></script>
+}

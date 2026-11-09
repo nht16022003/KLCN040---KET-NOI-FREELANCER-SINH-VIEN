@@ -1,0 +1,289 @@
+@model FreelancerStudent.Web.ViewModels.DanhSachHopDongViewModel
+
+@{
+    ViewData["Title"] = "Quản lý hợp đồng";
+
+    var dsTrangThai = new Dictionary<string, string>
+    {
+        { "ChoXacNhan", "Chờ Freelancer xác nhận" },
+        { "ChoKyKet", "Chờ ký kết" },
+        { "ChoKyQuy", "Chờ ký quỹ" },
+        { "DangThucHien", "Đang thực hiện" },
+        { "DaHoanThanh", "Đã hoàn thành" },
+        { "DaHuy", "Đã hủy" },
+        { "DangTranhChap", "Đang tranh chấp" }
+    };
+}
+
+<style>
+    /* ==========================================================================
+       UI SCOPED STYLING – QUẢN LÝ HỢP ĐỒNG (PHƯƠNG ÁN B – BALANCED PROPORTIONS)
+       Áp dụng đồng bộ cho cả 2 ngữ cảnh: Freelancer và Nhà tuyển dụng
+       ========================================================================== */
+    .contracts-scope .card {
+        border-radius: 10px !important;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .contracts-scope .btn {
+        border-radius: 6px !important;
+        font-weight: 600;
+    }
+
+    .contracts-scope .badge {
+        border-radius: 6px !important;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 5px 10px;
+    }
+
+    .contracts-scope .form-control,
+    .contracts-scope .form-select {
+        border-radius: 6px !important;
+    }
+
+    .contracts-scope .table th {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-bottom: 2px solid #E2E8F0;
+        padding: 12px 14px;
+        background-color: #F8FAFC;
+    }
+
+    .contracts-scope .table td {
+        padding: 14px 14px;
+        font-size: 0.9rem;
+        color: #1E293B;
+    }
+
+    .contracts-scope .contract-code-link {
+        color: #2B7A4B;
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.15s ease;
+    }
+
+    .contracts-scope .contract-code-link:hover {
+        color: #1E5C37;
+        text-decoration: none;
+    }
+
+    .contracts-scope .btn-escrow-action {
+        background-color: #2B7A4B !important;
+        border-color: #2B7A4B !important;
+        color: #FFFFFF !important;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 6px !important;
+        transition: background-color 0.15s ease;
+    }
+
+    .contracts-scope .btn-escrow-action:hover {
+        background-color: #1E5C37 !important;
+        border-color: #1E5C37 !important;
+    }
+</style>
+
+<div class="contracts-scope container py-4">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 8px !important;">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 8px !important;">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Header trang – Chuẩn hóa đồng bộ h4 màu xanh #1B5E36 kèm đường phân cách -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-2 border-bottom">
+       
+    </div>
+
+    <!-- Tìm kiếm và lọc -->
+    <form asp-controller="HopDong" asp-action="Index" method="get" class="row g-3 mb-4">
+
+        <div class="col-md-5">
+            <label class="form-label small fw-semibold text-secondary">Tìm kiếm hợp đồng</label>
+
+            <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+                   placeholder="@(Model.LaFreelancer ? "Mã hợp đồng, tên công việc hoặc Nhà tuyển dụng" : "Mã hợp đồng, tên công việc hoặc Freelancer")" />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold text-secondary">Trạng thái</label>
+
+            <select name="trangThai" class="form-select">
+
+                <option value="">Tất cả trạng thái</option>
+
+                @foreach (var item in dsTrangThai)
+                {
+                    if (Model.TrangThai == item.Key)
+                    {
+                        <option value="@item.Key" selected>
+                            @item.Value
+                        </option>
+                    }
+                    else
+                    {
+                        <option value="@item.Key">
+                            @item.Value
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary px-3">
+                Tìm kiếm
+            </button>
+
+            <a asp-controller="HopDong" asp-action="Index" class="btn btn-outline-secondary px-3">
+                Xóa lọc
+            </a>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Loi))
+    {
+        <div class="alert alert-danger" style="border-radius: 8px !important;">
+            @Model.Loi
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th style="width: 12%;">Mã hợp đồng</th>
+                            <th style="width: 25%;">Công việc</th>
+                            <th style="width: 18%;">@(Model.LaFreelancer ? "Nhà tuyển dụng" : "Freelancer")</th>
+                            <th style="width: 11%;">Ngày bắt đầu</th>
+                            <th style="width: 11%;">Ngày kết thúc</th>
+                            <th style="width: 13%;">Tiền ký quỹ</th>
+                            <th style="width: 10%;">Trạng thái</th>
+                            <th style="width: 10%;" class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.HopDongs.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    Không có hợp đồng phù hợp.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var hd in Model.HopDongs)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@hd.maHD" class="contract-code-link">
+                                            @hd.maHD
+                                        </a>
+                                    </td>
+
+                                    <td class="fw-semibold text-dark">@hd.tenCongViec</td>
+
+                                    <td>
+                                        @if (Model.LaFreelancer)
+                                        {
+                                            @(!string.IsNullOrWhiteSpace(hd.tenNhaTuyenDung) ? hd.tenNhaTuyenDung : "Nhà tuyển dụng")
+                                        }
+                                        else
+                                        {
+                                            @(!string.IsNullOrWhiteSpace(hd.tenFreelancer) ? hd.tenFreelancer : "Freelancer")
+                                        }
+                                    </td>
+
+                                    <td class="text-secondary small">
+                                        @(hd.ngayBatDau?.ToString("dd/MM/yyyy") ?? "-")
+                                    </td>
+
+                                    <td class="text-secondary small">
+                                        @(hd.ngayKetThuc?.ToString("dd/MM/yyyy") ?? "-")
+                                    </td>
+
+                                    <td class="fw-bold" style="color: #2B7A4B;">
+                                        @(hd.sotienkyquy?.ToString("N0") ?? "0") VNĐ
+                                    </td>
+
+                                    <td>
+                                        @{
+                                            var tenTrangThai =
+                                                dsTrangThai.TryGetValue(
+                                                    hd.trangThai, out var ten)
+                                                    ? ten
+                                                    : hd.trangThai;
+
+                                            var badgeClass = hd.trangThai switch
+                                            {
+                                                "ChoXacNhan" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+                                                "ChoKyKet" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+                                                "ChoKyQuy" => "bg-info-subtle text-info-emphasis border border-info-subtle",
+                                                "DangThucHien" => "bg-success-subtle text-success border border-success-subtle",
+                                                "DaHoanThanh" => "bg-light text-secondary border border-secondary-subtle",
+                                                "DaHuy" => "bg-danger-subtle text-danger border border-danger-subtle",
+                                                "DangTranhChap" => "bg-danger-subtle text-danger border border-danger-subtle",
+                                                _ => "bg-secondary-subtle text-secondary border border-secondary-subtle"
+                                            };
+                                        }
+
+                                        <div class="d-flex align-items-center flex-wrap gap-2">
+                                            <span class="badge @badgeClass">
+                                                @tenTrangThai
+                                            </span>
+
+                                            @if (!Model.LaFreelancer && hd.trangThai == "ChoKyQuy")
+                                            {
+                                                <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@hd.maHD"
+                                                   class="btn btn-sm btn-escrow-action d-inline-flex align-items-center"
+                                                   title="Xem chi tiết và tiến hành ký quỹ cho hợp đồng này">
+                                                    Tiến hành ký quỹ
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+
+                                    <td class="text-end">
+                                        <a asp-controller="HopDong" asp-action="ChiTiet" asp-route-maHD="@hd.maHD"
+                                           class="btn btn-sm btn-outline-success">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <p class="mt-3 text-muted small">
+            Tổng số: <strong class="text-dark">@Model.HopDongs.Count</strong> hợp đồng
+        </p>
+    }
+
+</div>

@@ -1,0 +1,907 @@
+@model FreelancerStudent.Web.ViewModels.ChiTietBanGiaoViewModel
+
+@{
+    ViewData["Title"] = "Bàn giao sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var danhSach = Model.DanhSachBanGiao
+        .OrderByDescending(x => x.MaBanGiao)
+        .ToList();
+
+    var moiNhat = danhSach.FirstOrDefault();
+
+    var laChuaDat = moiNhat != null && (moiNhat.TrangThai == "YeuCauChinhSua" || moiNhat.TrangThai == "ChuaDat");
+
+    var coTheNop = Model.LaFreelancer
+        && Model.TrangThaiHopDong == "DangThucHien"
+        && Model.TatCaMocDaDat
+        && (moiNhat == null || laChuaDat);
+
+    var coTheDanhGia = Model.LaKhachHang
+        && Model.TrangThaiHopDong == "DangThucHien"
+        && moiNhat?.TrangThai == "ChoNghiemThu";
+
+    bool moSanForm = moiNhat == null || Model.CheDoCapNhatLai;
+}
+
+<style>
+    :root {
+        --fs-primary: #2B7A4B;
+        --fs-primary-dark: #1E5C37;
+        --fs-heading: #1B5E36;
+        --fs-subtle: #EAF5EE;
+        --fs-bg: #F8FAF9;
+        --fs-border: #E2E8F0;
+        --fs-text: #1E293B;
+        --fs-muted: #64748B;
+        --fs-danger: #DC2626;
+        --fs-danger-bg: #FEF2F2;
+        --fs-danger-border: #FECACA;
+        --fs-warning: #D97706;
+        --fs-warning-bg: #FFFBEB;
+        --fs-warning-border: #FDE68A;
+        --fs-info: #0284C7;
+        --fs-info-bg: #F0F9FF;
+        --fs-info-border: #BAE6FD;
+    }
+
+    .fs-page-wrapper {
+        color: var(--fs-text);
+        background-color: var(--fs-bg);
+        min-height: calc(100vh - 120px);
+    }
+
+    .fs-breadcrumb .breadcrumb-item a {
+        color: var(--fs-primary);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .fs-breadcrumb .breadcrumb-item a:hover {
+        color: var(--fs-primary-dark);
+        text-decoration: none;
+    }
+    .fs-breadcrumb .breadcrumb-item.active {
+        color: var(--fs-muted);
+    }
+
+    /* Header Banner */
+    .fs-header-card {
+        background: #ffffff;
+        border: 1px solid var(--fs-border);
+        border-left: 5px solid var(--fs-primary);
+        border-radius: 8px;
+    }
+
+    .fs-badge-primary {
+        background-color: var(--fs-subtle);
+        color: var(--fs-heading);
+        border: 1px solid #C6E7D2;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+    }
+
+    .fs-badge-status-completed {
+        background-color: #DEF7EC;
+        color: #03543F;
+        border: 1px solid #BCF0DA;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+    }
+
+    .fs-badge-status-pending {
+        background-color: #E0F2FE;
+        color: #0369A1;
+        border: 1px solid #BAE6FD;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+    }
+
+    .fs-badge-status-reject {
+        background-color: #FDE8E8;
+        color: #9B1C1C;
+        border: 1px solid #F8B4B4;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+    }
+
+    /* Unified Alert Cards */
+    .fs-alert {
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.25rem;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .fs-alert-success {
+        background-color: #F0FDF4;
+        border-color: #BBF7D0;
+        color: #166534;
+    }
+    .fs-alert-danger {
+        background-color: var(--fs-danger-bg);
+        border-color: var(--fs-danger-border);
+        color: #991B1B;
+    }
+    .fs-alert-warning {
+        background-color: var(--fs-warning-bg);
+        border-color: var(--fs-warning-border);
+        color: #92400E;
+    }
+    .fs-alert-info {
+        background-color: var(--fs-info-bg);
+        border-color: var(--fs-info-border);
+        color: #075985;
+    }
+
+    /* Primary Action Buttons */
+    .fs-btn-primary {
+        background-color: var(--fs-primary);
+        color: #ffffff;
+        border: 1px solid var(--fs-primary);
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .fs-btn-primary:hover, .fs-btn-primary:focus {
+        background-color: var(--fs-primary-dark);
+        border-color: var(--fs-primary-dark);
+        color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(43, 122, 75, 0.2);
+    }
+
+    .fs-btn-outline {
+        background-color: #ffffff;
+        color: var(--fs-text);
+        border: 1px solid var(--fs-border);
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .fs-btn-outline:hover {
+        background-color: #F1F5F9;
+        border-color: #CBD5E1;
+        color: var(--fs-text);
+    }
+
+    .fs-btn-outline-primary {
+        background-color: #ffffff;
+        color: var(--fs-primary);
+        border: 1px solid var(--fs-primary);
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .fs-btn-outline-primary:hover {
+        background-color: var(--fs-subtle);
+        color: var(--fs-primary-dark);
+        border-color: var(--fs-primary-dark);
+    }
+
+    .fs-btn-danger {
+        background-color: var(--fs-danger);
+        color: #ffffff;
+        border: 1px solid var(--fs-danger);
+        font-weight: 600;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    .fs-btn-danger:hover {
+        background-color: #B91C1C;
+        border-color: #B91C1C;
+        color: #ffffff;
+    }
+
+    /* Card Panels */
+    .fs-card {
+        background: #ffffff;
+        border: 1px solid var(--fs-border);
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    .fs-card-header {
+        background-color: #ffffff;
+        border-bottom: 1px solid var(--fs-border);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .fs-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form Inputs */
+    .fs-form-control {
+        border: 1px solid var(--fs-border);
+        border-radius: 6px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.95rem;
+        color: var(--fs-text);
+        background-color: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .fs-form-control:focus {
+        border-color: var(--fs-primary);
+        box-shadow: 0 0 0 3px rgba(43, 122, 75, 0.15);
+        outline: none;
+    }
+
+    /* Timeline Versions */
+    .fs-version-card {
+        border: 1px solid var(--fs-border);
+        border-radius: 8px;
+        background: #ffffff;
+        margin-bottom: 1.25rem;
+        transition: all 0.2s ease;
+    }
+    .fs-version-card.is-latest {
+        border: 2px solid var(--fs-primary);
+        box-shadow: 0 4px 12px rgba(43, 122, 75, 0.08);
+    }
+    .fs-version-header {
+        background-color: #FAFCFA;
+        border-bottom: 1px solid var(--fs-border);
+        padding: 0.9rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .fs-version-card.is-latest .fs-version-header {
+        background-color: var(--fs-subtle);
+        border-bottom-color: #D1E7DD;
+    }
+    .fs-version-body {
+        padding: 1.25rem;
+    }
+
+    /* Resource Link Pills */
+    .fs-resource-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        background: var(--fs-bg);
+        border: 1px solid var(--fs-border);
+        border-radius: 6px;
+        color: var(--fs-heading);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+    .fs-resource-pill:hover {
+        background: var(--fs-subtle);
+        border-color: var(--fs-primary);
+        color: var(--fs-primary-dark);
+        text-decoration: none;
+    }
+
+    /* Review Evaluation Box */
+    .fs-review-box {
+        background: #F8FAF9;
+        border: 1px solid var(--fs-border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-top: 1.25rem;
+    }
+    .fs-eval-card-accept {
+        background: #ffffff;
+        border: 1.5px solid #86EFAC;
+        border-radius: 8px;
+        padding: 1.25rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .fs-eval-card-reject {
+        background: #ffffff;
+        border: 1.5px solid #FCA5A5;
+        border-radius: 8px;
+        padding: 1.25rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* SVG Icon Helpers */
+    .fs-icon {
+        width: 1.15rem;
+        height: 1.15rem;
+        display: inline-block;
+        vertical-align: -0.15em;
+        fill: currentColor;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="fs-page-wrapper py-4">
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="fs-breadcrumb mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="HopDong"
+                       asp-action="ChiTiet"
+                       asp-route-maHD="@Model.MaHD">
+                        <svg class="fs-icon me-1" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                        Chi tiết hợp đồng
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Bàn giao và nghiệm thu sản phẩm
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Header Card -->
+        <div class="fs-header-card p-4 mb-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h4 class="fw-bold mb-0" style="color: var(--fs-heading);">
+                            Bàn giao và nghiệm thu sản phẩm
+                        </h4>
+                        <span class="fs-badge-primary">
+                            Hợp đồng: #@Model.MaHD
+                        </span>
+                    </div>
+                    <div class="small" style="color: var(--fs-muted);">
+                        @if (Model.LaFreelancer)
+                        {
+                            <span>Vai trò của bạn: <strong>Freelancer thực hiện dự án</strong></span>
+                        }
+                        else if (Model.LaKhachHang)
+                        {
+                            <span>Vai trò của bạn: <strong>Nhà tuyển dụng / Chủ dự án</strong></span>
+                        }
+                        <span class="mx-2">•</span>
+                        <span>
+                            Trạng thái:
+                            @if (Model.TrangThaiHopDong == "DaHoanThanh" || Model.TrangThaiHopDong == "DaThanhToan")
+                            {
+                                <span class="fs-badge-status-completed ms-1">Đã hoàn thành</span>
+                            }
+                            else
+                            {
+                                <span class="fs-badge-status-pending ms-1">Đang thực hiện</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a asp-controller="HopDong"
+                       asp-action="ChiTiet"
+                       asp-route-maHD="@Model.MaHD"
+                       class="btn fs-btn-outline px-3 py-2">
+                        <svg class="fs-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        Xem hợp đồng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unified Alert Notifications -->
+        @if (Model.LaKhachHang && (Model.TrangThaiHopDong == "DaHoanThanh"))
+        {
+            <div class="fs-alert fs-alert-success justify-content-between align-items-center flex-wrap gap-3 shadow-sm">
+                <div class="d-flex align-items-center gap-3">
+                    <svg class="fs-icon text-success" style="width: 2rem; height: 2rem;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <div>
+                        <div class="fw-bold fs-6">Sản phẩm đã được nghiệm thu thành công!</div>
+                        <div class="small">Hợp đồng đang chờ xác nhận thanh toán. Vui lòng giải ngân thù lao ký quỹ cho Freelancer để kết thúc hợp đồng.</div>
+                    </div>
+                </div>
+                <a asp-controller="HopDong" asp-action="ThanhToan" asp-route-maHD="@Model.MaHD" class="btn fs-btn-primary px-3 py-2 shadow-sm">
+                    <svg class="fs-icon" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    Giải ngân thù lao cho Freelancer
+                </a>
+            </div>
+        }
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="fs-alert fs-alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <svg class="fs-icon text-success" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <div class="flex-grow-1">@TempData["SuccessMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="fs-alert fs-alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <svg class="fs-icon text-danger" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <div class="flex-grow-1">@TempData["ErrorMessage"]</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (Model.LaFreelancer && Model.TrangThaiHopDong == "DangThucHien" && !Model.TatCaMocDaDat)
+        {
+            <div class="fs-alert fs-alert-warning shadow-sm">
+                <svg class="fs-icon text-warning" style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                <div>
+                    <div class="fw-bold">Chưa đủ điều kiện bàn giao sản phẩm</div>
+                    <div class="small mt-1">
+                        @(Model.LyDoChuaDuDieuKien ?? "Toàn bộ các mốc tiến độ của dự án phải được Nhà tuyển dụng đánh giá Đạt trước khi bạn được phép bàn giao sản phẩm hoàn chỉnh.")
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- FORM FREELANCER BÀN GIAO SẢN PHẨM -->
+        @if (coTheNop)
+        {
+            <div class="fs-card mb-4" id="formBanGiaoContainer" style="@(moSanForm ? "" : "display: none;")">
+                <div class="fs-card-header" style="background-color: var(--fs-subtle); border-bottom: 1px solid #D1E7DD;">
+                    <div class="d-flex align-items-center gap-2">
+                        <svg class="fs-icon" style="color: var(--fs-primary); width: 1.35rem; height: 1.35rem;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                        <h5 class="fw-bold mb-0" style="color: var(--fs-heading);">
+                            @(moiNhat == null
+                                ? "Nộp bàn giao sản phẩm hoàn chỉnh (v1.0)"
+                                : $"Cập nhật lại sản phẩm bàn giao ({moiNhat.PhienBan} -> Phiên bản mới)")
+                        </h5>
+                    </div>
+
+                    @if (laChuaDat)
+                    {
+                        <span class="fs-badge-status-reject">
+                            Nộp lại sau phản hồi Chưa đạt
+                        </span>
+                    }
+                </div>
+
+                <div class="fs-card-body">
+                    @if (laChuaDat)
+                    {
+                        <div class="fs-alert fs-alert-warning small mb-4">
+                            <svg class="fs-icon text-warning" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            <div>
+                                <strong>Hướng dẫn nộp lại:</strong> Vui lòng cập nhật và hoàn thiện sản phẩm theo lý do đánh giá Chưa đạt của Nhà tuyển dụng. Khi nhấn <strong>"Gửi bàn giao lại"</strong>, hệ thống sẽ tự động tạo một phiên bản bàn giao mới độc lập để Nhà tuyển dụng đánh giá. Lịch sử các lần nộp trước đó luôn được bảo lưu toàn vẹn.
+                            </div>
+                        </div>
+                    }
+
+                    <form asp-controller="BanGiaoSanPham"
+                          asp-action="TaoBanGiao"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="MaHD"
+                               value="@Model.MaHD" />
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold" style="color: var(--fs-text);">
+                                    Đường dẫn sản phẩm hoàn chỉnh / Mã nguồn <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white" style="border-color: var(--fs-border);">
+                                        <svg class="fs-icon" style="color: var(--fs-primary);" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                                    </span>
+                                    <input type="url"
+                                           name="FileSanPhamUrl"
+                                           class="form-control fs-form-control"
+                                           placeholder="https://drive.google.com/... hoặc https://github.com/..."
+                                           value="@(laChuaDat ? moiNhat?.FileSanPhamUrl : "")"
+                                           required />
+                                </div>
+                                <div class="form-text small" style="color: var(--fs-muted);">
+                                    Đường dẫn Google Drive, OneDrive, Dropbox, GitHub... Vui lòng đảm bảo quyền truy cập để Nhà tuyển dụng có thể xem và tải về.
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold" style="color: var(--fs-text);">
+                                    Đường dẫn Demo nghiệm thu trực tiếp <span class="small text-muted">(Tùy chọn)</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white" style="border-color: var(--fs-border);">
+                                        <svg class="fs-icon" style="color: var(--fs-info);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                                    </span>
+                                    <input type="url"
+                                           name="LinkDemo"
+                                           class="form-control fs-form-control"
+                                           placeholder="https://demo-app.com... hoặc video preview"
+                                           value="@(laChuaDat ? moiNhat?.LinkDemo : "")" />
+                                </div>
+                                <div class="form-text small" style="color: var(--fs-muted);">
+                                    Liên kết trang web demo, video quay thao tác chức năng hoặc ứng dụng đã deploy.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: var(--fs-text);">
+                                Mô tả bàn giao &amp; Nội dung đã hoàn thiện <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="MoTaBanGiao"
+                                      class="form-control fs-form-control"
+                                      rows="4"
+                                      required
+                                      placeholder="Mô tả cụ thể danh sách tính năng đã bàn giao, tài liệu hướng dẫn kèm theo hoặc các điểm đã sửa chữa theo phản hồi của Nhà tuyển dụng...">@(laChuaDat ? moiNhat?.MoTaBanGiao : "")</textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit"
+                                    class="btn fs-btn-primary px-4 py-2"
+                                    onclick="return confirm('Xác nhận gửi bàn giao sản phẩm này cho Nhà tuyển dụng?');">
+                                <svg class="fs-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                @(moiNhat == null ? "Gửi bàn giao sản phẩm" : "Gửi bàn giao lại (Tạo phiên bản mới)")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <!-- DANH SÁCH LỊCH SỬ BÀN GIAO SẢN PHẨM (TIMELINE) -->
+        <div class="fs-card mb-4">
+            <div class="fs-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <svg class="fs-icon" style="color: var(--fs-primary); width: 1.35rem; height: 1.35rem;" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                    <h5 class="fw-bold mb-0" style="color: var(--fs-heading);">
+                        Tiến trình bàn giao sản phẩm
+                    </h5>
+                </div>
+                <span class="fs-badge-primary">
+                    @danhSach.Count phiên bản
+                </span>
+            </div>
+
+            <div class="fs-card-body">
+                @if (!danhSach.Any())
+                {
+                    <div class="text-center py-5" style="color: var(--fs-muted);">
+                        <svg class="fs-icon mb-3" style="width: 3.5rem; height: 3.5rem; color: #CBD5E1;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-4-4h-2v-2h2v2zm0-4h-2V7h2v4z"/></svg>
+                        <h6 class="fw-semibold text-dark mb-1">Chưa có sản phẩm nào được bàn giao</h6>
+                        <p class="small mb-0">Khi Freelancer hoàn tất các mốc tiến độ và nộp sản phẩm hoàn chỉnh, phiên bản bàn giao sẽ hiển thị tại đây.</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in danhSach)
+                    {
+                        var laBanMoiNhat = moiNhat?.MaBanGiao == item.MaBanGiao;
+                        var itemLaChuaDat = item.TrangThai == "YeuCauChinhSua" || item.TrangThai == "ChuaDat";
+
+                        var yeuCau = Model.DanhSachYeuCau
+                            .Where(x => x.MaBanGiao == item.MaBanGiao)
+                            .OrderByDescending(x => x.NgayYeuCau)
+                            .ToList();
+
+                        <div class="fs-version-card @(laBanMoiNhat ? "is-latest" : "")">
+                            <!-- Header phiên bản -->
+                            <div class="fs-version-header">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <h6 class="fw-bold mb-0" style="color: var(--fs-heading);">
+                                        Phiên bản @item.PhienBan
+                                    </h6>
+
+                                    @if (laBanMoiNhat)
+                                    {
+                                        <span class="fs-badge-primary small">
+                                            Mới nhất
+                                        </span>
+                                    }
+
+                                    <span class="text-muted small">
+                                        • Ngày nộp: @item.NgayNop.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                </div>
+
+                                <div>
+                                    @if (item.TrangThai == "DaNghiemThu")
+                                    {
+                                        <span class="fs-badge-status-completed">
+                                            <svg class="fs-icon me-1" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                            Đã nghiệm thu
+                                        </span>
+                                    }
+                                    else if (itemLaChuaDat)
+                                    {
+                                        <span class="fs-badge-status-reject">
+                                            <svg class="fs-icon me-1" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                            Chưa đạt
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fs-badge-status-pending">
+                                            <svg class="fs-icon me-1" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                                            Chờ nghiệm thu
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Thân phiên bản -->
+                            <div class="fs-version-body">
+                                <!-- Nội dung mô tả bàn giao -->
+                                <div class="mb-3">
+                                    <div class="small fw-semibold text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                        Mô tả chi tiết sản phẩm
+                                    </div>
+                                    <div class="p-3 rounded-2" style="background-color: var(--fs-bg); border: 1px solid var(--fs-border); white-space: pre-line; color: var(--fs-text);">
+                                        @item.MoTaBanGiao
+                                    </div>
+                                </div>
+
+                                <!-- Tài nguyên đính kèm -->
+                                <div class="mb-3">
+                                    <div class="small fw-semibold text-muted text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                        Tài nguyên &amp; Liên kết bàn giao
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <a href="@item.FileSanPhamUrl"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="fs-resource-pill">
+                                            <svg class="fs-icon" style="color: var(--fs-primary);" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                                            <span>Xem sản phẩm hoàn chỉnh / Mã nguồn</span>
+                                        </a>
+
+                                        @if (!string.IsNullOrWhiteSpace(item.LinkDemo))
+                                        {
+                                            <a href="@item.LinkDemo"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               class="fs-resource-pill">
+                                                <svg class="fs-icon" style="color: var(--fs-info);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                                                <span>Xem liên kết Demo trực tiếp</span>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Phản hồi Chưa đạt nếu có -->
+                                @if (itemLaChuaDat)
+                                {
+                                    var lyDo = !string.IsNullOrWhiteSpace(item.PhanHoi)
+                                        ? item.PhanHoi
+                                        : (yeuCau.FirstOrDefault()?.NoiDungYeuCau ?? "Yêu cầu chỉnh sửa và hoàn thiện lại sản phẩm.");
+
+                                    <div class="fs-alert fs-alert-danger mb-3">
+                                        <svg class="fs-icon text-danger" style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold mb-1">Lý do Nhà tuyển dụng đánh giá Chưa đạt:</div>
+                                            <div class="text-dark">@lyDo</div>
+                                            @if (item.NgayPhanHoi.HasValue)
+                                            {
+                                                <div class="small text-muted mt-2">
+                                                    Thời gian đánh giá: @item.NgayPhanHoi.Value.ToString("dd/MM/yyyy HH:mm")
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Nút mở lại form cho Freelancer -->
+                                    @if (Model.LaFreelancer && laBanMoiNhat && Model.TrangThaiHopDong == "DangThucHien")
+                                    {
+                                        <div class="p-3 rounded-2 d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"
+                                             id="boxCapNhatLai"
+                                             style="background-color: var(--fs-subtle); border: 1px solid #C6E7D2;">
+                                            <div>
+                                                <div class="fw-bold" style="color: var(--fs-heading);">
+                                                    Cập nhật lại sản phẩm theo yêu cầu
+                                                </div>
+                                                <div class="small text-muted">
+                                                    Mở lại biểu mẫu bên trên để hoàn thiện các điểm chưa đạt và tạo phiên bản bàn giao mới.
+                                                </div>
+                                            </div>
+
+                                            <button type="button"
+                                                    class="btn fs-btn-primary px-3 py-2 shadow-sm"
+                                                    id="btnCapNhatLaiBanGiao"
+                                                    onclick="kichHoatCapNhatLai('@(item.FileSanPhamUrl ?? "")', '@(item.LinkDemo ?? "")', '@(System.Web.HttpUtility.JavaScriptStringEncode(item.MoTaBanGiao ?? ""))')">
+                                                <svg class="fs-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                                Mở form cập nhật lại
+                                            </button>
+                                        </div>
+                                    }
+                                }
+
+                                <!-- Chi tiết lịch sử yêu cầu chỉnh sửa -->
+                                @if (yeuCau.Any())
+                                {
+                                    <div class="mt-3">
+                                        <div class="small fw-semibold text-muted text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                            Lịch sử yêu cầu chỉnh sửa (@yeuCau.Count lần)
+                                        </div>
+
+                                        <div class="d-flex flex-column gap-2">
+                                            @foreach (var yc in yeuCau)
+                                            {
+                                                <div class="p-2 px-3 rounded-2 small" style="background-color: var(--fs-bg); border: 1px solid var(--fs-border);">
+                                                    <div class="text-dark">@yc.NoiDungYeuCau</div>
+                                                    <div class="d-flex align-items-center gap-2 mt-1 text-muted" style="font-size: 0.8rem;">
+                                                        <span>@yc.NgayYeuCau.ToString("dd/MM/yyyy HH:mm")</span>
+                                                        <span>•</span>
+                                                        <span class="badge @(yc.TrangThai == "DaNopLai" ? "bg-success" : "bg-secondary")">
+                                                            @(yc.TrangThai == "DaNopLai" ? "Đã nộp lại" : "Chờ sửa")
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- KHU VỰC ĐÁNH GIÁ CỦA NHÀ TUYỂN DỤNG TRÊN BẢN MỚI NHẤT -->
+                                @if (coTheDanhGia && laBanMoiNhat)
+                                {
+                                    <div class="fs-review-box">
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold mb-1" style="color: var(--fs-heading);">
+                                                Thẩm định &amp; Nghiệm thu sản phẩm (Phiên bản @item.PhienBan)
+                                            </h6>
+                                            <div class="small text-muted">
+                                                Vui lòng kiểm tra kỹ đường dẫn sản phẩm, mã nguồn và demo. Chọn phương án xử lý tương ứng:
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 align-items-stretch">
+                                            <!-- Cột 1: Đánh giá Chưa đạt -->
+                                            <div class="col-md-6">
+                                                <div class="fs-eval-card-reject">
+                                                    <div>
+                                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                                            <svg class="fs-icon text-danger" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                                                            <h6 class="fw-bold text-danger mb-0">Phương án 1: Đánh giá Chưa đạt</h6>
+                                                        </div>
+                                                        <div class="small text-muted mb-3">
+                                                            Nếu sản phẩm chưa đúng cam kết, nhập rõ lý do và yêu cầu để Freelancer sửa chữa.
+                                                        </div>
+
+                                                        <form asp-controller="BanGiaoSanPham"
+                                                              asp-action="GuiYeuCau"
+                                                              method="post"
+                                                              id="formChuaDat">
+
+                                                            @Html.AntiForgeryToken()
+
+                                                            <input type="hidden"
+                                                                   name="maHD"
+                                                                   value="@Model.MaHD" />
+
+                                                            <input type="hidden"
+                                                                   name="MaBanGiao"
+                                                                   value="@item.MaBanGiao" />
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label small fw-semibold text-danger">
+                                                                    Lý do yêu cầu sửa đổi <span class="text-danger">*</span>
+                                                                </label>
+                                                                <textarea name="NoiDungYeuCau"
+                                                                          class="form-control fs-form-control"
+                                                                          rows="3"
+                                                                          required
+                                                                          placeholder="Chỉ rõ các lỗi, thiếu sót hoặc yêu cầu cải thiện..."></textarea>
+                                                            </div>
+
+                                                            <button type="submit"
+                                                                    class="btn fs-btn-danger w-100 py-2"
+                                                                    onclick="return confirm('Xác nhận đánh giá Chưa đạt cho phiên bản bàn giao này?');">
+                                                                <svg class="fs-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                                                Xác nhận Chưa đạt &amp; Yêu cầu sửa
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Cột 2: Đánh giá Đạt & Nghiệm thu -->
+                                            <div class="col-md-6">
+                                                <div class="fs-eval-card-accept">
+                                                    <div>
+                                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                                            <svg class="fs-icon text-success" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                                            <h6 class="fw-bold text-success mb-0">Phương án 2: Đánh giá Đạt &amp; Nghiệm thu</h6>
+                                                        </div>
+                                                        <div class="small text-muted mb-3">
+                                                            Sản phẩm đã đáp ứng đầy đủ yêu cầu hợp đồng. Nhấn nút bên dưới để chuyển sang bước kiểm tra thù lao và giải ngân tiền ký quỹ.
+                                                        </div>
+
+                                                        <div class="fs-alert fs-alert-success small mb-3">
+                                                            Tiền ký quỹ sẽ được giải ngân cho Freelancer sau khi bạn hoàn tất xác nhận thanh toán ở bước tiếp theo.
+                                                        </div>
+                                                    </div>
+
+                                                    <a asp-controller="HopDong"
+                                                       asp-action="ThanhToan"
+                                                       asp-route-maHD="@Model.MaHD"
+                                                       asp-route-maBanGiao="@item.MaBanGiao"
+                                                       class="btn fs-btn-primary w-100 py-2 shadow-sm text-center justify-content-center">
+                                                        <svg class="fs-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                                        Đạt &amp; Chuyển sang bước giải ngân
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Nút quay lại hợp đồng ở chân trang -->
+        <div class="d-flex justify-content-between align-items-center pt-2">
+            <a asp-controller="HopDong"
+               asp-action="ChiTiet"
+               asp-route-maHD="@Model.MaHD"
+               class="btn fs-btn-outline px-4 py-2">
+                <svg class="fs-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                Quay lại chi tiết hợp đồng
+            </a>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function kichHoatCapNhatLai(fileUrl, linkDemo, moTa) {
+            const container = document.getElementById('formBanGiaoContainer');
+            const box = document.getElementById('boxCapNhatLai');
+
+            if (container) {
+                container.style.display = 'block';
+
+                const inputFile = container.querySelector('input[name="FileSanPhamUrl"]');
+                const inputDemo = container.querySelector('input[name="LinkDemo"]');
+                const txtMoTa = container.querySelector('textarea[name="MoTaBanGiao"]');
+
+                if (inputFile && fileUrl) inputFile.value = fileUrl;
+                if (inputDemo && linkDemo) inputDemo.value = linkDemo;
+                if (txtMoTa && moTa) txtMoTa.value = moTa;
+
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (inputFile) inputFile.focus();
+            }
+
+            if (box) {
+                box.innerHTML = '<span class="fs-badge-primary p-2 fs-6 d-inline-flex align-items-center gap-1"><svg class="fs-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Đang mở biểu mẫu cập nhật lại bàn giao bên trên</span>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (Model.CheDoCapNhatLai && laChuaDat && moiNhat != null)
+            {
+                <text>
+                kichHoatCapNhatLai('@(moiNhat.FileSanPhamUrl ?? "")', '@(moiNhat.LinkDemo ?? "")', '@(System.Web.HttpUtility.JavaScriptStringEncode(moiNhat.MoTaBanGiao ?? ""))');
+                </text>
+            }
+        });
+    </script>
+}

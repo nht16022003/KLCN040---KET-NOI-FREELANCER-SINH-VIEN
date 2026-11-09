@@ -18,6 +18,8 @@ namespace FreelancerStudent.Web.Services.Interfaces
            JobPostViewModel model
        );
 
+        Task<ApiReponse<decimal>> layPhiDangBaiHienTaiAsync();
+
         //Tuấn
         Task<ApiReponse<List<UngTuyenViewModel>>> layDSUngTuyenTheoMaUser(int maUser);
 
@@ -34,5 +36,9 @@ namespace FreelancerStudent.Web.Services.Interfaces
 
         //Tuấn
         Task<ApiReponse<bool>> capNhatJobPostAsync(JobPostViewModel model);
+
+        Task<ApiReponse<List<KyNangGoiYViewModel>>> layGoiYKyNangTheoTieuDe(string? tieuDe, string? moTa = null);
+
+
     }
 }

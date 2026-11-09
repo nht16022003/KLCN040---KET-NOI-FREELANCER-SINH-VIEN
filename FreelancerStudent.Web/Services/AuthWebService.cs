@@ -112,12 +112,11 @@ namespace FreelancerStudent.Web.Services
 
             var noiDung_Json_Degui = new StringContent(JsonSerializer.Serialize(api_request), Encoding.UTF8, "application/json");
 
-            var reponse = await _guiRequest.PostAsync("api/Auth/DangNhap", noiDung_Json_Degui);
-
-            var noiDung_API_TraVe = await reponse.Content.ReadAsStringAsync();
-
             try
             {
+                var reponse = await _guiRequest.PostAsync("api/Auth/DangNhap", noiDung_Json_Degui);
+                var noiDung_API_TraVe = await reponse.Content.ReadAsStringAsync();
+
                 //Chuyển JSon sang Object C# để Controller sử dụng
                 return JsonSerializer.Deserialize<ApiReponse<UserSessionViewModel>>(noiDung_API_TraVe, _jsonOptions)
 
@@ -138,7 +137,7 @@ namespace FreelancerStudent.Web.Services
                 return new ApiReponse<UserSessionViewModel>
                 {
                     success = false,
-                    message = "Lỗi kết nối máy chủ API"
+                    message = "Không thể kết nối máy chủ API. Vui lòng thử lại sau."
                 };
             }
         }

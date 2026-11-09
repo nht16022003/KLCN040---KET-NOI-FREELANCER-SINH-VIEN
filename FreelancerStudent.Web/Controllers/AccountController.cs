@@ -4,20 +4,23 @@ using FreelancerStudent.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using FreelancerStudent.Web.Helpers;
 
 namespace FreelancerStudent.Web.Controllers
 {
     public class AccountController : Controller
     {
         private readonly IAuthWebService _authWebService; //Khai báo để sử dụng serviceswweb
+        private readonly IMinhChungWebService _minhChungWebService;
 
-        public AccountController(IAuthWebService authWebService)
+        public AccountController(IAuthWebService authWebService, IMinhChungWebService minhChungWebService)
         {
             _authWebService = authWebService;
+            _minhChungWebService = minhChungWebService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> DangKy()
+        public async Task<IActionResult> DangKy(int? role = null)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (User.Identity?.IsAuthenticated == true && maUser.HasValue)
@@ -30,7 +33,13 @@ namespace FreelancerStudent.Web.Controllers
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
-            return View(new DangKyViewModel());
+            var model = new DangKyViewModel();
+            if (role.HasValue && (role.Value == 1 || role.Value == 2))
+            {
+                model.marole = role.Value;
+            }
+
+            return View(model);
         }
 
         [HttpPost]
@@ -85,11 +94,43 @@ namespace FreelancerStudent.Web.Controllers
 
             if (!ketqua_dangnhap.success || ketqua_dangnhap.data == null)
             {
+                if (ketqua_dangnhap.data != null && ketqua_dangnhap.data.hetHanNienKhoa)
+                {
+                    // Thiết lập Session hạn chế để sinh viên có thể xem thông báo, nộp lại minh chứng hoặc đăng xuất
+                    HttpContext.Session.SetInt32("maUser", ketqua_dangnhap.data.maUser);
+                    HttpContext.Session.SetString("hovaten", ketqua_dangnhap.data.hovaten);
+                    HttpContext.Session.SetString("tenRole", ketqua_dangnhap.data.tenrole);
+                    HttpContext.Session.SetString("HetHanNienKhoa", "true");
+                    HttpContext.Session.SetString("ThongBaoNienKhoa", NienKhoaHelper.ThongBaoHetHan);
+
+                    TempData["ErrorMessage"] = NienKhoaHelper.ThongBaoHetHan;
+                    ModelState.AddModelError(string.Empty, NienKhoaHelper.ThongBaoHetHan);
+                    ViewBag.HetHanNienKhoa = true;
+                    ViewBag.ThongBaoNienKhoa = NienKhoaHelper.ThongBaoHetHan;
+                    return View(model);
+                }
+
                 ModelState.AddModelError(string.Empty, ketqua_dangnhap.message!);
                 return View(model);
             }
 
             var user = ketqua_dangnhap.data;
+
+            // Kiểm tra trường hợp tài khoản sinh viên hết hạn niên khóa
+            if (user.hetHanNienKhoa)
+            {
+                HttpContext.Session.SetInt32("maUser", user.maUser);
+                HttpContext.Session.SetString("hovaten", user.hovaten);
+                HttpContext.Session.SetString("tenRole", user.tenrole);
+                HttpContext.Session.SetString("HetHanNienKhoa", "true");
+                HttpContext.Session.SetString("ThongBaoNienKhoa", NienKhoaHelper.ThongBaoHetHan);
+
+                TempData["ErrorMessage"] = NienKhoaHelper.ThongBaoHetHan;
+                ModelState.AddModelError(string.Empty, NienKhoaHelper.ThongBaoHetHan);
+                ViewBag.HetHanNienKhoa = true;
+                ViewBag.ThongBaoNienKhoa = NienKhoaHelper.ThongBaoHetHan;
+                return View(model);
+            }
 
 
 
@@ -131,7 +172,7 @@ namespace FreelancerStudent.Web.Controllers
                 case "Admin":
                     return RedirectToAction("Index", "Admin");
                 case "NhaTuyenDung":
-                    return RedirectToAction("Index", "FreelancerStudent");
+                    return RedirectToAction("Search", "FreelancerStudent");
                 case "FreelancerStudent":
                     return RedirectToAction("Index", "JobPost");
 
@@ -422,5 +463,102 @@ namespace FreelancerStudent.Web.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        #region Minh Chứng Sinh Viên (Quét Thẻ SV)
+
+        [HttpGet]
+        public async Task<IActionResult> MinhChung()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var viewModel = new MinhChungIndexViewModel();
+
+            var thongTinRes = await _minhChungWebService.LayThongTinHienTaiAsync(maUser.Value);
+            if (thongTinRes.success && thongTinRes.data != null)
+            {
+                viewModel.ThongTinSinhVien = thongTinRes.data;
+            }
+
+            var lichSuRes = await _minhChungWebService.LayLichSuMinhChungAsync(maUser.Value);
+            if (lichSuRes.success && lichSuRes.data != null)
+            {
+                viewModel.DanhSachMinhChung = lichSuRes.data;
+            }
+
+            var chuyenNganhRes = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+            if (chuyenNganhRes.success && chuyenNganhRes.data != null)
+            {
+                viewModel.DanhSachChuyenNganh = chuyenNganhRes.data;
+            }
+
+            var xacThucRes = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            if (xacThucRes.data != null)
+            {
+                viewModel.TrangThaiXacThuc = xacThucRes.data;
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PheDuyetMinhChung(int maMinhChung, bool chapNhan = true, string? lyDoTuChoi = null)
+        {
+            var result = await _minhChungWebService.PheDuyetMinhChungAsync(maMinhChung, chapNhan, lyDoTuChoi);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> QuetTheSinhVien(IFormFile file)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Vui lòng chọn hoặc chụp ảnh thẻ sinh viên." });
+            }
+
+            var result = await _minhChungWebService.QuetTheSinhVienAsync(file, maUser.Value);
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> XacNhanTheSinhVien([FromBody] XacNhanTheSinhVienViewModel model)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            if (model == null)
+            {
+                return Json(new { success = false, message = "Dữ liệu xác nhận không hợp lệ." });
+            }
+
+            // Bảo mật: Luôn dùng maUser từ session người dùng đăng nhập hiện tại
+            model.MaUser = maUser.Value;
+
+            var result = await _minhChungWebService.XacNhanTheSinhVienAsync(model);
+            if (result.success)
+            {
+                // Cập nhật lại session tên người dùng nếu có thay đổi
+                if (!string.IsNullOrWhiteSpace(model.HoVaTen))
+                {
+                    HttpContext.Session.SetString("hovaten", model.HoVaTen);
+                }
+            }
+
+            return Json(result);
+        }
+
+        #endregion
     }
 }

@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 using System.Security.Cryptography.X509Certificates;
 using FreelancerStudent.Web.Models;
-=======
->>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
 using FreelancerStudent.Web.Services.Interfaces;
 using FreelancerStudent.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -16,44 +13,207 @@ namespace FreelancerStudent.Web.Controllers
         private readonly IJobPostWebService _jobPostWebService;
 
         private readonly IBaiDangTimViecWebService _baiDangWebService;
+        private readonly IDanhGiaWebService _danhGiaWebService;
+        private readonly IMinhChungWebService _minhChungWebService;
+        private readonly IYeuThichWebService _yeuThichService;
+        private readonly IUngThueWebService _ungThueWebService;
 
         public FreelancerStudentController(IFreelancerStudentWebService freelancerStudentWebService, IJobPostWebService jobPostWebService,
-        IBaiDangTimViecWebService baiDangTimViecWebService)
+        IBaiDangTimViecWebService baiDangTimViecWebService, IDanhGiaWebService danhGiaWebService,
+        IMinhChungWebService minhChungWebService, IYeuThichWebService yeuThichService,
+        IUngThueWebService ungThueWebService)
         {
             _freelancerStudentWebService = freelancerStudentWebService;
             _jobPostWebService = jobPostWebService;
             _baiDangWebService = baiDangTimViecWebService;
+            _danhGiaWebService = danhGiaWebService;
+            _minhChungWebService = minhChungWebService;
+            _yeuThichService = yeuThichService;
+            _ungThueWebService = ungThueWebService;
         }
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? tuKhoa,
+            string? chuyenNganh,
+            string? kyNang,
+            double? soSaoMin,
+            double? gpaMin,
+            int? namThu,
+            bool? trangThaiNhanViec,
+            string? sapXep)
         {
-            var layDanhSachFreelancerStudent = await _freelancerStudentWebService.layDanhSachFreelancerStudentAsync();
-            Console.WriteLine($"===> [SỐ LƯỢNG NTD NHẬN ĐƯỢC]: {layDanhSachFreelancerStudent.data?.Count ?? 0}");
+            var model = await LayDanhSachFreelancerDaLoc(tuKhoa, chuyenNganh, kyNang, soSaoMin, gpaMin, namThu, trangThaiNhanViec, sapXep);
+            return View(model);
+        }
 
-            var dsFree = layDanhSachFreelancerStudent.data ?? new List<FreelancerStudent.Web.ViewModels.FreelacerStudentViewModel>();
-            return View(dsFree);
+        private async Task<FreelancerFilterViewModel> LayDanhSachFreelancerDaLoc(
+            string? tuKhoa,
+            string? chuyenNganh,
+            string? kyNang,
+            double? soSaoMin,
+            double? gpaMin,
+            int? namThu,
+            bool? trangThaiNhanViec,
+            string? sapXep)
+        {
+            var layDanhSach = await _freelancerStudentWebService.layDanhSachFreelancerStudentAsync();
+            var rawList = layDanhSach.data ?? new List<FreelacerStudentViewModel>();
+
+            // Danh sách lựa chọn cho dropdown bộ lọc
+            var allMajors = rawList
+                .Where(f => !string.IsNullOrWhiteSpace(f.tenChuyenNganh))
+                .Select(f => f.tenChuyenNganh!)
+                .Distinct()
+                .OrderBy(m => m)
+                .ToList();
+
+            var allSkills = rawList
+                .SelectMany(f => f.danhSachKyNang != null && f.danhSachKyNang.Any()
+                    ? f.danhSachKyNang
+                    : (!string.IsNullOrWhiteSpace(f.kyNangCoBan)
+                        ? f.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim())
+                        : Enumerable.Empty<string>()))
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(s => s)
+                .ToList();
+
+            var query = rawList.AsEnumerable();
+
+            // 1. Tìm theo từ khóa (tên, trường học, giới thiệu, kỹ năng)
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var kw = tuKhoa.Trim();
+                query = query.Where(f =>
+                    (f.tenUser != null && f.tenUser.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (f.tenTruong != null && f.tenTruong.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (f.gioithieu != null && f.gioithieu.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (f.kyNangCoBan != null && f.kyNangCoBan.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+                    (f.danhSachKyNang != null && f.danhSachKyNang.Any(k => k.Contains(kw, StringComparison.OrdinalIgnoreCase))));
+            }
+
+            // 2. Lọc theo chuyên ngành
+            if (!string.IsNullOrWhiteSpace(chuyenNganh))
+            {
+                query = query.Where(f => string.Equals(f.tenChuyenNganh, chuyenNganh, StringComparison.OrdinalIgnoreCase)
+                                      || string.Equals(f.maChuyenNganh, chuyenNganh, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // 3. Lọc theo kỹ năng
+            if (!string.IsNullOrWhiteSpace(kyNang))
+            {
+                var kn = kyNang.Trim();
+                query = query.Where(f =>
+                    (f.danhSachKyNang != null && f.danhSachKyNang.Any(k => k.Contains(kn, StringComparison.OrdinalIgnoreCase))) ||
+                    (f.kyNangCoBan != null && f.kyNangCoBan.Contains(kn, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // 4. Lọc theo số sao đánh giá tối thiểu
+            if (soSaoMin.HasValue && soSaoMin.Value > 0)
+            {
+                query = query.Where(f => f.diemDanhGiaTrungBinh >= soSaoMin.Value && f.soLuotDanhGia > 0);
+            }
+
+            // 5. Lọc theo GPA tối thiểu
+            if (gpaMin.HasValue && gpaMin.Value > 0)
+            {
+                query = query.Where(f => f.GPA >= gpaMin.Value);
+            }
+
+            // 6. Lọc theo năm học
+            if (namThu.HasValue && namThu.Value > 0)
+            {
+                query = query.Where(f => f.namThu == namThu.Value);
+            }
+
+            // 7. Lọc theo trạng thái nhận việc
+            if (trangThaiNhanViec.HasValue)
+            {
+                query = query.Where(f => f.trangthaiNhanViec == trangThaiNhanViec.Value);
+            }
+
+            // 8. Sắp xếp (Mặc định bắt buộc theo Section 5: Ngày tạo giảm dần)
+            string sortOrder = string.IsNullOrWhiteSpace(sapXep) ? "moi-nhat" : sapXep;
+            switch (sortOrder)
+            {
+                case "sao-cao":
+                    query = query.OrderByDescending(f => f.diemDanhGiaTrungBinh).ThenByDescending(f => f.soLuotDanhGia);
+                    break;
+                case "gpa-cao":
+                    query = query.OrderByDescending(f => f.GPA).ThenByDescending(f => f.diemDanhGiaTrungBinh);
+                    break;
+                case "moi-nhat":
+                default:
+                    query = query.OrderByDescending(f => f.ngayTao).ThenByDescending(f => f.maFreelancerStudents);
+                    break;
+            }
+
+            return new FreelancerFilterViewModel
+            {
+                DanhSachFreelancer = query.ToList(),
+                TuKhoa = tuKhoa,
+                ChuyenNganh = chuyenNganh,
+                KyNang = kyNang,
+                SoSaoMin = soSaoMin,
+                GpaMin = gpaMin,
+                NamThu = namThu,
+                TrangThaiNhanViec = trangThaiNhanViec,
+                SapXep = sortOrder,
+                DanhSachChuyenNganh = allMajors,
+                DanhSachKyNang = allSkills
+            };
         }
 
         [HttpGet]
-        public async Task<IActionResult> Profile(int? maUser, int? maFreelancerStudents)
+        [Route("FreelancerStudent/Profile")]
+        [Route("FreelancerStudent/Profile/{id:int}")]
+        public async Task<IActionResult> Profile(int? maUser, int? maFreelancerStudents, int? maFreelancerStudent, int? id)
         {
-            if ((!maUser.HasValue || maUser <= 0) && (!maFreelancerStudents.HasValue || maFreelancerStudents <= 0))
+            int? targetMaFL = (maFreelancerStudents.HasValue && maFreelancerStudents > 0)
+                ? maFreelancerStudents
+                : ((maFreelancerStudent.HasValue && maFreelancerStudent > 0)
+                    ? maFreelancerStudent
+                    : (id.HasValue && id > 0 ? id : null));
+
+            if ((!maUser.HasValue || maUser <= 0) && (!targetMaFL.HasValue || targetMaFL <= 0))
             {
                 return NotFound();
             }
 
-            FreelacerStudentViewModel? freelancer;
-            if (maFreelancerStudents.HasValue && maFreelancerStudents > 0)
+            FreelacerStudentViewModel? freelancer = null;
+            var listResult = await _freelancerStudentWebService.layDanhSachFreelancerStudentAsync();
+
+            if (targetMaFL.HasValue && targetMaFL > 0)
             {
-                var listResult = await _freelancerStudentWebService
-                    .layDanhSachFreelancerStudentAsync();
-                freelancer = listResult.data?.FirstOrDefault(x => x.maFreelancerStudents == maFreelancerStudents.Value);
+                freelancer = listResult.data?.FirstOrDefault(x => x.maFreelancerStudents == targetMaFL.Value);
+                if (freelancer == null)
+                {
+                    // Thử tìm theo chi tiết hồ sơ
+                    var chiTiet = (await _freelancerStudentWebService.layChiTietHoSoAsync(targetMaFL.Value))?.data;
+                    if (chiTiet != null)
+                    {
+                        freelancer = new FreelacerStudentViewModel
+                        {
+                            maFreelancerStudents = chiTiet.MaFreelancerStudents,
+                            maUser = chiTiet.MaUser,
+                            tenUser = chiTiet.TenUser,
+                            avatar = chiTiet.Avatar,
+                            tenChuyenNganh = chiTiet.TenChuyenNganh,
+                            tenTruong = chiTiet.TenTruong,
+                            namThu = chiTiet.NamThu,
+                            GPA = chiTiet.GPA,
+                            gioithieu = chiTiet.Gioithieu,
+                            kyNangCoBan = chiTiet.KyNangCoBan,
+                            danhSachKyNang = chiTiet.DanhSachKyNang ?? new List<string>(),
+                            trangthaiNhanViec = chiTiet.TrangthaiNhanViec,
+                            chiPhiTu = chiTiet.ChiPhiTu
+                        };
+                    }
+                }
             }
-            else
+            else if (maUser.HasValue && maUser > 0)
             {
-                var listResult = await _freelancerStudentWebService
-                    .layDanhSachFreelancerStudentAsync();
-                freelancer = listResult.data?.FirstOrDefault(x => x.maUser == maUser!.Value);
+                freelancer = listResult.data?.FirstOrDefault(x => x.maUser == maUser.Value);
             }
 
             if (freelancer == null)
@@ -67,22 +227,25 @@ namespace FreelancerStudent.Web.Controllers
             var result = await _freelancerStudentWebService
                 .layProfileFreelancerStudentAsync(freelancer.maFreelancerStudents);
 
-            if (!result.success || result.data == null)
+            if (result.data != null)
             {
-                TempData["Error"] = result.message;
-                return NotFound();
-            }
+                var stats = await _danhGiaWebService.LayFreelancerAsync(freelancer.maFreelancerStudents, 1, 50);
+                result.data.ThongKeDanhGia = stats.data;
 
-            ViewBag.LaChinhMinh = HttpContext.Session.GetInt32("maUser") == maUser;
+                var currentUserId = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+                var currentRole = HttpContext.Session.GetString("tenRole") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                bool daLuu = false;
+                if (currentUserId.HasValue && (currentRole == "NhaTuyenDung" || currentRole == "Employer"))
+                {
+                    daLuu = await _yeuThichService.KiemTraLuuFreelancerAsync(currentUserId.Value, freelancer.maFreelancerStudents);
+                }
+                ViewBag.DaLuuFreelancer = daLuu;
+            }
 
             return View(result.data);
         }
 
-<<<<<<< HEAD
-
-        //Tuấn
-        [HttpGet]
-=======
+        //Sơn
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddProject(PortfolioViewModel model)
@@ -225,9 +388,204 @@ namespace FreelancerStudent.Web.Controllers
                 ? "Đã cập nhật dự án nổi bật."
                 : result.message;
 
+            return RedirectToAction(nameof(Profile), new { maUser = maUser!.Value });
+        }
+
+        // Cập nhật kỹ năng chuyên ngành trực tiếp từ trang Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatKyNang(List<string> danhSachKyNang)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var freelancer = await GetCurrentFreelancerAsync(maUser.Value);
+            if (freelancer == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy hồ sơ sinh viên của bạn.";
+                return RedirectToAction("Profile", new { maUser = maUser.Value });
+            }
+
+            // Lấy chi tiết hồ sơ hiện tại để giữ nguyên các thông tin học vấn, trường học
+            var hoSoKq = await _freelancerStudentWebService.layChiTietHoSoAsync(freelancer.maFreelancerStudents);
+            var hoSo = hoSoKq.data ?? new ChiTietHoSoFreelancerViewModel();
+
+            hoSo.MaUser = maUser.Value;
+            hoSo.MaFreelancerStudents = freelancer.maFreelancerStudents;
+            hoSo.DanhSachKyNang = danhSachKyNang?
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList() ?? new List<string>();
+
+            var ketQua = await _freelancerStudentWebService.capNhatHoSoAsync(hoSo);
+            if (ketQua.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật kỹ năng chuyên ngành thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = ketQua.message ?? "Không thể cập nhật kỹ năng chuyên ngành.";
+            }
+
             return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
         }
->>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
+
+        // Cập nhật thông tin giới thiệu bản thân trực tiếp từ trang Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatGioiThieu(string gioiThieu, string? urlVideo)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var freelancer = await GetCurrentFreelancerAsync(maUser.Value);
+            if (freelancer == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy hồ sơ sinh viên của bạn.";
+                return RedirectToAction("Profile", new { maUser = maUser.Value });
+            }
+
+            // 1. Cập nhật vào bảng FreelancerStudents (cột gioithieu)
+            var hoSoKq = await _freelancerStudentWebService.layChiTietHoSoAsync(freelancer.maFreelancerStudents);
+            if (hoSoKq.success && hoSoKq.data != null)
+            {
+                var hoSo = hoSoKq.data;
+                hoSo.MaUser = maUser.Value;
+                hoSo.MaFreelancerStudents = freelancer.maFreelancerStudents;
+                hoSo.Gioithieu = gioiThieu?.Trim() ?? string.Empty;
+                await _freelancerStudentWebService.capNhatHoSoAsync(hoSo);
+            }
+
+            // 2. Cập nhật vào bảng Portfolio (cột moTaBanThan & url_video)
+            var portfolioModel = new PortfolioViewModel
+            {
+                maFreelancerStudents = freelancer.maFreelancerStudents,
+                moTaBanThan = gioiThieu?.Trim() ?? string.Empty,
+                url_video = urlVideo?.Trim()
+            };
+            var portfolioKq = await _freelancerStudentWebService.capNhatPortfolioAsync(portfolioModel);
+
+            if (portfolioKq.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật giới thiệu bản thân thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = portfolioKq.message ?? "Không thể cập nhật giới thiệu bản thân.";
+            }
+
+            return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+        }
+
+        // Cập nhật thông tin cơ bản: Địa điểm, Ngôn ngữ, Kỹ năng cơ bản, Mức giá tham khảo trực tiếp từ trang Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatThongTinCoBan(string inputDiaDiem, string? ngonNgu, string? kyNangCoBan, decimal? chiPhiTu)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (string.IsNullOrWhiteSpace(inputDiaDiem))
+            {
+                TempData["ErrorMessage"] = "Địa điểm làm việc / sinh sống không được để trống.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (inputDiaDiem.Trim().Length > 100)
+            {
+                TempData["ErrorMessage"] = "Địa điểm không được vượt quá 100 ký tự.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (!string.IsNullOrWhiteSpace(ngonNgu) && ngonNgu.Trim().Length > 100)
+            {
+                TempData["ErrorMessage"] = "Ngôn ngữ không được vượt quá 100 ký tự.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (!string.IsNullOrWhiteSpace(kyNangCoBan) && kyNangCoBan.Trim().Length > 150)
+            {
+                TempData["ErrorMessage"] = "Kỹ năng cơ bản không được vượt quá 150 ký tự.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (chiPhiTu.HasValue && chiPhiTu.Value < 0)
+            {
+                TempData["ErrorMessage"] = "Mức giá tham khảo không được là số âm.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            var model = new CapNhatThongTinCoBanViewModel
+            {
+                MaUser = maUser.Value,
+                DiaDiemFreelancerStudent = inputDiaDiem.Trim(),
+                NgonNgu = string.IsNullOrWhiteSpace(ngonNgu) ? null : ngonNgu.Trim(),
+                KyNangCoBan = string.IsNullOrWhiteSpace(kyNangCoBan) ? null : kyNangCoBan.Trim(),
+                ChiPhiTu = chiPhiTu
+            };
+
+            var res = await _freelancerStudentWebService.capNhatThongTinCoBanAsync(model);
+            if (res.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật thông tin cơ bản thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = res.message ?? "Không thể cập nhật thông tin cơ bản.";
+            }
+
+            return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+        }
+
+        // Cập nhật điểm GPA học tập trực tiếp từ trang Profile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatGPA(double? gpa)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (!gpa.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng nhập điểm GPA.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            if (gpa.Value < 0.0 || gpa.Value > 4.0)
+            {
+                TempData["ErrorMessage"] = "Điểm GPA phải nằm trong khoảng hợp lệ từ 0.0 đến 4.0.";
+                return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+            }
+
+            var res = await _freelancerStudentWebService.capNhatGPAAsync(maUser.Value, gpa.Value);
+            if (res.success)
+            {
+                TempData["SuccessMessage"] = "Cập nhật điểm GPA học tập thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = res.message ?? "Không thể cập nhật điểm GPA.";
+            }
+
+            return RedirectToAction(nameof(Profile), new { maUser = maUser.Value });
+        }
+
+
+        //Tuấn
+        [HttpGet]
 
         public async Task<IActionResult> DanhSachNopTuyen()
         {
@@ -245,17 +603,27 @@ namespace FreelancerStudent.Web.Controllers
             return View(dsUngTuyen);
         }
 
-<<<<<<< HEAD
         //Tuấn
         //Mở trang đăng tin tìm việc
         [HttpGet]
-        public IActionResult DangTinTimViec()
+        public async Task<IActionResult> DangTinTimViec()
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (maUser == null)
             {
                 return RedirectToAction("DangNhap", "Account");
             }
+
+            // Kiểm tra trạng thái xác thực minh chứng sinh viên
+            var checkXacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            if (checkXacThuc?.data != null && !checkXacThuc.data.DaXacMinh)
+            {
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(checkXacThuc.data.ThongBao)
+                    ? checkXacThuc.data.ThongBao
+                    : "Bạn cần được xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!";
+                return RedirectToAction("MinhChung", "Account");
+            }
+
             return View(new DangTinTimViecViewModel { maUser = maUser.Value });
         }
 
@@ -270,9 +638,22 @@ namespace FreelancerStudent.Web.Controllers
             {
                 return RedirectToAction("DangNhap", "Account");
             }
+
+            // Kiểm tra trạng thái xác thực minh chứng sinh viên
+            var checkXacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            if (checkXacThuc?.data != null && !checkXacThuc.data.DaXacMinh)
+            {
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(checkXacThuc.data.ThongBao)
+                    ? checkXacThuc.data.ThongBao
+                    : "Bạn cần được xác thực minh chứng Thẻ sinh viên (trạng thái 'Đã xác minh') trước khi đăng tin tìm việc!";
+                return RedirectToAction("MinhChung", "Account");
+            }
+
             model.maUser = maUser.Value;
             if (!ModelState.IsValid)
             {
+                var chuyenNganhList = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+                ViewBag.DanhSachChuyenNganh = chuyenNganhList?.data ?? new List<ChuyenNganhOptionViewModel>();
                 return View(model);
             }
             var ketQua = await _baiDangWebService.taoBaiDangAsync(model);
@@ -338,14 +719,37 @@ namespace FreelancerStudent.Web.Controllers
         }
 
 
-        //Tuấn
+        // Khám phá và Tìm kiếm Freelancer Sinh viên
         [HttpGet]
-        public async Task<IActionResult> Search()
+        public async Task<IActionResult> Search(
+            string? tuKhoa,
+            string? chuyenNganh,
+            string? kyNang,
+            double? soSaoMin,
+            double? gpaMin,
+            int? namThu,
+            bool? trangThaiNhanViec,
+            string? sapXep)
         {
-            var ketQua = await _baiDangWebService.layTatCaBaiDangAsync();
-            var dsBaiDang = ketQua?.data ?? new List<BaiDangTimViecViewModel>();
+            var model = await LayDanhSachFreelancerDaLoc(tuKhoa, chuyenNganh, kyNang, soSaoMin, gpaMin, namThu, trangThaiNhanViec, sapXep);
+            await PopulatedSavedFreelancerIds();
+            return View(model);
+        }
 
-            return View(dsBaiDang);
+        private async Task PopulatedSavedFreelancerIds()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+            var role = HttpContext.Session.GetString("tenRole") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var dsDaLuu = new HashSet<int>();
+            if (maUser.HasValue && (role == "NhaTuyenDung" || role == "Employer"))
+            {
+                var listSaved = await _yeuThichService.LayDanhSachFreelancerYeuThichAsync(maUser.Value);
+                if (listSaved != null && listSaved.Any())
+                {
+                    dsDaLuu = listSaved.Select(x => x.maFreelancerStudent).ToHashSet();
+                }
+            }
+            ViewBag.DanhSachMaFreelancerDaLuu = dsDaLuu;
         }
 
         //Tuấn
@@ -444,6 +848,16 @@ namespace FreelancerStudent.Web.Controllers
                 model.NewSkillsInput = string.Join(", ", model.DanhSachKyNang);
             }
 
+            // Kiểm tra trạng thái xác minh thẻ sinh viên để thiết lập khóa các input tương ứng
+            var xacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            ViewBag.DaXacMinh = xacThuc?.data?.DaXacMinh == true;
+            ViewBag.TrangThaiMinhChung = xacThuc?.data?.TrangThai ?? "ChuaGui";
+            ViewBag.ThongBaoMinhChung = xacThuc?.data?.ThongBao ?? string.Empty;
+
+            // Lấy danh sách chuyên ngành đào tạo từ API để hiển thị dropdown
+            var chuyenNganhRes = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+            ViewBag.DanhSachChuyenNganh = chuyenNganhRes?.data ?? new List<ChuyenNganhOptionViewModel>();
+
             return View(model);
         }
 
@@ -460,8 +874,17 @@ namespace FreelancerStudent.Web.Controllers
             }
 
             model.MaUser = maUser.Value;
+
+            // Kiểm tra trạng thái xác minh thẻ sinh viên
+            var xacThuc = await _minhChungWebService.KiemTraTrangThaiXacThucAsync(maUser.Value);
+            ViewBag.DaXacMinh = xacThuc?.data?.DaXacMinh == true;
+            ViewBag.TrangThaiMinhChung = xacThuc?.data?.TrangThai ?? "ChuaGui";
+            ViewBag.ThongBaoMinhChung = xacThuc?.data?.ThongBao ?? string.Empty;
+
             if (!ModelState.IsValid)
             {
+                var chuyenNganhList = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+                ViewBag.DanhSachChuyenNganh = chuyenNganhList?.data ?? new List<ChuyenNganhOptionViewModel>();
                 return View(model);
             }
 
@@ -481,11 +904,11 @@ namespace FreelancerStudent.Web.Controllers
             }
 
             TempData["ErrorMessage"] = ketQua.message ?? "Có lỗi xảy ra khi lưu hồ sơ.";
+            var chuyenNganhListFail = await _minhChungWebService.LayDanhSachChuyenNganhAsync();
+            ViewBag.DanhSachChuyenNganh = chuyenNganhListFail?.data ?? new List<ChuyenNganhOptionViewModel>();
             return View(model);
         }
 
-
-=======
         private async Task<FreelacerStudentViewModel?> GetCurrentFreelancerAsync(int? maUser)
         {
             if (!maUser.HasValue) return null;
@@ -493,7 +916,61 @@ namespace FreelancerStudent.Web.Controllers
             return result.data?.FirstOrDefault(x => x.maUser == maUser.Value);
         }
 
->>>>>>> 461ecfc3a270be4a4d6c239efb1e62de57019d5b
+        // ==================== YÊU CẦU THUÊ TRỰC TIẾP (DIRECT HIRE) ====================
 
+        /// <summary>
+        /// Trang danh sách các yêu cầu thuê từ Nhà tuyển dụng gửi tới Freelancer
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> YeuCauThue()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+            var role = HttpContext.Session.GetString("tenRole") ?? HttpContext.Session.GetString("role") ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            if (!maUser.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập để xem các yêu cầu thuê.";
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            var res = await _ungThueWebService.LayDanhSachYeuCauThueTheoFreelancerAsync(maUser.Value);
+            var list = res?.data ?? new List<YeuCauThueViewModel>();
+            return View(list);
+        }
+
+        /// <summary>
+        /// Phản hồi yêu cầu thuê (Chấp nhận hoặc Từ chối)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PhanHoiYeuCauThue(int maYeuCau, bool chapNhan, string? lyDoTuChoi)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser") ?? (int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int uId) ? uId : (int?)null);
+            if (!maUser.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập để phản hồi yêu cầu.";
+                return RedirectToAction("DangNhap", "Account");
+            }
+
+            if (maYeuCau <= 0)
+            {
+                TempData["ErrorMessage"] = "Mã yêu cầu không hợp lệ.";
+                return RedirectToAction("YeuCauThue");
+            }
+
+            var result = await _ungThueWebService.PhanHoiYeuCauThueAsync(maYeuCau, chapNhan, lyDoTuChoi, maUser.Value);
+            if (result.success)
+            {
+                TempData["SuccessMessage"] = chapNhan 
+                    ? "Bạn đã chấp nhận yêu cầu thuê thành công! Nhà tuyển dụng sẽ tiến hành tạo hợp đồng công việc." 
+                    : "Đã gửi phản hồi từ chối yêu cầu thuê.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.message ?? "Có lỗi xảy ra khi xử lý phản hồi yêu cầu thuê.";
+            }
+
+            return RedirectToAction("YeuCauThue");
+        }
     }
 }

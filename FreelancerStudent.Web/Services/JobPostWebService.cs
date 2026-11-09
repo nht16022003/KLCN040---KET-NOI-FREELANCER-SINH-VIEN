@@ -284,5 +284,49 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
+        public async Task<ApiReponse<List<KyNangGoiYViewModel>>> layGoiYKyNangTheoTieuDe(string? tieuDe, string? moTa = null)
+        {
+            try
+            {
+                var query = $"api/JobPost/GoiYKyNangTheoTieuDe?tieuDe={Uri.EscapeDataString(tieuDe ?? string.Empty)}";
+                if (!string.IsNullOrWhiteSpace(moTa))
+                {
+                    query += $"&moTa={Uri.EscapeDataString(moTa)}";
+                }
+
+                var response = await _guiRequest.GetAsync(query);
+                var data = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ApiReponse<List<KyNangGoiYViewModel>>>(data, _jsonOptions)
+                    ?? new ApiReponse<List<KyNangGoiYViewModel>> { success = false, message = "Không thể đọc dữ liệu gợi ý kỹ năng" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<KyNangGoiYViewModel>>
+                {
+                    success = false,
+                    message = "Lỗi kết nối khi gợi ý kỹ năng: " + ex.Message
+                };
+            }
+        }
+
+
+        public async Task<ApiReponse<decimal>> layPhiDangBaiHienTaiAsync()
+        {
+            try
+            {
+                var response = await _guiRequest.GetAsync("api/JobPost/PhiDangBaiHienTai");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var res = JsonSerializer.Deserialize<ApiReponse<decimal>>(json, _jsonOptions);
+                    return res ?? new ApiReponse<decimal> { success = true, data = 0m };
+                }
+                return new ApiReponse<decimal> { success = false, message = "Không lấy được phí đăng bài.", data = 0m };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<decimal> { success = false, message = ex.Message, data = 0m };
+            }
+        }
     }
 }

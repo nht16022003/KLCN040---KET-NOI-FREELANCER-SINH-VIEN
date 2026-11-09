@@ -30,6 +30,7 @@ namespace FreelancerStudent.Web.Services
 
         }
 
+        //Sơn
         public async Task<ApiReponse<PortfolioViewModel>> layPortfolioAsync(int maFreelancerStudents)
         {
             var response = await _guiRequest.GetAsync($"api/Portfolio/{maFreelancerStudents}");
@@ -122,6 +123,7 @@ namespace FreelancerStudent.Web.Services
             return JsonSerializer.Deserialize<ApiReponse<PortfolioViewModel>>(json, _jsonOptions)
                 ?? new ApiReponse<PortfolioViewModel> { success = false, message = "Không thể cập nhật dự án nổi bật." };
         }
+
         //XS
         public async Task<ApiReponse<FreelancerStudentProfileViewModel>> layProfileFreelancerStudentAsync(int maFreelancerStudents)
         {
@@ -234,7 +236,59 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
+        public async Task<ApiReponse<bool>> capNhatThongTinCoBanAsync(CapNhatThongTinCoBanViewModel model)
+        {
+            try
+            {
+                var jsonContent = new StringContent(JsonSerializer.Serialize(new
+                {
+                    maUser = model.MaUser,
+                    diaDiemFreelancerStudent = model.DiaDiemFreelancerStudent,
+                    ngonNgu = model.NgonNgu,
+                    kyNangCoBan = model.KyNangCoBan,
+                    chiPhiTu = model.ChiPhiTu
+                }), Encoding.UTF8, "application/json");
 
+                var response = await _guiRequest.PutAsync("api/FreelancerStudent/CapNhatThongTinCoBan", jsonContent);
+                var noiDung = await response.Content.ReadAsByteArrayAsync();
 
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(noiDung, _jsonOptions)
+                    ?? new ApiReponse<bool> { success = false, message = "Không thể cập nhật thông tin cơ bản." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> capNhatGPAAsync(int maUser, double gpa)
+        {
+            try
+            {
+                var jsonContent = new StringContent(JsonSerializer.Serialize(new
+                {
+                    maUser = maUser,
+                    GPA = gpa
+                }), Encoding.UTF8, "application/json");
+
+                var response = await _guiRequest.PutAsync("api/FreelancerStudent/CapNhatGPA", jsonContent);
+                var noiDung = await response.Content.ReadAsByteArrayAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(noiDung, _jsonOptions)
+                    ?? new ApiReponse<bool> { success = false, message = "Không thể cập nhật điểm GPA." };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
     }
 }

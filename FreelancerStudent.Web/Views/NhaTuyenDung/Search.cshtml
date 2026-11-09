@@ -4,36 +4,1328 @@
     ViewData["Title"] = "Khám phá Nhà Tuyển Dụng";
 }
 
-<div class="container py-4">
-    <!-- TIÊU ĐỀ TRANG -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <h4 class="text-success fw-bold mb-1">
-                Khám phá & Kết nối Nhà Tuyển Dụng
-            </h4>
-            <span class="text-muted small">Tìm kiếm các doanh nghiệp, công ty đối tác và trực tiếp trao đổi qua tin
-                nhắn</span>
+<style>
+    .ntd-dashboard-root {
+        --ntd-deep-forest: #0D2818;
+        --ntd-forest-mid: #144327;
+        --ntd-forest-rich: #1B5E36;
+        --ntd-primary: #2B7A4B;
+        --ntd-primary-hover: #23653E;
+        --ntd-accent-bright: #4ADE80;
+        --ntd-mint-soft: #EAF5EE;
+        --ntd-mint-border: #C8E6C9;
+        --ntd-surface-dark: #0A2013;
+        --ntd-surface-card-bottom: #0E2B1A;
+        --ntd-text-dark: #0F172A;
+        --ntd-text-body: #334155;
+        --ntd-text-muted: #64748B;
+        --ntd-border-light: #E2E8F0;
+        font-family: var(--font-sans);
+        color: var(--ntd-text-dark);
+        background-color: #F4F8F5;
+        min-height: 100vh;
+        padding-bottom: 72px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-showcase {
+        position: relative;
+        background: linear-gradient(135deg, #091E12 0%, #123C23 42%, #1B5E36 78%, #246A40 100%);
+        border-radius: 24px !important;
+        padding: 48px 44px 40px 44px;
+        margin-top: 24px;
+        margin-bottom: 36px;
+        overflow: hidden;
+        box-shadow: 0 24px 54px rgba(13, 40, 24, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(74, 222, 128, 0.18);
+    }
+
+    .ntd-dashboard-root .ntd-hero-showcase::before {
+        content: "";
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 68%;
+        height: 165%;
+        background: linear-gradient(125deg, rgba(255, 255, 255, 0.0) 20%, rgba(74, 222, 128, 0.08) 48%, rgba(43, 122, 75, 0.22) 52%, rgba(13, 40, 24, 0.0) 80%);
+        transform: rotate(-14deg);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ntd-dashboard-root .ntd-hero-showcase::after {
+        content: "";
+        position: absolute;
+        bottom: -25%;
+        left: 18%;
+        width: 55%;
+        height: 90%;
+        background: radial-gradient(circle, rgba(59, 178, 105, 0.24) 0%, rgba(13, 40, 24, 0) 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ntd-dashboard-root .ntd-hero-inner {
+        position: relative;
+        z-index: 2;
+    }
+
+    .ntd-dashboard-root .ntd-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(74, 222, 128, 0.14);
+        color: #FFFFFF;
+        border: 1px solid rgba(167, 243, 208, 0.28);
+        border-radius: 8px !important;
+        padding: 6px 14px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        margin-bottom: 18px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50% !important;
+        background: #4ADE80;
+        box-shadow: 0 0 8px #4ADE80;
+    }
+
+    .ntd-dashboard-root .ntd-hero-title {
+        font-size: clamp(1.95rem, 3.2vw, 2.75rem);
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1.18;
+        letter-spacing: -0.02em;
+        max-width: none;
+        margin-bottom: 14px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-desc {
+        font-size: 1.02rem;
+        color: rgba(234, 245, 238, 0.84);
+        line-height: 1.6;
+        max-width: none;
+        width: 100%;
+        margin-bottom: 26px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 34px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-cta-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-primary {
+        background: #FFFFFF !important;
+        color: #0D2818 !important;
+        border: 1px solid #FFFFFF !important;
+        border-radius: 12px !important;
+        padding: 12px 24px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+        transition: all 0.22s ease;
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-primary:hover {
+        background: #EAF5EE !important;
+        color: #091E12 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-secondary {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        border-radius: 12px !important;
+        padding: 12px 22px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(8px);
+        transition: all 0.22s ease;
+    }
+
+    .ntd-dashboard-root .ntd-btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: #FFFFFF !important;
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+    }
+
+    .ntd-dashboard-root .ntd-carousel-nav-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ntd-dashboard-root .ntd-btn-toggle-view {
+        background: rgba(255, 255, 255, 0.08);
+        color: #D1FAE5;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px !important;
+        padding: 9px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-btn-toggle-view:hover {
+        background: rgba(255, 255, 255, 0.18);
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-nav-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50% !important;
+        background: #FFFFFF;
+        color: #0D2818;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-nav-circle:hover {
+        background: #4ADE80;
+        color: #091E12;
+        transform: scale(1.06);
+    }
+
+    .ntd-dashboard-root .ntd-functions-header-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        margin-bottom: 18px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .ntd-dashboard-root .ntd-functions-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 2px;
+    }
+
+    .ntd-dashboard-root .ntd-functions-subtitle {
+        font-size: 0.86rem;
+        color: rgba(234, 245, 238, 0.74);
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track {
+        display: flex;
+        gap: 22px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scroll-snap-type: x mandatory;
+        padding: 6px 4px 18px 4px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track.is-grid-mode {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        overflow-x: visible;
+    }
+
+    .ntd-dashboard-root .ntd-feature-card {
+        flex: 0 0 calc(33.333% - 15px);
+        min-width: 300px;
+        scroll-snap-align: start;
+        background: var(--ntd-surface-card-bottom);
+        border: 1px solid rgba(167, 243, 208, 0.16);
+        border-radius: 18px !important;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 16px 36px rgba(5, 18, 10, 0.38);
+        transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .ntd-dashboard-root .ntd-cards-track.is-grid-mode .ntd-feature-card {
+        flex: unset;
+        min-width: 0;
+    }
+
+    .ntd-dashboard-root .ntd-feature-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(74, 222, 128, 0.55);
+        box-shadow: 0 22px 44px rgba(5, 18, 10, 0.52);
+    }
+
+    .ntd-dashboard-root .ntd-card-visual-top {
+        position: relative;
+        height: 168px;
+        padding: 18px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-1 {
+        background: linear-gradient(135deg, #EAF5EE 0%, #C8E6C9 55%, #A7F3D0 100%);
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-2 {
+        background: linear-gradient(135deg, #134E2B 0%, #1F7A44 55%, #2B9356 100%);
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-3 {
+        background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 50%, #6EE7B7 100%);
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-4 {
+        background: linear-gradient(135deg, #0F3820 0%, #1B5E36 55%, #2E8552 100%);
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-visual-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 2;
+    }
+
+    .ntd-dashboard-root .ntd-visual-tag {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 4px 10px;
+        border-radius: 6px !important;
+        background: rgba(13, 40, 24, 0.12);
+        color: inherit;
+        backdrop-filter: blur(4px);
+    }
+
+    .ntd-dashboard-root .ntd-visual-theme-2 .ntd-visual-tag,
+    .ntd-dashboard-root .ntd-visual-theme-4 .ntd-visual-tag {
+        background: rgba(255, 255, 255, 0.16);
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-visual-step-num {
+        font-size: 0.75rem;
+        font-weight: 800;
+        opacity: 0.75;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-window {
+        background: rgba(255, 255, 255, 0.94);
+        border-radius: 10px !important;
+        padding: 12px 14px;
+        box-shadow: 0 10px 24px rgba(13, 40, 24, 0.15);
+        color: #0F172A;
+        z-index: 2;
+        border: 1px solid rgba(43, 122, 75, 0.15);
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-title {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #0D2818;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-pill {
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px !important;
+        background: #E8F5E9;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-bar {
+        height: 6px;
+        border-radius: 4px !important;
+        background: #E2E8F0;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #1B5E36, #4ADE80);
+        border-radius: 4px !important;
+    }
+
+    .ntd-dashboard-root .ntd-mini-ui-sub {
+        font-size: 0.71rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .ntd-dashboard-root .ntd-card-body-bottom {
+        padding: 22px 22px 20px 22px;
+        background: linear-gradient(180deg, rgba(16, 49, 30, 0.96) 0%, #091D11 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-title {
+        font-size: 1.12rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-desc {
+        font-size: 0.85rem;
+        color: rgba(226, 242, 232, 0.76);
+        line-height: 1.55;
+        margin-bottom: 18px;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 16px;
+        background: rgba(43, 122, 75, 0.28);
+        color: #FFFFFF !important;
+        border: 1px solid rgba(74, 222, 128, 0.32);
+        border-radius: 10px !important;
+        font-size: 0.84rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-card-fn-btn:hover {
+        background: #2B7A4B;
+        color: #FFFFFF !important;
+        border-color: #4ADE80;
+    }
+
+    .ntd-dashboard-root .ntd-hero-dots-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .ntd-dashboard-root .ntd-hero-dot {
+        flex: 0 0 8px;
+        width: 8px;
+        height: 8px !important;
+        min-width: 8px;
+        min-height: 8px !important;
+        aspect-ratio: 1;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.26);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ntd-dashboard-root .ntd-hero-dot.active {
+        width: 8px;
+        height: 8px !important;
+        min-height: 8px !important;
+        border-radius: 50% !important;
+        background: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-section-badge {
+        display: inline-block;
+        background: #EAF5EE;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+        border-radius: 6px !important;
+        padding: 4px 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 6px;
+    }
+
+    .ntd-dashboard-root .ntd-filter-bar-card {
+        background: #FFFFFF;
+        border: 1px solid #D5E6DC;
+        border-radius: 18px !important;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(13, 40, 24, 0.05);
+    }
+
+    .ntd-dashboard-root .ntd-company-card {
+        background: #FFFFFF;
+        border: 1px solid #DCE8E0;
+        border-radius: 16px !important;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 8px 24px rgba(13, 40, 24, 0.05);
+        transition: all 0.24s ease;
+    }
+
+    .ntd-dashboard-root .ntd-company-card:hover {
+        border-color: #2B7A4B;
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(13, 40, 24, 0.12);
+    }
+
+    .ntd-dashboard-root .ntd-company-top {
+        background: linear-gradient(135deg, #0D2818 0%, #1B5E36 60%, #2B7A4B 100%);
+        padding: 18px 20px;
+        color: #FFFFFF;
+    }
+
+    .ntd-dashboard-root .ntd-company-logo {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px !important;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        background: #FFFFFF;
+        flex-shrink: 0;
+    }
+
+    .ntd-dashboard-root .ntd-company-body {
+        padding: 18px 20px 14px 20px;
+        flex-grow: 1;
+    }
+
+    .ntd-dashboard-root .ntd-company-footer {
+        padding: 14px 20px;
+        background: #FAFCFB;
+        border-top: 1px solid #E2E8F0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .ntd-dashboard-root .ntd-workflow-section {
+        background: linear-gradient(180deg, #FFFFFF 0%, #EAF5EE 100%);
+        border: 1px solid #C8E6C9;
+        border-radius: 22px !important;
+        padding: 36px 34px;
+        margin-top: 44px;
+        box-shadow: 0 12px 32px rgba(13, 40, 24, 0.06);
+    }
+
+    .ntd-dashboard-root .ntd-workflow-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 26px;
+    }
+
+    .ntd-dashboard-root .ntd-workflow-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0D2818;
+        margin-bottom: 4px;
+    }
+
+    .ntd-dashboard-root .ntd-workflow-sub {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .ntd-step-card {
+        position: relative;
+        background: #FFFFFF;
+        border: 1px solid #D5E8DC;
+        border-radius: 16px !important;
+        padding: 24px 20px;
+        height: 100%;
+        box-shadow: 0 6px 18px rgba(13, 40, 24, 0.04);
+        transition: all 0.22s ease;
+    }
+
+    .ntd-dashboard-root .ntd-step-card:hover {
+        transform: translateY(-4px);
+        border-color: #2B7A4B;
+        box-shadow: 0 14px 28px rgba(13, 40, 24, 0.1);
+    }
+
+    .ntd-dashboard-root .ntd-step-number-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #0D2818 0%, #1B5E36 100%);
+        color: #FFFFFF;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 6px 14px;
+        border-radius: 99px !important;
+        margin-bottom: 14px;
+    }
+
+    .ntd-dashboard-root .ntd-step-heading {
+        font-size: 1.04rem;
+        font-weight: 800;
+        color: #0D2818;
+        margin-bottom: 8px;
+    }
+
+    .ntd-dashboard-root .ntd-step-desc {
+        font-size: 0.86rem;
+        color: #475569;
+        line-height: 1.55;
+        margin-bottom: 0;
+    }
+
+    .ntd-dashboard-root .btn-search-main {
+        background: linear-gradient(135deg, #1B5E36 0%, #2B7A4B 100%);
+        color: #FFFFFF !important;
+        border: 1px solid #1B5E36;
+        border-radius: 10px !important;
+        padding: 10px 22px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 6px 16px rgba(27, 94, 54, 0.2);
+    }
+
+    @@media (max-width: 1199.98px) {
+        .ntd-dashboard-root .ntd-feature-card {
+            flex: 0 0 calc(50% - 12px);
+        }
+        .ntd-dashboard-root .ntd-cards-track.is-grid-mode {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .ntd-dashboard-root .ntd-hero-showcase {
+            padding: 28px 20px 26px 20px;
+        }
+        .ntd-dashboard-root .ntd-feature-card {
+            flex: 0 0 88%;
+        }
+        .ntd-dashboard-root .ntd-cards-track.is-grid-mode {
+            grid-template-columns: 1fr;
+        }
+        .ntd-dashboard-root .ntd-workflow-section {
+            padding: 24px 18px;
+        }
+    }
+</style>
+
+<div class="ntd-dashboard-root">
+    <div class="container-fluid px-lg-5">
+
+        <!-- ===============================================================
+             KHU VỰC 1 & KHU VỰC 2: PHÂN CHIA THEO VAI TRÒ
+             - NHÀ TUYỂN DỤNG: Hiển thị Trung tâm điều khiển & 8 chức năng Nhà tuyển dụng
+             - FREELANCER: Hiển thị Trung tâm điều khiển & 8 chức năng Sinh viên Freelancer
+             =============================================================== -->
+        @if (User.IsInRole("NhaTuyenDung") || Context.Session.GetString("tenRole") == "NhaTuyenDung")
+        {
+            <section class="ntd-hero-showcase" aria-label="Trung tâm điều khiển Nhà tuyển dụng">
+                <div class="ntd-hero-inner">
+
+                   
+
+                    <h1 class="ntd-hero-title">Trung tâm điều khiển Nhà tuyển dụng</h1>
+
+                    <p class="ntd-hero-desc">
+                        Đăng tin tuyển dụng, xem hồ sơ ứng viên, theo dõi hợp đồng và quản lý khoản ký quỹ.
+                    </p>
+
+                    <div class="ntd-hero-controls-row">
+                        <div class="ntd-hero-cta-group">
+                            <a asp-controller="JobPost" asp-action="Create" class="ntd-btn-hero-primary">
+                                <span>Đăng tin tuyển dụng</span>
+                                <span>→</span>
+                            </a>
+                            <a asp-controller="FreelancerStudent" asp-action="Search" class="ntd-btn-hero-secondary">
+                                <span>Tìm kiếm Freelancer</span>
+                            </a>
+                        </div>
+
+                        <div class="ntd-carousel-nav-group">
+                            <button type="button" class="ntd-btn-toggle-view" id="ntdToggleViewBtn" onclick="toggleNtdCardsLayout()">
+                                Xem tất cả 8 chức năng
+                            </button>
+                            <button type="button" class="ntd-nav-circle" onclick="scrollNtdCards(-1)" title="Trượt sang trái" aria-label="Trượt sang trái">
+                                ←
+                            </button>
+                            <button type="button" class="ntd-nav-circle" onclick="scrollNtdCards(1)" title="Trượt sang phải" aria-label="Trượt sang phải">
+                                →
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ntd-functions-header-bar">
+                        <div>
+                            <h2 class="ntd-functions-title">Quản lý hoạt động tuyển dụng</h2>
+                            <p class="ntd-functions-subtitle">
+                                Các chức năng cần thiết để quản lý công việc và quá trình hợp tác với Freelancer.
+                            </p>
+                        </div>
+                        <span class="text-white-50 small">8 công cụ nghiệp vụ Nhà tuyển dụng</span>
+                    </div>
+
+                    <div class="ntd-cards-track" id="ntdFeatureCardsTrack">
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-1">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Đăng tin mới</span>
+                                    <span class="ntd-visual-step-num">01 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Tạo bài đăng dự án mới</span>
+                                        <span class="ntd-mini-ui-pill">Sẵn sàng</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Kỹ năng · Ngân sách · Thời hạn bàn giao</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 85%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Đăng việc tuyển dụng</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Tạo công việc mới với yêu cầu chuyên môn, kỹ năng, thời hạn và ngân sách rõ ràng.
+                                    </p>
+                                </div>
+                                <a asp-controller="JobPost" asp-action="Create" class="ntd-card-fn-btn">
+                                    <span>Soạn bài đăng việc</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-2">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Tin tuyển dụng</span>
+                                    <span class="ntd-visual-step-num">02 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Danh sách tin đăng</span>
+                                        <span class="ntd-mini-ui-pill">Đang mở tuyển</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Theo dõi trạng thái &amp; cập nhật tiến độ tin</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 72%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Quản lý tin đăng</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Theo dõi các tin đang tuyển, tạm dừng hoặc đóng việc đã hoàn thành.
+                                    </p>
+                                </div>
+                                <a asp-controller="JobPost" asp-action="QuanLyTinTuyenDung" class="ntd-card-fn-btn">
+                                    <span>Xem danh sách tin</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-3">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Ứng tuyển</span>
+                                    <span class="ntd-visual-step-num">03 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Đơn ứng tuyển sinh viên</span>
+                                        <span class="ntd-mini-ui-pill">Đang xét duyệt</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Đối chiếu GPA, kỹ năng &amp; chi phí đề xuất</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 90%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Hồ sơ ứng viên</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Xem danh sách sinh viên nộp đơn, thù lao đề xuất và phê duyệt ứng viên phù hợp.
+                                    </p>
+                                </div>
+                                <a asp-controller="NhaTuyenDung" asp-action="DanhSachUngVien" class="ntd-card-fn-btn">
+                                    <span>Duyệt ứng viên</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-4">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Hợp đồng</span>
+                                    <span class="ntd-visual-step-num">04 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Hợp đồng &amp; Bàn giao</span>
+                                        <span class="ntd-mini-ui-pill">Có hợp đồng</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Kiểm tra sản phẩm &amp; nghiệm thu trực tuyến</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 78%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Quản lý hợp đồng</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Theo dõi tiến độ thực hiện, nhận bàn giao sản phẩm và xác nhận thanh toán.
+                                    </p>
+                                </div>
+                                <a asp-controller="HopDong" asp-action="Index" class="ntd-card-fn-btn">
+                                    <span>Vào trang hợp đồng</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-1">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Nhân tài</span>
+                                    <span class="ntd-visual-step-num">05 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Mạng lưới Sinh viên</span>
+                                        <span class="ntd-mini-ui-pill">Đa chuyên ngành</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Lọc theo Chuyên ngành, Kỹ năng, GPA &amp; Sao</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 94%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Khám phá Freelancer</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Tìm kiếm sinh viên theo chuyên ngành, kỹ năng, trường học và mức thù lao.
+                                    </p>
+                                </div>
+                                <a asp-controller="FreelancerStudent" asp-action="Search" class="ntd-card-fn-btn">
+                                    <span>Khám phá ngay</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-2">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Yêu thích</span>
+                                    <span class="ntd-visual-step-num">06 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Danh sách Ứng viên lưu</span>
+                                        <span class="ntd-mini-ui-pill">Hợp tác dài hạn</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Mở hồ sơ sinh viên bạn đã lưu</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 80%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Freelancer đã lưu</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Danh sách hồ sơ sinh viên bạn đã lưu để xem lại hoặc liên hệ.
+                                    </p>
+                                </div>
+                                <a asp-controller="NhaTuyenDung" asp-action="FreelancerYeuThich" class="ntd-card-fn-btn">
+                                    <span>Xem danh sách đã lưu</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-3">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Tài chính</span>
+                                    <span class="ntd-visual-step-num">07 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Ví Ký quỹ Escrow</span>
+                                        <span class="ntd-mini-ui-pill">Đã ký quỹ</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Nạp khoản ký quỹ và xem lịch sử giao dịch</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 88%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Ví và Ký quỹ dự án</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Nạp số dư ví để ký quỹ cho hợp đồng và xem các khoản thu, chi.
+                                    </p>
+                                </div>
+                                <a asp-controller="Wallet" asp-action="Index" class="ntd-card-fn-btn">
+                                    <span>Quản lý số dư ví</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-4">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Thông tin</span>
+                                    <span class="ntd-visual-step-num">08 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Thương hiệu Tuyển dụng</span>
+                                        <span class="ntd-mini-ui-pill">Đã xác thực</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Tên công ty · Lĩnh vực · Thông tin hồ sơ</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 92%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Hồ sơ Doanh nghiệp</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Cập nhật thông tin công ty, địa chỉ, website và mô tả để tăng độ tin cậy với ứng viên.
+                                    </p>
+                                </div>
+                                <a asp-controller="NhaTuyenDung" asp-action="Profile" class="ntd-card-fn-btn">
+                                    <span>Xem và cập nhật hồ sơ</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                    </div>
+
+                    <div class="ntd-hero-dots-bar" id="ntdHeroDotsBar">
+                        <button type="button" class="ntd-hero-dot active" onclick="scrollToNtdGroup(0)" aria-label="Nhóm chức năng 1"></button>
+                        <button type="button" class="ntd-hero-dot" onclick="scrollToNtdGroup(1)" aria-label="Nhóm chức năng 2"></button>
+                        <button type="button" class="ntd-hero-dot" onclick="scrollToNtdGroup(2)" aria-label="Nhóm chức năng 3"></button>
+                    </div>
+
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="ntd-hero-showcase" aria-label="Trung tâm điều khiển Sinh viên Freelancer">
+                <div class="ntd-hero-inner">
+
+                   
+
+                    <h1 class="ntd-hero-title">Trung tâm điều khiển Sinh viên Freelancer</h1>
+
+                    <p class="ntd-hero-desc">
+                        Chủ động tìm kiếm dự án thực tế, quản lý đơn ứng tuyển, theo dõi hợp đồng bàn giao sản phẩm và nhận thù lao minh bạch qua ví điện tử.
+                    </p>
+
+                    <div class="ntd-hero-controls-row">
+                        <div class="ntd-hero-cta-group">
+                            <a asp-controller="FreelancerStudent" asp-action="DangTinTimViec" class="ntd-btn-hero-primary">
+                                <span>Đăng tin tìm việc</span>
+                                <span>→</span>
+                            </a>
+                            <a asp-controller="JobPost" asp-action="Index" class="ntd-btn-hero-secondary">
+                                <span>Tìm việc làm ngay</span>
+                            </a>
+                        </div>
+
+                        <div class="ntd-carousel-nav-group">
+                            <button type="button" class="ntd-btn-toggle-view" id="ntdToggleViewBtn" onclick="toggleNtdCardsLayout()">
+                                Xem tất cả 8 chức năng
+                            </button>
+                            <button type="button" class="ntd-nav-circle" onclick="scrollNtdCards(-1)" title="Trượt sang trái" aria-label="Trượt sang trái">
+                                ←
+                            </button>
+                            <button type="button" class="ntd-nav-circle" onclick="scrollNtdCards(1)" title="Trượt sang phải" aria-label="Trượt sang phải">
+                                →
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ntd-functions-header-bar">
+                        <div>
+                            <h2 class="ntd-functions-title">Quản lý hoạt động nghề nghiệp Freelancer</h2>
+                            <p class="ntd-functions-subtitle">
+                                Các chức năng cần thiết để tìm kiếm dự án, quản lý hồ sơ năng lực và hợp tác với Nhà tuyển dụng.
+                            </p>
+                        </div>
+                        <span class="text-white-50 small">8 công cụ nghiệp vụ Sinh viên Freelancer</span>
+                    </div>
+
+                    <div class="ntd-cards-track" id="ntdFeatureCardsTrack">
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-1">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Đăng tin mới</span>
+                                    <span class="ntd-visual-step-num">01 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Tạo hồ sơ chào việc</span>
+                                        <span class="ntd-mini-ui-pill">Chủ động</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Chuyên ngành · Kỹ năng · Mức thù lao</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 88%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Đăng tin tìm việc</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Đăng bài giới thiệu năng lực, kỹ năng chuyên môn và mức thù lao mong muốn để Nhà tuyển dụng liên hệ.
+                                    </p>
+                                </div>
+                                <a asp-controller="FreelancerStudent" asp-action="DangTinTimViec" class="ntd-card-fn-btn">
+                                    <span>Soạn bài tìm việc</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-2">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Tin tìm việc</span>
+                                    <span class="ntd-visual-step-num">02 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Bài đăng tìm việc của tôi</span>
+                                        <span class="ntd-mini-ui-pill">Đang hiển thị</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Chỉnh sửa nội dung &amp; trạng thái nhận việc</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 76%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Quản lý tìm việc</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Theo dõi, cập nhật hoặc điều chỉnh các bài đăng tìm việc cá nhân của bạn trên hệ thống.
+                                    </p>
+                                </div>
+                                <a asp-controller="FreelancerStudent" asp-action="QuanLyTimViec" class="ntd-card-fn-btn">
+                                    <span>Xem bài đăng của tôi</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-3">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Đơn ứng tuyển</span>
+                                    <span class="ntd-visual-step-num">03 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Trạng thái đơn nộp tuyển</span>
+                                        <span class="ntd-mini-ui-pill">Cập nhật tức thì</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Theo dõi phản hồi duyệt đơn từ Doanh nghiệp</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 90%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Danh sách nộp tuyển</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Kiểm tra tiến độ các công việc đã ứng tuyển, mức thù lao đề xuất và kết quả phê duyệt.
+                                    </p>
+                                </div>
+                                <a asp-controller="FreelancerStudent" asp-action="DanhSachNopTuyen" class="ntd-card-fn-btn">
+                                    <span>Theo dõi đơn nộp tuyển</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-4">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Hợp đồng</span>
+                                    <span class="ntd-visual-step-num">04 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Hợp đồng &amp; Nộp sản phẩm</span>
+                                        <span class="ntd-mini-ui-pill">Đã ký quỹ 100%</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Ký hợp đồng điện tử &amp; gửi bàn giao dự án</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 82%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Hợp đồng &amp; Bàn giao</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Quản lý các hợp đồng đang thực hiện, tải lên tệp bàn giao sản phẩm và chờ nghiệm thu.
+                                    </p>
+                                </div>
+                                <a asp-controller="HopDong" asp-action="Index" class="ntd-card-fn-btn">
+                                    <span>Vào trang hợp đồng</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-1">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Đối tác</span>
+                                    <span class="ntd-visual-step-num">05 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Mạng lưới Doanh nghiệp</span>
+                                        <span class="ntd-mini-ui-pill">@(Model?.Count ?? 0) NTD</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Tra cứu thông tin công ty &amp; nhắn tin trực tiếp</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 94%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Khám phá Nhà tuyển dụng</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Tìm kiếm các doanh nghiệp, công ty đối tác theo lĩnh vực và kết nối trao đổi cơ hội hợp tác.
+                                    </p>
+                                </div>
+                                <a asp-controller="NhaTuyenDung" asp-action="Search" class="ntd-card-fn-btn">
+                                    <span>Tìm kiếm doanh nghiệp</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-2">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Yêu thích</span>
+                                    <span class="ntd-visual-step-num">06 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Danh sách Việc đã lưu</span>
+                                        <span class="ntd-mini-ui-pill">Tin đã lưu</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Lưu tin để xem lại và gửi hồ sơ ứng tuyển</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 80%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Công việc đã lưu</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Xem lại danh sách các dự án và tin tuyển dụng bạn đã đánh dấu quan tâm để nộp đơn đúng hạn.
+                                    </p>
+                                </div>
+                                <a asp-controller="JobPost" asp-action="ViecDaLuu" class="ntd-card-fn-btn">
+                                    <span>Xem việc làm đã lưu</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-3">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Tài chính</span>
+                                    <span class="ntd-visual-step-num">07 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Ví &amp; Thu nhập Freelancer</span>
+                                        <span class="ntd-mini-ui-pill">Giải ngân tự động</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Theo dõi thù lao nhận được &amp; lịch sử biến động</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 88%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Ví &amp; Thu nhập dự án</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Kiểm tra số dư khả dụng, nhận tiền giải ngân từ hợp đồng hoàn thành và tra cứu giao dịch.
+                                    </p>
+                                </div>
+                                <a asp-controller="Wallet" asp-action="Index" class="ntd-card-fn-btn">
+                                    <span>Quản lý số dư ví</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                        <article class="ntd-feature-card">
+                            <div class="ntd-card-visual-top ntd-visual-theme-4">
+                                <div class="ntd-visual-top-bar">
+                                    <span class="ntd-visual-tag">Năng lực</span>
+                                    <span class="ntd-visual-step-num">08 / 08</span>
+                                </div>
+                                <div class="ntd-mini-ui-window">
+                                    <div class="ntd-mini-ui-row">
+                                        <span class="ntd-mini-ui-title">Hồ sơ &amp; Portfolio Sinh viên</span>
+                                        <span class="ntd-mini-ui-pill">Tăng độ tin cậy</span>
+                                    </div>
+                                    <div class="ntd-mini-ui-sub mb-2">Cập nhật GPA, kỹ năng, CV &amp; minh chứng thẻ SV</div>
+                                    <div class="ntd-mini-ui-bar">
+                                        <div class="ntd-mini-ui-bar-fill" style="width: 92%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ntd-card-body-bottom">
+                                <div>
+                                    <h3 class="ntd-card-fn-title">Hồ sơ &amp; Portfolio cá nhân</h3>
+                                    <p class="ntd-card-fn-desc">
+                                        Thêm trường học, kỹ năng và dự án đã thực hiện để Nhà tuyển dụng xem xét hồ sơ.
+                                    </p>
+                                </div>
+                                <a asp-controller="FreelancerStudent" asp-action="HoSo" class="ntd-card-fn-btn">
+                                    <span>Cập nhật hồ sơ ngay</span>
+                                    <span>→</span>
+                                </a>
+                            </div>
+                        </article>
+
+                    </div>
+
+                    <div class="ntd-hero-dots-bar" id="ntdHeroDotsBar">
+                        <button type="button" class="ntd-hero-dot active" onclick="scrollToNtdGroup(0)" aria-label="Nhóm chức năng 1"></button>
+                        <button type="button" class="ntd-hero-dot" onclick="scrollToNtdGroup(1)" aria-label="Nhóm chức năng 2"></button>
+                        <button type="button" class="ntd-hero-dot" onclick="scrollToNtdGroup(2)" aria-label="Nhóm chức năng 3"></button>
+                    </div>
+
+                </div>
+            </section>
+        }
+
+        <!-- TIÊU ĐỀ TRANG -->
+        <div class="d-flex flex-wrap justify-content-between align-items-end mb-3 gap-2">
+            <div>
+                <span class="ntd-section-badge">Mạng lưới Doanh nghiệp Đối tác</span>
+                <h2 class="fw-bold mb-1" style="font-size: 1.55rem; color: #0D2818;">
+                    Khám phá &amp; Kết nối Nhà Tuyển Dụng
+                </h2>
+                <span class="text-muted small">Tìm kiếm các doanh nghiệp, công ty đối tác và trực tiếp trao đổi qua tin nhắn</span>
             </div>
-            <span class="badge bg-light text-success border border-success px-3 py-2 rounded-0">
+            <span class="badge bg-white text-success border border-success px-3 py-2" style="border-radius: 10px !important; font-size: 0.85rem;">
                 Tổng cộng: @(Model?.Count ?? 0) Nhà Tuyển Dụng
             </span>
         </div>
 
-        <!-- THANH BỘ LỌC TÌM KIẾM NHÀ TUYỂN DỤNG (FLAT DESIGN, ROUNDED-0) -->
-        <div class="card border rounded-0 p-3 mb-4 bg-light shadow-sm">
-            <div class="row g-2 align-items-center">
+        <!-- THANH BỘ LỌC TÌM KIẾM NHÀ TUYỂN DỤNG -->
+        <div class="ntd-filter-bar-card">
+            <div class="row g-3 align-items-center">
                 <!-- 1. Từ khoá tìm kiếm -->
                 <div class="col-md-6">
                     <div class="input-group">
-                        <span class="input-group-text bg-white rounded-0 border-end-0 text-muted small">Tìm</span>
-                        <input type="text" id="filterKeyword" class="form-control rounded-0 border-start-0"
+                        <span class="input-group-text bg-light border-end-0 text-muted small fw-semibold" style="border-radius: 10px 0 0 10px !important;">Tìm kiếm</span>
+                        <input type="text" id="filterKeyword" class="form-control border-start-0" style="border-radius: 0 10px 10px 0 !important;"
                                placeholder="Tìm theo tên công ty, người liên hệ, địa chỉ...">
                     </div>
                 </div>
 
                 <!-- 2. Lĩnh vực hoạt động -->
                 <div class="col-md-6">
-                    <select id="filterLinhVuc" class="form-select rounded-0">
+                    <select id="filterLinhVuc" class="form-select" style="border-radius: 10px !important;">
                         <option value="">-- Tất cả lĩnh vực --</option>
                         @if (Model != null)
                         {
@@ -51,8 +1343,8 @@
             </div>
         </div>
 
-        <!-- DANH SÁCH NHÀ TUYỂN DỤNG DẠNG GRID CARD -->
-        <div class="row g-3" id="ntdListContainer">
+        <!-- DANH SÁCH NHÀ TUYỂN DỤNG DẠNG GRID CARD 2 TẦNG -->
+        <div class="row g-4" id="ntdListContainer">
             @if (Model != null && Model.Count > 0)
             {
                 @foreach (var ntd in Model)
@@ -64,51 +1356,52 @@
                     <div class="col-md-6 col-lg-4 ntd-card-wrapper" data-company="@((ntd.tencongty ?? "").ToLower())"
                          data-name="@((ntd.hotenUser ?? "").ToLower())" data-address="@((ntd.diachi ?? "").ToLower())"
                          data-field="@(ntd.linhvuc ?? "")">
-                        <div class="card h-100 border rounded-0 p-3 bg-white shadow-sm d-flex flex-column">
+                        <div class="ntd-company-card">
                             
-                            <!-- Header Card: Logo + Tên công ty + Lĩnh vực -->
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <img src="@hinhAnh" alt="@tenHienThi" class="rounded-0 border"
-                                     style="width: 52px; height: 52px; object-fit: cover; flex-shrink: 0;" />
-                                
-                                <div class="overflow-hidden">
-                                    <h6 class="fw-bold text-dark mb-1 text-truncate" title="@tenHienThi">
-                                        @tenHienThi
-                                    </h6>
-                                    <span class="badge bg-light text-success border border-success-subtle rounded-0"
-                                          style="font-size: 0.72rem;">
-                                        @(string.IsNullOrEmpty(ntd.linhvuc) ? "Đa ngành" : ntd.linhvuc)
-                                    </span>
+                            <!-- Tầng trên: Logo + Tên công ty + Lĩnh vực trên nền xanh lá đậm -->
+                            <div class="ntd-company-top">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@hinhAnh" alt="@tenHienThi" class="ntd-company-logo" />
+                                    
+                                    <div class="overflow-hidden">
+                                        <h6 class="fw-bold text-white mb-1 text-truncate" title="@tenHienThi" style="font-size: 1.02rem;">
+                                            @tenHienThi
+                                        </h6>
+                                        <span class="badge px-2 py-1"
+                                              style="font-size: 0.72rem; background: rgba(74, 222, 128, 0.22); color: #FFFFFF; border: 1px solid rgba(167, 243, 208, 0.35); border-radius: 6px !important;">
+                                            @(string.IsNullOrEmpty(ntd.linhvuc) ? "Đa ngành" : ntd.linhvuc)
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Giới thiệu ngắn -->
-                            <div class="p-2 mb-2 bg-light rounded-0 border">
-                                <span class="text-muted small d-block" style="font-size: 0.72rem;">Giới thiệu:</span>
-                                <p class="text-secondary small mb-0"
-                                   style="font-size: 0.8rem; line-height: 1.4; max-height: 38px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                    @(string.IsNullOrEmpty(ntd.gioithieu) ? "Chưa cập nhật phần giới thiệu..." : ntd.gioithieu)
-                                </p>
+                            <!-- Tầng thân: Giới thiệu ngắn & Địa chỉ -->
+                            <div class="ntd-company-body">
+                                <div class="p-3 mb-3 border" style="background: #F4F9F6; border-color: #D5E8DC !important; border-radius: 10px !important;">
+                                    <span class="text-muted small d-block fw-semibold mb-1" style="font-size: 0.74rem;">Giới thiệu doanh nghiệp:</span>
+                                    <p class="text-secondary small mb-0"
+                                       style="font-size: 0.83rem; line-height: 1.45; max-height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        @(string.IsNullOrEmpty(ntd.gioithieu) ? "Chưa cập nhật phần giới thiệu..." : ntd.gioithieu)
+                                    </p>
+                                </div>
+
+                                <div class="text-muted small text-truncate" style="font-size: 0.82rem;">
+                                    <div class="mb-1"><strong class="text-dark">Khu vực:</strong> @(string.IsNullOrEmpty(ntd.diachi) ? "Toàn quốc" : ntd.diachi)</div>
+                                    <div><strong class="text-dark">Đại diện:</strong> @(ntd.hotenUser ?? "Chưa cập nhật")</div>
+                                </div>
                             </div>
 
-                            <!-- Địa chỉ & Người đại diện -->
-                            <div class="text-muted small mb-3 text-truncate" style="font-size: 0.78rem;">
-                                <div class="mb-1">Khu vực: @(string.IsNullOrEmpty(ntd.diachi) ? "Toàn quốc" : ntd.diachi)</div>
-                                <div>Đại diện: @(ntd.hotenUser ?? "Chưa cập nhật")</div>
-                            </div>
-
-                            <!-- Footer Card: 2 Nút (Xem hồ sơ & Nhắn tin trao đổi) Vuông góc -->
-                            <div class="mt-auto pt-2 border-top d-flex gap-2">
-                                <!-- 1. Nút Xem hồ sơ công ty -->
+                            <!-- Footer Card: 2 Nút (Xem hồ sơ & Nhắn tin trao đổi) -->
+                            <div class="ntd-company-footer">
                                 <a href="/Employer/Profile/@ntd.maNhaTuyenDung"
-                                   class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-0 fw-semibold">
+                                   class="btn btn-sm btn-outline-success flex-grow-1 fw-semibold"
+                                   style="border-radius: 8px !important; padding: 7px 12px;">
                                     Xem hồ sơ
                                 </a>
 
-                                <!-- 2. Nút Nhắn tin trao đổi trực tiếp với NTD -->
                                 <a href="/Chat?maUserNTD=@ntd.maUser"
-                                   class="btn btn-sm btn-success flex-grow-1 rounded-0 fw-semibold"
-                                   style="background-color: #1B5E36; border-color: #1B5E36;">
+                                   class="btn btn-sm btn-success flex-grow-1 fw-semibold"
+                                   style="background-color: #1B5E36; border-color: #1B5E36; border-radius: 8px !important; padding: 7px 12px;">
                                     Nhắn tin
                                 </a>
                             </div>
@@ -120,42 +1413,212 @@
             else
             {
                 <div class="col-12">
-                    <div class="alert alert-light border rounded-0 text-center py-5 text-muted">
+                    <div class="alert alert-light border text-center py-5 text-muted" style="border-radius: 16px !important;">
                         Hiện tại chưa có nhà tuyển dụng nào trong hệ thống.
                     </div>
                 </div>
             }
         </div>
+
+        <!-- KHU VỰC 3: QUY TRÌNH 4 BƯỚC THEO VAI TRÒ -->
+        @if (User.IsInRole("NhaTuyenDung") || Context.Session.GetString("tenRole") == "NhaTuyenDung")
+        {
+            <section class="ntd-workflow-section" aria-label="Quy trình làm việc chuẩn cho Nhà tuyển dụng">
+                <div class="ntd-workflow-header">
+                    <div>
+                        <span class="ntd-section-badge">Chuẩn hóa Hợp tác</span>
+                        <h2 class="ntd-workflow-title">Quy trình làm việc chuẩn cho Nhà tuyển dụng</h2>
+                        <p class="ntd-workflow-sub">Đăng việc, chọn ứng viên, ký hợp đồng và nghiệm thu sản phẩm theo từng bước.</p>
+                    </div>
+                    <a asp-controller="JobPost" asp-action="Create" class="btn-search-main">
+                        + Đăng tin tuyển dụng mới
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 01</span>
+                            <h3 class="ntd-step-heading">1. Đăng việc chi tiết</h3>
+                            <p class="ntd-step-desc">
+                                Nêu rõ yêu cầu dự án, kỹ năng cần thiết, thời hạn và ngân sách dự kiến.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 02</span>
+                            <h3 class="ntd-step-heading">2. Chọn ứng viên &amp; Trao đổi</h3>
+                            <p class="ntd-step-desc">
+                                Xem đề xuất, hồ sơ năng lực của sinh viên và nhắn tin trao đổi chi tiết.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 03</span>
+                            <h3 class="ntd-step-heading">3. Ký hợp đồng &amp; Ký quỹ</h3>
+                            <p class="ntd-step-desc">
+                                Hai bên ký hợp đồng điện tử; Nhà tuyển dụng nộp khoản ký quỹ theo giá trị và điều khoản hợp đồng.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 04</span>
+                            <h3 class="ntd-step-heading">4. Nghiệm thu &amp; Giải ngân</h3>
+                            <p class="ntd-step-desc">
+                                Kiểm tra sản phẩm bàn giao, xác nhận hoàn thành và chấm điểm đánh giá ứng viên.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="ntd-workflow-section" aria-label="Quy trình nhận việc chuẩn cho Sinh viên Freelancer">
+                <div class="ntd-workflow-header">
+                    <div>
+                        <span class="ntd-section-badge">Chuẩn hóa Nghề nghiệp</span>
+                        <h2 class="ntd-workflow-title">Quy trình nhận việc chuẩn cho Sinh viên Freelancer</h2>
+                        <p class="ntd-workflow-sub">Tìm việc, gửi đề xuất, ký hợp đồng và bàn giao sản phẩm theo từng bước.</p>
+                    </div>
+                    <a asp-controller="FreelancerStudent" asp-action="DangTinTimViec" class="btn-search-main">
+                        + Đăng bài tìm việc ngay
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 01</span>
+                            <h3 class="ntd-step-heading">1. Hoàn thiện Hồ sơ &amp; Portfolio</h3>
+                            <p class="ntd-step-desc">
+                                Thêm kỹ năng, GPA, dự án đã thực hiện và minh chứng sinh viên để Nhà tuyển dụng tham khảo.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 02</span>
+                            <h3 class="ntd-step-heading">2. Tìm việc &amp; Gửi đề xuất</h3>
+                            <p class="ntd-step-desc">
+                                Lựa chọn dự án phù hợp chuyên ngành, gửi báo giá thù lao và trao đổi trực tiếp với Nhà tuyển dụng.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 03</span>
+                            <h3 class="ntd-step-heading">3. Ký hợp đồng &amp; Triển khai</h3>
+                            <p class="ntd-step-desc">
+                                Bắt đầu thực hiện dự án khi hợp đồng điện tử đã được ký kết và Nhà tuyển dụng đã ký quỹ 100% thù lao.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="ntd-step-card">
+                            <span class="ntd-step-number-badge">Bước 04</span>
+                            <h3 class="ntd-step-heading">4. Bàn giao &amp; Nhận thù lao</h3>
+                            <p class="ntd-step-desc">
+                                Nộp sản phẩm hoàn thiện đúng thời hạn, nghiệm thu trực tuyến và nhận thanh toán ngay về Ví điện tử.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+
     </div>
+</div>
 
-    @section Scripts {
-        <script>
-            const filterKeyword = document.getElementById("filterKeyword");
-            const filterLinhVuc = document.getElementById("filterLinhVuc");
-            const ntdCards = document.querySelectorAll(".ntd-card-wrapper");
+@section Scripts {
+    <script>
+        function scrollNtdCards(direction) {
+            const track = document.getElementById('ntdFeatureCardsTrack');
+            if (!track || track.classList.contains('is-grid-mode')) return;
+            const cardWidth = 340;
+            track.scrollBy({ left: direction * cardWidth * 2, behavior: 'smooth' });
+            setTimeout(updateNtdDotsOnScroll, 350);
+        }
 
-            function applyFilter() {
-                const kw = filterKeyword.value.toLowerCase().trim();
-                const field = filterLinhVuc.value;
+        function scrollToNtdGroup(groupIndex) {
+            const track = document.getElementById('ntdFeatureCardsTrack');
+            if (!track || track.classList.contains('is-grid-mode')) return;
+            const maxScroll = track.scrollWidth - track.clientWidth;
+            const targetScroll = (maxScroll / 2) * groupIndex;
+            track.scrollTo({ left: targetScroll, behavior: 'smooth' });
+            setActiveNtdDot(groupIndex);
+        }
 
-                ntdCards.forEach(card => {
-                    const comp = card.getAttribute("data-company") || "";
-                    const name = card.getAttribute("data-name") || "";
-                    const addr = card.getAttribute("data-address") || "";
-                    const cardField = card.getAttribute("data-field") || "";
+        function setActiveNtdDot(activeIndex) {
+            const dots = document.querySelectorAll('#ntdHeroDotsBar .ntd-hero-dot');
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === activeIndex);
+            });
+        }
 
-                    let matchKw = !kw || comp.includes(kw) || name.includes(kw) || addr.includes(kw);
-                    let matchField = !field || cardField === field;
+        function updateNtdDotsOnScroll() {
+            const track = document.getElementById('ntdFeatureCardsTrack');
+            if (!track) return;
+            const maxScroll = Math.max(1, track.scrollWidth - track.clientWidth);
+            const ratio = track.scrollLeft / maxScroll;
+            const activeIdx = ratio < 0.34 ? 0 : (ratio < 0.75 ? 1 : 2);
+            setActiveNtdDot(activeIdx);
+        }
 
-                    if (matchKw && matchField) {
-                        card.classList.remove("d-none");
-                    } else {
-                        card.classList.add("d-none");
-                    }
-                });
+        function toggleNtdCardsLayout() {
+            const track = document.getElementById('ntdFeatureCardsTrack');
+            const btn = document.getElementById('ntdToggleViewBtn');
+            const dotsBar = document.getElementById('ntdHeroDotsBar');
+            if (!track || !btn) return;
+            const isGrid = track.classList.toggle('is-grid-mode');
+            btn.textContent = isGrid ? 'Thu gọn dạng trượt ngang' : 'Xem tất cả 8 chức năng';
+            if (dotsBar) {
+                dotsBar.style.display = isGrid ? 'none' : 'flex';
             }
+        }
 
-            if (filterKeyword) filterKeyword.addEventListener("input", applyFilter);
-            if (filterLinhVuc) filterLinhVuc.addEventListener("change", applyFilter);
-        </script>
-    }
+        document.addEventListener('DOMContentLoaded', function () {
+            const track = document.getElementById('ntdFeatureCardsTrack');
+            if (track) {
+                track.addEventListener('scroll', updateNtdDotsOnScroll, { passive: true });
+            }
+        });
+
+        const filterKeyword = document.getElementById("filterKeyword");
+        const filterLinhVuc = document.getElementById("filterLinhVuc");
+        const ntdCards = document.querySelectorAll(".ntd-card-wrapper");
+
+        function applyFilter() {
+            const kw = filterKeyword.value.toLowerCase().trim();
+            const field = filterLinhVuc.value;
+
+            ntdCards.forEach(card => {
+                const comp = card.getAttribute("data-company") || "";
+                const name = card.getAttribute("data-name") || "";
+                const addr = card.getAttribute("data-address") || "";
+                const cardField = card.getAttribute("data-field") || "";
+
+                let matchKw = !kw || comp.includes(kw) || name.includes(kw) || addr.includes(kw);
+                let matchField = !field || cardField === field;
+
+                if (matchKw && matchField) {
+                    card.classList.remove("d-none");
+                } else {
+                    card.classList.add("d-none");
+                }
+            });
+        }
+
+        if (filterKeyword) filterKeyword.addEventListener("input", applyFilter);
+        if (filterLinhVuc) filterLinhVuc.addEventListener("change", applyFilter);
+    </script>
+}

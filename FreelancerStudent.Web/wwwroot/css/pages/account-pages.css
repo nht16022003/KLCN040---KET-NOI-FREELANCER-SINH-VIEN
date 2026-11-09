@@ -1,0 +1,223 @@
+.auth-reference-page {
+    min-height: calc(100vh - 130px);
+    background: #f7faf8;
+}
+
+.auth-reference-page .auth-top-hero {
+    display: none;
+}
+
+.auth-reference-page .auth-main-section {
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px 64px !important;
+}
+
+.auth-reference-page .auth-split-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+}
+
+.auth-reference-page .auth-showcase-card {
+    width: 100%;
+    padding: 24px 20px;
+}
+
+.auth-reference-page .auth-form-inner {
+    padding: 22px 18px;
+}
+
+.auth-reference-page .auth-field-row-2col {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+}
+
+.auth-reference-page .auth-password-control {
+    display: flex;
+    align-items: stretch;
+}
+
+.auth-reference-page .auth-password-control .auth-input {
+    min-width: 0;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.auth-reference-page .auth-password-toggle {
+    display: inline-flex;
+    min-width: 48px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #CBD5E1;
+    border-left: 0;
+    border-radius: 0 8px 8px 0;
+    background: #F3FAF6;
+    color: #144327;
+    font-size: 1.15rem;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.auth-reference-page .auth-password-toggle:hover,
+.auth-reference-page .auth-password-toggle:focus-visible {
+    border-color: #2B7A4B;
+    background: #EAF4ED;
+    color: #2B7A4B;
+}
+
+.auth-reference-page .auth-password-toggle:focus-visible {
+    outline: 2px solid #2B7A4B;
+    outline-offset: 2px;
+}
+
+.auth-reference-page .auth-role-options {
+    display: grid;
+    gap: 10px;
+}
+
+.auth-reference-page .auth-role-option {
+    display: flex;
+    min-height: 58px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    background: #fff;
+    color: #144327;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-reference-page .auth-role-option:has(input:checked) {
+    border-color: #2B7A4B;
+    background: #F0F8F3;
+    box-shadow: 0 0 0 2px rgba(43, 122, 75, .12);
+}
+
+.auth-reference-page .auth-role-option input {
+    width: 18px;
+    height: 18px;
+    accent-color: #2B7A4B;
+    flex: 0 0 auto;
+}
+
+.auth-reference-page .auth-password-hint {
+    display: block;
+    margin-top: 6px;
+    color: #52635A;
+}
+
+.auth-reference-page .auth-links-row {
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.auth-reference-page .auth-btn-submit {
+    justify-content: center;
+    width: 100%;
+}
+
+.minhchung-steps {
+    display: flex;
+    gap: 12px;
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
+}
+
+.minhchung-step {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid #dce5df;
+    padding: 0 4px 10px;
+    color: #58665d;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.minhchung-step--active {
+    border-color: #2B7A4B;
+    color: #144327;
+}
+
+.minhchung-step__number {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.minhchung-card-guide {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid #dce5df;
+    background: #fff;
+}
+
+.minhchung-card-guide__visual {
+    display: grid;
+    width: min(100%, 260px);
+    min-height: 116px;
+    align-content: center;
+    gap: 5px;
+    padding: 12px;
+    border: 1px solid #7d9887;
+    border-radius: 8px;
+    background: #f3f8f5;
+    color: #24382b;
+    font-size: .72rem;
+}
+
+.minhchung-card-guide__heading {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #b8c9be;
+    font-weight: 800;
+    text-align: center;
+}
+
+.account-avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.account-avatar-section__title {
+    color: #171717;
+    font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+    .auth-reference-page .auth-main-section {
+        padding: 24px 12px 40px !important;
+    }
+
+    .auth-reference-page .auth-showcase-card {
+        padding: 20px 14px;
+    }
+
+    .minhchung-steps {
+        gap: 6px;
+    }
+
+    .minhchung-step {
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: .78rem;
+    }
+
+    .minhchung-card-guide {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
