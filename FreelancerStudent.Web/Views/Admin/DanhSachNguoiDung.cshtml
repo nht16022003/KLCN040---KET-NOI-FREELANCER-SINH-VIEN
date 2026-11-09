@@ -77,7 +77,7 @@
                         @foreach (var u in Model.Users)
                         {
                             <tr>
-                                <td class="small fw-bold text-dark">#@u.MaUser</td>
+                                <td class="small fw-bold text-dark">@u.MaUser</td>
                                 <td>
                                     <div class="fw-bold text-dark small">@u.HotenUser</div>
                                     <div class="text-muted small">@@@u.TenTaiKhoanUser</div>
@@ -85,15 +85,15 @@
                                 <td>
                                     @if (u.MaRole == 1)
                                     {
-                                        <span class="badge bg-light text-success border border-success small">Sinh viên</span>
+                                        <span class="badge  text-success ">Sinh viên</span>
                                     }
                                     else if (u.MaRole == 2)
                                     {
-                                        <span class="badge bg-light text-primary border border-primary small">Nhà tuyển dụng</span>
+                                        <span class="badge  text-primary ">Nhà tuyển dụng</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-dark small">Quản trị</span>
+                                        <span class="badge text-warning small">Quản trị</span>
                                     }
                                 </td>
                                 <td class="small">
@@ -109,11 +109,11 @@
                                 <td>
                                     @if (u.Status == "ACTIVE" || u.Status == "HoatDong")
                                     {
-                                        <span class="badge bg-light text-success border border-success small">Hoạt động</span>
+                                        <span class="badge  text-success ">Hoạt động</span>
                                     }
                                     else if (u.Status == "LOCKED" || u.Status == "BiKhoa")
                                     {
-                                        <span class="badge bg-light text-danger border border-danger small">Đã khóa</span>
+                                        <span class="badge text-danger ">Đã khóa</span>
                                     }
                                     else
                                     {

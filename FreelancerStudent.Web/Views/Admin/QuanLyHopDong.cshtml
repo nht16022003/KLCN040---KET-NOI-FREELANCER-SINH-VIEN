@@ -67,7 +67,7 @@
                         <th style="width: 80px;">Mã HĐ</th>
                         <th>Công việc</th>
                         <th>Bên A (Nhà tuyển dụng)</th>
-                        <th>Bên B (Freelancer)</th>
+                        <th>Bên B (Sinh viên)</th>
                         <th class="text-end" style="width: 140px;">Giá trị ký quỹ</th>
                         <th class="text-center" style="width: 110px;">Hình thức</th>
                         <th class="text-center" style="width: 130px;">Trạng thái</th>
@@ -85,23 +85,26 @@
                     {
                         @foreach (var item in Model.DanhSachHopDongHeThong)
                         {
-                            var statusClass = item.TrangThai switch
-                            {
-                                "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "badge bg-light text-success border border-success",
-                                "DangThucHien" or "DANG_THUC_HIEN" => "badge bg-light text-primary border border-primary",
-                                "DaHuy" or "DA_HUY" => "badge bg-light text-danger border border-danger",
-                                _ => "badge bg-light text-warning border border-warning"
-                            };
-                            var statusText = item.TrangThai switch
-                            {
-                                "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "Đã hoàn thành",
-                                "DangThucHien" or "DANG_THUC_HIEN" => "Đang thực hiện",
-                                "DaHuy" or "DA_HUY" => "Đã hủy",
-                                _ => item.TrangThai
-                            };
+                           var statusClass = item.TrangThai switch
+                                {
+                                    "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "badge  text-success ",
+                                    "DaThanhToan" or "DA_THANH_TOAN"             => "badge  text-success ",
+                                    "DangThucHien" or "DANG_THUC_HIEN"           => "badge  text-primary ",
+                                    "DaHuy" or "DA_HUY"                         => "badge  text-danger b",
+                                    _                                            => "badge  text-warning "
+                                };
+
+                                var statusText = item.TrangThai switch
+                                {
+                                    "DaHoanThanh" or "HoanThanh" or "HOAN_THANH" => "Đã hoàn thành",
+                                    "DaThanhToan" or "DA_THANH_TOAN"             => "Đã thanh toán",
+                                    "DangThucHien" or "DANG_THUC_HIEN"           => "Đang thực hiện",
+                                    "DaHuy" or "DA_HUY"                         => "Đã hủy",
+                                    _                                            => item.TrangThai
+                                };
 
                             <tr>
-                                <td class="small fw-bold text-dark">#@item.MaHD</td>
+                                <td class="small fw-bold text-dark">@item.MaHD</td>
                                 <td>
                                     <div class="fw-bold text-dark small text-truncate" style="max-width: 250px;" title="@item.TenCongViec">
                                         @item.TenCongViec
@@ -112,11 +115,11 @@
                                 </td>
                                 <td class="small">
                                     <div class="fw-semibold text-dark">@item.TenNhaTuyenDung</div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Mã NTD: #@item.MaNhaTuyenDung</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Mã người dùng: @item.MaNhaTuyenDung</div>
                                 </td>
                                 <td class="small">
                                     <div class="fw-semibold text-dark">@item.TenFreelancer</div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Mã SV: #@item.MaFreelancer</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Mã sinh viên: @item.MaFreelancer</div>
                                 </td>
                                 <td class="small text-end fw-bold text-dark">
                                     @item.SoTienKyQuy.ToString("N0") đ

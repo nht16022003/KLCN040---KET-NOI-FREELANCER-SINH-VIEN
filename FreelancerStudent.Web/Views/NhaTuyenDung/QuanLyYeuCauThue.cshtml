@@ -108,7 +108,7 @@
                                 <td class="small text-muted">
                                     @item.ngayGui.ToString("dd/MM/yyyy HH:mm")
                                 </td>
-                                <td>
+                                                               <td>
                                     @if (item.trangThai == "ChoPhanHoi")
                                     {
                                         <span class="badge bg-warning text-dark rounded-0 px-2 py-1">
@@ -132,6 +132,12 @@
                                                 Lý do: @item.lyDoTuChoi
                                             </div>
                                         }
+                                    }
+                                    else if (item.trangThai == "DaTaoHopDong")
+                                    {
+                                        <span class="badge bg-primary text-white rounded-0 px-2 py-1" style="background-color: #164E41 !important;">
+                                            <i class="bi bi-file-earmark-check me-1"></i> Đã tạo hợp đồng
+                                        </span>
                                     }
                                     else
                                     {

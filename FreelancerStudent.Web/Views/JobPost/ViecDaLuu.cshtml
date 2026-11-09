@@ -115,7 +115,7 @@
                                     else
                                     {
                                         <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                            @job.status
+                                           @(job.status == "DaHoanThanh" ? "Đã hoàn thành" : (job.status == "DangThucHien" ? "Đang thực hiện" : job.status))
                                         </span>
                                     }
 

@@ -152,19 +152,19 @@
                             <div class="mb-2">
                                 @if (item.trangThaiUngTuyen == "ChoDuyet")
                                 {
-                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1">Chờ duyệt</span>
+                                    <span class=" text-warning-emphasis ">Chờ duyệt</span>
                                 }
                                 else if (item.trangThaiUngTuyen == "ChapNhan")
                                 {
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">Đã chấp nhận</span>
+                                    <span class=" text-success ">Đã chấp nhận</span>
                                 }
                                 else if (item.trangThaiUngTuyen == "TuChoi")
                                 {
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1">Đã từ chối</span>
+                                    <span class=" text-danger ">Đã từ chối</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-light text-secondary border border-light-subtle px-3 py-1">@item.trangThaiUngTuyen</span>
+                                    <span class=" text-secondary ">@item.trangThaiUngTuyen</span>
                                 }
                             </div>
 
@@ -217,9 +217,21 @@
                                             Tạo hợp đồng
                                         </a>
                                     }
+                                                                       else if (item.TrangThaiHopDong == "DaHoanThanh")
+                                    {
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 small">
+                                            Đã hoàn thành
+                                        </span>
+                                    }
+                                    else if (item.TrangThaiHopDong == "DaThanhToan")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                            Đã thanh toán
+                                        </span>
+                                    }
                                     else
                                     {
-                                        <span class="badge bg-light text-secondary border border-light-subtle px-2 py-1 small">
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 small">
                                             @item.TrangThaiHopDong
                                         </span>
                                     }

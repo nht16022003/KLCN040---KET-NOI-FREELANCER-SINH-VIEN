@@ -11,7 +11,8 @@
         { "DangThucHien", "Đang thực hiện" },
         { "DaHoanThanh", "Đã hoàn thành" },
         { "DaHuy", "Đã hủy" },
-        { "DangTranhChap", "Đang tranh chấp" }
+        { "DangTranhChap", "Đang tranh chấp" },
+        { "DaThanhToan", "Đã thanh toán"}
     };
 }
 
@@ -239,14 +240,15 @@
 
                                             var badgeClass = hd.trangThai switch
                                             {
-                                                "ChoXacNhan" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
-                                                "ChoKyKet" => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
-                                                "ChoKyQuy" => "bg-info-subtle text-info-emphasis border border-info-subtle",
-                                                "DangThucHien" => "bg-success-subtle text-success border border-success-subtle",
-                                                "DaHoanThanh" => "bg-light text-secondary border border-secondary-subtle",
-                                                "DaHuy" => "bg-danger-subtle text-danger border border-danger-subtle",
-                                                "DangTranhChap" => "bg-danger-subtle text-danger border border-danger-subtle",
-                                                _ => "bg-secondary-subtle text-secondary border border-secondary-subtle"
+                                                "ChoXacNhan" => " text-warning-emphasis ",
+                                                "ChoKyKet" => " text-warning-emphasis ",
+                                                "ChoKyQuy" => " text-info-emphasis ",
+                                                "DangThucHien" => " text-success ",
+                                                "DaHoanThanh" => " text-secondary ",
+                                                "DaHuy" => " text-danger ",
+                                                "DangTranhChap" => " text-danger ",
+                                                 "DaThanhToan" => " text-success ",
+                                                _ => " text-secondary "
                                             };
                                         }
 

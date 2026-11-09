@@ -129,7 +129,6 @@ D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\rjsmcshtml.dswa.cac
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\scopedcss\bundle\FreelancerStudent.Web.styles.css
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\scopedcss\projectbundle\FreelancerStudent.Web.bundle.scp.css
-D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\que5biveux-{0}-jzmznfnl0h-jzmznfnl0h.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\9nwox4qcx9-{0}-61n19gt1b8-61n19gt1b8.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\lvpphdajjo-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\x6t8b636i5-{0}-bqjiyaj88i-bqjiyaj88i.gz
@@ -225,3 +224,9 @@ D:\KLTN\KLTN\Improve\FreelancerStudent.Web\bin\TestBuild\FreelancerStudent.Web.p
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\uy8znmcq8d-{0}-s7kmgt37pa-s7kmgt37pa.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\se34cd9x9x-{0}-hgosgh5hl2-hgosgh5hl2.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\fs4ohpxt9l-{0}-a5c5cshv0d-a5c5cshv0d.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\eq3rfvfqdm-{0}-5ipweew5fc-5ipweew5fc.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\que5biveux-{0}-xqpi9zcp34-xqpi9zcp34.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\o548dg5ndl-{0}-l17c9m0bfb-l17c9m0bfb.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\61fv8abb4x-{0}-l17c9m0bfb-l17c9m0bfb.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\bxck7hdiux-{0}-l17c9m0bfb-l17c9m0bfb.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\lqvcja4pqu-{0}-kag5xxg7x8-kag5xxg7x8.gz
