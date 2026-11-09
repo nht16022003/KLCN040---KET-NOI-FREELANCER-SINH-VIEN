@@ -65,6 +65,7 @@ namespace FreelancerStudent.API.Data
         public DbSet<MinhChung_FreelancerStudents> MinhChung_FreelancerStudents { get; set; }
         public DbSet<FreelancerYeuThich> FreelancerYeuThichs { get; set; }
         public DbSet<LuuViec_ChoFreelancer> LuuViec_ChoFreelancers { get; set; }
+        public DbSet<UngThue> UngThues { get; set; }
 
 
         //Sử dụng phương thức OnModelCreating và dối tượng modelBuilder để cấu hình toàn bộ quy tắc CSDL, quan hệ giữa các bảng, khóa chính/ ngoại,
@@ -184,6 +185,27 @@ namespace FreelancerStudent.API.Data
                 entity.HasOne(u => u.FreelamcerStudents).WithMany(f => f.UngTuyens).HasForeignKey(u => u.maFreelancerStudent).OnDelete(DeleteBehavior.Cascade);
 
                 entity.Property(u => u.thulaoDeXuat).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<UngThue>(entity =>
+            {
+                entity.HasKey(u => u.maYeuCau);
+                entity.HasOne(u => u.NhaTuyenDung)
+                      .WithMany()
+                      .HasForeignKey(u => u.maNhaTuyenDung)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(u => u.FreelancerStudent)
+                      .WithMany()
+                      .HasForeignKey(u => u.maFreelancerStudent)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(u => u.JobPost)
+                      .WithMany()
+                      .HasForeignKey(u => u.maJob)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.Property(u => u.nganSachDeNghi).HasPrecision(18, 2);
             });
 
             modelBuilder.Entity<BaiDangTimViecFreelancerStudent>(entity =>

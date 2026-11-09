@@ -20,6 +20,7 @@ import '../thong_bao/man_hinh_thong_bao.dart';
 import '../wallet/man_hinh_vi_tien.dart';
 import 'man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
 import 'man_hinh_freelancer_yeu_thich.dart';
+import 'man_hinh_quan_ly_yeu_cau_thue_ntd.dart';
 import 'man_hinh_tao_bai_dang_tuyen_dung.dart';
 
 /// Màn hình chính của Nhà tuyển dụng (Employer Dashboard)
@@ -108,6 +109,14 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const ManHinhFreelancerYeuThich()),
+        );
+        break;
+      case 'direct-hires':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ManHinhQuanLyYeuCauThueNTD(),
+          ),
         );
         break;
       case 'contracts':
@@ -348,6 +357,16 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                 ),
               ),
               PopupMenuItem(
+                value: 'direct-hires',
+                child: Row(
+                  children: [
+                    Icon(Icons.handshake_outlined, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Yêu cầu thuê trực tiếp'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
                 value: 'contracts',
                 child: Row(
                   children: [
@@ -464,49 +483,64 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _actionButton(
-                        context,
-                        icon: Icons.add_circle_outline,
-                        label: 'Đăng tin',
-                        onTap: () async {
-                          await Navigator.push(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _actionButton(
+                          context,
+                          icon: Icons.add_circle_outline,
+                          label: 'Đăng tin',
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const CreateJobPostScreen()),
+                            );
+                            _taiDuLieu();
+                          },
+                        ),
+                        _actionButton(
+                          context,
+                          icon: Icons.handshake_outlined,
+                          label: 'Thuê TT',
+                          onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const CreateJobPostScreen()),
-                          );
-                          _taiDuLieu();
-                        },
-                      ),
-                      _actionButton(
-                        context,
-                        icon: Icons.assignment_outlined,
-                        label: 'Hợp đồng',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HopDongListScreen()),
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const ManHinhQuanLyYeuCauThueNTD(),
+                            ),
+                          ),
                         ),
-                      ),
-                      _actionButton(
-                        context,
-                        icon: Icons.account_balance_wallet_outlined,
-                        label: 'Ví & Nạp tiền',
-                        onTap: () => Navigator.push(
+                        _actionButton(
                           context,
-                          MaterialPageRoute(builder: (_) => const WalletScreen()),
+                          icon: Icons.assignment_outlined,
+                          label: 'Hợp đồng',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HopDongListScreen()),
+                          ),
                         ),
-                      ),
-                      _actionButton(
-                        context,
-                        icon: Icons.star_outline,
-                        label: 'Đánh giá',
-                        onTap: () => Navigator.push(
+                        _actionButton(
                           context,
-                          MaterialPageRoute(builder: (_) => const DanhGiaListScreen()),
+                          icon: Icons.account_balance_wallet_outlined,
+                          label: 'Ví tiền',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const WalletScreen()),
+                          ),
                         ),
-                      ),
-                    ],
+                        _actionButton(
+                          context,
+                          icon: Icons.star_outline,
+                          label: 'Đánh giá',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const DanhGiaListScreen()),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

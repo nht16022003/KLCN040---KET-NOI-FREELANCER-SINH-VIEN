@@ -20,7 +20,7 @@ namespace FreelancerStudent.API.Services
             TaoHopDong_RequestDTO request,
             int? maUserNTD);
 
-        Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaAsync(string maHD);
+        Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaAsync(string maHD, int? maUser = null);
 
         Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaJobAsync(string maJob);
 

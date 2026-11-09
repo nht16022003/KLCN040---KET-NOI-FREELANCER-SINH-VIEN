@@ -152,9 +152,9 @@ namespace FreelancerStudent.Web.Controllers
             return View(model);
         }
 
-        // GET: /HopDong/TaoHopDong?maJob=...&maFreelancerStudent=...&maUngTuyen=...
+        // GET: /HopDong/TaoHopDong?maJob=...&maFreelancerStudent=...&maUngTuyen=...&maYeuCauThue=...
         [HttpGet]
-        public async Task<IActionResult> TaoHopDong(string maJob, int maFreelancerStudent, int? maUngTuyen)
+        public async Task<IActionResult> TaoHopDong(string maJob, int maFreelancerStudent, int? maUngTuyen, int? maYeuCauThue)
         {
             var maUser = HttpContext.Session.GetInt32("maUser");
             if (maUser == null)
@@ -181,12 +181,13 @@ namespace FreelancerStudent.Web.Controllers
                 maJob = maJob,
                 maFreelancerStudent = maFreelancerStudent,
                 maUngTuyen = maUngTuyen,
+                maYeuCauThue = maYeuCauThue,
                 ngayBatDau = DateTime.Now,
                 ngayKetThuc = DateTime.Now.AddDays(14),
                 hinhthuclamviec = "Remote"
             };
 
-            // 2. Lấy thông tin ứng tuyển từ NTD
+            // 2. Lấy thông tin ứng tuyển từ NTD (Luồng A)
             UngTuyenViewModel? ungTuyen = null;
             try
             {
@@ -200,6 +201,45 @@ namespace FreelancerStudent.Web.Controllers
                 }
             }
             catch { }
+
+            // 2.1 Nếu không có đơn ứng tuyển, kiểm tra thông tin từ Yêu cầu thuê (Luồng B - Direct Hire)
+            if (ungTuyen == null)
+            {
+                try
+                {
+                    var ungThueService = HttpContext.RequestServices.GetService<IUngThueWebService>();
+                    if (ungThueService != null)
+                    {
+                        var ytRes = await ungThueService.LayDanhSachYeuCauThueTheoNhaTuyenDungAsync(maUser.Value);
+                        var yt = ytRes?.data?.FirstOrDefault(y =>
+                            (maYeuCauThue.HasValue && y.maYeuCau == maYeuCauThue.Value) ||
+                            (y.maJob == maJob && y.maFreelancerStudent == maFreelancerStudent));
+
+                        if (yt != null)
+                        {
+                            model.maYeuCauThue = yt.maYeuCau;
+                            if (yt.nganSachDeNghi.HasValue && yt.nganSachDeNghi.Value > 0)
+                            {
+                                model.thulaoDeXuat = yt.nganSachDeNghi.Value;
+                                model.sotienkyquy = yt.nganSachDeNghi.Value;
+                            }
+                            if (!string.IsNullOrEmpty(yt.tieuDeCongViec))
+                            {
+                                model.tieuDeJob = yt.tieuDeCongViec;
+                            }
+                            if (!string.IsNullOrEmpty(yt.moTaCongViec))
+                            {
+                                model.moTaJob = yt.moTaCongViec;
+                            }
+                            if (!string.IsNullOrEmpty(yt.thoiHanDuKien) && DateTime.TryParse(yt.thoiHanDuKien, out DateTime hHan) && hHan > DateTime.Now)
+                            {
+                                model.ngayKetThuc = hHan;
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
 
             // 3. Lấy thông tin chi tiết JobPost
             try
@@ -347,7 +387,7 @@ namespace FreelancerStudent.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(maHD);
+            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(maHD, maUser.Value);
             if (hopDong == null)
             {
                 TempData["ErrorMessage"] = $"Không tìm thấy thông tin hợp đồng {maHD}.";
@@ -544,7 +584,7 @@ namespace FreelancerStudent.Web.Controllers
             {
                 // 3. Lấy thông tin hợp đồng
                 var hopDong = await _hopDongService
-                    .LayChiTietTheoMaAsync(maHD);
+                    .LayChiTietTheoMaAsync(maHD, maUser.Value);
 
                 if (hopDong == null)
                 {

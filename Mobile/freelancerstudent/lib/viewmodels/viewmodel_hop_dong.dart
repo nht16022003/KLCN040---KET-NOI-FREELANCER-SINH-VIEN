@@ -76,12 +76,12 @@ class HopDongViewModel extends ChangeNotifier {
   }
 
   /// Tải chi tiết 1 hợp đồng
-  Future<void> taiChiTietHopDong(String maHD) async {
+  Future<void> taiChiTietHopDong(String maHD, {int? maUser}) async {
     _dangTai = true;
     _thongBaoLoi = null;
     notifyListeners();
 
-    final response = await _hopDongService.layChiTietHopDong(maHD);
+    final response = await _hopDongService.layChiTietHopDong(maHD, maUser: maUser);
     if (response.isSuccess) {
       _hopDongHienTai = response.data;
     } else {

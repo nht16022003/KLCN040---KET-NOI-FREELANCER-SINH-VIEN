@@ -1,5 +1,7 @@
 @using FreelancerStudent.Web.Services.Interfaces
 @inject IWalletWebService WalletWebService
+@inject IThongBaoWebService ThongBaoWebService
+@inject IChatWebService ChatWebService
 @using Microsoft.AspNetCore.Http
 @{
     var role = Context.Session.GetString("tenRole");
@@ -14,6 +16,8 @@
     var maUserDangNhap = Context.Session.GetInt32("maUser");
 
     decimal soDuKhaDung = 0;
+    int soThongBaoChuaDoc = 0;
+    int soTinNhanChuaDoc = 0;
 
     var maUser = Context.Session.GetInt32("maUser");
 
@@ -25,6 +29,26 @@
         {
             soDuKhaDung = ketQuaVi.data.soDuKhaDung;
         }
+
+        try
+        {
+            var ketQuaTB = await ThongBaoWebService.DemChuaDocAsync(maUser.Value);
+            if (ketQuaTB.success)
+            {
+                soThongBaoChuaDoc = ketQuaTB.data;
+            }
+        }
+        catch {}
+
+        try
+        {
+            var ketQuaTN = await ChatWebService.DemTinNhanChuaDocAsync(maUser.Value);
+            if (ketQuaTN.success)
+            {
+                soTinNhanChuaDoc = ketQuaTN.data;
+            }
+        }
+        catch {}
     }
 }
 
@@ -94,8 +118,6 @@
             .rounded-circle {
                 border-radius: 0 !important;
                 box-sizing: border-box;
-                margin: 0;
-                padding: 0;
             }
 
             i.bi,
@@ -811,13 +833,21 @@
                     <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài + Profile User -->
                     <div class="d-flex align-items-center gap-3">
                         <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
-                        <a href="/ThongBao" class="portal-nav-link" title="Thông báo">
+                        <a href="/ThongBao" class="portal-nav-link position-relative" title="Thông báo" id="btnThongBaoNTD">
+                            <i class="bi bi-bell fs-6 me-1"></i>
                             <span>Thông báo</span>
+                            <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle badge-thong-bao @(soThongBaoChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                @(soThongBaoChuaDoc > 99 ? "99+" : soThongBaoChuaDoc.ToString())
+                            </span>
                         </a>
 
                         <!-- Nút Tin Nhắn (FRL-UC-07) -->
-                        <a href="/Chat" class="portal-nav-link" title="Tin nhắn trao đổi">
+                        <a href="/Chat" class="portal-nav-link position-relative" title="Tin nhắn trao đổi" id="btnTinNhanNTD">
+                            <i class="bi bi-chat-dots fs-6 me-1"></i>
                             <span>Tin nhắn</span>
+                            <span class="badge rounded-pill bg-success position-absolute top-0 start-100 translate-middle badge-tin-nhan @(soTinNhanChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                @(soTinNhanChuaDoc > 99 ? "99+" : soTinNhanChuaDoc.ToString())
+                            </span>
                         </a>
 
                         <!-- Nút Đăng bài tuyển dụng -->
@@ -856,6 +886,7 @@
                                     <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
                                     <li><a class="dropdown-item" href="/NhaTuyenDung/Profile">Hồ sơ công ty</a></li>
                                     <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a></li>
+                                    <li><a class="dropdown-item" href="/NhaTuyenDung/QuanLyYeuCauThue">Yêu cầu thuê ứng viên</a></li>
                                     <li><a class="dropdown-item" href="/NhaTuyenDung/FreelancerYeuThich">Freelancer yêu thích</a></li>
                                     <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
                                     <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
@@ -877,6 +908,7 @@
                     <div class="container-fluid px-lg-5">
                         <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
                             <a href="/JobPost/QuanLyTinTuyenDung" class="subnav-link">Quản lý tin tuyển dụng</a>
+                            <a href="/NhaTuyenDung/QuanLyYeuCauThue" class="subnav-link">Yêu cầu thuê ứng viên</a>
                             <a href="/NhaTuyenDung/FreelancerYeuThich" class="subnav-link">Freelancer yêu thích</a>
                             <a href="/NhaTuyenDung/DanhSachUngVien" class="subnav-link">Danh sách ứng viên</a>
                             <a href="/Wallet" class="subnav-link">Ví điện tử</a>
@@ -910,13 +942,16 @@
                                 <!-- Navigation chính -->
                                 <nav class="d-none d-md-flex align-items-center gap-2">
                                     <a href="/FreelancerStudent/QuanLyTimViec" class="portal-nav-link">
-                                        <span>Quản lý tìm việc</span>
+                                        <span style->Quản lý tìm việc</span>
+                                    </a>
+                                    <a href="/FreelancerStudent/YeuCauThue" class="portal-nav-link">
+                                        <span>Lời mời nhận việc</span>
                                     </a>
                                     <a href="/HopDong" class="portal-nav-link">
                                         <span>Hợp đồng</span>
                                     </a>
                                     <a href="/Wallet" class="portal-nav-link">
-                                        <span>Ví & Thu nhập</span>
+                                        <span>Ví và thu nhập</span>
                                     </a>
                                 </nav>
                             </div>
@@ -924,13 +959,21 @@
                             <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài tìm việc + Profile User -->
                             <div class="d-flex align-items-center gap-3">
                                 <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
-                                <a href="/ThongBao" class="portal-nav-link" title="Thông báo">
+                                <a href="/ThongBao" class="portal-nav-link position-relative" title="Thông báo" id="btnThongBaoFreelancer">
+                                    <i class="bi bi-bell fs-6 me-1"></i>
                                     <span>Thông báo</span>
+                                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle badge-thong-bao @(soThongBaoChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                        @(soThongBaoChuaDoc > 99 ? "99+" : soThongBaoChuaDoc.ToString())
+                                    </span>
                                 </a>
 
                                 <!-- Nút Tin Nhắn (FRL-UC-07) -->
-                                <a href="/Chat" class="portal-nav-link" title="Tin nhắn trao đổi">
+                                <a href="/Chat" class="portal-nav-link position-relative" title="Tin nhắn trao đổi" id="btnTinNhanFreelancer">
+                                    <i class="bi bi-chat-dots fs-6 me-1"></i>
                                     <span>Tin nhắn</span>
+                                    <span class="badge rounded-pill bg-success position-absolute top-0 start-100 translate-middle badge-tin-nhan @(soTinNhanChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                        @(soTinNhanChuaDoc > 99 ? "99+" : soTinNhanChuaDoc.ToString())
+                                    </span>
                                 </a>
 
                                 <!-- Nút Đăng bài tìm việc -->
@@ -978,6 +1021,7 @@
                                                    asp-route-maUser="@maUserDangNhap.Value">Hồ sơ năng lực sinh viên</a></li>
                                         }
                                         <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Portfolio">Portfolio cá nhân</a></li>
+                                        <li><a class="dropdown-item" href="/FreelancerStudent/YeuCauThue">Lời mời nhận việc</a></li>
                                         <li><a class="dropdown-item" href="/JobPost/ViecDaLuu">Công việc đã lưu</a></li>
                                         <li><a class="dropdown-item" href="/HopDong">Hợp đồng của tôi</a></li>
                                         <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
@@ -998,13 +1042,14 @@
                     <div class="container-fluid px-lg-5">
                         <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
                             <a href="/FreelancerStudent/QuanLyTimViec" class="subnav-link">Quản lý tìm việc</a>
+                            
                             <a href="/JobPost/ViecDaLuu" class="subnav-link">Việc đã lưu</a>
-                            <a href="/FreelancerStudent/DangTinTimViec" class="subnav-link">Đăng tin tìm việc</a>
+                           
                             <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
-                            <a href="/Wallet" class="subnav-link">Ví & Thu nhập</a>
-                            <a asp-controller="FreelancerStudent" asp-action="Portfolio" class="subnav-link">Portfolio cá nhân</a>
+                         
+                          
                             <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
-                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                        
                             <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
                             <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
                         </div>
@@ -1015,66 +1060,73 @@
     StringComparison.OrdinalIgnoreCase)))
                         {
                             <!-- ==================== HEADER QUẢN TRỊ VIÊN (ADMIN) ==================== -->
+                            var adminReqPath = Context.Request.Path.Value ?? "";
                             <header class="portal-header">
-                                <div class="container-fluid px-lg-5">
+                                <div class="container-fluid px-3 px-md-4">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <!-- Cột Trái: Brand Admin + Tra cứu nhanh + Navigation chính -->
-                                        <div class="d-flex align-items-center gap-3 gap-lg-4">
-                                            <a href="/Admin" class="brand-logo me-2">
-                                                Freelancer <span
-                                                class="badge bg-success-subtle text-success fs-6 fw-bold px-2 py-1 ms-1 border border-success-subtle">Admin</span>
-                                            </a>
-
-                                            <!-- Nút Tra cứu nhanh người dùng -->
-                                            <a href="/Admin/DanhSachNguoiDung" class="search-pill-btn">
-                                                <span>Tra cứu người dùng & hệ thống</span>
+                                        <!-- Cột Trái: Brand Admin + Navigation chính -->
+                                        <div class="d-flex align-items-center gap-3">
+                                            <a href="/Admin" class="brand-logo me-2 text-decoration-none">
+                                             <span class="badge  small ms-1">ADMIN SYSTEM</span>
                                             </a>
 
                                             <!-- Navigation chính -->
-                                            <nav class="d-none d-md-flex align-items-center gap-2">
-                                                <a href="/Admin" class="portal-nav-link">
+                                            <nav class="d-none d-md-flex align-items-center gap-1">
+                                                <a href="/Admin" class="portal-nav-link @(adminReqPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || adminReqPath.Equals("/Admin/Index", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
                                                     <span>Tổng quan</span>
                                                 </a>
-                                                <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link">
+                                                <a href="/Admin/DuyetMinhChung" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DuyetMinhChung", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Duyệt thẻ SV</span>
+                                                </a>
+                                                <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DanhSachNguoiDung", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
                                                     <span>Người dùng</span>
                                                 </a>
-                                                <a href="/Admin/DuyetRutTien" class="portal-nav-link">
+                                                <a href="/Admin/DuyetNapTien" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DuyetNapTien", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Duyệt nạp tiền</span>
+                                                </a>
+                                                <a href="/Admin/DuyetRutTien" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DuyetRutTien", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
                                                     <span>Duyệt rút tiền</span>
                                                 </a>
-                                                <a href="/Admin/QuanLyHopDong" class="portal-nav-link">
+                                                <a href="/Admin/QuanLyHopDong" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/QuanLyHopDong", StringComparison.OrdinalIgnoreCase) || adminReqPath.StartsWith("/Admin/ChiTietHopDong", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
                                                     <span>Hợp đồng</span>
+                                                </a>
+                                                <a href="/Admin/CauHinhHeThong" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/CauHinhHeThong", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Cấu hình phí</span>
                                                 </a>
                                             </nav>
                                         </div>
 
-                                        <!-- Cột Phải: Thông báo + Profile Admin -->
-                                        <div class="d-flex align-items-center gap-3">
+                                        <!-- Cột Phải: Tra cứu + Profile Admin -->
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="/Admin/DanhSachNguoiDung" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-block">
+                                                Tra cứu người dùng
+                                            </a>
+
                                             <!-- User Profile Dropdown -->
                                             <div class="dropdown">
                                                 <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
                                                    data-bs-toggle="dropdown" aria-expanded="false">
                                                     <img src="@userAvatar" alt="@userName"
-                                                         class="portal-user-avatar border border-2 border-success" />
+                                                         class="portal-user-avatar border" />
                                                     <div class="portal-user-info d-none d-lg-block">
                                                         <span class="portal-user-name">@userName</span>
-                                                        <span class="portal-user-tag text-success fw-bold">Quản trị viên</span>
+                                                        <span class="portal-user-tag text-muted">Quản trị viên</span>
                                                     </div>
                                                 </a>
-                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                                                    <li><a class="dropdown-item" href="/Admin">Bảng điều khiển Quản trị</a></li>
-                                                    <li><a class="dropdown-item fw-bold text-success" href="/Admin/DuyetMinhChung">Duyệt thẻ sinh viên</a></li>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-1">
+                                                    <li><a class="dropdown-item" href="/Admin">Bảng điều khiển quản trị</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetMinhChung">Duyệt thẻ sinh viên</a></li>
                                                     <li><a class="dropdown-item" href="/Admin/DanhSachNguoiDung">Quản lý người dùng</a></li>
-                                                    <li><a class="dropdown-item" href="/Admin/DuyetRutTien">Duyệt yêu cầu rút tiền</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/XuLyTaiKhoan">Khóa / Mở tài khoản</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetNapTien">Duyệt nạp tiền</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetRutTien">Duyệt rút tiền</a></li>
                                                     <li><a class="dropdown-item" href="/Admin/DieuChinhSoDu">Điều chỉnh số dư ví</a></li>
                                                     <li><a class="dropdown-item" href="/Admin/QuanLyHopDong">Quản lý hợp đồng</a></li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li><a class="dropdown-item text-primary" href="/JobPost/QuanLyTinTuyenDung">Giao diện Tuyển dụng</a></li>
-                                                    <li><a class="dropdown-item text-success" href="/FreelancerStudent/Index">Giao diện Freelancer</a></li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
+                                                    <li><a class="dropdown-item" href="/Admin/CauHinhHeThong">Cấu hình phí hệ thống</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Giao diện Tuyển dụng</a></li>
+                                                    <li><a class="dropdown-item" href="/FreelancerStudent/Index">Giao diện Freelancer</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
                                                     <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
                                                 </ul>
                                             </div>
@@ -1083,17 +1135,19 @@
                                 </div>
                             </header>
 
-                            <!-- SUBNAVBAR CHO ADMIN (Chỉ chứa liên kết chức năng thực tế đã triển khai) -->
+                            <!-- SUBNAVBAR CHO ADMIN (Thanh điều hướng nghiệp vụ quản trị) -->
                             <nav class="portal-subnav">
-                                <div class="container-fluid px-lg-5">
-                                    <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
-                                        <a href="/Admin" class="subnav-link">Tổng quan</a>
-                                        <a href="/Admin/DuyetMinhChung" class="subnav-link text-success fw-bold">Duyệt thẻ SV</a>
-                                        <a href="/Admin/DanhSachNguoiDung" class="subnav-link">Quản lý người dùng</a>
-                                        <a href="/Admin/XuLyTaiKhoan" class="subnav-link">Khóa và mở tài khoản</a>
-                                        <a href="/Admin/DuyetRutTien" class="subnav-link">Duyệt yêu cầu rút tiền</a>
-                                        <a href="/Admin/DieuChinhSoDu" class="subnav-link">Điều chỉnh số dư ví</a>
-                                        <a href="/Admin/QuanLyHopDong" class="subnav-link">Quản lý hợp đồng</a>
+                                <div class="container-fluid px-3 px-md-4">
+                                    <div class="d-flex align-items-center gap-1 overflow-auto text-nowrap py-1">
+                                        <a href="/Admin" class="@(adminReqPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || adminReqPath.Equals("/Admin/Index", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Tổng quan</a>
+                                        <a href="/Admin/DuyetMinhChung" class="@(adminReqPath.StartsWith("/Admin/DuyetMinhChung", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Duyệt thẻ SV</a>
+                                        <a href="/Admin/DanhSachNguoiDung" class="@(adminReqPath.StartsWith("/Admin/DanhSachNguoiDung", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Quản lý người dùng</a>
+                                        <a href="/Admin/XuLyTaiKhoan" class="@(adminReqPath.StartsWith("/Admin/XuLyTaiKhoan", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Khóa / Mở tài khoản</a>
+                                        <a href="/Admin/DuyetNapTien" class="@(adminReqPath.StartsWith("/Admin/DuyetNapTien", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Duyệt nạp tiền</a>
+                                        <a href="/Admin/DuyetRutTien" class="@(adminReqPath.StartsWith("/Admin/DuyetRutTien", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Duyệt rút tiền</a>
+                                        <a href="/Admin/DieuChinhSoDu" class="@(adminReqPath.StartsWith("/Admin/DieuChinhSoDu", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Điều chỉnh số dư ví</a>
+                                        <a href="/Admin/QuanLyHopDong" class="@(adminReqPath.StartsWith("/Admin/QuanLyHopDong", StringComparison.OrdinalIgnoreCase) || adminReqPath.StartsWith("/Admin/ChiTietHopDong", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Quản lý hợp đồng</a>
+                                        <a href="/Admin/CauHinhHeThong" class="@(adminReqPath.StartsWith("/Admin/CauHinhHeThong", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Cấu hình phí</a>
                                     </div>
                                 </div>
                             </nav>
@@ -1215,6 +1269,160 @@
                                                                 </footer>
 
                                                                 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+                                                                <!-- Global Toast Container cho Thông Báo và Tin Nhắn Mới -->
+                                                                <div aria-live="polite" aria-atomic="true" class="position-relative">
+                                                                    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;" id="globalNotificationToastContainer"></div>
+                                                                </div>
+
+                                                                @if (maUser.HasValue)
+                                                                {
+                                                                    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+                                                                    <script>
+                                                                        (function() {
+                                                                            const globalUserId = @maUser.Value;
+                                                                            const API_URL = "http://localhost:5152";
+
+                                                                            // Hàm cập nhật Badge số lượng
+                                                                            function capNhatBadgeElement(selector, count) {
+                                                                                const badges = document.querySelectorAll(selector);
+                                                                                badges.forEach(badge => {
+                                                                                    const num = parseInt(count) || 0;
+                                                                                    if (num > 0) {
+                                                                                        badge.textContent = num > 99 ? '99+' : num;
+                                                                                        badge.classList.remove('d-none');
+                                                                                    } else {
+                                                                                        badge.textContent = '0';
+                                                                                        badge.classList.add('d-none');
+                                                                                    }
+                                                                                });
+                                                                            }
+
+                                                                            // Hàm phát âm thanh thông báo nhẹ nhàng bằng Web Audio API
+                                                                            function phatAmThanhThongBao() {
+                                                                                try {
+                                                                                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                                                                    const osc = audioCtx.createOscillator();
+                                                                                    const gain = audioCtx.createGain();
+                                                                                    osc.type = "sine";
+                                                                                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                                                                                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                                                                                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                                                                                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                                                                                    osc.connect(gain);
+                                                                                    gain.connect(audioCtx.destination);
+                                                                                    osc.start();
+                                                                                    osc.stop(audioCtx.currentTime + 0.35);
+                                                                                } catch (e) {
+                                                                                    // Trình duyệt có thể chặn audio nếu chưa có user gesture
+                                                                                }
+                                                                            }
+
+                                                                            // Hàm hiển thị Toast thông báo tin nhắn mới
+                                                                            function hienThiToastTinNhan(msg) {
+                                                                                const container = document.getElementById("globalNotificationToastContainer");
+                                                                                if (!container) return;
+
+                                                                                const toastId = "toast_msg_" + Date.now();
+                                                                                const noiDungRutGon = (msg.noiDung && msg.noiDung.length > 80)
+                                                                                    ? msg.noiDung.substring(0, 77) + "..."
+                                                                                    : (msg.noiDung || "[Tệp đính kèm]");
+
+                                                                                const toastHtml = `
+                                                                                    <div id="${toastId}" class="toast align-items-center text-dark bg-white border border-success border-2 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="border-radius: 12px; min-width: 300px;">
+                                                                                        <div class="toast-header bg-success text-white py-2" style="border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                                                                                            <i class="bi bi-chat-dots-fill me-2"></i>
+                                                                                            <strong class="me-auto text-truncate" style="max-width: 180px;">${msg.tenNguoiGui || 'Tin nhắn mới'}</strong>
+                                                                                            <small class="text-white-50">Vừa xong</small>
+                                                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                        </div>
+                                                                                        <div class="toast-body p-3">
+                                                                                            <p class="mb-2 text-secondary small">${noiDungRutGon}</p>
+                                                                                            <div class="text-end">
+                                                                                                <a href="${msg.linkDieuHuong || ('/Chat?maPhongChat=' + msg.maPhongChat)}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-decoration-none">
+                                                                                                    Mở cuộc trò chuyện <i class="bi bi-arrow-right ms-1"></i>
+                                                                                                </a>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                `;
+
+                                                                                container.insertAdjacentHTML("beforeend", toastHtml);
+                                                                                const toastEl = document.getElementById(toastId);
+                                                                                if (toastEl && window.bootstrap && window.bootstrap.Toast) {
+                                                                                    const bsToast = new bootstrap.Toast(toastEl, { delay: 6000 });
+                                                                                    bsToast.show();
+                                                                                }
+                                                                            }
+
+                                                                            // Hàm đồng bộ số lượng từ server
+                                                                            window.dongBoSoLuongHeader = async function() {
+                                                                                try {
+                                                                                    const [resTB, resTN] = await Promise.all([
+                                                                                        fetch('/ThongBao/DemChuaDoc').then(r => r.json()).catch(() => ({ success: false })),
+                                                                                        fetch('/Chat/DemChuaDoc').then(r => r.json()).catch(() => ({ success: false }))
+                                                                                    ]);
+                                                                                    if (resTB && resTB.success) {
+                                                                                        capNhatBadgeElement('.badge-thong-bao', resTB.data);
+                                                                                    }
+                                                                                    if (resTN && resTN.success) {
+                                                                                        capNhatBadgeElement('.badge-tin-nhan', resTN.data);
+                                                                                    }
+                                                                                } catch (e) {}
+                                                                            };
+
+                                                                            // Khởi tạo kết nối SignalR toàn cục
+                                                                            const globalKetNoi = new signalR.HubConnectionBuilder()
+                                                                                .withUrl(`${API_URL}/chatHub?maUser=${globalUserId}`)
+                                                                                .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                                                                                .build();
+
+                                                                            // Lắng nghe sự kiện thông báo tin nhắn mới
+                                                                            globalKetNoi.on("ThongBaoTinNhanMoi", function(msg) {
+                                                                                // Nếu người dùng đang mở đúng phòng chat này, không tăng badge và không hiện toast
+                                                                                if (window.currentChatRoomId && parseInt(window.currentChatRoomId) === parseInt(msg.maPhongChat)) {
+                                                                                    return;
+                                                                                }
+
+                                                                                // Tăng badge tin nhắn hiện tại
+                                                                                const firstBadge = document.querySelector('.badge-tin-nhan');
+                                                                                let currentCount = firstBadge ? (parseInt(firstBadge.textContent) || 0) : 0;
+                                                                                capNhatBadgeElement('.badge-tin-nhan', currentCount + 1);
+
+                                                                                // Hiển thị Toast và phát âm thanh
+                                                                                hienThiToastTinNhan(msg);
+                                                                                phatAmThanhThongBao();
+                                                                            });
+
+                                                                            // Lắng nghe sự kiện cập nhật tin nhắn đã đọc
+                                                                            globalKetNoi.on("CapNhatTinNhanDaDoc", function(data) {
+                                                                                window.dongBoSoLuongHeader();
+                                                                            });
+
+                                                                            // Kết nối tới Hub
+                                                                            async function khoiTaoSignalRToanCuc() {
+                                                                                try {
+                                                                                    if (globalKetNoi.state === signalR.HubConnectionState.Disconnected) {
+                                                                                        await globalKetNoi.start();
+                                                                                        await globalKetNoi.invoke("DangKyUser", globalUserId);
+                                                                                    }
+                                                                                } catch (err) {
+                                                                                    setTimeout(khoiTaoSignalRToanCuc, 5000);
+                                                                                }
+                                                                            }
+
+                                                                            globalKetNoi.onreconnected(async () => {
+                                                                                await globalKetNoi.invoke("DangKyUser", globalUserId);
+                                                                                window.dongBoSoLuongHeader();
+                                                                            });
+
+                                                                            khoiTaoSignalRToanCuc();
+
+                                                                            // Fallback đồng bộ định kỳ mỗi 30 giây
+                                                                            setInterval(window.dongBoSoLuongHeader, 30000);
+                                                                        })();
+                                                                    </script>
+                                                                }
 
                                                                 @await RenderSectionAsync("Scripts", required: false)
 

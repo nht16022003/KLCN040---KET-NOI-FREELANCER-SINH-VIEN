@@ -29,7 +29,7 @@ namespace FreelancerStudent.API.Repositories
                     .ThenInclude(f => f.User)
                 .Where(h =>
                     h.JobPost != null &&
-                    (h.JobPost.maNhaTuyenDung == maNhaTuyenDung || (h.JobPost.NhaTuyenDung != null && h.JobPost.NhaTuyenDung.maUser == maNhaTuyenDung)));
+                    h.JobPost.maNhaTuyenDung == maNhaTuyenDung);
 
             // Tìm kiếm theo mã hợp đồng hoặc tên công việc hoặc tên freelancer
             if (!string.IsNullOrWhiteSpace(tuKhoa))
@@ -70,7 +70,7 @@ namespace FreelancerStudent.API.Repositories
                         .ThenInclude(n => n.User)
                 .Include(h => h.FreelancerStudent)
                     .ThenInclude(f => f.User)
-                .Where(h => h.maFreelancerStudent == maFreelancerStudent || (h.FreelancerStudent != null && h.FreelancerStudent.maUser == maFreelancerStudent));
+                .Where(h => h.maFreelancerStudent == maFreelancerStudent);
 
             // Tìm kiếm theo mã hợp đồng, tên công việc, hoặc tên nhà tuyển dụng
             if (!string.IsNullOrWhiteSpace(tuKhoa))

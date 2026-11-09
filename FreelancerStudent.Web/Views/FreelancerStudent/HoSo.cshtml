@@ -28,11 +28,7 @@
                 
                 <!-- HEADER -->
                 <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
-                    <div>
-                        <h3 class="fw-bold text-dark mb-1">Cập nhật hồ sơ & Kỹ năng nhận việc</h3>
-                        <p class="text-muted small mb-0">Tối ưu thông tin cá nhân để thu hút nhiều doanh nghiệp tìm đến.
-                        </p>
-                    </div>
+                   
                     @if (Model != null && Model.MaFreelancerStudents > 0)
                     {
                         <a href="/FreelancerStudent/Profile/@Model.MaFreelancerStudents"
@@ -66,13 +62,13 @@
                     <!-- PHẦN 1: THÔNG TIN CÁ NHÂN -->
                     <div class="mb-4">
                         <div class="section-title">
-                            1. Thông tin cá nhân & Liên hệ
+                            1. Thông tin cá nhân
                         </div>
                         @if (ViewBag.DaXacMinh == true)
                         {
                             <div class="alert alert-success d-flex align-items-center rounded-0 py-2 px-3 mb-3 border-start border-success border-4" style="background-color: #f0fdf4;">
                                 <div class="small">
-                                    <strong>Hồ sơ đã xác minh:</strong> Họ và tên cùng thông tin học vấn đã được xác thực từ Thẻ sinh viên bởi Ban quản trị. Các trường này đã được khóa để bảo đảm tính minh bạch.
+                                    <strong>Hồ sơ đã xác minh:</strong> Họ và tên cùng thông tin học vấn đã được xác thực từ thẻ sinh viên bởi ban quản trị. Các trường này đã được khóa để bảo đảm tính minh bạch.
                                 </div>
                             </div>
                         }
@@ -102,14 +98,14 @@
                     <!-- PHẦN 2: THIẾT LẬP NHẬN VIỆC & MỨC THÙ LAO -->
                     <div class="mb-4">
                         <div class="section-title">
-                            2. Trạng thái & Mức thù lao khởi điểm
+                            2. Định giá
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="p-3 bg-light border rounded-0 h-100 d-flex justify-content-between align-items-center">
                                     <div>
                                         <div class="fw-bold small mb-1">Sẵn sàng nhận việc freelance</div>
-                                        <div class="text-muted" style="font-size: 0.8rem;">Bật để hồ sơ hiển thị trên trang Khám phá Freelancer.</div>
+                                      
                                     </div>
                                     <div class="form-check form-switch fs-4 mb-0">
                                         <input asp-for="TrangthaiNhanViec" class="form-check-input" type="checkbox" role="switch">
@@ -118,7 +114,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="p-3 bg-light border rounded-0 h-100">
-                                    <label class="form-label fw-bold small mb-1">Mức giá / thù lao từ (VNĐ/dự án)</label>
+                                    <label class="form-label fw-bold small mb-1">Mức giá (VNĐ/dự án)</label>
                                     <div class="input-group">
                                         <input asp-for="ChiPhiTu" type="number" step="50000" class="form-control rounded-0" placeholder="100000" />
                                         <span class="input-group-text bg-white rounded-0">VNĐ</span>
@@ -131,7 +127,7 @@
                     <!-- PHẦN 3: HỌC VẤN & NGÀNH NGHỀ -->
                     <div class="mb-4">
                         <div class="section-title">
-                            3. Thông tin học vấn & Chuyên ngành
+                            3. Thông tin học vấn
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -157,15 +153,11 @@
                                 <input type="hidden" asp-for="MaChuyenNganh" id="hdnMaChuyenNganh" />
 
                                 <div id="divNhapChuyenNganhMoi" class="mt-2" style="@(isChonMoi ? "" : "display: none;")">
-                                    <label class="form-label small text-muted mb-1">
-                                        Nhập tên chuyên ngành mới (hệ thống sẽ tự động tạo mã viết tắt và lưu vào CSDL):
-                                    </label>
+                                   
                                     <input type="text" asp-for="TenChuyenNganh" id="txtTenChuyenNganh" class="form-control rounded-0"
                                            placeholder="VD: Trí tuệ nhân tạo, Khoa học dữ liệu..." />
                                 </div>
-                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
-                                    Freelancer có thể chọn ngành có sẵn hoặc tự do nhập chuyên ngành mới.
-                                </small>
+                                
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Trường Đại học / Cao đẳng
@@ -240,10 +232,10 @@
                                     <!-- PHẦN 4: KỸ NĂNG & GIỚI THIỆU -->
                                     <div class="mb-4">
                                         <div class="section-title">
-                                            4. Kỹ năng & Giới thiệu bản thân
+                                            4. Giới thiệu bản thân và kỹ năng
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small">Giới thiệu bản thân (Bio)</label>
+                                            <label class="form-label fw-bold small">Giới thiệu bản thân </label>
                                             <textarea asp-for="Gioithieu" class="form-control rounded-0" rows="3"
                                                       placeholder="Giới thiệu điểm mạnh, kinh nghiệm đồ án và định hướng nghề nghiệp..."></textarea>
                                         </div>
@@ -254,7 +246,7 @@
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-md-6">
-                                                <label class="form-label fw-bold small">Kỹ năng cơ bản / Tin học văn phòng</label>
+                                                <label class="form-label fw-bold small">Kỹ năng cơ bản </label>
                                                 <input asp-for="KyNangCoBan" class="form-control rounded-0"
                                                        placeholder="Word, Excel, PowerPoint..." />
                                             </div>

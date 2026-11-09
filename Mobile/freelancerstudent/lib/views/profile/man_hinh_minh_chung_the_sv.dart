@@ -698,30 +698,67 @@ class _ManHinhMinhChungTheSVState extends State<ManHinhMinhChungTheSV> {
             const SizedBox(height: 10),
 
             // Chuyên ngành đào tạo
-            DropdownButtonFormField<String>(
-              key: ValueKey('chuyen_nganh_$_selectedMaChuyenNganh'),
-              initialValue: _selectedMaChuyenNganh,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                labelText: 'Chuyên ngành đào tạo *',
-                prefixIcon: Icon(Icons.book, size: 18),
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-              items: _danhSachChuyenNganh.map((cn) {
-                return DropdownMenuItem<String>(
-                  value: cn['maChuyenNganh']?.toString(),
-                  child: Text(
-                    '${cn['tenChuyenNganh']} (${cn['maChuyenNganh']})',
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13),
+            Builder(
+              builder: (context) {
+                final seen = <String>{};
+                final items = <DropdownMenuItem<String>>[];
+
+                for (final cn in _danhSachChuyenNganh) {
+                  final code = (cn['maChuyenNganh'] ?? '').toString().trim();
+                  final name = (cn['tenChuyenNganh'] ?? '').toString().trim();
+                  if (code.isNotEmpty && !seen.contains(code)) {
+                    seen.add(code);
+                    items.add(
+                      DropdownMenuItem<String>(
+                        value: code,
+                        child: Text(
+                          '$name ($code)',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    );
+                  }
+                }
+
+                if (_selectedMaChuyenNganh != null &&
+                    _selectedMaChuyenNganh!.isNotEmpty &&
+                    !seen.contains(_selectedMaChuyenNganh)) {
+                  seen.add(_selectedMaChuyenNganh!);
+                  items.insert(
+                    0,
+                    DropdownMenuItem<String>(
+                      value: _selectedMaChuyenNganh!,
+                      child: Text(
+                        _selectedMaChuyenNganh!,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+
+                final effectiveValue = (_selectedMaChuyenNganh != null && seen.contains(_selectedMaChuyenNganh))
+                    ? _selectedMaChuyenNganh
+                    : null;
+
+                return DropdownButtonFormField<String>(
+                  key: ValueKey('chuyen_nganh_${effectiveValue ?? "none"}'),
+                  value: effectiveValue,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Chuyên ngành đào tạo *',
+                    prefixIcon: Icon(Icons.book, size: 18),
+                    border: OutlineInputBorder(),
+                    isDense: true,
                   ),
+                  items: items,
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedMaChuyenNganh = val;
+                    });
+                  },
                 );
-              }).toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedMaChuyenNganh = val;
-                });
               },
             ),
             const SizedBox(height: 10),

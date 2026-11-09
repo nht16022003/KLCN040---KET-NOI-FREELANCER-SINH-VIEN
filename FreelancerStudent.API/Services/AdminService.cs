@@ -80,6 +80,16 @@ namespace FreelancerStudent.API.Services
             return _adminRepo.XuLyYeuCauRutTienAsync(request);
         }
 
+        public Task<List<AdminYeuCauNapTienItemDTO>> LayDanhSachYeuCauNapTienAsync(string? trangThai)
+        {
+            return _adminRepo.LayDanhSachYeuCauNapTienAsync(trangThai);
+        }
+
+        public Task<bool> XuLyYeuCauNapTienAsync(AdminXuLyNapTienRequestDTO request)
+        {
+            return _adminRepo.XuLyYeuCauNapTienAsync(request);
+        }
+
         public Task<List<AdminCauHinhPhiDTO>> LayDanhSachCauHinhPhiAsync()
         {
             return _adminRepo.LayDanhSachCauHinhPhiAsync();

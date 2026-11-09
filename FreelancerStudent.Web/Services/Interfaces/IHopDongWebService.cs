@@ -21,7 +21,7 @@ namespace FreelancerStudent.Web.Services.Interfaces
 
         Task<HopDongViewModel?> LayChiTietTheoJobAsync(string maJob);
 
-        Task<HopDongViewModel?> LayChiTietTheoMaAsync(string maHD);
+        Task<HopDongViewModel?> LayChiTietTheoMaAsync(string maHD, int? maUser = null);
 
         Task<ApiReponse<bool>> XacNhanHopDongAsync(
             string maHD,

@@ -3,53 +3,37 @@
     ViewData["Title"] = "Khóa và Mở khóa Tài khoản";
 }
 
-<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
-    <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb small mb-1">
-                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Khóa và Mở khóa Tài khoản</li>
-                </ol>
-            </nav>
-            <h3 class="fw-bold text-dark mb-1">Khóa và Mở khóa Tài khoản Người dùng</h3>
-            <p class="text-muted small mb-0">Thực thi chế tài kỷ luật, tạm dừng tài khoản vi phạm hoặc khôi phục hoạt động sau khi kiểm tra khiếu nại.</p>
-        </div>
-        <div>
-            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-0 px-3">
-                Danh sách người dùng
-            </a>
-        </div>
-    </div>
+<div class="container-fluid px-3 px-md-4 py-3" style="background-color: #F8FAFC; min-height: 85vh;">
+    
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
 
-    <div class="row g-4">
-        <!-- Form Action -->
+    <!-- Bố cục 2 cột: Biểu mẫu xử lý và Nhật ký kiểm toán -->
+    <div class="row g-3">
+        <!-- Cột trái: Biểu mẫu thực thi -->
         <div class="col-12 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-0 bg-white p-4">
-                <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Thiết lập Trạng thái Tài khoản</h5>
+            <div class="border bg-white p-3 h-100">
                 
+
                 <form method="post" asp-action="XuLyTaiKhoan">
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Chọn Người dùng cần xử lý <span class="text-danger">*</span></label>
-                        <select asp-for="XuLyModel.MaUser" class="form-select bg-light rounded-0">
+                        <label class="form-label small fw-semibold text-dark mb-1">Tài khoản cần xử lý <span class="text-danger">*</span></label>
+                        <select asp-for="XuLyModel.MaUser" class="form-select form-select-sm">
                             @foreach (var u in Model.DanhSachTaiKhoan)
                             {
                                 <option value="@u.MaUser">
@@ -61,17 +45,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Hành động áp dụng <span class="text-danger">*</span></label>
-                        <div class="d-flex gap-3">
+                        <label class="form-label small fw-semibold text-dark mb-1">Hành động áp dụng <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-3 pt-1">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" asp-for="XuLyModel.HanhDong" id="actLock" value="KHOA_TAI_KHOAN" checked />
-                                <label class="form-check-label text-danger fw-semibold" for="actLock">
+                                <label class="form-check-label text-danger fw-semibold small" for="actLock">
                                     Khóa tài khoản
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" asp-for="XuLyModel.HanhDong" id="actUnlock" value="MO_KHOA_TAI_KHOAN" />
-                                <label class="form-check-label text-success fw-semibold" for="actUnlock">
+                                <label class="form-check-label text-success fw-semibold small" for="actUnlock">
                                     Mở khóa tài khoản
                                 </label>
                             </div>
@@ -79,36 +63,36 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Lý do xử lý (Lưu vào hồ sơ kiểm toán) <span class="text-danger">*</span></label>
-                        <textarea asp-for="XuLyModel.LyDo" class="form-control bg-light rounded-0" rows="4" placeholder="Nhập căn cứ, điều khoản vi phạm hoặc lý do khôi phục tài khoản..."></textarea>
+                        <label class="form-label small fw-semibold text-dark mb-1">Lý do xử lý  <span class="text-danger">*</span></label>
+                        <textarea asp-for="XuLyModel.LyDo" class="form-control form-control-sm" rows="3" placeholder="Nhập căn cứ vi phạm hoặc lý do khôi phục hoạt động tài khoản..."></textarea>
                         <span asp-validation-for="XuLyModel.LyDo" class="text-danger small"></span>
                     </div>
 
-                    <div class="p-3 bg-light rounded-0 mb-3 small text-muted">
-                        Khi khóa tài khoản, người dùng sẽ không thể đăng tin tuyển dụng, nộp hồ sơ xin việc hoặc tạo hợp đồng mới.
+                    <div class="border bg-light p-2 mb-3 small text-muted">
+                        Tài khoản sẽ bị khóa .
                     </div>
 
-                    <button type="submit" class="btn btn-danger w-100 rounded-0 py-2 fw-semibold">
-                        Xác nhận Thực thi Xử lý
+                    <button type="submit" class="btn btn-sm btn-danger w-100 py-2 fw-semibold">
+                        Xác nhận thực hiện
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- Audit Log History -->
+        <!-- Cột phải: Lịch sử xử lý -->
         <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-0 bg-white p-4">
-                <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Lịch sử Xử lý Tài khoản</h5>
-                
+            <div class="border bg-white p-3 h-100">
+                <h2 class="h6 fw-bold text-dark mb-3 pb-2 border-bottom">Nhật ký xử lý tài khoản</h2>
+
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-bordered table-hover align-middle mb-0">
                         <thead class="table-light text-muted small">
                             <tr>
-                                <th>Mã LS</th>
+                                <th style="width: 70px;">Mã LS</th>
                                 <th>Người dùng</th>
-                                <th>Hành động</th>
+                                <th style="width: 100px;">Hành động</th>
                                 <th>Lý do</th>
-                                <th>Admin xử lý</th>
+                                <th>Quản trị viên</th>
                                 <th>Thời gian</th>
                             </tr>
                         </thead>
@@ -116,7 +100,7 @@
                             @if (!Model.LichSuXuLys.Any())
                             {
                                 <tr>
-                                    <td colspan="6" class="text-center py-4 text-muted">Chưa có lịch sử xử lý tài khoản nào trong hệ thống.</td>
+                                    <td colspan="6" class="text-center py-4 text-muted small">Chưa có lịch sử xử lý tài khoản nào trong hệ thống.</td>
                                 </tr>
                             }
                             else
@@ -124,9 +108,9 @@
                                 @foreach (var ls in Model.LichSuXuLys)
                                 {
                                     <tr>
-                                        <td class="fw-bold text-dark small">#@ls.MaLichSu</td>
+                                        <td class="small fw-bold text-dark">#@ls.MaLichSu</td>
                                         <td class="small">
-                                            ID: <span class="fw-bold">#@ls.MaUser</span> @(string.IsNullOrWhiteSpace(ls.TenUser) ? "" : $"({ls.TenUser})")
+                                            <span class="fw-bold">#@ls.MaUser</span> @(string.IsNullOrWhiteSpace(ls.TenUser) ? "" : $"({ls.TenUser})")
                                         </td>
                                         <td>
                                             @if (ls.HanhDong == "KHOA_TAI_KHOAN")

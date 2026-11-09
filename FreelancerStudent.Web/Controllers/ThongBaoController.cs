@@ -48,5 +48,15 @@ namespace FreelancerStudent.Web.Controllers
             await _service.DanhDauTatCaDaDocAsync(maUser.Value);
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DemChuaDoc()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+                return Json(new { success = false, data = 0 });
+            var result = await _service.DemChuaDocAsync(maUser.Value);
+            return Json(new { success = result.success, data = result.data });
+        }
     }
 }

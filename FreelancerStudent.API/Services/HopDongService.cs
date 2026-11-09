@@ -164,23 +164,91 @@ namespace FreelancerStudent.API.Services
                 }
             }
 
-            if (donUngTuyen == null)
-            {
-                throw new InvalidOperationException("Không tìm thấy đơn ứng tuyển tương ứng với Freelancer và công việc này.");
-            }
+            UngThue? yeuCauThue = null;
 
-            if (donUngTuyen.maJob != request.maJob ||
-                donUngTuyen.maFreelancerStudent != request.maFreelancerStudent)
+            if (donUngTuyen != null)
             {
-                throw new InvalidOperationException(
-                    "Đơn ứng tuyển không thuộc công việc hoặc Freelancer đã chọn.");
-            }
+                // ==================== LUỒNG A: TẠO HỢP ĐỒNG TỪ ĐƠN ỨNG TUYỂN ====================
+                if (donUngTuyen.maJob != request.maJob ||
+                    donUngTuyen.maFreelancerStudent != request.maFreelancerStudent)
+                {
+                    throw new InvalidOperationException(
+                        "Đơn ứng tuyển không thuộc công việc hoặc Freelancer đã chọn.");
+                }
 
-            if (donUngTuyen.trangThaiUngTuyen != "ChapNhan")
+                if (donUngTuyen.trangThaiUngTuyen != "ChapNhan")
+                {
+                    // Nếu đơn ứng tuyển từng bị đổi sang TuChoi do code cũ, tự động phục hồi về ChapNhan
+                    donUngTuyen.trangThaiUngTuyen = "ChapNhan";
+                    await _context.SaveChangesAsync();
+                }
+            }
+            else
             {
-                // Nếu đơn ứng tuyển từng bị đổi sang TuChoi do code cũ, tự động phục hồi về ChapNhan
-                donUngTuyen.trangThaiUngTuyen = "ChapNhan";
-                await _context.SaveChangesAsync();
+                // ==================== LUỒNG B: TẠO HỢP ĐỒNG TỪ DIRECT HIRE (YÊU CẦU THUÊ) ====================
+                if (request.maYeuCauThue.HasValue && request.maYeuCauThue.Value > 0)
+                {
+                    yeuCauThue = await _context.UngThues
+                        .Include(y => y.NhaTuyenDung)
+                        .FirstOrDefaultAsync(y => y.maYeuCau == request.maYeuCauThue.Value);
+                }
+                else
+                {
+                    // Tìm yêu cầu thuê theo Job và Freelancer
+                    yeuCauThue = await _context.UngThues
+                        .Include(y => y.NhaTuyenDung)
+                        .OrderByDescending(y => y.ngayGui)
+                        .FirstOrDefaultAsync(y => y.maJob == request.maJob && y.maFreelancerStudent == request.maFreelancerStudent);
+                }
+
+                if (yeuCauThue == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy đơn ứng tuyển hoặc yêu cầu thuê hợp lệ tương ứng với Freelancer và công việc này.");
+                }
+
+                // 1. Kiểm tra yêu cầu thuê thuộc đúng Nhà tuyển dụng đang đăng nhập
+                if (yeuCauThue.NhaTuyenDung == null || yeuCauThue.NhaTuyenDung.maUser != maUserNTD.Value)
+                {
+                    throw new UnauthorizedAccessException("Yêu cầu thuê không thuộc quyền sở hữu của Nhà tuyển dụng này.");
+                }
+
+                // 2. Kiểm tra Freelancer được liên kết đúng với yêu cầu thuê
+                if (yeuCauThue.maFreelancerStudent != request.maFreelancerStudent)
+                {
+                    throw new InvalidOperationException("Freelancer trong hợp đồng không khớp với thông tin ứng viên trong yêu cầu thuê.");
+                }
+
+                // 3. Kiểm tra bài đăng tuyển dụng được liên kết đúng với yêu cầu thuê
+                if (yeuCauThue.maJob != request.maJob)
+                {
+                    throw new InvalidOperationException("Yêu cầu thuê không liên kết với bài đăng tuyển dụng đã chọn.");
+                }
+
+                // 4. Kiểm tra trạng thái yêu cầu thuê của Freelancer
+                if (string.Equals(yeuCauThue.trangThai, "ChoPhanHoi", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("Freelancer chưa chấp nhận yêu cầu thuê này. Bạn chỉ có thể tạo hợp đồng sau khi Freelancer đồng ý.");
+                }
+                if (string.Equals(yeuCauThue.trangThai, "DaTuChoi", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(yeuCauThue.trangThai, "TuChoi", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("Freelancer đã từ chối yêu cầu thuê này, không thể tạo hợp đồng.");
+                }
+                if (string.Equals(yeuCauThue.trangThai, "DaHuy", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("Yêu cầu thuê này đã bị hủy, không thể tạo hợp đồng.");
+                }
+                if (!string.Equals(yeuCauThue.trangThai, "DaChapNhan", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(yeuCauThue.trangThai, "DaTaoHopDong", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"Yêu cầu thuê đang ở trạng thái '{yeuCauThue.trangThai}', không đủ điều kiện để tạo hợp đồng.");
+                }
+
+                // 5. Kiểm tra bài đăng vẫn đủ điều kiện
+                if (job.status == "DaHoanThanh" || job.status == "DaDong" || job.status == "DaHuy")
+                {
+                    throw new InvalidOperationException("Bài đăng tuyển dụng này đã đóng hoặc hoàn thành, không thể tạo hợp đồng mới.");
+                }
             }
 
             // Kiểm tra Freelancer
@@ -256,6 +324,12 @@ namespace FreelancerStudent.API.Services
 
             var hopDongMoi = await _repository.TaoHopDongAsync(hopDong, giaiDoans, request.maUngTuyen, thongBao);
 
+            if (yeuCauThue != null && yeuCauThue.trangThai != "DaTaoHopDong")
+            {
+                yeuCauThue.trangThai = "DaTaoHopDong";
+                await _context.SaveChangesAsync();
+            }
+
             if (job.status == "DangTuyen")
             {
                 job.status = "DaTuyenDu";
@@ -265,12 +339,29 @@ namespace FreelancerStudent.API.Services
             return MapToResponseDTO(hopDongMoi);
         }
 
-        public async Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaAsync(string maHD)
+        public async Task<HopDongResponseDTO?> LayChiTietHopDongTheoMaAsync(string maHD, int? maUser = null)
         {
             if (string.IsNullOrWhiteSpace(maHD)) return null;
 
             var hopDong = await _repository.LayChiTietHopDongTheoMaAsync(maHD);
             if (hopDong == null) return null;
+
+            // Kiểm tra quyền sở hữu nếu có maUser
+            if (maUser.HasValue && maUser.Value > 0)
+            {
+                var maUserFL = hopDong.FreelancerStudent?.User?.maUser ?? hopDong.FreelancerStudent?.maUser;
+                var maUserNTD = hopDong.JobPost?.NhaTuyenDung?.User?.maUser ?? hopDong.JobPost?.NhaTuyenDung?.maUser;
+
+                bool laNguoiLienQuan = (maUser.Value == maUserFL || maUser.Value == maUserNTD);
+                if (!laNguoiLienQuan)
+                {
+                    bool laAdmin = await _context.Admins.AnyAsync(a => a.maUser == maUser.Value);
+                    if (!laAdmin)
+                    {
+                        throw new UnauthorizedAccessException("Bạn không có quyền xem thông tin hợp đồng này.");
+                    }
+                }
+            }
 
             var dto = MapToResponseDTO(hopDong);
 

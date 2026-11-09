@@ -227,5 +227,21 @@ namespace FreelancerStudent.API.Services
         {
             await _giaoDichNapTienRepository.xuLyNapTienSePayAsync(maGiaoDich, soTien, maGiaoDichNganHang);
         }
+
+        // =====================================================
+        // CẬP NHẬT ẢNH BIÊN LAI MINH CHỨNG NẠP TIỀN
+        // =====================================================
+        public async Task<bool> capNhatAnhBienLaiAsync(string maGiaoDich, string anhBienLaiUrl)
+        {
+            var giaoDich = await _giaoDichNapTienRepository.layGiaoDichTheoMaAsync(maGiaoDich);
+            if (giaoDich == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy giao dịch nạp tiền.");
+            }
+
+            giaoDich.maGiaoDichNganHang = anhBienLaiUrl;
+            await _giaoDichNapTienRepository.capNhatGiaoDichAsync(giaoDich);
+            return true;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using FreelancerStudent.API.Data;
+using FreelancerStudent.API.DTOs.RequestDTOs;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,71 @@ namespace FreelancerStudent.API.Repositories
             return await _context.NhaTuyenDungs
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.maNhaTuyenDung == maNhaTuyenDung);
+        }
+
+        public async Task<bool> capNhatThongTinNTDAsync(CapNhatThongTinNhaTuyenDung_RequestDTO dto)
+        {
+            var ntd = await _context.NhaTuyenDungs
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.maUser == dto.maUser);
+
+            if (ntd == null)
+            {
+                return false;
+            }
+
+            ntd.tencongty = dto.tencongty;
+            ntd.linhvuc = dto.linhvuc;
+            ntd.diachi = dto.diachi;
+            ntd.link = dto.link;
+
+            if (ntd.User != null)
+            {
+                if (!string.IsNullOrWhiteSpace(dto.hotenNguoiDaiDien))
+                {
+                    ntd.User.hotenUser = dto.hotenNguoiDaiDien;
+                }
+                ntd.User.sdtUser = dto.sdtLienHe;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> capNhatGioiThieuNTDAsync(int maUser, string? gioithieu)
+        {
+            var ntd = await _context.NhaTuyenDungs
+                .FirstOrDefaultAsync(x => x.maUser == maUser);
+
+            if (ntd == null)
+            {
+                return false;
+            }
+
+            ntd.gioithieu = gioithieu;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> capNhatLogoNTDAsync(int maUser, string logoUrl)
+        {
+            var ntd = await _context.NhaTuyenDungs
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.maUser == maUser);
+
+            if (ntd == null)
+            {
+                return false;
+            }
+
+            ntd.logo = logoUrl;
+            if (ntd.User != null)
+            {
+                ntd.User.avatarUrl = logoUrl;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

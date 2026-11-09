@@ -3,111 +3,96 @@
     ViewData["Title"] = "Duyệt Yêu cầu Rút tiền";
 }
 
-<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
-    <!-- Breadcrumb & Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb small mb-1">
-                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Duyệt Yêu cầu Rút tiền</li>
-                </ol>
-            </nav>
-            <h3 class="fw-bold text-dark mb-1">Duyệt và Xử lý Yêu cầu Rút tiền</h3>
-            <p class="text-muted small mb-0">Kiểm tra thông tin tài khoản ngân hàng thụ hưởng, xác nhận giải ngân hoặc từ chối hoàn tiền về ví người dùng.</p>
-        </div>
-        <div class="d-flex gap-2 mt-2 mt-md-0">
-            <a href="/Admin/DieuChinhSoDu" class="btn btn-outline-warning btn-sm rounded-0 px-3 text-dark fw-semibold">
-                Điều chỉnh số dư ví
-            </a>
-            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm rounded-0 px-3">
-                Quản lý người dùng
-            </a>
-        </div>
-    </div>
+<div class="container-fluid px-3 px-md-4 py-3" style="background-color: #F8FAFC; min-height: 85vh;">
+   
 
-    <!-- Alert / Toast -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show rounded-0 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
 
-    <!-- Stat KPI Cards -->
-    <div class="row g-3 mb-4">
+    <!-- Thống kê trạng thái yêu cầu rút tiền -->
+    <div class="row g-3 mb-3">
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-0 p-3 bg-white h-100 border-start border-warning border-4">
-                <span class="text-muted small fw-semibold text-uppercase">Chờ Quản trị duyệt</span>
-                <h3 class="fw-bold text-warning mt-2 mb-0">@Model.TongSoChoXuLy <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
-                <div class="small text-muted mt-2 pt-2 border-top">Tổng tiền chờ giải ngân: <strong class="text-dark">@Model.TongTienChoXuLy.ToString("N0") VNĐ</strong></div>
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Chờ quản trị duyệt</span>
+                <div class="h4 fw-bold text-warning mb-1">@Model.TongSoChoXuLy <span class="fs-6 fw-normal text-muted">yêu cầu</span></div>
+                <div class="small text-muted pt-2 border-top">
+                    Tổng tiền chờ giải ngân: <strong class="text-dark">@Model.TongTienChoXuLy.ToString("N0") VNĐ</strong>
+                </div>
             </div>
         </div>
 
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-0 p-3 bg-white h-100 border-start border-success border-4">
-                <span class="text-muted small fw-semibold text-uppercase">Đã duyệt giải ngân</span>
-                <h3 class="fw-bold text-success mt-2 mb-0">@Model.TongSoHoanThanh <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
-                <div class="small text-muted mt-2 pt-2 border-top">Đã tất toán chuyển khoản ngân hàng</div>
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Đã duyệt giải ngân</span>
+                <div class="h4 fw-bold text-success mb-1">@Model.TongSoHoanThanh <span class="fs-6 fw-normal text-muted">yêu cầu</span></div>
+                <div class="small text-muted pt-2 border-top">
+                    Đã hoàn tất chuyển khoản ngân hàng
+                </div>
             </div>
         </div>
 
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-0 p-3 bg-white h-100 border-start border-danger border-4">
-                <span class="text-muted small fw-semibold text-uppercase">Bị từ chối / Hủy</span>
-                <h3 class="fw-bold text-danger mt-2 mb-0">@Model.TongSoTuChoi <span class="fs-6 fw-normal text-muted">yêu cầu</span></h3>
-                <div class="small text-muted mt-2 pt-2 border-top">Tiền đã hoàn lại ví khả dụng người dùng</div>
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Từ chối / Đã hoàn tiền</span>
+                <div class="h4 fw-bold text-danger mb-1">@Model.TongSoTuChoi <span class="fs-6 fw-normal text-muted">yêu cầu</span></div>
+                <div class="small text-muted pt-2 border-top">
+                    Tiền đã hoàn lại số dư khả dụng ví
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Filter Pills Navigation -->
+    <!-- Bộ lọc trạng thái -->
     <div class="d-flex flex-wrap gap-2 mb-3">
         <a href="/Admin/DuyetRutTien?trangThai=ChoXuLy" 
-           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "ChoXuLy" ? "btn-warning text-dark shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm px-3 fw-semibold @(Model.CurrentFilter == "ChoXuLy" ? "btn-warning text-dark" : "btn-outline-secondary bg-white")">
             Chờ xử lý (@Model.TongSoChoXuLy)
         </a>
         <a href="/Admin/DuyetRutTien?trangThai=TatCa" 
-           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "TatCa" ? "btn-dark shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm px-3 fw-semibold @(Model.CurrentFilter == "TatCa" ? "btn-dark" : "btn-outline-secondary bg-white")">
             Tất cả (@(Model.TongSoChoXuLy + Model.TongSoHoanThanh + Model.TongSoTuChoi))
         </a>
         <a href="/Admin/DuyetRutTien?trangThai=HoanThanh" 
-           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "HoanThanh" ? "btn-success shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm px-3 fw-semibold @(Model.CurrentFilter == "HoanThanh" ? "btn-success" : "btn-outline-secondary bg-white")">
             Đã hoàn thành (@Model.TongSoHoanThanh)
         </a>
         <a href="/Admin/DuyetRutTien?trangThai=TuChoi" 
-           class="btn btn-sm rounded-0 px-3 fw-semibold @(Model.CurrentFilter == "TuChoi" ? "btn-danger shadow-sm" : "btn-outline-secondary bg-white")">
+           class="btn btn-sm px-3 fw-semibold @(Model.CurrentFilter == "TuChoi" ? "btn-danger" : "btn-outline-secondary bg-white")">
             Từ chối (@Model.TongSoTuChoi)
         </a>
     </div>
 
-    <!-- Table of Requests -->
-    <div class="card border-0 shadow-sm rounded-0 bg-white overflow-hidden">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold text-dark mb-0">Danh sách Yêu cầu Rút tiền</h5>
+    <!-- Bảng danh sách yêu cầu -->
+    <div class="border bg-white p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <h2 class="h6 fw-bold text-dark mb-0">Danh sách yêu cầu rút tiền</h2>
             <span class="text-muted small">Hiển thị @Model.DanhSachYeuCau.Count bản ghi</span>
         </div>
 
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-bordered table-hover align-middle mb-0">
                 <thead class="table-light text-muted small">
                     <tr>
                         <th style="width: 70px;">Mã</th>
                         <th>Người rút tiền</th>
-                        <th>Số tiền rút</th>
+                        <th style="width: 140px;">Số tiền rút</th>
                         <th>Thông tin thụ hưởng</th>
-                        <th>Ngày yêu cầu</th>
-                        <th>Trạng thái</th>
+                        <th style="width: 130px;">Ngày yêu cầu</th>
+                        <th style="width: 120px;">Trạng thái</th>
                         <th>Thông tin xử lý</th>
-                        <th class="text-end" style="width: 200px;">Thao tác</th>
+                        <th class="text-end" style="width: 190px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,23 +101,23 @@
                         @foreach (var item in Model.DanhSachYeuCau)
                         {
                             <tr>
-                                <td class="fw-bold text-dark">#@item.MaRutTien</td>
-                                <td>
+                                <td class="small fw-bold text-dark">#@item.MaRutTien</td>
+                                <td class="small">
                                     <div class="fw-bold text-dark">@item.HoTenUser</div>
-                                    <div class="small text-muted">
-                                        <span class="badge bg-light text-secondary border small me-1">@item.RoleName</span>
+                                    <div class="text-muted">
+                                        <span class="badge bg-light text-secondary border me-1">@item.RoleName</span>
                                         Ví #@item.MaWallet
                                     </div>
-                                    <div class="small text-muted">@item.EmailUser @(!string.IsNullOrEmpty(item.SdtUser) ? $"• {item.SdtUser}" : "")</div>
+                                    <div class="text-muted">@item.EmailUser @(!string.IsNullOrEmpty(item.SdtUser) ? $"• {item.SdtUser}" : "")</div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold fs-6 text-danger">@item.SoTienRut.ToString("N0") VNĐ</div>
-                                    <div class="small text-muted">Đóng băng ví: @item.SoDuDongBangVi.ToString("N0") VNĐ</div>
+                                    <div class="small fw-bold text-danger">@item.SoTienRut.ToString("N0") đ</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Đóng băng: @item.SoDuDongBangVi.ToString("N0") đ</div>
                                 </td>
-                                <td>
+                                <td class="small">
                                     <div class="fw-bold text-primary">@item.TenNganHang</div>
-                                    <div class="small font-monospace fw-bold text-dark">@item.SoTaiKhoan</div>
-                                    <div class="small text-uppercase text-muted">@item.TenChuTaiKhoan</div>
+                                    <div class="font-monospace text-dark">@item.SoTaiKhoan</div>
+                                    <div class="text-muted text-uppercase" style="font-size: 0.75rem;">@item.TenChuTaiKhoan</div>
                                 </td>
                                 <td class="small text-muted">
                                     @(item.NgayYeuCau?.ToString("dd/MM/yyyy HH:mm") ?? "-")
@@ -140,21 +125,15 @@
                                 <td>
                                     @if (item.TrangThai == "ChoXuLy")
                                     {
-                                        <span class="badge bg-light text-warning border border-warning px-2 py-1">
-                                            Chờ xử lý
-                                        </span>
+                                        <span class="badge bg-light text-warning border border-warning px-2 py-1">Chờ xử lý</span>
                                     }
                                     else if (item.TrangThai == "HoanThanh")
                                     {
-                                        <span class="badge bg-light text-success border border-success px-2 py-1">
-                                            Đã hoàn thành
-                                        </span>
+                                        <span class="badge bg-light text-success border border-success px-2 py-1">Đã duyệt</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-light text-danger border border-danger px-2 py-1">
-                                            Từ chối
-                                        </span>
+                                        <span class="badge bg-light text-danger border border-danger px-2 py-1">Từ chối</span>
                                     }
                                 </td>
                                 <td class="small">
@@ -167,40 +146,44 @@
                                         }
                                         @if (!string.IsNullOrEmpty(item.LyDoTuChoi))
                                         {
-                                            <div class="text-danger small mt-1">Lý do: @item.LyDoTuChoi</div>
+                                            <div class="text-danger mt-1">Lý do: @item.LyDoTuChoi</div>
                                         }
                                     }
                                     else
                                     {
-                                        <span class="text-muted fst-italic">Đang chờ Admin</span>
+                                        <span class="text-muted fst-italic">Đang chờ xử lý</span>
                                     }
                                 </td>
                                 <td class="text-end">
-                                    @if (item.TrangThai == "ChoXuLy")
-                                    {
-                                        <div class="d-inline-flex gap-1">
-                                            <!-- Nút Duyệt giải ngân -->
+                                    <div class="d-inline-flex gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-primary px-2 py-1"
+                                                onclick="openVietQrModal('@item.TenNganHang', '@item.SoTaiKhoan', '@item.TenChuTaiKhoan', @item.SoTienRut, @item.MaRutTien, '@item.HoTenUser')"
+                                                title="Quét mã VietQR chuyển tiền">
+                                            Quét QR
+                                        </button>
+
+                                        @if (item.TrangThai == "ChoXuLy")
+                                        {
                                             <form method="post" asp-action="XuLyRutTien" class="d-inline"
-                                                  onsubmit="return confirm('Xác nhận duyệt giải ngân @item.SoTienRut.ToString("N0") VNĐ cho @item.HoTenUser về tài khoản @item.TenNganHang (@item.SoTaiKhoan)?');">
+                                                  onsubmit="return confirm('Xác nhận đã chuyển khoản thành công @item.SoTienRut.ToString("N0") VNĐ cho @item.HoTenUser về tài khoản @item.TenNganHang (@item.SoTaiKhoan)?');">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="MaRutTien" value="@item.MaRutTien" />
                                                 <input type="hidden" name="ChapNhan" value="true" />
-                                                <button type="submit" class="btn btn-success btn-sm px-2 py-1 rounded-2 shadow-sm" title="Duyệt giải ngân">
+                                                <button type="submit" class="btn btn-sm btn-success px-2 py-1" title="Xác nhận giải ngân">
                                                     Duyệt
                                                 </button>
                                             </form>
 
-                                            <!-- Nút Từ chối -->
-                                            <button type="button" class="btn btn-outline-danger btn-sm px-2 py-1 rounded-2"
+                                            <button type="button" class="btn btn-sm btn-outline-danger px-2 py-1"
                                                     onclick="openTuChoiModal(@item.MaRutTien, '@item.HoTenUser', '@item.SoTienRut.ToString("N0")')">
                                                 Từ chối
                                             </button>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-light text-muted border px-2 py-1 small">Đã giải quyết</span>
-                                    }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted border px-2 py-1 small align-self-center">Đã giải quyết</span>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -208,7 +191,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-4 text-muted small">
                                 Không có yêu cầu rút tiền nào trong bộ lọc này.
                             </td>
                         </tr>
@@ -222,41 +205,108 @@
 <!-- Modal Từ Chối Yêu Cầu Rút Tiền -->
 <div class="modal fade" id="tuChoiModal" tabindex="-1" aria-labelledby="tuChoiModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-3 border-0 shadow">
-            <div class="modal-header border-bottom py-3">
-                <h5 class="modal-title fw-bold text-danger" id="tuChoiModalLabel">
-                    Từ chối Yêu cầu Rút tiền
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border">
+            <div class="modal-header border-bottom py-2">
+                <h2 class="h6 modal-title fw-bold text-danger mb-0" id="tuChoiModalLabel">
+                    Từ chối yêu cầu rút tiền
+                </h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <form method="post" asp-action="XuLyRutTien">
                 @Html.AntiForgeryToken()
-                <div class="modal-body p-4">
+                <div class="modal-body p-3">
                     <input type="hidden" name="MaRutTien" id="modalMaRutTien" value="" />
                     <input type="hidden" name="ChapNhan" value="false" />
 
-                    <div class="alert alert-light border small text-muted mb-3">
-                        Bạn đang từ chối yêu cầu rút tiền <strong id="modalInfoUser" class="text-dark"></strong> với số tiền <strong id="modalInfoSoTien" class="text-danger"></strong>.
-                        Toàn bộ số tiền này sẽ lập tức được hoàn trả về số dư khả dụng của ví người dùng.
+                    <div class="border bg-light p-2 small text-muted mb-3">
+                        Từ chối yêu cầu rút tiền <strong id="modalInfoUser" class="text-dark"></strong> số tiền <strong id="modalInfoSoTien" class="text-danger"></strong>. Tiền sẽ được hoàn trả về số dư khả dụng ví người dùng.
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Lý do từ chối <span class="text-danger">*</span></label>
-                        <textarea name="LyDoTuChoi" class="form-control" rows="3" required
-                                  placeholder="Ví dụ: Sai tên chủ tài khoản thụ hưởng, số tài khoản không tồn tại, v.v..."></textarea>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-dark mb-1">Lý do từ chối <span class="text-danger">*</span></label>
+                        <textarea name="LyDoTuChoi" class="form-control form-control-sm" rows="3" required
+                                  placeholder="Ví dụ: Sai tên chủ tài khoản thụ hưởng, số tài khoản không đúng..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-top py-2">
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-0 px-3" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-danger btn-sm rounded-0 px-4 shadow-sm">Xác nhận Từ chối</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-sm btn-danger px-3">Xác nhận từ chối</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Modal Quét Mã VietQR Chuyển Tiền -->
+<div class="modal fade" id="vietQrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border">
+            <div class="modal-header border-bottom py-2">
+                <h2 class="h6 modal-title fw-bold text-dark mb-0">
+                    Mã VietQR chuyển tiền - <span id="qrModalMaRut" class="text-primary font-monospace"></span>
+                </h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-3 text-center">
+                <div class="border bg-light p-2 small text-muted mb-3 text-start">
+                    Quét mã QR bằng ứng dụng ngân hàng để chuyển khoản chính xác tới người dùng trước khi bấm duyệt.
+                </div>
+
+                <div class="p-2 border bg-white d-inline-block mb-3">
+                    <img id="vietQrImage" src="" alt="Mã VietQR" class="img-fluid" style="width: 240px; height: 240px; object-fit: contain;" />
+                </div>
+
+                <div class="text-start small p-2 bg-light border">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Người thụ hưởng:</span>
+                        <strong id="qrInfoUser" class="text-dark"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Ngân hàng:</span>
+                        <strong id="qrInfoBank" class="text-primary"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Số tài khoản:</span>
+                        <strong id="qrInfoAccount" class="text-dark font-monospace"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Chủ tài khoản:</span>
+                        <strong id="qrInfoOwner" class="text-dark text-uppercase"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top">
+                        <span class="text-muted">Số tiền giải ngân:</span>
+                        <strong id="qrInfoAmount" class="text-danger fw-bold"></strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top py-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        function openVietQrModal(bank, account, owner, amount, maRut, userName) {
+            document.getElementById('qrModalMaRut').textContent = '#' + maRut;
+            document.getElementById('qrInfoUser').textContent = userName;
+            document.getElementById('qrInfoBank').textContent = bank;
+            document.getElementById('qrInfoAccount').textContent = account;
+            document.getElementById('qrInfoOwner').textContent = owner;
+            document.getElementById('qrInfoAmount').textContent = Number(amount).toLocaleString('vi-VN') + ' VNĐ';
+
+            var cleanBank = encodeURIComponent(bank.replace(/\s+/g, ''));
+            var cleanAccount = encodeURIComponent(account.replace(/\s+/g, ''));
+            var cleanOwner = encodeURIComponent(owner);
+            var qrUrl = 'https://img.vietqr.io/image/' + cleanBank + '-' + cleanAccount + '-compact2.png?amount=' + amount + '&addInfo=RUTTIEN_' + maRut + '&accountName=' + cleanOwner;
+
+            document.getElementById('vietQrImage').src = qrUrl;
+
+            var modal = new bootstrap.Modal(document.getElementById('vietQrModal'));
+            modal.show();
+        }
+
         function openTuChoiModal(maRutTien, hoTen, soTien) {
             document.getElementById('modalMaRutTien').value = maRutTien;
             document.getElementById('modalInfoUser').textContent = '#' + maRutTien + ' (' + hoTen + ')';

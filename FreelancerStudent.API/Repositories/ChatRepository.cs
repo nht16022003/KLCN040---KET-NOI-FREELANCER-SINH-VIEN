@@ -55,7 +55,7 @@ namespace FreelancerStudent.API.Repositories
                 .Include(p => p.JobPost)
                 .FirstOrDefaultAsync(p => p.maUserClient == maUserClient
                                        && p.maFreelancerStudent == maFreelancerStudent
-                                       && (string.IsNullOrEmpty(maJob) || p.maJob == maJob));
+                                       && (string.IsNullOrEmpty(maJob) ? (p.maJob == null || p.maJob == "") : p.maJob == maJob));
             if (phongHienTai != null)
             {
                 return phongHienTai;
@@ -146,6 +146,33 @@ namespace FreelancerStudent.API.Repositories
             }
         }
 
-    }
+        // Lấy danh sách tin nhắn có đính kèm file trong phòng chat
+        public async Task<List<TinNhanChat>> LayDanhSachFileTheoPhongChatAsync(int maPhongChat)
+        {
+            return await _context.TinNhanChats
+                .Include(t => t.NguoiGui)
+                .Where(t => t.maPhongChat == maPhongChat && !string.IsNullOrEmpty(t.fileDinhKem))
+                .OrderByDescending(t => t.ngayGui)
+                .ToListAsync();
+        }
 
+        // Đếm tổng số tin nhắn chưa đọc gửi tới maUser
+        public async Task<int> DemTinNhanChuaDocAsync(int maUser)
+        {
+            if (maUser <= 0) return 0;
+
+            var freelancer = await _context.FreelancerStudents.FirstOrDefaultAsync(f => f.maUser == maUser);
+            int maFree = freelancer?.maFreelancerStudents ?? 0;
+
+            var phongIds = await _context.PhongChats
+                .Where(p => p.maUserClient == maUser || (maFree > 0 && p.maFreelancerStudent == maFree))
+                .Select(p => p.maPhongChat)
+                .ToListAsync();
+
+            if (!phongIds.Any()) return 0;
+
+            return await _context.TinNhanChats
+                .CountAsync(t => phongIds.Contains(t.maPhongChat) && t.maNguoiGui != maUser && !t.daDoc);
+        }
+    }
 }

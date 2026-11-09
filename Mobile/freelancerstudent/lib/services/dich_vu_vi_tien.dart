@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
 import '../core/network/phan_hoi_api.dart';
@@ -64,6 +66,80 @@ class WalletService {
       return ApiResponse<Map<String, dynamic>>(
         isSuccess: false,
         message: 'Lỗi tạo giao dịch nạp tiền: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Tải ảnh biên lai minh chứng nạp tiền (POST api/GiaoDichNapTien/UploadBienLai/{maGiaoDich})
+  Future<ApiResponse<String>> uploadBienLaiNapTien(
+    String maGiaoDich,
+    File file,
+  ) async {
+    try {
+      final fileName = file.path.split('/').last.split('\\').last;
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '${ApiEndpoints.uploadBienLaiNapTien}/$maGiaoDich',
+        formData,
+      );
+
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final isOk = body['success'] == true || response.statusCode == 200;
+      final fileUrl = body['fileUrl']?.toString() ?? '';
+
+      return ApiResponse<String>(
+        isSuccess: isOk,
+        data: fileUrl,
+        message: body['message']?.toString() ??
+            'Tải biên lai minh chứng thành công! Đang chờ Quản trị viên duyệt.',
+      );
+    } catch (e) {
+      return ApiResponse<String>(
+        isSuccess: false,
+        message: 'Lỗi tải ảnh biên lai: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Tải ảnh mã QR ngân hàng cá nhân khi rút tiền (POST api/Wallet/UploadQrRutTien)
+  Future<ApiResponse<String>> uploadQrRutTien(File file) async {
+    try {
+      final fileName = file.path.split('/').last.split('\\').last;
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        ApiEndpoints.uploadQrRutTien,
+        formData,
+      );
+
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      final isOk = body['success'] == true || response.statusCode == 200;
+      final fileUrl = body['fileUrl']?.toString() ?? '';
+
+      return ApiResponse<String>(
+        isSuccess: isOk,
+        data: fileUrl,
+        message: body['message']?.toString() ?? 'Tải ảnh mã QR thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<String>(
+        isSuccess: false,
+        message: 'Lỗi tải ảnh mã QR: ${e.toString()}',
       );
     }
   }

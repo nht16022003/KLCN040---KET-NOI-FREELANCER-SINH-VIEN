@@ -173,5 +173,73 @@ namespace FreelancerStudent.API.Controllers
                 return StatusCode(500, new { success = false, message = "Lỗi hệ thống khi xử lý yêu cầu rút tiền: " + ex.Message });
             }
         }
+
+        // ==========================================
+        // 6. TẢI ẢNH MÃ QR NHẬN TIỀN CÁ NHÂN
+        // ==========================================
+        [HttpPost("UploadQrRutTien")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadQrRutTien([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "Vui lòng chọn ảnh mã QR tài khoản." });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(new { success = false, message = "Định dạng file không hỗ trợ. Vui lòng tải file ảnh (.jpg, .jpeg, .png, .webp)." });
+            }
+
+            if (file.Length > 10 * 1024 * 1024)
+            {
+                return BadRequest(new { success = false, message = "Kích thước ảnh tối đa là 10MB." });
+            }
+
+            try
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "rut-tien");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                var fileName = $"qr_ruttien_{Guid.NewGuid():N}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
+                var filePath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Đồng bộ sang thư mục Web nếu tồn tại
+                try
+                {
+                    var webFolder = Path.Combine(Directory.GetCurrentDirectory(), "..", "FreelancerStudent.Web", "wwwroot", "uploads", "rut-tien");
+                    if (!Directory.Exists(webFolder))
+                    {
+                        Directory.CreateDirectory(webFolder);
+                    }
+                    var webPath = Path.Combine(webFolder, fileName);
+                    System.IO.File.Copy(filePath, webPath, true);
+                }
+                catch { }
+
+                var relativeUrl = $"/uploads/rut-tien/{fileName}";
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Tải ảnh mã QR thành công!",
+                    fileUrl = relativeUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi khi lưu ảnh QR: " + ex.Message });
+            }
+        }
     }
 }

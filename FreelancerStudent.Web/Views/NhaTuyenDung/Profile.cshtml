@@ -52,7 +52,8 @@
 
     .cover-strip {
         height: 64px;
-        background: #E8EEE9;
+        background: linear-gradient(135deg, #EAF5EE 0%, #DCEEE2 100%);
+        border-bottom: 1px solid #C8E6C9;
         border-radius: 0;
     }
 
@@ -66,6 +67,28 @@
         height: 84px;
         flex-shrink: 0;
         position: relative;
+    }
+
+    .avatar-wrapper:hover .avatar-edit-overlay {
+        opacity: 1;
+    }
+
+    .avatar-edit-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        color: #FFFFFF;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 4px;
     }
 
     .avatar-img {
@@ -144,15 +167,16 @@
 
     /* Strip số liệu thống kê */
     .metrics-bar {
-        background: #FFFFFF;
-        border: 1px solid var(--border);
+        background: #EAF5EE;
+        border: 1px solid #C8E6C9;
         border-radius: 0;
         padding: 16px 24px;
         margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(27, 94, 54, 0.04);
     }
 
     .metric-item {
-        border-right: 1px solid var(--border);
+        border-right: 1px solid #D5EBDD;
         padding: 0 16px;
     }
 
@@ -163,7 +187,7 @@
     .metric-value {
         font-size: 1.25rem;
         font-weight: 700;
-        color: var(--ink);
+        color: #1E5C37;
         line-height: 1.2;
     }
 
@@ -263,16 +287,19 @@
 
     /* Card tin tuyển dụng */
     .job-item-card {
-        background: #FFFFFF;
-        border: 1px solid var(--border);
+        background: #F8FAF9;
+        border: 1px solid #E2E8F0;
         border-radius: 0;
         padding: 18px 20px;
         margin-bottom: 14px;
-        transition: border-color 0.15s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .job-item-card:hover {
-        border-color: var(--accent);
+        background: #FFFFFF;
+        border-color: #A3D4B6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        transform: translateY(-1px);
     }
 
     .job-title-link {
@@ -317,8 +344,10 @@
 
     /* Phần đánh giá */
     .review-row {
-        padding: 14px 0;
-        border-bottom: 1px solid #F0F0F0;
+        background: #F8FAF9;
+        border: 1px solid #E2E8F0;
+        padding: 14px 16px;
+        margin-bottom: 12px;
     }
 
     .review-row:last-child {
@@ -387,8 +416,14 @@
                     <!-- Thông tin đại diện & thương hiệu -->
                     <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-3">
                         <div class="avatar-wrapper">
-                            <img src="@avatarUrl" alt="@tenHienThi" class="avatar-img"
+                            <img src="@avatarUrl" alt="@tenHienThi" class="avatar-img" id="currentProfileAvatarImg"
                                  onerror="this.src='https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name=@Uri.EscapeDataString(tenHienThi)';" />
+                            @if (isProfileOwner)
+                            {
+                                <div class="avatar-edit-overlay" data-bs-toggle="modal" data-bs-target="#uploadAvatarModal" role="button" title="Bấm để đổi ảnh đại diện / Logo">
+                                    <span>Đổi ảnh</span>
+                                </div>
+                            }
                         </div>
 
                         <div class="pt-2">
@@ -421,9 +456,12 @@
                     <div class="d-flex align-items-center gap-2 mb-1">
                         @if (isProfileOwner)
                         {
-                            <a href="/Account/ThietLapTaiKhoan?tab=thongtin" class="btn-action-primary">
-                                Chỉnh sửa hồ sơ
-                            </a>
+                            <button type="button" class="btn-action-primary" data-bs-toggle="modal" data-bs-target="#editBasicInfoModal">
+                                Chỉnh sửa thông tin
+                            </button>
+                            <button type="button" class="btn-action-outline" data-bs-toggle="modal" data-bs-target="#uploadAvatarModal">
+                                Đổi Logo / Avatar
+                            </button>
                             <a href="/JobPost/Create" class="btn-action-outline">
                                 Đăng tin tuyển dụng
                             </a>
@@ -508,7 +546,15 @@
                 <!-- Cột trái: Thông tin doanh nghiệp (Dữ liệu SQL thực tế) -->
                 <div class="col-12 col-lg-4">
                     <div class="section-box">
-                        <h2 class="section-heading">Thông tin liên hệ & Pháp lý</h2>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                            <h2 class="section-heading mb-0 border-bottom-0 pb-0">Thông tin cơ bản</h2>
+                            @if (isProfileOwner)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-0" data-bs-toggle="modal" data-bs-target="#editBasicInfoModal" style="font-size: 0.8rem; font-weight: 600;">
+                                    Chỉnh sửa
+                                </button>
+                            }
+                        </div>
                         
                         <div class="info-table-row">
                             <span class="info-label">Tên đơn vị</span>
@@ -572,28 +618,22 @@
                         </div>
                     </div>
 
-                    <!-- Cam kết uy tín & Quy chuẩn làm việc -->
-                    <div class="section-box">
-                        <h2 class="section-heading">Cam kết tuyển dụng</h2>
-                        <p class="text-muted small mb-2" style="line-height: 1.5;">
-                            Nhà tuyển dụng cam kết thanh toán đúng hạn qua tài khoản ký quỹ của hệ thống và tuân thủ các quy định bảo vệ quyền lợi sinh viên.
-                        </p>
-                        <div class="info-table-row">
-                            <span class="info-label">Hình thức ký quỹ</span>
-                            <span class="info-value">100% qua hệ thống</span>
-                        </div>
-                        <div class="info-table-row">
-                            <span class="info-label">Nghiệm thu</span>
-                            <span class="info-value">Thanh toán sau khi duyệt</span>
-                        </div>
-                    </div>
+                   
                 </div>
 
                 <!-- Cột phải: Giới thiệu & Việc làm mới nhất -->
                 <div class="col-12 col-lg-8">
                     <!-- Giới thiệu công ty -->
                     <div class="section-box">
-                        <h2 class="section-heading">Giới thiệu về đơn vị tuyển dụng</h2>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                            <h2 class="section-heading mb-0 border-bottom-0 pb-0">Giới thiệu về đơn vị tuyển dụng</h2>
+                            @if (isProfileOwner)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-0" data-bs-toggle="modal" data-bs-target="#editBioModal" style="font-size: 0.8rem; font-weight: 600;">
+                                    @(string.IsNullOrWhiteSpace(ntd.Gioithieu) ? "+ Thêm giới thiệu" : "Chỉnh sửa")
+                                </button>
+                            }
+                        </div>
                         @if (!string.IsNullOrWhiteSpace(ntd.Gioithieu))
                         {
                             <div class="text-dark" style="line-height: 1.6; font-size: 0.92rem; white-space: pre-line;">
@@ -605,6 +645,14 @@
                             <p class="text-muted mb-0" style="font-size: 0.9rem;">
                                 Đơn vị chưa bổ sung mô tả giới thiệu chi tiết. Các dự án và hợp đồng tuyển dụng được quản lý trực tiếp qua hệ thống Freelancer Students.
                             </p>
+                            @if (isProfileOwner)
+                            {
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-success rounded-0" data-bs-toggle="modal" data-bs-target="#editBioModal">
+                                        + Thêm giới thiệu doanh nghiệp ngay
+                                    </button>
+                                </div>
+                            }
                         }
                     </div>
 
@@ -932,6 +980,164 @@
     </div>
 </div>
 
+@if (isProfileOwner)
+{
+    <!-- ==================== MODAL 1: CHỈNH SỬA THÔNG TIN CƠ BẢN ==================== -->
+    <div class="modal fade" id="editBasicInfoModal" tabindex="-1" aria-labelledby="editBasicInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-0">
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-0">
+                    <h5 class="modal-title fw-bold text-dark" id="editBasicInfoModalLabel">
+                        Chỉnh sửa thông tin doanh nghiệp
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <form asp-controller="NhaTuyenDung" asp-action="CapNhatThongTinCoBan" method="post" id="formCapNhatThongTinNTD">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <!-- Tên công ty / doanh nghiệp -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold text-dark">
+                                    Tên doanh nghiệp / Đơn vị tuyển dụng <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control rounded-0" name="Tencongty" value="@ntd.Tencongty" maxlength="100" required placeholder="VD: Công ty TNHH Giải Pháp Công Nghệ ABC" />
+                                <div class="form-text">Tên hiển thị chính thức của đơn vị bạn trên toàn hệ thống.</div>
+                            </div>
+
+                            <!-- Người đại diện -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold text-dark">
+                                    Họ tên người đại diện / Phụ trách tuyển dụng <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control rounded-0" name="HotenNguoiDaiDien" value="@usr.HotenUser" maxlength="100" required placeholder="VD: Nguyễn Văn A" />
+                                <div class="form-text">Tên người trực tiếp trao đổi và quản lý hợp đồng.</div>
+                            </div>
+
+                            <!-- Email liên hệ (Read-only tài khoản) -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold text-dark">Email đăng nhập tài khoản</label>
+                                <input type="email" class="form-control rounded-0 bg-light" value="@usr.Email" readonly disabled />
+                                <div class="form-text text-muted">Email đăng nhập cố định để nhận thông báo và bảo mật.</div>
+                            </div>
+
+                            <!-- Số điện thoại liên hệ -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold text-dark">Số điện thoại liên hệ</label>
+                                <input type="tel" class="form-control rounded-0" name="SdtLienHe" value="@usr.Sodienthoai" maxlength="15" placeholder="VD: 0912345678" />
+                                <div class="form-text">Dùng để liên hệ nhanh khi cần trao đổi công việc.</div>
+                            </div>
+
+                            <!-- Lĩnh vực hoạt động -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold text-dark">Lĩnh vực hoạt động chính</label>
+                                <input type="text" class="form-control rounded-0" name="Linhvuc" value="@ntd.Linhvuc" maxlength="100" placeholder="VD: Công nghệ phần mềm, Thương mại điện tử, Marketing..." />
+                                <div class="form-text">Giúp sinh viên hiểu rõ ngành nghề và dự án của bạn.</div>
+                            </div>
+
+                            <!-- Địa chỉ trụ sở -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold text-dark">Địa chỉ trụ sở / Khu vực</label>
+                                <input type="text" class="form-control rounded-0" name="Diachi" value="@ntd.Diachi" maxlength="200" placeholder="VD: Quận 1, TP. Hồ Chí Minh" />
+                                <div class="form-text">Tỉnh/Thành phố hoặc địa chỉ văn phòng làm việc.</div>
+                            </div>
+
+                            <!-- Website / Link liên kết -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-dark">Website doanh nghiệp / Fanpage (Nếu có)</label>
+                                <input type="url" class="form-control rounded-0" name="Link" value="@ntd.Link" maxlength="500" placeholder="https://congty.com hoặc https://facebook.com/..." />
+                                <div class="form-text">Link trang web để Freelancer tham khảo thêm thông tin doanh nghiệp.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light rounded-0">
+                        <button type="button" class="btn btn-light rounded-0 px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: CẬP NHẬT GIỚI THIỆU ==================== -->
+    <div class="modal fade" id="editBioModal" tabindex="-1" aria-labelledby="editBioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-0">
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-0">
+                    <h5 class="modal-title fw-bold text-dark" id="editBioModalLabel">
+                        Cập nhật giới thiệu đơn vị tuyển dụng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <form asp-controller="NhaTuyenDung" asp-action="CapNhatGioiThieu" method="post" id="formCapNhatGioiThieuNTD">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">
+                                Mô tả / Giới thiệu chi tiết về doanh nghiệp: <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="gioiThieu" class="form-control rounded-0" rows="6" required
+                                      placeholder="Chia sẻ về sứ mệnh, môi trường làm việc, văn hóa doanh nghiệp, các dòng sản phẩm tiêu biểu và chính sách hỗ trợ phát triển dành cho Freelancer sinh viên...">@(ntd.Gioithieu ?? "")</textarea>
+                            <small class="text-muted mt-2 d-block" style="font-size: 0.8rem;">
+                                Lời giới thiệu rõ ràng, chuyên nghiệp sẽ giúp hồ sơ doanh nghiệp tạo được ấn tượng tin cậy cao và thu hút nhiều ứng viên tài năng.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light rounded-0">
+                        <button type="button" class="btn btn-light rounded-0 px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold">Lưu giới thiệu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: CẬP NHẬT ẢNH ĐẠI DIỆN / LOGO CÓ PREVIEW ==================== -->
+    <div class="modal fade" id="uploadAvatarModal" tabindex="-1" aria-labelledby="uploadAvatarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-0">
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-0">
+                    <h5 class="modal-title fw-bold text-dark" id="uploadAvatarModalLabel">
+                        Cập nhật Logo / Ảnh đại diện đơn vị
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <form asp-controller="NhaTuyenDung" asp-action="CapNhatAvatar" method="post" enctype="multipart/form-data" id="formUploadAvatarNTD">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body p-4 text-center">
+                        <!-- Khung xem trước trực tiếp (Live Preview) -->
+                        <div class="mb-3 d-flex flex-column align-items-center">
+                            <div class="border p-1 bg-white mb-2 shadow-sm" style="width: 130px; height: 130px;">
+                                <img id="avatarLivePreviewImg" src="@avatarUrl" alt="Xem trước ảnh"
+                                     style="width: 100%; height: 100%; object-fit: cover;"
+                                     onerror="this.src='https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name=@Uri.EscapeDataString(tenHienThi)';" />
+                            </div>
+                            <div id="avatarFileDetails" class="text-success small fw-semibold" style="min-height: 20px;">
+                                Ảnh hiện tại
+                            </div>
+                        </div>
+
+                        <!-- Ô chọn file -->
+                        <div class="mb-3 text-start">
+                            <label for="avatarFileInput" class="form-label fw-semibold text-dark">
+                                Chọn tệp hình ảnh mới: <span class="text-danger">*</span>
+                            </label>
+                            <input type="file" name="avatar" id="avatarFileInput" accept=".jpg,.jpeg,.png,.webp,.gif" class="form-control rounded-0" required />
+                            <small class="text-muted d-block mt-2" style="font-size: 0.8rem;">
+                                Định dạng hỗ trợ: <strong>JPG, JPEG, PNG, WebP, GIF</strong>. Dung lượng tối đa: <strong>5MB</strong>.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light rounded-0">
+                        <button type="button" class="btn btn-light rounded-0 px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold">Lưu ảnh đại diện</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
 <script>
     function chonTab(tabName) {
         // Ẩn tất cả các container tab
@@ -956,4 +1162,48 @@
             document.getElementById('tabBtn-overview').classList.add('active');
         }
     }
+
+    // Xử lý xem trước ảnh đại diện (Live Preview) ngay khi người dùng chọn file
+    document.getElementById('avatarFileInput')?.addEventListener('change', function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        // Kiểm tra dung lượng tối đa 5MB (5 * 1024 * 1024 bytes)
+        var maxSizeBytes = 5 * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+            alert('Dung lượng tệp vượt quá 5MB. Vui lòng chọn ảnh khác có dung lượng nhỏ hơn.');
+            this.value = '';
+            document.getElementById('avatarLivePreviewImg').src = '@avatarUrl';
+            document.getElementById('avatarFileDetails').textContent = 'Ảnh hiện tại';
+            document.getElementById('avatarFileDetails').className = 'text-muted small';
+            return;
+        }
+
+        // Kiểm tra phần mở rộng
+        var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.webp|\.gif)$/i;
+        if (!allowedExtensions.exec(file.name)) {
+            alert('Định dạng tệp không được hỗ trợ. Vui lòng chọn file hình ảnh (.jpg, .jpeg, .png, .webp, .gif).');
+            this.value = '';
+            document.getElementById('avatarLivePreviewImg').src = '@avatarUrl';
+            document.getElementById('avatarFileDetails').textContent = 'Ảnh hiện tại';
+            document.getElementById('avatarFileDetails').className = 'text-muted small';
+            return;
+        }
+
+        // Đọc và hiển thị xem trước
+        var reader = new FileReader();
+        reader.onload = function (evt) {
+            var preview = document.getElementById('avatarLivePreviewImg');
+            if (preview) {
+                preview.src = evt.target.result;
+            }
+            var details = document.getElementById('avatarFileDetails');
+            if (details) {
+                var sizeKB = (file.size / 1024).toFixed(1);
+                details.textContent = 'Xem trước: ' + file.name + ' (' + sizeKB + ' KB)';
+                details.className = 'text-success small fw-semibold';
+            }
+        };
+        reader.readAsDataURL(file);
+    });
 </script>

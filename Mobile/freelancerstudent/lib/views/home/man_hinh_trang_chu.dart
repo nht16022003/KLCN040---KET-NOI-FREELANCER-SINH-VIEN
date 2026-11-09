@@ -10,6 +10,7 @@ import '../../viewmodels/viewmodel_thong_bao.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_yeu_thich.dart';
 import '../applications/man_hinh_don_ung_tuyen_cua_toi.dart';
+import '../applications/man_hinh_yeu_cau_thue_freelancer.dart';
 import '../auth/man_hinh_dang_nhap.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
 import '../chat/man_hinh_danh_sach_chat.dart';
@@ -259,6 +260,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icon(Icons.assignment_outlined, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text('Trạng thái ứng tuyển'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'direct_hire_requests',
+                child: Row(
+                  children: [
+                    Icon(Icons.handshake_outlined, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Yêu cầu thuê trực tiếp'),
                   ],
                 ),
               ),
@@ -1163,6 +1174,14 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const MyApplicationsScreen()),
+        );
+        break;
+      case 'direct_hire_requests':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ManHinhYeuCauThueFreelancer(),
+          ),
         );
         break;
       case 'settings':

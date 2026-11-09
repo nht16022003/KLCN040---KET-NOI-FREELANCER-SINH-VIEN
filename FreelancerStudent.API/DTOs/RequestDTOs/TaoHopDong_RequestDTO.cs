@@ -43,6 +43,8 @@ namespace FreelancerStudent.API.DTOs.RequestDTOs
 
         public int? maUngTuyen { get; set; }
 
+        public int? maYeuCauThue { get; set; }
+
         public List<TaoGiaiDoanHopDong_DTO>? giaiDoans { get; set; } = new List<TaoGiaiDoanHopDong_DTO>();
     }
 }

@@ -236,6 +236,53 @@ namespace FreelancerStudent.Web.ViewModels
     }
 
     // ==========================================
+    // 6.1. AD-UC-06: DUYỆT YÊU CẦU NẠP TIỀN
+    // ==========================================
+    public class AdminYeuCauNapTienItemViewModel
+    {
+        public int MaNapTien { get; set; }
+        public int MaWallet { get; set; }
+        public int MaUser { get; set; }
+        public string HoTenUser { get; set; } = string.Empty;
+        public string EmailUser { get; set; } = string.Empty;
+        public string? SdtUser { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+        public string MaGiaoDich { get; set; } = string.Empty;
+        public decimal SoTien { get; set; }
+        public string NoiDungChuyenKhoan { get; set; } = string.Empty;
+        public string? AnhBienLai { get; set; }
+        public string TrangThai { get; set; } = "DangXuLy";
+        public DateTime NgayTao { get; set; }
+        public DateTime NgayHetHan { get; set; }
+        public DateTime? NgayHoanThanh { get; set; }
+        public int? MaAdminXuLy { get; set; }
+        public string? TenAdminXuLy { get; set; }
+        public decimal SoDuKhaDungVi { get; set; }
+        public decimal SoDuDongBangVi { get; set; }
+    }
+
+    public class AdminXuLyNapTienPostModel
+    {
+        [Required]
+        public string MaGiaoDich { get; set; } = string.Empty;
+
+        public bool ChapNhan { get; set; }
+
+        [StringLength(500, ErrorMessage = "Lý do từ chối tối đa 500 ký tự")]
+        public string? LyDoTuChoi { get; set; }
+    }
+
+    public class AdminDuyetNapTienViewModel
+    {
+        public List<AdminYeuCauNapTienItemViewModel> DanhSachYeuCau { get; set; } = new();
+        public string CurrentFilter { get; set; } = "TatCa";
+        public int TongSoChoXuLy { get; set; }
+        public int TongSoHoanThanh { get; set; }
+        public int TongSoTuChoi { get; set; }
+        public decimal TongTienChoXuLy { get; set; }
+    }
+
+    // ==========================================
     // 7. CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
     // ==========================================
     public class AdminCauHinhPhiViewModel

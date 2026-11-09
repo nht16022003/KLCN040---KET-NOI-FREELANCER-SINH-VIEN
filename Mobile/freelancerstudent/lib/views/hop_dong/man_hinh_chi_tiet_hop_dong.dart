@@ -42,9 +42,13 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _tai());
   }
 
-  Future<void> _tai() => context.read<HopDongViewModel>().taiChiTietHopDong(
-        widget.maHD,
-      );
+  Future<void> _tai() {
+    final user = context.read<AuthViewModel>().currentUser;
+    return context.read<HopDongViewModel>().taiChiTietHopDong(
+          widget.maHD,
+          maUser: user?.userId,
+        );
+  }
 
   void _thongBao(String noiDung) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -838,12 +842,42 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
       final mau = mauTrangThaiHopDong(hd.trangThai);
       final laFreelancerCuaHopDong =
           user != null && hd.maUserFreelancer == user.userId;
-      final isNTD = user != null &&
-          (user.role == 'NhaTuyenDung' ||
-              user.role == 'Employer' ||
-              hd.maUserNhaTuyenDung == user.userId);
-      final choXacNhan = hd.trangThai == 'ChoXacNhan';
-      final choKyQuy = hd.trangThai == 'ChoKyQuy';
+      final laNTDCuaHopDong =
+          user != null && hd.maUserNhaTuyenDung == user.userId;
+      final laAdmin =
+          user != null && (user.role == 'Admin' || user.role == 'QuanTriVien');
+
+      if (!laFreelancerCuaHopDong && !laNTDCuaHopDong && !laAdmin) {
+        noiDung = Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.lock_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Bạn không có quyền xem thông tin hợp đồng này.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.tonal(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Quay lại'),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        final isNTD = laNTDCuaHopDong;
+        final choXacNhan = hd.trangThai == 'ChoXacNhan';
+        final choKyQuy = hd.trangThai == 'ChoKyQuy';
 
       noiDung = RefreshIndicator(
         onRefresh: _tai,
@@ -1577,12 +1611,11 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
         ),
       );
     }
+  }
 
     final laNtdChuHopDong = hd != null &&
         user != null &&
-        (user.role == 'NhaTuyenDung' ||
-            user.role == 'Employer' ||
-            hd.maUserNhaTuyenDung == user.userId);
+        hd.maUserNhaTuyenDung == user.userId;
 
     return Scaffold(
       backgroundColor: AppColors.background,

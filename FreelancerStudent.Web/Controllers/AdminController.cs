@@ -317,6 +317,60 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         // ==========================================================
+        // 6.1. DUYỆT YÊU CẦU NẠP TIỀN
+        // ==========================================================
+        [HttpGet]
+        public async Task<IActionResult> DuyetNapTien(string? trangThai)
+        {
+            var filter = string.IsNullOrWhiteSpace(trangThai) ? "DangXuLy" : trangThai.Trim();
+
+            var allRes = await _adminService.LayDanhSachYeuCauNapTienAsync("TatCa");
+            var allList = allRes.success && allRes.data != null ? allRes.data : new List<AdminYeuCauNapTienItemViewModel>();
+
+            var filteredList = filter == "TatCa"
+                ? allList
+                : allList.Where(x => x.TrangThai == filter).ToList();
+
+            var vm = new AdminDuyetNapTienViewModel
+            {
+                DanhSachYeuCau = filteredList,
+                CurrentFilter = filter,
+                TongSoChoXuLy = allList.Count(x => x.TrangThai == "DangXuLy"),
+                TongSoHoanThanh = allList.Count(x => x.TrangThai == "HoanThanh"),
+                TongSoTuChoi = allList.Count(x => x.TrangThai == "TuChoi"),
+                TongTienChoXuLy = allList.Where(x => x.TrangThai == "DangXuLy").Sum(x => x.SoTien)
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XuLyNapTien(AdminXuLyNapTienPostModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Dữ liệu xử lý không hợp lệ.";
+                return RedirectToAction(nameof(DuyetNapTien));
+            }
+
+            var adminId = GetCurrentAdminId();
+            var res = await _adminService.XuLyNapTienAsync(model, adminId);
+            if (res.success)
+            {
+                TempData["SuccessMessage"] = model.ChapNhan
+                    ? $"Duyệt nạp tiền thành công cho giao dịch #{model.MaGiaoDich}!"
+                    : $"Đã từ chối giao dịch nạp tiền #{model.MaGiaoDich}!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = res.message ?? "Không thể xử lý giao dịch nạp tiền này.";
+            }
+
+            return RedirectToAction(nameof(DuyetNapTien));
+        }
+
+        // ==========================================================
         // 7. DUYỆT MINH CHỨNG THẺ SINH VIÊN
         // ==========================================================
         [HttpGet]

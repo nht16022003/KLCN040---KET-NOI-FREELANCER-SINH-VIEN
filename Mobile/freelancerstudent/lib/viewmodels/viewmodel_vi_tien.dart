@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../core/network/phan_hoi_api.dart';
@@ -152,6 +153,16 @@ class WalletViewModel extends ChangeNotifier {
       notifyListeners();
     }
     return res;
+  }
+
+  /// Tải ảnh biên lai minh chứng nạp tiền
+  Future<ApiResponse<String>> uploadBienLaiNapTien(String maGiaoDich, File file) async {
+    return await _walletService.uploadBienLaiNapTien(maGiaoDich, file);
+  }
+
+  /// Tải ảnh mã QR ngân hàng cá nhân khi rút tiền
+  Future<ApiResponse<String>> uploadQrRutTien(File file) async {
+    return await _walletService.uploadQrRutTien(file);
   }
 
   // ==========================================

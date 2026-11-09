@@ -382,6 +382,14 @@ CREATE TABLE UngThue (
     CONSTRAINT FK_YeuCau_Freelancer FOREIGN KEY (maFreelancerStudent) REFERENCES FreelancerStudents(maFreelancerStudents)
 );
 
+-- 1. Bổ sung cột maJob vào bảng UngThue
+ALTER TABLE UngThue
+ADD maJob VARCHAR(20) NULL;
+
+-- 2. Tạo khóa ngoại liên kết với bảng JobPost
+ALTER TABLE UngThue
+ADD CONSTRAINT FK_UngThue_JobPost FOREIGN KEY (maJob) REFERENCES JobPost(maJob);
+
 
 -- HopDong
 CREATE TABLE HopDong (
@@ -1188,6 +1196,10 @@ SELECT * FROM FreelancerStudent_KyNang;
 SELECT * FROM BaiDangTimViec_FreelancerStudent;
 SELECT * FROM NhaTuyenDung;
 SELECT * FROM FreelancerYeuThich;
+
+
+SELECT * FROM FreelancerStudents f, FreelancerStudent_KyNang kn, KyNang k
+
 
 -- 3. Nhóm ví & Giao dịch tài chính
 SELECT * FROM Wallet;

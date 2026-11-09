@@ -151,16 +151,30 @@ namespace FreelancerStudent.API.Controllers
 
         // GET: api/HopDong/chi-tiet/{maHD}
         [HttpGet("chi-tiet/{maHD}")]
-        public async Task<ActionResult<HopDongResponseDTO>> GetChiTietHopDong(string maHD)
+        public async Task<ActionResult<HopDongResponseDTO>> GetChiTietHopDong(string maHD, [FromQuery] int? maUser)
         {
             try
             {
-                var hopDong = await _hopDongService.LayChiTietHopDongTheoMaAsync(maHD);
+                if (string.IsNullOrWhiteSpace(maHD))
+                {
+                    return BadRequest(new { message = "Mã hợp đồng không hợp lệ." });
+                }
+
+                if (!maUser.HasValue || maUser.Value <= 0)
+                {
+                    return StatusCode(403, new { message = "Yêu cầu định danh tài khoản người dùng để xem chi tiết hợp đồng." });
+                }
+
+                var hopDong = await _hopDongService.LayChiTietHopDongTheoMaAsync(maHD, maUser);
                 if (hopDong == null)
                 {
                     return NotFound(new { message = "Không tìm thấy hợp đồng." });
                 }
                 return Ok(hopDong);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
             }
             catch (Exception ex)
             {

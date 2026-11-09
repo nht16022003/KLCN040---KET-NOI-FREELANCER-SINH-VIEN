@@ -18,5 +18,11 @@ namespace FreelancerStudent.Web.Services.Interfaces
             string maGiaoDich,
             int maUser
         );
+
+        // Upload ảnh biên lai minh chứng nạp tiền
+        Task<ApiReponse<string>> uploadBienLai(
+            string maGiaoDich,
+            IFormFile file
+        );
     }
 }

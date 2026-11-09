@@ -123,8 +123,11 @@
                             </div>
                         </div>
 
-                        <!-- Nút thao tác mở hồ sơ -->
-                        <div>
+                        <!-- Nút thao tác mở hồ sơ & Tệp chia sẻ -->
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-0 px-3 py-1" id="btnOpenSharedFiles" data-bs-toggle="modal" data-bs-target="#sharedFilesModal" title="Xem danh sách tệp đính kèm trong phòng">
+                                <i class="bi bi-paperclip me-1"></i> Tệp đã chia sẻ
+                            </button>
                             @if (isMeClientActive && activeRoom.maFreelancerStudent > 0)
                             {
                                 <a href="/FreelancerStudent/Profile/@activeRoom.maFreelancerStudent" target="_blank" 
@@ -209,11 +212,30 @@
 
                                                     @if (!string.IsNullOrEmpty(msg.fileDinhKem))
                                                     {
-                                                        <div class="mt-2 pt-2 border-top @(isMyMsg ? "border-white-50" : "border-light")">
-                                                            <a href="@msg.fileDinhKem" target="_blank" class="@(isMyMsg ? "text-white text-decoration-underline" : "text-success") small">
-                                                                Tệp đính kèm
-                                                            </a>
-                                                        </div>
+                                                        var ext = System.IO.Path.GetExtension(msg.fileDinhKem).ToLowerInvariant();
+                                                        var isImg = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" }.Contains(ext) || msg.loaiTinNhan == "Image";
+                                                        var rawFileName = System.IO.Path.GetFileName(msg.fileDinhKem);
+
+                                                        if (isImg)
+                                                        {
+                                                            <div class="mt-2">
+                                                                <a href="@msg.fileDinhKem" target="_blank" title="Bấm để xem ảnh phóng to">
+                                                                    <img src="@msg.fileDinhKem" alt="Ảnh đính kèm" class="img-fluid rounded border bg-light" style="max-height: 220px; max-width: 100%; object-fit: contain;" />
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="mt-2 p-2 rounded @(isMyMsg ? "bg-white text-dark bg-opacity-25" : "bg-light border") d-flex align-items-center justify-content-between gap-2">
+                                                                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                                                    <i class="bi bi-file-earmark-arrow-down fs-5 @(isMyMsg ? "text-white" : "text-success")"></i>
+                                                                    <span class="small fw-semibold text-truncate @(isMyMsg ? "text-white" : "text-dark")" style="max-width: 180px;" title="@rawFileName">@rawFileName</span>
+                                                                </div>
+                                                                <a href="@msg.fileDinhKem" download target="_blank" class="btn btn-sm @(isMyMsg ? "btn-light text-success fw-bold" : "btn-outline-success") rounded-0 py-0 px-2 small text-nowrap">
+                                                                    Tải về
+                                                                </a>
+                                                            </div>
+                                                        }
                                                     }
                                                 </div>
                                                 <div class="small text-muted mt-1 px-1 @(isMyMsg ? "text-end" : "text-start")" style="font-size: 0.7rem;">
@@ -235,10 +257,28 @@
 
                     <!-- 3. Khung nhập tin nhắn (Footer) -->
                     <div class="p-3 border-top bg-light">
+                        <!-- Khu vực preview tệp đã chọn -->
+                        <div id="attachmentPreview" class="d-none mb-2 p-2 bg-white border rounded d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <i id="previewFileIcon" class="bi bi-file-earmark-text text-success fs-5"></i>
+                                <span id="previewFileName" class="small fw-bold text-truncate" style="max-width: 280px;"></span>
+                                <span id="previewFileSize" class="badge bg-secondary rounded-pill small"></span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger border-0 py-0 px-1" id="btnCancelAttachment" title="Hủy bỏ đính kèm">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </div>
+
                         <form id="chatForm" class="d-flex gap-2 align-items-center">
                             <input type="hidden" id="currentRoomId" value="@activeRoom.maPhongChat" />
+                            <input type="file" id="fileInput" class="d-none" accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z" />
+                            
+                            <button type="button" id="btnAttach" class="btn btn-outline-secondary rounded-0 px-3 py-2" title="Đính kèm tệp (Ảnh, PDF, Docx, Zip...)">
+                                <i class="bi bi-paperclip fs-5"></i>
+                            </button>
+                            
                             <input type="text" id="messageInput" class="form-control rounded-0 border py-2" 
-                                   placeholder="Nhập nội dung trao đổi... (Nhấn Enter để gửi)" autocomplete="off" required />
+                                   placeholder="Nhập nội dung trao đổi... (Nhấn Enter để gửi)" autocomplete="off" />
                             <button type="submit" id="btnSend" class="btn btn-success rounded-0 px-4 py-2 fw-semibold" style="background-color: #1B5E36; border-color: #1B5E36;">
                                 Gửi
                             </button>
@@ -260,6 +300,34 @@
     </div>
 </div>
 
+<!-- MODAL XEM DANH SÁCH TỆP ĐÃ CHIA SẺ TRONG PHÒNG CHAT -->
+<div class="modal fade" id="sharedFilesModal" tabindex="-1" aria-labelledby="sharedFilesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content rounded-0">
+            <div class="modal-header border-bottom bg-light">
+                <h6 class="modal-title fw-bold text-success mb-0" id="sharedFilesModalLabel">
+                    <i class="bi bi-folder2-open me-2"></i> Tệp đính kèm đã chia sẻ trong phòng
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="text-center py-4 text-muted" id="sharedFilesLoading">
+                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                    <span>Đang tải danh sách tệp...</span>
+                </div>
+                <div id="sharedFilesEmpty" class="text-center py-5 text-muted d-none">
+                    <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary"></i>
+                    <p class="mb-0">Chưa có tệp đính kèm nào được chia sẻ trong cuộc trò chuyện này.</p>
+                </div>
+                <div id="sharedFilesList" class="d-flex flex-column gap-2"></div>
+            </div>
+            <div class="modal-footer border-top p-2 bg-light">
+                <button type="button" class="btn btn-sm btn-secondary rounded-0 px-3" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .hover-bg:hover {
         background-color: #e9ecef !important;
@@ -272,11 +340,21 @@
     <script>
         const currentUserId = @Model.CurrentUserId;
         const currentRoomId = document.getElementById("currentRoomId") ? parseInt(document.getElementById("currentRoomId").value) : 0;
+        window.currentChatRoomId = currentRoomId;
         const messageContainer = document.getElementById("messageContainer");
         const messagesList = document.getElementById("messagesList");
         const chatForm = document.getElementById("chatForm");
         const messageInput = document.getElementById("messageInput");
         const btnSend = document.getElementById("btnSend");
+
+        // Các thành phần đính kèm file
+        const fileInput = document.getElementById("fileInput");
+        const btnAttach = document.getElementById("btnAttach");
+        const attachmentPreview = document.getElementById("attachmentPreview");
+        const previewFileName = document.getElementById("previewFileName");
+        const previewFileSize = document.getElementById("previewFileSize");
+        const previewFileIcon = document.getElementById("previewFileIcon");
+        const btnCancelAttachment = document.getElementById("btnCancelAttachment");
 
         // Cuộn xuống đáy khung chat
         function scrollToBottom() {
@@ -286,6 +364,43 @@
         }
         scrollToBottom();
 
+        // Xử lý chọn file đính kèm
+        if (btnAttach && fileInput) {
+            btnAttach.addEventListener("click", () => fileInput.click());
+
+            fileInput.addEventListener("change", function () {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    if (file.size > 20 * 1024 * 1024) {
+                        alert("Dung lượng file vượt quá 20MB! Vui lòng chọn file nhỏ hơn.");
+                        this.value = "";
+                        return;
+                    }
+                    previewFileName.textContent = file.name;
+                    const sizeKB = (file.size / 1024).toFixed(1);
+                    previewFileSize.textContent = sizeKB > 1024 ? (sizeKB / 1024).toFixed(1) + " MB" : sizeKB + " KB";
+                    
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                        previewFileIcon.className = "bi bi-file-earmark-image text-success fs-5";
+                    } else if (['pdf'].includes(ext)) {
+                        previewFileIcon.className = "bi bi-file-earmark-pdf text-danger fs-5";
+                    } else if (['zip', 'rar', '7z'].includes(ext)) {
+                        previewFileIcon.className = "bi bi-file-earmark-zip text-warning fs-5";
+                    } else {
+                        previewFileIcon.className = "bi bi-file-earmark-text text-primary fs-5";
+                    }
+
+                    attachmentPreview.classList.remove("d-none");
+                }
+            });
+
+            btnCancelAttachment.addEventListener("click", function () {
+                fileInput.value = "";
+                attachmentPreview.classList.add("d-none");
+            });
+        }
+
         // 1. KHỞI TẠO KẾT NỐI SIGNALR TỚI API CHATHUB
         const API_URL = "http://localhost:5152"; // Cổng API
         const ketNoiChat = new signalR.HubConnectionBuilder()
@@ -294,7 +409,6 @@
             .build();
 
         // 2. LẮNG NGHE SỰ KIỆN TỪ SERVER (TIẾNG VIỆT)
-        // Khi nhận được tin nhắn mới từ Hub
         ketNoiChat.on("NhanTinNhanMoi", function (msg) {
             console.log("Đã nhận tin nhắn mới từ SignalR:", msg);
             if (parseInt(msg.maPhongChat) === currentRoomId) {
@@ -304,7 +418,6 @@
             }
         });
 
-        // Tự động tham gia lại phòng khi kết nối lại thành công
         ketNoiChat.onreconnected(async () => {
             console.log("Đã kết nối lại SignalR!");
             if (currentRoomId > 0) {
@@ -331,52 +444,98 @@
         }
         batDauKetNoi();
 
-        // 4. GỬI TIN NHẮN QUA SIGNALR
+        // 4. GỬI TIN NHẮN (CÓ HỖ TRỢ UPLOAD FILE)
         if (chatForm) {
             chatForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
                 const text = messageInput.value.trim();
-                if (!text || currentRoomId === 0) return;
+                const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+
+                if (!text && !hasFile) return;
+                if (currentRoomId === 0) return;
 
                 btnSend.disabled = true;
-                messageInput.value = "";
+                const originalBtnText = btnSend.innerHTML;
+                btnSend.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Đang gửi...';
 
                 try {
-                    if (ketNoiChat.state !== signalR.HubConnectionState.Connected) {
-                        await batDauKetNoi();
+                    let uploadedFileUrl = null;
+                    let loaiTinNhan = "Text";
+                    let noiDungGui = text;
+
+                    // Nếu có file đính kèm, upload lên trước
+                    if (hasFile) {
+                        const formData = new FormData();
+                        formData.append("file", fileInput.files[0]);
+
+                        const uploadRes = await fetch("/Chat/UploadFile", {
+                            method: "POST",
+                            body: formData
+                        });
+                        const uploadData = await uploadRes.json();
+
+                        if (!uploadData.success || !uploadData.data) {
+                            alert(uploadData.message || "Tải tệp đính kèm thất bại!");
+                            btnSend.disabled = false;
+                            btnSend.innerHTML = originalBtnText;
+                            return;
+                        }
+
+                        uploadedFileUrl = uploadData.data.fileUrl;
+                        loaiTinNhan = uploadData.data.loaiTinNhan || uploadData.data.loaiFile || "File";
+                        if (!noiDungGui) {
+                            noiDungGui = uploadData.data.fileName || uploadData.data.tenFile || "[Tệp đính kèm]";
+                        }
+
+                        // Reset file input & preview
+                        fileInput.value = "";
+                        attachmentPreview.classList.add("d-none");
                     }
-                    // Gọi trực tiếp hàm GuiTinNhan trên ChatHub.cs
-                    await ketNoiChat.invoke("GuiTinNhan", currentRoomId, currentUserId, text, null);
-                } catch (err) {
-                    console.error("Lỗi gửi tin nhắn qua SignalR:", err);
-                    // Dự phòng gửi qua AJAX nếu Hub bị ngắt quãng
+
+                    messageInput.value = "";
+
+                    // Gửi tin nhắn qua SignalR hoặc fallback AJAX
                     try {
+                        if (ketNoiChat.state !== signalR.HubConnectionState.Connected) {
+                            await batDauKetNoi();
+                        }
+                        await ketNoiChat.invoke("GuiTinNhan", currentRoomId, currentUserId, noiDungGui, uploadedFileUrl, loaiTinNhan);
+                    } catch (hubErr) {
+                        console.warn("SignalR không khả dụng, gửi qua AJAX:", hubErr);
                         const response = await fetch("/Chat/GuiTinNhan", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ maPhongChat: currentRoomId, noiDung: text, fileDinhKem: null })
+                            body: JSON.stringify({
+                                maPhongChat: currentRoomId,
+                                noiDung: noiDungGui,
+                                fileDinhKem: uploadedFileUrl,
+                                loaiTinNhan: loaiTinNhan
+                            })
                         });
                         const res = await response.json();
                         if (res.success && res.data) {
                             appendMessage(res.data, true);
                             scrollToBottom();
+                        } else {
+                            alert(res.message || "Không thể gửi tin nhắn!");
                         }
-                    } catch (ajaxErr) {
-                        alert("Không thể gửi tin nhắn. Vui lòng thử lại!");
                     }
+                } catch (err) {
+                    console.error("Lỗi khi gửi tin nhắn:", err);
+                    alert("Có lỗi xảy ra khi gửi tin nhắn: " + err.message);
                 } finally {
                     btnSend.disabled = false;
+                    btnSend.innerHTML = originalBtnText;
                     messageInput.focus();
                 }
             });
         }
 
-        // 5. Hàm render thêm 1 tin nhắn vào DOM
+        // 5. Render tin nhắn vào DOM
         function appendMessage(msg, isMyMsg) {
             const emptyNotice = document.querySelector(".empty-chat");
             if (emptyNotice) emptyNotice.remove();
 
-            // Kiểm tra xem tin nhắn đã có trên màn hình chưa để tránh trùng lặp
             if (document.querySelector(`.message-item[data-id="${msg.maTinNhan}"]`)) return;
 
             let timeStr = "";
@@ -393,6 +552,35 @@
 
             const avatarUrl = msg.avatarNguoiGui || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.tenNguoiGui || 'User')}&background=E8F5E9&color=1B5E36`;
 
+            let attachmentHtml = "";
+            if (msg.fileDinhKem) {
+                const ext = msg.fileDinhKem.split('.').pop().toLowerCase();
+                const isImg = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext) || msg.loaiTinNhan === "Image";
+                const rawName = msg.fileDinhKem.split('/').pop();
+
+                if (isImg) {
+                    attachmentHtml = `
+                        <div class="mt-2">
+                            <a href="${msg.fileDinhKem}" target="_blank" title="Bấm để xem ảnh phóng to">
+                                <img src="${msg.fileDinhKem}" alt="Ảnh đính kèm" class="img-fluid rounded border bg-light" style="max-height: 220px; max-width: 100%; object-fit: contain;" />
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    attachmentHtml = `
+                        <div class="mt-2 p-2 rounded ${isMyMsg ? "bg-white text-dark bg-opacity-25" : "bg-light border"} d-flex align-items-center justify-content-between gap-2">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <i class="bi bi-file-earmark-arrow-down fs-5 ${isMyMsg ? "text-white" : "text-success"}"></i>
+                                <span class="small fw-semibold text-truncate ${isMyMsg ? "text-white" : "text-dark"}" style="max-width: 180px;" title="${rawName}">${rawName}</span>
+                            </div>
+                            <a href="${msg.fileDinhKem}" download target="_blank" class="btn btn-sm ${isMyMsg ? "btn-light text-success fw-bold" : "btn-outline-success"} rounded-0 py-0 px-2 small text-nowrap">
+                                Tải về
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+
             const wrapper = document.createElement("div");
             wrapper.className = `d-flex ${isMyMsg ? "justify-content-end" : "justify-content-start"} message-item`;
             wrapper.setAttribute("data-id", msg.maTinNhan);
@@ -405,6 +593,7 @@
                              style="${isMyMsg ? 'background-color: #1B5E36 !important;' : ''}">
                             ${!isMyMsg ? `<div class="fw-bold mb-1 text-success" style="font-size: 0.75rem;">${msg.tenNguoiGui || 'Người dùng'}</div>` : ''}
                             <div class="text-break" style="font-size: 0.9rem; white-space: pre-line;">${msg.noiDung || ''}</div>
+                            ${attachmentHtml}
                         </div>
                         <div class="small text-muted mt-1 px-1 ${isMyMsg ? 'text-end' : 'text-start'}" style="font-size: 0.7rem;">
                             ${timeStr}
@@ -416,7 +605,67 @@
             messagesList.appendChild(wrapper);
         }
 
-        // 6. Lọc danh sách hội thoại bên trái
+        // 6. Xử lý Modal Xem Tệp đã chia sẻ
+        const sharedFilesModal = document.getElementById("sharedFilesModal");
+        if (sharedFilesModal) {
+            sharedFilesModal.addEventListener("show.bs.modal", async function () {
+                const loading = document.getElementById("sharedFilesLoading");
+                const empty = document.getElementById("sharedFilesEmpty");
+                const list = document.getElementById("sharedFilesList");
+
+                loading.classList.remove("d-none");
+                empty.classList.add("d-none");
+                list.innerHTML = "";
+
+                try {
+                    const response = await fetch(`/Chat/DanhSachFile?maPhongChat=${currentRoomId}`);
+                    const res = await response.json();
+
+                    loading.classList.add("d-none");
+
+                    if (res.success && res.data && res.data.length > 0) {
+                        res.data.forEach(item => {
+                            const d = new Date(item.ngayGui);
+                            const timeStr = !isNaN(d.getTime()) ? d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.ngayGui;
+                            const ext = item.fileUrl.split('.').pop().toLowerCase();
+                            let iconClass = "bi bi-file-earmark-text text-primary";
+                            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) iconClass = "bi bi-file-earmark-image text-success";
+                            else if (['pdf'].includes(ext)) iconClass = "bi bi-file-earmark-pdf text-danger";
+                            else if (['zip', 'rar', '7z'].includes(ext)) iconClass = "bi bi-file-earmark-zip text-warning";
+
+                            const div = document.createElement("div");
+                            div.className = "p-2 border rounded bg-white d-flex align-items-center justify-content-between gap-3";
+                            div.innerHTML = `
+                                <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                    <i class="${iconClass} fs-3"></i>
+                                    <div class="overflow-hidden">
+                                        <div class="fw-bold text-dark text-truncate small" title="${item.tenFile}">${item.tenFile}</div>
+                                        <div class="text-muted small" style="font-size: 0.72rem;">Người gửi: <span class="text-success fw-semibold">${item.tenNguoiGui}</span> • ${timeStr}</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="${item.fileUrl}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-0 py-1 px-2 small">
+                                        <i class="bi bi-eye"></i> Mở
+                                    </a>
+                                    <a href="${item.fileUrl}" download target="_blank" class="btn btn-sm btn-success rounded-0 py-1 px-3 small fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                        <i class="bi bi-download"></i> Tải về
+                                    </a>
+                                </div>
+                            `;
+                            list.appendChild(div);
+                        });
+                    } else {
+                        empty.classList.remove("d-none");
+                    }
+                } catch (err) {
+                    loading.classList.add("d-none");
+                    empty.classList.remove("d-none");
+                    console.error("Lỗi khi tải tệp:", err);
+                }
+            });
+        }
+
+        // 7. Lọc danh sách hội thoại bên trái
         const searchInput = document.getElementById("searchConversation");
         if (searchInput) {
             searchInput.addEventListener("input", function (e) {

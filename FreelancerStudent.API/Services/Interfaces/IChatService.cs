@@ -9,5 +9,7 @@ namespace FreelancerStudent.API.Services.Interfaces
         Task<List<PhongChat_ReponseDTO>> LayDanhSachPhongChatAsync(int maUser);
         Task<List<TinNhan_ReponseDTO>> LayLichSuTinNhanAsync(int maPhongChat, int maUserDangXem);
         Task<TinNhan_ReponseDTO> GuiTinNhanAsync(GuiTinNhan_RequestDTO request);
+        Task<List<FileDinhKemChat_DTO>> LayDanhSachFileTheoPhongChatAsync(int maPhongChat);
+        Task<int> DemTinNhanChuaDocAsync(int maUser);
     }
 }

@@ -71,10 +71,11 @@ class HopDongService {
   }
 
   /// Xem chi tiết hợp đồng (HopDongController.GetChiTietHopDong)
-  Future<ApiResponse<HopDongModel>> layChiTietHopDong(String maHD) async {
+  Future<ApiResponse<HopDongModel>> layChiTietHopDong(String maHD, {int? maUser}) async {
     try {
+      final query = (maUser != null && maUser > 0) ? '?maUser=$maUser' : '';
       final response = await _apiClient.get<Map<String, dynamic>>(
-        '${ApiEndpoints.chiTietHopDong}/$maHD',
+        '${ApiEndpoints.chiTietHopDong}/$maHD$query',
       );
       final body = response.data is Map<String, dynamic>
           ? response.data as Map<String, dynamic>

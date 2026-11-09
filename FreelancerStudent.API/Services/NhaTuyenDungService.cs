@@ -2,6 +2,7 @@ using System.Reflection.Metadata.Ecma335;
 using FreelancerStudent.API.Data;
 using FreelancerStudent.API.DTOs.ReponseDTOs;
 using FreelancerStudent.API.DTOs.ReponsesDTO;
+using FreelancerStudent.API.DTOs.RequestDTOs;
 using FreelancerStudent.API.Helper;
 using FreelancerStudent.API.Models;
 using FreelancerStudent.API.Repositories.Interfaces;
@@ -175,6 +176,44 @@ namespace FreelancerStudent.API.Services
                     Soluongtuyen = j.soluongtuyen
                 }).ToList()
             };
+        }
+
+        public async Task<bool> capNhatThongTinNTDAsync(CapNhatThongTinNhaTuyenDung_RequestDTO dto)
+        {
+            if (dto == null || dto.maUser <= 0)
+            {
+                throw new ArgumentException("Thông tin tài khoản không hợp lệ.");
+            }
+
+            dto.tencongty = dto.tencongty?.Trim();
+            dto.linhvuc = dto.linhvuc?.Trim();
+            dto.diachi = dto.diachi?.Trim();
+            dto.link = dto.link?.Trim();
+            dto.hotenNguoiDaiDien = dto.hotenNguoiDaiDien?.Trim();
+            dto.sdtLienHe = dto.sdtLienHe?.Trim();
+
+            return await _nhaTuyenDungRepository.capNhatThongTinNTDAsync(dto);
+        }
+
+        public async Task<bool> capNhatGioiThieuNTDAsync(CapNhatGioiThieuNhaTuyenDung_RequestDTO dto)
+        {
+            if (dto == null || dto.maUser <= 0)
+            {
+                throw new ArgumentException("Thông tin tài khoản không hợp lệ.");
+            }
+
+            var noiDung = dto.gioithieu?.Trim();
+            return await _nhaTuyenDungRepository.capNhatGioiThieuNTDAsync(dto.maUser, noiDung);
+        }
+
+        public async Task<bool> capNhatLogoNTDAsync(int maUser, string logoUrl)
+        {
+            if (maUser <= 0 || string.IsNullOrWhiteSpace(logoUrl))
+            {
+                throw new ArgumentException("Thông tin cập nhật ảnh không hợp lệ.");
+            }
+
+            return await _nhaTuyenDungRepository.capNhatLogoNTDAsync(maUser, logoUrl.Trim());
         }
     }
 }

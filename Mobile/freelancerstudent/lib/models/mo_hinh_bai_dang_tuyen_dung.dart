@@ -22,6 +22,10 @@ class JobPostModel {
   final DateTime? ngaydang;
   final double? phiDangBai;
 
+  DateTime? get hannophoso =>
+      thoigiandukienhoanthanh ??
+      (ngayHetHan != null ? DateTime.tryParse(ngayHetHan!) : null);
+
   // Thuộc tính gợi ý công việc phù hợp
   final double? doPhuHop;
   final String? lyDoGoiY;

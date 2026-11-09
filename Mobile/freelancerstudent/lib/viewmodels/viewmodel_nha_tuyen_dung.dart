@@ -138,4 +138,68 @@ class NhaTuyenDungViewModel extends ChangeNotifier {
       return khopTuKhoa && khopLinhVuc;
     }).toList();
   }
+
+  /// Cập nhật thông tin nhà tuyển dụng
+  Future<bool> capNhatThongTinNTD({
+    required int maUser,
+    String? tencongty,
+    String? linhvuc,
+    String? diachi,
+    String? link,
+    String? hotenNguoiDaiDien,
+    String? sdtLienHe,
+  }) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final res = await _service.capNhatThongTinNTD(
+      maUser: maUser,
+      tencongty: tencongty,
+      linhvuc: linhvuc,
+      diachi: diachi,
+      link: link,
+      hotenNguoiDaiDien: hotenNguoiDaiDien,
+      sdtLienHe: sdtLienHe,
+    );
+
+    if (res.isSuccess) {
+      await taiProfileNhaTuyenDungTheoUser(maUser);
+      _dangTai = false;
+      notifyListeners();
+      return true;
+    } else {
+      _thongBaoLoi = res.message;
+      _dangTai = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Cập nhật giới thiệu nhà tuyển dụng
+  Future<bool> capNhatGioiThieuNTD({
+    required int maUser,
+    String? gioithieu,
+  }) async {
+    _dangTai = true;
+    _thongBaoLoi = null;
+    notifyListeners();
+
+    final res = await _service.capNhatGioiThieuNTD(
+      maUser: maUser,
+      gioithieu: gioithieu,
+    );
+
+    if (res.isSuccess) {
+      await taiProfileNhaTuyenDungTheoUser(maUser);
+      _dangTai = false;
+      notifyListeners();
+      return true;
+    } else {
+      _thongBaoLoi = res.message;
+      _dangTai = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }

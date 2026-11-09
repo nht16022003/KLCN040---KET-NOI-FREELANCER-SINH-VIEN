@@ -3,59 +3,37 @@
     ViewData["Title"] = "Điều chỉnh Số dư Ví";
 }
 
-<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
-    <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb small mb-1">
-                    <li class="breadcrumb-item"><a href="/Admin" class="text-decoration-none text-muted">Quản trị</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Điều chỉnh Số dư Ví</li>
-                </ol>
-            </nav>
-            <h3 class="fw-bold text-dark mb-1">Điều chỉnh Số dư Ví</h3>
-            <p class="text-muted small mb-0">Hỗ trợ cộng hoặc trừ số dư ví người dùng trong các trường hợp bồi hoàn, hoàn tiền hoặc xử lý sự cố thanh toán.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="/Admin/DuyetRutTien" class="btn btn-outline-secondary btn-sm px-3">
-                Duyệt rút tiền
-            </a>
-            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-secondary btn-sm px-3">
-                Danh sách người dùng
-            </a>
-            <a href="/Admin/QuanLyHopDong" class="btn btn-outline-secondary btn-sm px-3">
-                Quản lý hợp đồng
-            </a>
-        </div>
-    </div>
+<div class="container-fluid px-3 px-md-4 py-3" style="background-color: #F8FAFC; min-height: 85vh;">
+    
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show border mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show border mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
 
-    <div class="row g-4">
-        <!-- Adjustment Form -->
+    <!-- Bố cục 2 cột: Biểu mẫu tạo lệnh và Lịch sử điều chỉnh -->
+    <div class="row g-3">
+        <!-- Cột trái: Form điều chỉnh -->
         <div class="col-12 col-lg-5">
-            <div class="card border rounded-3 bg-white p-4">
-                <h5 class="fw-bold text-dark mb-3">Tạo lệnh điều chỉnh số dư</h5>
+            <div class="border bg-white p-3 h-100">
+                <h2 class="h6 fw-bold text-dark mb-3 pb-2 border-bottom">Tạo lệnh điều chỉnh số dư</h2>
 
                 <form method="post" asp-action="DieuChinhSoDu">
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Chọn ví người dùng <span class="text-danger">*</span></label>
-                        <select asp-for="FormModel.MaWallet" class="form-select bg-light">
+                        <label class="form-label small fw-semibold text-dark mb-1">Chọn ví người dùng <span class="text-danger">*</span></label>
+                        <select asp-for="FormModel.MaWallet" class="form-select form-select-sm">
                             @foreach (var w in Model.Wallets)
                             {
                                 <option value="@w.MaWallet">
@@ -67,17 +45,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Loại điều chỉnh <span class="text-danger">*</span></label>
-                        <div class="d-flex gap-4 mt-1">
+                        <label class="form-label small fw-semibold text-dark mb-1">Loại điều chỉnh <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-4 pt-1">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" asp-for="FormModel.LoaiDieuChinh" id="typeAdd" value="CongTien" checked />
-                                <label class="form-check-label text-success fw-semibold" for="typeAdd">
+                                <label class="form-check-label text-success fw-semibold small" for="typeAdd">
                                     Cộng tiền (Tăng số dư)
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" asp-for="FormModel.LoaiDieuChinh" id="typeSub" value="TruTien" />
-                                <label class="form-check-label text-danger fw-semibold" for="typeSub">
+                                <label class="form-check-label text-danger fw-semibold small" for="typeSub">
                                     Trừ tiền (Giảm số dư)
                                 </label>
                             </div>
@@ -85,45 +63,43 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Số tiền điều chỉnh (VNĐ) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="number" asp-for="FormModel.SoTien" class="form-control bg-light" step="1000" min="1000" />
+                        <label class="form-label small fw-semibold text-dark mb-1">Số tiền điều chỉnh (VNĐ) <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" asp-for="FormModel.SoTien" class="form-control" step="1000" min="1000" />
                             <span class="input-group-text bg-light">VNĐ</span>
                         </div>
                         <span asp-validation-for="FormModel.SoTien" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Lý do điều chỉnh (Kiểm toán) <span class="text-danger">*</span></label>
-                        <textarea asp-for="FormModel.LyDo" class="form-control bg-light" rows="3" placeholder="Nhập lý do điều chỉnh số dư để lưu nhật ký kiểm toán..."></textarea>
+                        <label class="form-label small fw-semibold text-dark mb-1">Lý do điều chỉnh (Kiểm toán) <span class="text-danger">*</span></label>
+                        <textarea asp-for="FormModel.LyDo" class="form-control form-control-sm" rows="3" placeholder="Nhập căn cứ xử lý bồi hoàn, đối soát hoặc bù trừ số dư..."></textarea>
                         <span asp-validation-for="FormModel.LyDo" class="text-danger small"></span>
                     </div>
 
-                    <div class="p-3 bg-light border rounded-3 mb-3 small text-muted">
-                        Lưu ý: Mọi thao tác điều chỉnh sẽ thay đổi trực tiếp số dư ví và được tự động ghi nhận vào sổ kiểm toán nhật ký hệ thống.
-                    </div>
+                    
 
-                    <button type="submit" class="btn btn-dark w-100 py-2 fw-semibold" onclick="return confirm('Bạn có chắc chắn muốn thực hiện điều chỉnh số dư này?');">
-                        Xác nhận điều chỉnh
+                    <button type="submit" class="btn btn-sm btn-dark w-100 py-2 fw-semibold" onclick="return confirm('Xác nhận thực hiện lệnh điều chỉnh số dư này?');">
+                        Xác nhận điều chỉnh số dư
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- Adjustment History -->
+        <!-- Cột phải: Lịch sử điều chỉnh -->
         <div class="col-12 col-lg-7">
-            <div class="card border rounded-3 bg-white p-4">
-                <h5 class="fw-bold text-dark mb-3">Nhật ký điều chỉnh số dư</h5>
+            <div class="border bg-white p-3 h-100">
+                <h2 class="h6 fw-bold text-dark mb-3 pb-2 border-bottom">Nhật ký điều chỉnh số dư ví</h2>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-bordered table-hover align-middle mb-0">
                         <thead class="table-light text-muted small">
                             <tr>
-                                <th>Mã</th>
-                                <th>Ví</th>
-                                <th>Loại</th>
+                                <th style="width: 60px;">Mã</th>
+                                <th style="width: 80px;">Ví</th>
+                                <th style="width: 100px;">Loại</th>
                                 <th>Số tiền</th>
-                                <th>Biến động</th>
+                                <th>Biến động số dư</th>
                                 <th>Lý do</th>
                                 <th>Thời gian</th>
                             </tr>
@@ -132,7 +108,7 @@
                             @if (!Model.LichSuDieuChinhs.Any())
                             {
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">Chưa có lịch sử điều chỉnh số dư nào.</td>
+                                    <td colspan="7" class="text-center py-4 text-muted small">Chưa có lịch sử điều chỉnh số dư nào trong hệ thống.</td>
                                 </tr>
                             }
                             else
@@ -140,19 +116,19 @@
                                 @foreach (var dc in Model.LichSuDieuChinhs)
                                 {
                                     <tr>
-                                        <td class="fw-bold text-dark small">#@dc.MaDieuChinh</td>
-                                        <td class="small">Ví #@dc.MaWallet</td>
+                                        <td class="small fw-bold text-dark">#@dc.MaDieuChinh</td>
+                                        <td class="small text-muted">Ví #@dc.MaWallet</td>
                                         <td>
                                             @if (dc.LoaiDieuChinh == "CongTien")
                                             {
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle small">+ Cộng tiền</span>
+                                                <span class="badge bg-light text-success border border-success small">+ Cộng</span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">- Trừ tiền</span>
+                                                <span class="badge bg-light text-danger border border-danger small">- Trừ</span>
                                             }
                                         </td>
-                                        <td class="fw-bold small @(dc.LoaiDieuChinh == "CongTien" ? "text-success" : "text-danger")">
+                                        <td class="small fw-bold @(dc.LoaiDieuChinh == "CongTien" ? "text-success" : "text-danger")">
                                             @dc.SoTienDieuChinh.ToString("N0") đ
                                         </td>
                                         <td class="small text-muted font-monospace">

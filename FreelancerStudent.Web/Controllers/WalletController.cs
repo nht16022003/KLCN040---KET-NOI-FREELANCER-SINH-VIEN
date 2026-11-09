@@ -182,6 +182,58 @@ namespace FreelancerStudent.Web.Controllers
         }
 
         // =====================================================
+        // TẢI ẢNH BIÊN LAI MINH CHỨNG CHUYỂN TIỀN
+        // =====================================================
+        [HttpPost]
+        public async Task<IActionResult> UploadBienLai([FromForm] string maGiaoDich, [FromForm] IFormFile file)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập để thực hiện." });
+            }
+
+            if (string.IsNullOrWhiteSpace(maGiaoDich) || file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Vui lòng chọn ảnh biên lai chuyển tiền." });
+            }
+
+            var ketQua = await _giaoDichNapTienWebService.uploadBienLai(maGiaoDich, file);
+            return Json(new
+            {
+                success = ketQua.success,
+                message = ketQua.message,
+                fileUrl = ketQua.data
+            });
+        }
+
+        // =====================================================
+        // TẢI ẢNH MÃ QR NHẬN TIỀN CỦA FREELANCER
+        // =====================================================
+        [HttpPost]
+        public async Task<IActionResult> UploadQrRutTien([FromForm] IFormFile file)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập để thực hiện." });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Vui lòng chọn ảnh mã QR." });
+            }
+
+            var ketQua = await _walletWebService.uploadQrRutTien(file);
+            return Json(new
+            {
+                success = ketQua.success,
+                message = ketQua.message,
+                fileUrl = ketQua.data
+            });
+        }
+
+        // =====================================================
         // TẠO YÊU CẦU RÚT TIỀN MÔ PHỎNG
         // =====================================================
         [HttpPost]

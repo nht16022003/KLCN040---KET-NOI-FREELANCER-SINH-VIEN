@@ -1,0 +1,551 @@
+@using FreelancerStudent.Web.ViewModels
+@model ChonJobThueFreelancerViewModel
+
+@{
+    ViewData["Title"] = "Chọn công việc để thuê Freelancer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fl = Model.FreelancerCard;
+    var tenUser = !string.IsNullOrWhiteSpace(Model.TenFreelancer) ? Model.TenFreelancer : "Sinh viên Freelancer";
+    var rawAvt = fl?.avatar ?? Model.AvatarFreelancer;
+    var avatarUrl = !string.IsNullOrEmpty(rawAvt)
+        ? (rawAvt.StartsWith("http", StringComparison.OrdinalIgnoreCase) || rawAvt.StartsWith("/") ? rawAvt : "/" + rawAvt)
+        : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(tenUser)}&background=E8F5E9&color=1B5E36&size=120";
+
+    var chuyenNganh = !string.IsNullOrWhiteSpace(fl?.tenChuyenNganh) ? fl.tenChuyenNganh : (!string.IsNullOrWhiteSpace(Model.ChuyenNganh) ? Model.ChuyenNganh : "Công nghệ thông tin");
+    var tenTruong = !string.IsNullOrWhiteSpace(fl?.tenTruong) ? fl.tenTruong : (!string.IsNullOrWhiteSpace(Model.TruongDaiHoc) ? Model.TruongDaiHoc : "Đại học");
+    var namThu = fl?.namThu ?? Model.NamThu;
+    var gpa = fl?.GPA ?? Model.GPA;
+    var soSao = fl?.diemDanhGiaTrungBinh ?? Model.SoSaoDanhGia ?? 0;
+    var soLuotDanhGia = fl?.soLuotDanhGia ?? Model.SoLuotDanhGia;
+    var bio = !string.IsNullOrWhiteSpace(fl?.gioithieu) ? fl.gioithieu : (!string.IsNullOrWhiteSpace(Model.GioiThieu) ? Model.GioiThieu : "Sinh viên nhiệt tình, chủ động học hỏi và cam kết hoàn thành dự án đúng tiến độ bàn giao.");
+    var isNhanViec = fl?.trangthaiNhanViec ?? Model.TrangthaiNhanViec;
+    var chiPhiTu = fl?.chiPhiTu ?? Model.ChiPhiTu;
+
+    var skills = fl?.danhSachKyNang != null && fl.danhSachKyNang.Any()
+        ? fl.danhSachKyNang
+        : (Model.DanhSachKyNang != null && Model.DanhSachKyNang.Any() 
+            ? Model.DanhSachKyNang 
+            : (!string.IsNullOrWhiteSpace(fl?.kyNangCoBan) 
+                ? fl.kyNangCoBan.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList() 
+                : new List<string>()));
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/FreelancerStudent/Search" class="text-decoration-none text-muted">Khám phá Freelancer</a></li>
+            <li class="breadcrumb-item"><a href="/FreelancerStudent/Profile?maFreelancerStudents=@Model.MaFreelancerStudent" class="text-decoration-none text-muted">Hồ sơ @tenUser</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Chọn bài tuyển dụng để thuê</li>
+        </ol>
+    </nav>
+
+    <!-- BỐ CỤC 2 CỘT NẰM CẠNH NHAU (DESKTOP: 35% / 65%, MOBILE: 1 CỘT) -->
+    <div class="row g-4 align-items-start">
+
+        <!-- ==================== CỘT TRÁI (35%): THẺ THÔNG TIN FREELANCER (STYLE CHUẨN TRANG SEARCH) ==================== -->
+        <div class="col-12 col-lg-5 col-xl-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">
+                    <i class="bi bi-person-check-fill me-1 text-success"></i> Ứng viên đang chọn
+                </span>
+                <span class="badge bg-success-subtle text-success border border-success rounded-0" style="font-size: 0.72rem;">
+                    Mã SV: #@Model.MaFreelancerStudent
+                </span>
+            </div>
+
+            <div class="freelancer-card shadow-sm">
+                <!-- Phần trên: Banner xanh lá đậm trực quan -->
+                <div class="freelancer-card-top-banner">
+                    <div class="card-top-profile">
+                        <img src="@avatarUrl" alt="@tenUser" class="student-avatar"
+                             onerror="this.src='https://ui-avatars.com/api/?name=@Uri.EscapeDataString(tenUser)&background=E8F5E9&color=1B5E36';" />
+
+                        <div class="overflow-hidden flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start gap-1">
+                                <a href="/FreelancerStudent/Profile?maFreelancerStudents=@Model.MaFreelancerStudent" 
+                                   target="_blank" 
+                                   class="student-name-link text-truncate" 
+                                   title="Xem hồ sơ @tenUser">
+                                    @tenUser
+                                </a>
+                                <span class="status-badge-inline @(isNhanViec ? "status-available" : "status-busy")">
+                                    @(isNhanViec ? "Nhận việc" : "Tạm ngưng")
+                                </span>
+                            </div>
+
+                            <div class="student-major-sub text-truncate">
+                                @chuyenNganh
+                            </div>
+
+                            <div class="student-school-sub text-truncate">
+                                @tenTruong · Năm @namThu
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phần thân: Chỉ số đánh giá, điểm học tập, mô tả & kỹ năng -->
+                <div class="freelancer-card-body">
+                    <div class="metrics-grid-compact">
+                        <div>
+                            <span class="text-muted" style="font-size: 0.72rem;">Điểm đánh giá:</span>
+                            @if (soLuotDanhGia > 0)
+                            {
+                                <span class="metric-compact-val rating">
+                                    ★ @soSao.ToString("0.0")/5.0 (@soLuotDanhGia)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="metric-compact-val rating-none">Chưa có đánh giá</span>
+                            }
+                        </div>
+
+                        <div>
+                            <span class="text-muted" style="font-size: 0.72rem;">Điểm học tập:</span>
+                            <span class="metric-compact-val">
+                                @(gpa > 0 ? $"GPA {gpa:0.00}/4.0" : "Đang cập nhật")
+                            </span>
+                        </div>
+                    </div>
+
+                    <p class="student-bio-text">
+                        @bio
+                    </p>
+
+                    <!-- Danh sách kỹ năng nổi bật -->
+                    <div class="mb-3">
+                        <div class="text-muted small fw-bold mb-1" style="font-size: 0.75rem;">Kỹ năng nổi bật:</div>
+                        @if (skills != null && skills.Any())
+                        {
+                            @foreach (var sk in skills.Take(5))
+                            {
+                                <span class="skill-tag-item">@sk</span>
+                            }
+                            @if (skills.Count > 5)
+                            {
+                                <span class="skill-tag-item text-muted">+@(skills.Count - 5)</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted small fst-italic">Đang cập nhật kỹ năng</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Phần chân: Thù lao tham khảo & Nút Xem hồ sơ -->
+                <div class="card-bottom-actions">
+                    <div>
+                        <span class="fee-refer-text d-block">Thù lao từ:</span>
+                        <span class="fee-refer-amount">
+                            @(chiPhiTu.HasValue && chiPhiTu > 0 
+                                ? chiPhiTu.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" 
+                                : "Thỏa thuận")
+                        </span>
+                    </div>
+
+                    <a href="/FreelancerStudent/Profile?maFreelancerStudents=@Model.MaFreelancerStudent" 
+                       target="_blank" 
+                       class="btn-view-profile"
+                       title="Mở hồ sơ chi tiết của @tenUser">
+                        <i class="bi bi-box-arrow-up-right"></i> Xem hồ sơ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CỘT PHẢI (65%): QUY TRÌNH THUÊ VÀ CHỌN BÀI TUYỂN DỤNG ==================== -->
+        <div class="col-12 col-lg-7 col-xl-8">
+            <div class="card border rounded-0 shadow-sm bg-white p-4">
+                
+                <!-- 1. Header khu vực chọn việc -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom pb-3 mb-3">
+                    <div>
+                        <h4 class="fw-bold text-success mb-1">
+                            <i class="bi bi-briefcase-fill me-2"></i> Thuê Freelancer Sinh Viên
+                        </h4>
+                        <p class="text-muted small mb-0">
+                            Chọn một bài đăng tuyển dụng đang mở của bạn để gắn vào đề xuất thuê ứng viên này.
+                        </p>
+                    </div>
+
+                    <!-- Nút đăng tin mới nếu cần -->
+                    <a href="@Url.Action("Create", "JobPost")" class="btn btn-sm btn-outline-success rounded-0 text-nowrap px-3 py-2 fw-semibold">
+                        <i class="bi bi-plus-lg me-1"></i> Đăng tin mới
+                    </a>
+                </div>
+
+                <!-- 2. Thanh tiến trình 3 bước -->
+                <div class="process-steps-bar mb-4 p-3 bg-light border rounded-0">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="step-item active">
+                            <span class="step-number">1</span>
+                            <span class="step-text">Chọn bài tuyển dụng</span>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted d-none d-sm-inline"></i>
+                        <div class="step-item text-muted">
+                            <span class="step-number disabled">2</span>
+                            <span class="step-text">Xác nhận & Đề xuất</span>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted d-none d-sm-inline"></i>
+                        <div class="step-item text-muted">
+                            <span class="step-number disabled">3</span>
+                            <span class="step-text">Chờ phản hồi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Danh sách bài đăng tuyển dụng đang mở -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-list-task me-1 text-success"></i> Danh sách bài tuyển dụng đang mở (@Model.DanhSachJob.Count)
+                    </h6>
+                    <span class="text-muted small">Vui lòng chọn 1 bài đăng để tiếp tục</span>
+                </div>
+
+                @if (Model.DanhSachJob != null && Model.DanhSachJob.Count > 0)
+                {
+                    <form asp-action="XacNhanThueFreelancer" asp-controller="NhaTuyenDung" method="get">
+                        <input type="hidden" name="maFreelancerStudent" value="@Model.MaFreelancerStudent" />
+
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            @for (int i = 0; i < Model.DanhSachJob.Count; i++)
+                            {
+                                var job = Model.DanhSachJob[i];
+                                bool isChecked = i == 0;
+
+                                <label class="job-card-option border rounded-0 p-3 transition-all cursor-pointer @(isChecked ? "border-success bg-light is-selected" : "")" style="cursor: pointer;">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="pt-1">
+                                            <input type="radio" name="maJob" value="@job.maJob" class="form-check-input" @(isChecked ? "checked" : "") required />
+                                        </div>
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-1">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1 text-dark">
+                                                        <span class="badge bg-success text-white rounded-0 me-1" style="background-color: #1B5E36 !important; font-size: 0.72rem;">#@job.maJob</span>
+                                                        @job.tieude
+                                                    </h6>
+                                                </div>
+                                                <div class="text-danger fw-bold fs-6 text-md-end text-nowrap">
+                                                    @(job.thulao.HasValue ? job.thulao.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                                                </div>
+                                            </div>
+
+                                            @if (!string.IsNullOrEmpty(job.mota))
+                                            {
+                                                <p class="text-muted small mb-2 text-truncate-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.45;">
+                                                    @job.mota
+                                                </p>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(job.kynangyeucau))
+                                            {
+                                                <div class="mb-2">
+                                                    @foreach (var k in job.kynangyeucau.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Take(4))
+                                                    {
+                                                        <span class="badge bg-light text-secondary border rounded-0 small me-1">@k.Trim()</span>
+                                                    }
+                                                </div>
+                                            }
+
+                                            <div class="d-flex flex-wrap align-items-center gap-3 text-muted small pt-1 border-top border-light">
+                                                <span><i class="bi bi-calendar-check me-1 text-success"></i>Hạn: @(job.thoigiandukienhoanthanh != DateTime.MinValue ? job.thoigiandukienhoanthanh.ToString("dd/MM/yyyy") : "Chưa đặt")</span>
+                                                @if (job.soluongtuyen.HasValue)
+                                                {
+                                                    <span><i class="bi bi-people me-1 text-success"></i>Cần tuyển: @job.soluongtuyen bạn</span>
+                                                }
+                                                <span><i class="bi bi-send-check me-1 text-success"></i>Đã nộp: @job.soLuongUngTuyen</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            }
+                        </div>
+
+                        <!-- 4. Thanh điều hướng thao tác -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
+                            <a href="/FreelancerStudent/Profile?maFreelancerStudents=@Model.MaFreelancerStudent" 
+                               class="btn btn-outline-secondary rounded-0 px-4 py-2">
+                                <i class="bi bi-arrow-left me-1"></i> Quay lại hồ sơ
+                            </a>
+                            <button type="submit" class="btn btn-success rounded-0 px-5 py-2 fw-bold shadow-sm" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                Tiếp tục xác nhận <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-5 border bg-light">
+                        <i class="bi bi-folder-x fs-1 text-muted d-block mb-3"></i>
+                        <h5 class="fw-bold text-dark">Bạn chưa có bài đăng tuyển dụng nào đang mở</h5>
+                        <p class="text-muted small mx-auto mb-4" style="max-width: 480px;">
+                            Để gửi đề xuất thuê Freelancer sinh viên trực tiếp, bạn cần có ít nhất một bài đăng tuyển dụng đang hoạt động để làm căn cứ lập hợp đồng và ký quỹ.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="/FreelancerStudent/Profile?maFreelancerStudents=@Model.MaFreelancerStudent" class="btn btn-outline-secondary rounded-0 px-4 py-2">
+                                <i class="bi bi-arrow-left me-1"></i> Quay lại
+                            </a>
+                            <a href="@Url.Action("Create", "JobPost")" class="btn btn-success rounded-0 px-4 py-2 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                <i class="bi bi-plus-circle me-1"></i> Đăng tin tuyển dụng ngay
+                            </a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ==================== CSS CHO BỐ CỤC 2 CỘT & THẺ FREELANCER ==================== -->
+<style>
+    /* Card Freelancer phong cách chuẩn /FreelancerStudent/Search */
+    .freelancer-card {
+        background: #FFFFFF;
+        border: 1px solid #DCE8E0;
+        border-radius: 16px !important;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.25s ease;
+    }
+
+    .freelancer-card-top-banner {
+        background: linear-gradient(135deg, #0D2818 0%, #1B5E36 60%, #2B7A4B 100%);
+        padding: 18px 20px 14px 20px;
+        color: #FFFFFF;
+    }
+
+    .card-top-profile {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 0;
+    }
+
+    .student-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px !important;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        background-color: #FFFFFF;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .student-name-link {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #FFFFFF;
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .student-name-link:hover {
+        color: #A7F3D0;
+    }
+
+    .student-major-sub {
+        color: #A7F3D0;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-top: 3px;
+    }
+
+    .student-school-sub {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.78rem;
+        margin-top: 2px;
+    }
+
+    .status-badge-inline {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px !important;
+        white-space: nowrap;
+    }
+
+    .status-available {
+        background-color: #A7F3D0;
+        color: #064E3B;
+    }
+
+    .status-busy {
+        background-color: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .freelancer-card-body {
+        padding: 18px 20px 14px 20px;
+        flex-grow: 1;
+    }
+
+    .metrics-grid-compact {
+        background-color: #F4F9F6;
+        border: 1px solid #D5E8DC;
+        border-radius: 10px !important;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+
+    .metric-compact-val {
+        font-weight: 800;
+        color: #0D2818;
+        display: block;
+    }
+
+    .metric-compact-val.rating {
+        color: #B45309;
+    }
+
+    .metric-compact-val.rating-none {
+        color: #64748B;
+        font-weight: 600;
+    }
+
+    .student-bio-text {
+        font-size: 0.84rem;
+        color: #334155;
+        line-height: 1.5;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .skill-tag-item {
+        background-color: #EAF5EE;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+        border-radius: 6px !important;
+        font-size: 0.74rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .card-bottom-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        background: #FAFCFB;
+        border-top: 1px solid #E2E8F0;
+        margin-top: auto;
+    }
+
+    .fee-refer-text {
+        font-size: 0.75rem;
+        color: #64748B;
+    }
+
+    .fee-refer-amount {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #1B5E36;
+    }
+
+    .btn-view-profile {
+        background-color: #2B7A4B;
+        color: #FFFFFF !important;
+        border: 1px solid #2B7A4B;
+        border-radius: 8px !important;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-view-profile:hover {
+        background-color: #144327;
+        border-color: #144327;
+        color: #FFFFFF !important;
+    }
+
+    /* Process steps bar */
+    .step-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+    }
+
+    .step-item.active {
+        font-weight: 800;
+        color: #1B5E36;
+    }
+
+    .step-number {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background-color: #1B5E36;
+        color: #FFFFFF;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .step-number.disabled {
+        background-color: #E2E8F0;
+        color: #64748B;
+    }
+
+    /* Job Card Option */
+    .job-card-option {
+        border-color: #E2E8F0 !important;
+        background-color: #FFFFFF;
+        transition: all 0.2s ease;
+    }
+
+    .job-card-option:hover {
+        border-color: #2B7A4B !important;
+        background-color: #F8FAF9;
+    }
+
+    .job-card-option.is-selected {
+        border-color: #1B5E36 !important;
+        border-width: 2px !important;
+        background-color: #F4F9F6 !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.job-card-option').forEach(card => {
+            card.addEventListener('click', function () {
+                document.querySelectorAll('.job-card-option').forEach(c => {
+                    c.classList.remove('is-selected');
+                    c.style.borderWidth = '1px';
+                });
+                this.classList.add('is-selected');
+                this.style.borderWidth = '2px';
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+            });
+        });
+    </script>
+}

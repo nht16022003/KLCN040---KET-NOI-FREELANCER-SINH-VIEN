@@ -33,7 +33,7 @@ namespace FreelancerStudent.Web.Controllers
             if (!maUser.HasValue)
                 return RedirectToAction("DangNhap", "Account");
 
-            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(maHD);
+            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(maHD, maUser.Value);
 
             if (hopDong == null)
                 return NotFound();
@@ -104,7 +104,7 @@ namespace FreelancerStudent.Web.Controllers
                     new { maHD = model.MaHD });
             }
 
-            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(model.MaHD);
+            var hopDong = await _hopDongService.LayChiTietTheoMaAsync(model.MaHD, maUser.Value);
             if (hopDong == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy thông tin hợp đồng.";

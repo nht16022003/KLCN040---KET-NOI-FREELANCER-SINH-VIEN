@@ -258,6 +258,48 @@ namespace FreelancerStudent.Web.Services
             }
         }
 
+        public async Task<ApiReponse<List<AdminYeuCauNapTienItemViewModel>>> LayDanhSachYeuCauNapTienAsync(string? trangThai)
+        {
+            try
+            {
+                var url = string.IsNullOrWhiteSpace(trangThai) || trangThai == "TatCa"
+                    ? "api/Admin/YeuCauNapTien"
+                    : $"api/Admin/YeuCauNapTien?trangThai={Uri.EscapeDataString(trangThai)}";
+
+                var response = await _guiRequest.GetAsync(url);
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiReponse<List<AdminYeuCauNapTienItemViewModel>>>(json, _jsonOptions);
+                return result ?? new ApiReponse<List<AdminYeuCauNapTienItemViewModel>> { success = false, message = "Không phân tích được phản hồi từ API" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<List<AdminYeuCauNapTienItemViewModel>> { success = false, message = "Lỗi kết nối API: " + ex.Message };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> XuLyNapTienAsync(AdminXuLyNapTienPostModel model, int maAdmin)
+        {
+            try
+            {
+                var reqObj = new
+                {
+                    MaGiaoDich = model.MaGiaoDich,
+                    ChapNhan = model.ChapNhan,
+                    LyDoTuChoi = model.LyDoTuChoi,
+                    MaAdmin = maAdmin
+                };
+
+                var response = await _guiRequest.PostAsJsonAsync("api/Admin/XuLyNapTien", reqObj);
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiReponse<bool>>(json, _jsonOptions);
+                return result ?? new ApiReponse<bool> { success = response.IsSuccessStatusCode, message = response.IsSuccessStatusCode ? "Thành công" : "Thao tác thất bại" };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool> { success = false, message = "Lỗi kết nối API: " + ex.Message };
+            }
+        }
+
         public async Task<ApiReponse<List<AdminCauHinhPhiViewModel>>> LayDanhSachCauHinhPhiAsync()
         {
             try

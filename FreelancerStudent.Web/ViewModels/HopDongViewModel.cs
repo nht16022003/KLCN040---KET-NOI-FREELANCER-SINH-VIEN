@@ -130,8 +130,9 @@ namespace FreelancerStudent.Web.ViewModels
         public string? chuyenNganhFreelancer { get; set; }
         public string? avatarFreelancer { get; set; }
 
-        // Thông tin ứng tuyển
+        // Thông tin ứng tuyển / yêu cầu thuê
         public int? maUngTuyen { get; set; }
+        public int? maYeuCauThue { get; set; }
         public decimal? thulaoDeXuat { get; set; }
         public string? camKetThoiGian { get; set; }
 

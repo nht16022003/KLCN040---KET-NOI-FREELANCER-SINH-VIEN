@@ -81,9 +81,35 @@ class LichSuGiaoDichModel {
     this.ngayTao,
   });
 
+  /// Quy tắc 2 lớp xác định giao dịch cộng tiền (Tiền vào ví)
   bool get laGiaoDichCong {
-    final loai = loaiGiaoDich.toLowerCase();
-    return loai.contains('nap') || loai.contains('nhantien') || loai.contains('hoan') || loai.contains('cong');
+    // LỚP 1: Kiểm tra toán học đối soát biến động số dư
+    if (soDuSauGD > soDuTruocGD) {
+      return true;
+    }
+    if (soDuSauGD < soDuTruocGD) {
+      return false;
+    }
+
+    // LỚP 2: Khớp danh mục whitelist loại giao dịch tiền vào
+    final loai = loaiGiaoDich.toLowerCase().trim();
+    const danhSachCong = [
+      'naptien',
+      'nhanthulao',
+      'nhantienhopdong',
+      'nhantien',
+      'hoantien',
+      'hoantienhopdong',
+      'hoantienrut',
+      'admincongtien',
+      'dieuchinhcong',
+    ];
+
+    return danhSachCong.any((item) => loai.contains(item)) ||
+        loai.contains('nap') ||
+        loai.contains('thulao') ||
+        loai.contains('hoan') ||
+        loai.contains('cong');
   }
 
   factory LichSuGiaoDichModel.fromJson(Map<String, dynamic> json) {

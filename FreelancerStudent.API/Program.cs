@@ -70,6 +70,8 @@ builder.Services.AddScoped<IBaiDangTimViecRepository, BaiDangTimViecRepository>(
 builder.Services.AddScoped<IBaiDangTimViecService, BaiDangTimViecService>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IUngThueRepository, UngThueRepository>();
+builder.Services.AddScoped<IUngThueService, UngThueService>();
 builder.Services.AddScoped<IGiaoDichNapTienRepository, GiaoDichNapTienRepository>();
 builder.Services.AddScoped<IGiaoDichNapTienService, GiaoDichNapTienService>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();

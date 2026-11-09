@@ -1,4 +1,6 @@
-﻿import '../core/constants/diem_cuoi_api.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import '../core/constants/diem_cuoi_api.dart';
 import '../core/network/trinh_khach_api.dart';
 import '../core/network/phan_hoi_api.dart';
 import '../core/utils/tien_ich_loi_api.dart';
@@ -135,6 +137,42 @@ class ChatService {
       return ApiResponse<ChatMessageModel>(
         isSuccess: false,
         message: layThongBaoLoiApi(e, macDinh: 'Không thể gửi tin nhắn.'),
+      );
+    }
+  }
+
+  /// Tải tệp hoặc hình ảnh lên chat (POST api/Chat/UploadFile)
+  Future<ApiResponse<Map<String, dynamic>>> uploadFileChat(File file) async {
+    try {
+      final fileName = file.path.split('/').last.split('\\').last;
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: fileName,
+        ),
+      });
+
+      final res = await _apiClient.post<Map<String, dynamic>>(
+        ApiEndpoints.uploadFileChat,
+        formData,
+      );
+
+      final body = _body(res.data);
+      if (body['success'] == true && body['data'] is Map<String, dynamic>) {
+        return ApiResponse<Map<String, dynamic>>(
+          isSuccess: true,
+          data: body['data'] as Map<String, dynamic>,
+          message: body['message']?.toString() ?? 'Tải tệp thành công!',
+        );
+      }
+      return ApiResponse<Map<String, dynamic>>(
+        isSuccess: false,
+        message: body['message']?.toString() ?? 'Tải tệp thất bại.',
+      );
+    } catch (e) {
+      return ApiResponse<Map<String, dynamic>>(
+        isSuccess: false,
+        message: layThongBaoLoiApi(e, macDinh: 'Không thể tải tệp lên.'),
       );
     }
   }

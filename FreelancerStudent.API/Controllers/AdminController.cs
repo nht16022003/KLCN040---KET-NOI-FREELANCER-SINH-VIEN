@@ -312,5 +312,54 @@ namespace FreelancerStudent.API.Controllers
                 return StatusCode(500, new { success = false, message = "Lỗi khi cập nhật phí đăng bài: " + ex.Message });
             }
         }
+        // ==========================================
+        // 8. QUẢN LÝ & DUYỆT NẠP TIỀN
+        // ==========================================
+        [HttpGet("YeuCauNapTien")]
+        public async Task<IActionResult> GetDanhSachYeuCauNapTien([FromQuery] string? trangThai)
+        {
+            try
+            {
+                var data = await _adminService.LayDanhSachYeuCauNapTienAsync(trangThai);
+                return Ok(new { success = true, data });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("XuLyNapTien")]
+        public async Task<IActionResult> XuLyNapTien([FromBody] AdminXuLyNapTienRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors = ModelState });
+            }
+
+            try
+            {
+                var result = await _adminService.XuLyYeuCauNapTienAsync(request);
+                return Ok(new
+                {
+                    success = result,
+                    message = request.ChapNhan
+                        ? $"Duyệt nạp tiền thành công cho giao dịch #{request.MaGiaoDich}!"
+                        : $"Đã từ chối giao dịch nạp tiền #{request.MaGiaoDich}!"
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
     }
 }

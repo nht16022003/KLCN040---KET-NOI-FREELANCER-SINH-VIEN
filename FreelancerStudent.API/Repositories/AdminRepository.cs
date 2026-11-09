@@ -624,5 +624,165 @@ namespace FreelancerStudent.API.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        // ==========================================
+        // 8. QUẢN LÝ & DUYỆT NẠP TIỀN
+        // ==========================================
+        public async Task<List<AdminYeuCauNapTienItemDTO>> LayDanhSachYeuCauNapTienAsync(string? trangThai)
+        {
+            var query = _context.GiaoDichNapTiens
+                .Include(g => g.Wallet)
+                    .ThenInclude(w => w!.User)
+                        .ThenInclude(u => u!.Roles)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(trangThai) && trangThai != "TatCa")
+            {
+                query = query.Where(g => g.trangThai == trangThai);
+            }
+
+            var list = await query
+                .OrderByDescending(g => g.ngayTao)
+                .ThenByDescending(g => g.maNapTien)
+                .ToListAsync();
+
+            // Lấy danh sách admin để map tên
+            var adminDict = await _context.Admins.ToDictionaryAsync(a => a.maAdmin, a => a.hotenAdmin);
+
+            return list.Select(g =>
+            {
+                // Kiểm tra hết hạn hiển thị
+                string status = g.trangThai ?? "DangXuLy";
+                if (status == "DangXuLy" && DateTime.Now > g.ngayHetHan)
+                {
+                    status = "HetHan";
+                }
+
+                string? tenAdmin = null;
+                if (g.maAdminXuLy.HasValue && adminDict.TryGetValue(g.maAdminXuLy.Value, out var name))
+                {
+                    tenAdmin = name;
+                }
+
+                return new AdminYeuCauNapTienItemDTO
+                {
+                    MaNapTien = g.maNapTien,
+                    MaWallet = g.maWallet,
+                    MaUser = g.Wallet?.maUser ?? 0,
+                    HoTenUser = g.Wallet?.User?.hotenUser ?? $"User #{g.Wallet?.maUser}",
+                    EmailUser = g.Wallet?.User?.emailUser ?? string.Empty,
+                    SdtUser = g.Wallet?.User?.sdtUser,
+                    RoleName = g.Wallet?.User?.Roles?.tenRole ?? (g.Wallet?.User?.maRole == 2 ? "Nhà tuyển dụng" : "Freelancer"),
+                    MaGiaoDich = g.maGiaoDich,
+                    SoTien = g.soTien,
+                    NoiDungChuyenKhoan = g.noiDungChuyenKhoan,
+                    AnhBienLai = g.maGiaoDichNganHang,
+                    TrangThai = status,
+                    NgayTao = g.ngayTao,
+                    NgayHetHan = g.ngayHetHan,
+                    NgayHoanThanh = g.ngayHoanThanh,
+                    MaAdminXuLy = g.maAdminXuLy,
+                    TenAdminXuLy = tenAdmin,
+                    SoDuKhaDungVi = g.Wallet?.soDuKhaDung ?? 0,
+                    SoDuDongBangVi = g.Wallet?.soDuDongBang ?? 0
+                };
+            }).ToList();
+        }
+
+        public async Task<bool> XuLyYeuCauNapTienAsync(AdminXuLyNapTienRequestDTO request)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            try
+            {
+                var giaoDich = await _context.GiaoDichNapTiens
+                    .Include(g => g.Wallet)
+                    .FirstOrDefaultAsync(g => g.maGiaoDich == request.MaGiaoDich);
+
+                if (giaoDich == null)
+                {
+                    throw new KeyNotFoundException($"Không tìm thấy giao dịch nạp tiền mã '{request.MaGiaoDich}'.");
+                }
+
+                if (giaoDich.Wallet == null)
+                {
+                    throw new InvalidOperationException("Không tìm thấy thông tin ví của giao dịch này.");
+                }
+
+                if (giaoDich.trangThai == "HoanThanh")
+                {
+                    throw new InvalidOperationException("Giao dịch này đã được hoàn thành trước đó.");
+                }
+
+                if (giaoDich.trangThai == "TuChoi")
+                {
+                    throw new InvalidOperationException("Giao dịch này đã bị từ chối trước đó.");
+                }
+
+                // Lấy mã Admin
+                int adminId = request.MaAdmin ?? 1;
+                var adminObj = await _context.Admins.FirstOrDefaultAsync();
+                if (adminObj != null && request.MaAdmin.HasValue)
+                {
+                    adminId = request.MaAdmin.Value;
+                }
+                else if (adminObj != null)
+                {
+                    adminId = adminObj.maAdmin;
+                }
+
+                var wallet = giaoDich.Wallet;
+                decimal soDuTruocGD = wallet.soDuKhaDung ?? 0;
+
+                if (request.ChapNhan)
+                {
+                    // PHÊ DUYỆT: Cộng tiền vào ví khả dụng
+                    wallet.soDuKhaDung = soDuTruocGD + giaoDich.soTien;
+                    giaoDich.trangThai = "HoanThanh";
+                    giaoDich.ngayHoanThanh = DateTime.Now;
+                    giaoDich.maAdminXuLy = adminId;
+
+                    _context.Wallets.Update(wallet);
+                    _context.GiaoDichNapTiens.Update(giaoDich);
+
+                    var lichSu = new LichSuGiaoDich
+                    {
+                        maWallet = wallet.maWallet,
+                        loaiGiaoDich = "NapTien",
+                        soTien = giaoDich.soTien,
+                        soDuTruocGD = soDuTruocGD,
+                        soDuSauGD = wallet.soDuKhaDung.Value,
+                        noiDung = $"Admin duyệt nạp tiền vào ví qua chuyển khoản ngân hàng ({giaoDich.maGiaoDich})",
+                        phuongThucThanhToan = "ChuyenKhoanNganHang",
+                        maGiaoDichNgoai = giaoDich.maGiaoDichNganHang ?? giaoDich.maGiaoDich,
+                        trangThai = "ThanhCong",
+                        ngayTao = DateTime.Now
+                    };
+                    await _context.LichSuGiaoDichs.AddAsync(lichSu);
+                }
+                else
+                {
+                    // TỪ CHỐI
+                    giaoDich.trangThai = "TuChoi";
+                    giaoDich.ngayHoanThanh = DateTime.Now;
+                    giaoDich.maAdminXuLy = adminId;
+                    if (!string.IsNullOrWhiteSpace(request.LyDoTuChoi))
+                    {
+                        // Lưu lý do từ chối vào nội dung chuyển khoản hoặc ghi chú
+                        giaoDich.noiDungChuyenKhoan += $" [Từ chối: {request.LyDoTuChoi.Trim()}]";
+                    }
+
+                    _context.GiaoDichNapTiens.Update(giaoDich);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

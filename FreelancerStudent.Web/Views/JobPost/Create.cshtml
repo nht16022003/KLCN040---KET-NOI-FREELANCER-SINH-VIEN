@@ -12,7 +12,7 @@
     }
 
     .create-job-container {
-        width: min(1180px, calc(100% - 40px));
+        width: min(1380px, calc(100% - 40px));
         margin: 0 auto;
     }
 
@@ -31,44 +31,286 @@
         color: #16864b;
     }
 
-    /* Banner */
-    .recruitment-banner {
+    /* Banner Đồ Họa CSS Gradient Project IMPROVE (Thay thế ảnh tĩnh vỡ 404) */
+    .recruitment-banner-hero {
         width: 100%;
+        background: #064321e4;
         border-radius: 0;
+        margin-bottom: 22px;
+        padding: 34px 38px;
+        color: #ffffff;
+        box-shadow: 0 8px 28px rgba(13, 40, 24, 0.10);
+        position: relative;
         overflow: hidden;
-        margin-bottom: 28px;
-        background: white;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
     }
 
-    .recruitment-banner img {
-        width: 100%;
-        height: auto;
-        display: block;
+    .banner-badge {
+        display: inline-block;
+        background: rgba(74, 222, 128, 0.18);
+        color: #4ADE80;
+        border: 1px solid rgba(74, 222, 128, 0.35);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 12px;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
     }
 
-    /* Form */
+    .banner-title {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0 0 8px;
+        color: #ffffff;
+        letter-spacing: -0.3px;
+    }
+
+    .banner-subtitle {
+        font-size: 14.5px;
+        color: #D1E7DD;
+        margin: 0 0 16px;
+        max-width: 720px;
+        line-height: 1.5;
+    }
+
+    .banner-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .banner-chip {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        padding: 5px 13px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #EAF5EE;
+    }
+
+    /* Form Card */
     .job-form-card {
         background: #fff;
         border: 1px solid #e4ebe7;
         border-radius: 0;
-        padding: 38px 42px;
+        padding: 34px 36px;
         box-shadow: 0 8px 30px rgba(21, 70, 44, 0.06);
     }
 
-    .form-section+.form-section {
-        margin-top: 38px;
+    /* 3-Column Layout Grid (Desktop/Laptop: 41% Nội dung / 25% Thù lao / 34% Preview) */
+    .job-create-layout-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.95fr) minmax(0, 1.25fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* Cột 1: Nội dung công việc */
+    .col-job-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Cột 2: Thù lao & Kế hoạch */
+    .col-job-budget-plan {
+        display: flex;
+        flex-direction: column;
+        background: #f8faf9;
+        border: 1px solid #e4ebe7;
+        padding: 22px;
+        border-radius: 0;
+    }
+
+    /* Cột 3: Xem trước trên giao diện Freelancer */
+    .col-job-preview {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-sticky-wrap {
+        position: sticky;
+        top: 24px;
+    }
+
+    .preview-guide-text {
+        font-size: 13px;
+        color: #64748B;
+        line-height: 1.45;
+        margin: -14px 0 16px;
+    }
+
+    /* Card công việc chuẩn góc nhìn Freelancer */
+    .col-job-preview .job-card {
+        background: #FFFFFF;
+        border: 1px solid #DCE8E0;
+        border-radius: 16px !important;
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        box-shadow: 0 8px 24px rgba(13, 40, 24, 0.06);
+        transition: all 0.24s ease;
+    }
+
+    .col-job-preview .job-card:hover {
+        border-color: #2B7A4B;
+        box-shadow: 0 12px 30px rgba(13, 40, 24, 0.10);
+    }
+
+    .col-job-preview .job-card-top-banner {
+        background: linear-gradient(135deg, #0D2818 0%, #1B5E36 60%, #2B7A4B 100%);
+        padding: 16px 18px;
+        color: #FFFFFF;
+    }
+
+    .col-job-preview .employer-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .col-job-preview .employer-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px !important;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        background: #E8F5E9;
+        color: #1B5E36;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 14px;
+        flex-shrink: 0;
+        letter-spacing: 0.5px;
+    }
+
+    .col-job-preview .employer-name {
+        font-weight: 800;
+        font-size: 0.90rem;
+        color: #FFFFFF;
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .col-job-preview .employer-rating-text {
+        font-size: 0.74rem;
+        color: #FDE68A;
+        font-weight: 700;
+    }
+
+    .col-job-preview .job-card-body {
+        padding: 16px 18px 12px 18px;
+        flex-grow: 1;
+    }
+
+    .col-job-preview .job-title-heading {
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: #0D2818;
+        margin-bottom: 8px;
+        line-height: 1.38;
+    }
+
+    .col-job-preview .job-title-heading a {
+        color: #0D2818;
+        text-decoration: none;
+        cursor: default;
+    }
+
+    .col-job-preview .job-desc-snippet {
+        font-size: 0.84rem;
+        color: #475569;
+        line-height: 1.5;
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .col-job-preview .skill-badge-item {
+        background-color: #EAF5EE;
+        color: #1B5E36;
+        border: 1px solid #C8E6C9;
+        border-radius: 6px !important;
+        font-size: 0.73rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        display: inline-block;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .col-job-preview .job-metrics-box {
+        background-color: #F4F9F6;
+        border: 1px solid #D5E8DC;
+        border-radius: 10px !important;
+        padding: 10px 12px;
+        margin: 12px 0 4px 0;
+        font-size: 0.82rem;
+    }
+
+    .col-job-preview .salary-highlight {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #1B5E36;
+    }
+
+    .col-job-preview .job-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 18px;
+        background: #FAFCFB;
+        border-top: 1px solid #E2E8F0;
+        font-size: 0.76rem;
+        color: #64748B;
+        margin-top: auto;
+    }
+
+    .col-job-preview .status-tag {
+        font-size: 0.70rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px !important;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .col-job-preview .status-open {
+        background-color: rgba(74, 222, 128, 0.22);
+        color: #A7F3D0;
+        border: 1px solid rgba(167, 243, 208, 0.4);
+    }
+
+    .col-job-preview .btn-detail-link {
+        color: #FFFFFF !important;
+        border: 1px solid #2B7A4B;
+        background: #2B7A4B;
+        padding: 5px 12px;
+        border-radius: 7px !important;
+        font-size: 0.80rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-block;
+        cursor: default;
     }
 
     .section-title {
         display: flex;
         align-items: center;
         gap: 12px;
-        font-size: 24px;
+        font-size: 21px;
         font-weight: 700;
         color: #10271c;
-        margin: 0 0 26px;
-        padding-bottom: 17px;
+        margin: 0 0 24px;
+        padding-bottom: 15px;
         border-bottom: 1px solid #e8eeea;
     }
 
@@ -76,22 +318,28 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
         border-radius: 0;
         background: #e7f5ed;
         color: #16864b;
-        font-size: 17px;
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
     }
 
     .form-group {
-        margin-bottom: 23px;
+        margin-bottom: 22px;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
     }
 
     .form-label {
         display: block;
-        margin-bottom: 9px;
-        font-size: 16px;
+        margin-bottom: 8px;
+        font-size: 15px;
         font-weight: 650;
         color: #17251e;
     }
@@ -103,12 +351,12 @@
     .form-control-custom {
         box-sizing: border-box;
         width: 100%;
-        padding: 14px 16px;
+        padding: 13px 16px;
         border: 1px solid #d8e0dc;
         border-radius: 0;
         background: #fff;
         color: #1b2922;
-        font-size: 16px;
+        font-size: 15px;
         outline: none;
         transition: .2s;
     }
@@ -119,29 +367,30 @@
     }
 
     textarea.form-control-custom {
-        min-height: 160px;
+        min-height: 200px;
         resize: vertical;
+        line-height: 1.5;
     }
 
     .field-error {
         display: block;
         color: #dc3545;
         font-size: 13px;
-        margin-top: 6px;
+        margin-top: 5px;
     }
 
-    /* Skill */
+    /* Skill Suggestions */
     .skill-suggestions {
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 9px;
+        flex-direction: column;
+        gap: 8px;
         margin-top: 12px;
     }
 
     .skill-label {
         color: #6b756f;
-        margin-right: 3px;
+        font-size: 14px;
+        font-weight: 500;
     }
 
     .skill-btn {
@@ -149,87 +398,90 @@
         background: #eff8f3;
         color: #176c42;
         border-radius: 0;
-        padding: 8px 15px;
+        padding: 6px 12px;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
+        transition: background .15s, color .15s;
     }
 
     .skill-btn:hover {
         background: #dff1e7;
     }
 
-    /* 2 columns */
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
     .money-input {
         display: flex;
+        width: 100%;
     }
 
     .money-input input {
         border-radius: 0;
+        flex: 1;
     }
 
     .money-unit {
         display: flex;
         align-items: center;
-        padding: 0 18px;
+        padding: 0 16px;
         border: 1px solid #d8e0dc;
         border-left: 0;
         border-radius: 0;
         background: #f7f9f8;
         color: #56635c;
         font-weight: 600;
+        font-size: 14px;
+        flex-shrink: 0;
     }
 
-    /* Fee */
+    /* Fee Box */
     .fee-box {
         min-height: 52px;
         box-sizing: border-box;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
-        padding: 13px 16px;
+        padding: 14px 16px;
         border: 1px solid #dce7e1;
         border-radius: 0;
-        background: #f5faf7;
+        background: #fff;
     }
 
     .fee-icon {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 34px;
-        height: 34px;
+        width: 30px;
+        height: 30px;
         border-radius: 0;
         background: #dff2e7;
         color: #16864b;
         font-weight: 800;
+        flex-shrink: 0;
+        margin-top: 2px;
     }
 
     .fee-title {
         font-weight: 700;
         color: #26372e;
+        font-size: 14px;
     }
 
     .fee-description {
-        margin-top: 2px;
+        margin-top: 4px;
         color: #69756e;
-        font-size: 13px;
+        font-size: 12.5px;
+        line-height: 1.45;
     }
 
-    /* Buttons */
+    /* Actions Bottom Bar */
     .form-actions {
+        grid-column: 1 / -1;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 20px;
-        margin-top: 36px;
-        padding-top: 26px;
+        margin-top: 24px;
+        padding-top: 24px;
         border-top: 1px solid #e4ebe7;
     }
 
@@ -245,20 +497,28 @@
         color: #4f5d56;
         font-size: 16px;
         text-decoration: none;
+        transition: background .2s, border-color .2s;
+    }
+
+    .btn-cancel:hover {
+        background: #f3f5f4;
+        border-color: #8c9992;
+        color: #28332d;
     }
 
     .btn-submit {
-        min-width: 300px;
-        height: 54px;
+        min-width: 280px;
+        height: 52px;
         padding: 0 28px;
         border: 0;
         border-radius: 0;
         background: #17763f;
         color: white;
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 8px 18px rgba(23, 118, 63, .20);
+        transition: background .2s;
     }
 
     .btn-submit:hover {
@@ -274,16 +534,58 @@
         margin-bottom: 22px;
     }
 
-    @@media (max-width: 768px) {
+    /* Responsive */
+    @@media (max-width: 1199px) {
+        .job-create-layout-grid {
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .col-job-preview {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            padding-top: 24px;
+            border-top: 1px dashed #DCE8E0;
+        }
+
+        .preview-sticky-wrap {
+            position: static;
+        }
+
+        .col-job-preview .job-card {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .recruitment-banner-hero {
+            padding: 26px 22px;
+        }
+
+        .banner-title {
+            font-size: 22px;
+        }
+
         .job-form-card {
-            padding: 25px 20px;
+            padding: 26px 20px;
         }
 
-        .form-grid {
+        .job-create-layout-grid {
             grid-template-columns: 1fr;
-            gap: 0;
+            gap: 28px;
         }
 
+        .col-job-budget-plan {
+            padding: 20px;
+        }
+
+        .col-job-preview .job-card {
+            max-width: 100%;
+        }
+    }
+
+    @@media (max-width: 576px) {
         .form-actions {
             flex-direction: column-reverse;
         }
@@ -303,9 +605,11 @@
             ← Quay lại
         </a>
 
-        <!-- Banner -->
-        <div class="recruitment-banner">
-            <img src="~/images/tuyendung.png" alt="Đăng tin tuyển dụng sinh viên" />
+        <!-- Banner Đồ Họa Thương Hiệu (Khắc phục 100% lỗi vỡ ảnh 404) -->
+        <div class="recruitment-banner-hero">
+            
+            <h1 class="banner-title">Đăng tin tuyển dụng Freelancer sinh viên</h1>
+           
         </div>
 
         <form asp-controller="JobPost" asp-action="Create" method="post" class="job-form-card">
@@ -316,94 +620,101 @@
 
             <div asp-validation-summary="ModelOnly"></div>
 
-            <!-- PHẦN 1 -->
-            <section class="form-section">
+            <!-- BỐ CỤC 3 CỘT (DESKTOP/LAPTOP: NỘI DUNG / THÙ LAO / PREVIEW) -->
+            <div class="job-create-layout-grid">
 
-                <h2 class="section-title">
-                    <span class="section-number">1</span>
-                    Nội dung công việc
-                </h2>
+                <!-- CỘT 1: NỘI DUNG CÔNG VIỆC -->
+                <div class="col-job-content">
 
-                <div class="form-group">
-                    <label asp-for="tieude" class="form-label">
-                        Tiêu đề bài đăng
-                        <span class="required">*</span>
-                    </label>
+                    <h2 class="section-title">
+                        <span class="section-number">1</span>
+                        Nội dung công việc
+                    </h2>
 
-                    <input asp-for="tieude" class="form-control-custom"
-                           placeholder="Ví dụ: Thiết kế website bán hàng bằng ASP.NET Core" />
+                    <!-- 1. Tiêu đề -->
+                    <div class="form-group">
+                        <label asp-for="tieude" class="form-label">
+                            Tiêu đề bài đăng
+                            <span class="required">*</span>
+                        </label>
 
-                    <span asp-validation-for="tieude" class="field-error"></span>
-                </div>
+                        <input asp-for="tieude" class="form-control-custom"
+                               placeholder="Ví dụ: Thiết kế website bán hàng bằng ASP.NET Core" />
 
-                <div class="form-group">
-                    <label asp-for="mota" class="form-label">
-                        Mô tả chi tiết yêu cầu công việc
-                        <span class="required">*</span>
-                    </label>
+                        <span asp-validation-for="tieude" class="field-error"></span>
+                    </div>
 
-                    <textarea asp-for="mota" class="form-control-custom"
-                              placeholder="Mô tả phạm vi công việc, mục tiêu, yêu cầu kỹ thuật và sản phẩm cần bàn giao..."></textarea>
+                    <!-- 2. Mô tả -->
+                    <div class="form-group">
+                        <label asp-for="mota" class="form-label">
+                            Mô tả chi tiết yêu cầu công việc
+                            <span class="required">*</span>
+                        </label>
 
-                    <span asp-validation-for="mota" class="field-error"></span>
-                </div>
+                        <textarea asp-for="mota" class="form-control-custom"
+                                  placeholder="Mô tả phạm vi công việc, mục tiêu, yêu cầu kỹ thuật và sản phẩm cần bàn giao..."></textarea>
 
-                <div class="form-group">
-                    <label asp-for="kynangyeucau" class="form-label">
-                        Kỹ năng yêu cầu
-                    </label>
+                        <span asp-validation-for="mota" class="field-error"></span>
+                    </div>
 
-                    <input asp-for="kynangyeucau" id="skillInput" class="form-control-custom"
-                           placeholder="Ví dụ: ASP.NET Core, SQL Server, HTML/CSS" />
+                    <!-- 3. Kỹ năng yêu cầu & Gợi ý -->
+                    <div class="form-group">
+                        <label asp-for="kynangyeucau" class="form-label">
+                            Kỹ năng yêu cầu
+                        </label>
 
-                    <span asp-validation-for="kynangyeucau" class="field-error"></span>
+                        <input asp-for="kynangyeucau" id="skillInput" class="form-control-custom"
+                               placeholder="Ví dụ: ASP.NET Core, SQL Server, HTML/CSS" />
 
-                    <div class="skill-suggestions" id="skillSuggestionsBox">
-                        <span class="skill-label">Gợi ý kỹ năng:</span>
-                        <span id="skillLoadingText" style="display:none; font-size: 13px; color: #16864b; margin-left: 6px;">
-                            <span class="spinner-border spinner-border-sm" role="status" style="width: 14px; height: 14px;"></span> Đang tìm kỹ năng phù hợp...
-                        </span>
+                        <span asp-validation-for="kynangyeucau" class="field-error"></span>
 
-                        <div id="skillListContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
-                            <button type="button" class="skill-btn" data-skill="Photoshop">
-                                + Photoshop
-                            </button>
+                        <div class="skill-suggestions" id="skillSuggestionsBox">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="skill-label">Gợi ý kỹ năng:</span>
+                                <span id="skillLoadingText" style="display:none; font-size: 13px; color: #16864b;">
+                                    <span class="spinner-border spinner-border-sm" role="status" style="width: 14px; height: 14px;"></span> Đang tìm kỹ năng phù hợp...
+                                </span>
+                            </div>
 
-                            <button type="button" class="skill-btn" data-skill="Figma">
-                                + Figma
-                            </button>
+                            <div id="skillListContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+                                <button type="button" class="skill-btn" data-skill="Photoshop">
+                                    + Photoshop
+                                </button>
 
-                            <button type="button" class="skill-btn" data-skill="ASP.NET Core">
-                                + ASP.NET Core
-                            </button>
+                                <button type="button" class="skill-btn" data-skill="Figma">
+                                    + Figma
+                                </button>
 
-                            <button type="button" class="skill-btn" data-skill="Flutter">
-                                + Flutter
-                            </button>
+                                <button type="button" class="skill-btn" data-skill="ASP.NET Core">
+                                    + ASP.NET Core
+                                </button>
 
-                            <button type="button" class="skill-btn" data-skill="HTML/CSS">
-                                + HTML/CSS
-                            </button>
+                                <button type="button" class="skill-btn" data-skill="Flutter">
+                                    + Flutter
+                                </button>
 
-                            <button type="button" class="skill-btn" data-skill="SQL Server">
-                                + SQL Server
-                            </button>
+                                <button type="button" class="skill-btn" data-skill="HTML/CSS">
+                                    + HTML/CSS
+                                </button>
+
+                                <button type="button" class="skill-btn" data-skill="SQL Server">
+                                    + SQL Server
+                                </button>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
-            </section>
+                <!-- CỘT 2: THÙ LAO & KẾ HOẠCH HOÀN THÀNH -->
+                <div class="col-job-budget-plan">
 
-            <!-- PHẦN 2 -->
-            <section class="form-section">
+                    <h2 class="section-title">
+                        <span class="section-number">2</span>
+                        Thù lao &amp; Kế hoạch
+                    </h2>
 
-                <h2 class="section-title">
-                    <span class="section-number">2</span>
-                    Ngân sách thù lao &amp; Kế hoạch hoàn thành
-                </h2>
-
-                <div class="form-grid">
-
+                    <!-- 1. Mức thù lao -->
                     <div class="form-group">
                         <label asp-for="thulao" class="form-label">
                             Mức thù lao ngân sách (VNĐ)
@@ -422,6 +733,7 @@
                         <span asp-validation-for="thulao" class="field-error"></span>
                     </div>
 
+                    <!-- 2. Số lượng sinh viên cần tuyển -->
                     <div class="form-group">
                         <label asp-for="soluongtuyen" class="form-label">
                             Số lượng sinh viên cần tuyển
@@ -433,6 +745,7 @@
                         <span asp-validation-for="soluongtuyen" class="field-error"></span>
                     </div>
 
+                    <!-- 3. Hạn hoàn thành dự kiến -->
                     <div class="form-group">
                         <label asp-for="thoigiandukienhoanthanh" class="form-label">
                             Hạn hoàn thành dự kiến
@@ -444,6 +757,7 @@
                         <span asp-validation-for="thoigiandukienhoanthanh" class="field-error"></span>
                     </div>
 
+                    <!-- 4. Chính sách phí đăng bài & Số dư ví -->
                     <div class="form-group">
                         <label class="form-label">
                             Chính sách thanh toán phí đăng bài
@@ -460,22 +774,22 @@
                             <div style="flex-grow: 1;">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div class="fee-title" style="@(khongDuTien ? "color: #dc3545;" : "")">
-                                        @Model.phiDangBai.ToString("N0") VNĐ phí đăng tin tuyển dụng
+                                        @Model.phiDangBai.ToString("N0") VNĐ phí đăng bài
                                     </div>
-                                    <span class="badge @(khongDuTien ? "bg-danger" : "bg-success") text-white px-2 py-1" style="font-size: 0.85rem;">
-                                        Số dư ví khả dụng: @soDuHienTai.ToString("N0") VNĐ
+                                    <span class="badge @(khongDuTien ? "bg-danger" : "bg-success") text-white px-2 py-1" style="font-size: 0.8rem;">
+                                        Ví: @soDuHienTai.ToString("N0") VNĐ
                                     </span>
                                 </div>
 
                                 <div class="fee-description mt-1">
-                                    Phí đăng tin được trừ trực tiếp từ số dư khả dụng của bạn khi xuất bản bài đăng thành công (không ký quỹ).
+                                    Phí đăng tin được trừ trực tiếp từ số dư khả dụng khi xuất bản bài đăng thành công (không ký quỹ).
                                 </div>
 
                                 @if (khongDuTien)
                                 {
                                     <div class="mt-2 p-2 rounded bg-white border border-danger d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <span class="text-danger small fw-semibold">
-                                            ⚠️ Số dư không đủ: Bạn còn thiếu @((Model.phiDangBai - soDuHienTai).ToString("N0")) VNĐ.
+                                            ⚠️ Thiếu: @((Model.phiDangBai - soDuHienTai).ToString("N0")) VNĐ.
                                         </span>
                                         <a href="/Wallet" target="_blank" class="btn btn-sm btn-danger text-white px-3 py-1 text-decoration-none fw-bold" style="font-size: 0.8rem;">
                                             Nạp ví ngay &rarr;
@@ -488,17 +802,108 @@
 
                 </div>
 
-            </section>
+                <!-- CỘT 3: XEM TRƯỚC TRÊN GIAO DIỆN FREELANCER (PREVIEW TĨNH) -->
+                <div class="col-job-preview">
+                    <div class="preview-sticky-wrap">
+                        <h2 class="section-title">
+                            <span class="section-number">3</span>
+                            Dạng bài đăng sẽ hiển thị
+                        </h2>
+                        
 
-            <div class="form-actions">
+                        <!-- Card công việc chuẩn góc nhìn Freelancer -->
+                        <div class="job-card">
+                            <!-- Tầng trên: Banner xanh gradient & thông tin Nhà tuyển dụng -->
+                            <div class="job-card-top-banner">
+                                <div class="employer-meta-row">
+                                    <div class="employer-avatar" title="Công ty TNHH ABC">
+                                        ABC
+                                    </div>
 
-                <a asp-controller="JobPost" asp-action="Index" class="btn-cancel">
-                    Hủy bỏ
-                </a>
+                                    <div style="flex-grow: 1; min-width: 0;">
+                                        <span class="employer-name">
+                                            Công ty TNHH ABC
+                                        </span>
+                                        <div class="employer-rating-text">
+                                            ★ 5.0/5.0 <span style="font-weight: 500; opacity: 0.9;">(1 đánh giá)</span>
+                                        </div>
+                                    </div>
 
-                <button type="submit" class="btn-submit">
-                    Đăng tin tuyển dụng ngay
-                </button>
+                                    <div>
+                                        <span class="status-tag status-open">
+                                            Đang tuyển
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Phần thân: Tiêu đề, mô tả tóm tắt, kỹ năng & thông số thù lao -->
+                            <div class="job-card-body">
+                                <h3 class="job-title-heading">
+                                    <a href="javascript:void(0);" tabindex="-1" style="pointer-events: none;">
+                                        Thiết kế Website bán hàng bằng Angular, Figma cơ bản
+                                    </a>
+                                </h3>
+
+                                <p class="job-desc-snippet">
+                                    Xây dựng trang chủ, danh sách và chi tiết sản phẩm, tìm kiếm, giỏ hàng và giao diện đặt hàng...
+                                </p>
+
+                                <div class="mb-2">
+                                    <span class="skill-badge-item">Angular</span>
+                                    <span class="skill-badge-item">ASP.NET Core</span>
+                                    <span class="skill-badge-item">C#</span>
+                                    <span class="skill-badge-item">MySQL</span>
+                                    <span class="skill-badge-item">Figma</span>
+                                    <span class="skill-badge-item">HTML/CSS</span>
+                                </div>
+
+                                <div class="job-metrics-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted">Thù lao:</span>
+                                        <span class="salary-highlight">1.500.000 VNĐ</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Hạn hoàn thành:</span>
+                                        <span class="fw-semibold text-dark">30/11/2026</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer card: Ngày đăng & Nút thao tác minh họa -->
+                            <div class="job-card-footer">
+                                <span>
+                                    Đăng 06/11/2026
+                                </span>
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-secondary" style="font-size: 1.1rem; line-height: 1; cursor: default;" title="Lưu tin">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark text-muted" viewBox="0 0 16 16">
+                                            <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                                        </svg>
+                                    </span>
+
+                                    <span class="btn-detail-link" style="cursor: default;">
+                                        Xem chi tiết
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NÚT THAO TÁC Ở ĐÁY -->
+                <div class="form-actions">
+
+                    <a asp-controller="JobPost" asp-action="Index" class="btn-cancel">
+                        Hủy bỏ
+                    </a>
+
+                    <button type="submit" class="btn-submit">
+                        Đăng tin tuyển dụng ngay
+                    </button>
+
+                </div>
 
             </div>
 
@@ -508,6 +913,7 @@
 </div>
 
 <script>
+
     (function () {
         const titleInput = document.querySelector('input[name="tieude"]');
         const descInput = document.querySelector('textarea[name="mota"]');
@@ -533,7 +939,7 @@
                     // Bỏ chọn nếu đã có
                     skills.splice(existingIdx, 1);
                     this.classList.remove("active");
-                    this.style.background = "#eef7f2";
+                    this.style.background = "#eff8f3";
                     this.style.color = "#176c42";
                 } else {
                     // Chọn thêm kỹ năng
@@ -562,11 +968,13 @@
                     btn.style.color = "#ffffff";
                 } else {
                     btn.classList.remove("active");
-                    btn.style.background = "#eef7f2";
+                    btn.style.background = "#eff8f3";
                     btn.style.color = "#176c42";
                 }
             });
         }
+
+        window.__updateSkillsUI = updateButtonActiveStates;
 
         async function fetchSkillSuggestions() {
             const tieuDe = titleInput ? titleInput.value.trim() : "";

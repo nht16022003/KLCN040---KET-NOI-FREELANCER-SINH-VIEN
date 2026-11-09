@@ -67,10 +67,12 @@ class ApiEndpoints {
   // ==========================================
   static const String layViTheoUser = '$baseUrl/Wallet/LayViTheoUser';
   static const String taoGiaoDichNapTien = '$baseUrl/GiaoDichNapTien/TaoGiaoDich';
+  static const String uploadBienLaiNapTien = '$baseUrl/GiaoDichNapTien/UploadBienLai';
   static const String trangThaiGiaoDichNapTien = '$baseUrl/GiaoDichNapTien/TrangThai';
   static const String xacNhanNapTienMoPhong = '$baseUrl/GiaoDichNapTien/XacNhanMoPhong';
   static const String lichSuGiaoDichVi = '$baseUrl/Wallet/LichSuGiaoDich';
   static const String taoYeuCauRutTien = '$baseUrl/Wallet/TaoYeuCauRutTien';
+  static const String uploadQrRutTien = '$baseUrl/Wallet/UploadQrRutTien';
   static const String danhSachRutTien = '$baseUrl/Wallet/DanhSachRutTien';
   static const String xacNhanRutTienMoPhong = '$baseUrl/Wallet/XacNhanRutTienMoPhong';
 
@@ -108,6 +110,7 @@ class ApiEndpoints {
   static const String danhSachPhongChat = '$baseUrl/Chat/DanhSachPhong';
   static const String lichSuTinNhan = '$baseUrl/Chat/TinNhan';
   static const String guiTinNhan = '$baseUrl/Chat/GuiTinNhan';
+  static const String uploadFileChat = '$baseUrl/Chat/UploadFile';
 
   // ==========================================
   // NHÀ TUYỂN DỤNG (EMPLOYERS)
@@ -115,6 +118,17 @@ class ApiEndpoints {
   static const String danhSachNhaTuyenDung = '$baseUrl/NhaTuyenDung/DanhSachNhaTuyenDung';
   static const String profileNhaTuyenDung = '$baseUrl/NhaTuyenDung/Profile';
   static const String profileNhaTuyenDungTheoUser = '$baseUrl/NhaTuyenDung/Profile/ByUser';
+  static const String capNhatThongTinNTD = '$baseUrl/NhaTuyenDung/CapNhatThongTin';
+  static const String capNhatGioiThieuNTD = '$baseUrl/NhaTuyenDung/CapNhatGioiThieu';
+  static const String capNhatLogoNTD = '$baseUrl/NhaTuyenDung/CapNhatLogo';
+
+  // ==========================================
+  // ỨNG THUÊ & THUÊ TRỰC TIẾP (DIRECT HIRE)
+  // ==========================================
+  static const String ungThueGuiYeuCau = '$baseUrl/UngThue/GuiYeuCau';
+  static const String ungThueDanhSachTheoFreelancer = '$baseUrl/UngThue/DanhSachTheoFreelancer';
+  static const String ungThueDanhSachTheoNTD = '$baseUrl/UngThue/DanhSachTheoNTD';
+  static const String ungThuePhanHoi = '$baseUrl/UngThue/PhanHoi';
 
   // ==========================================
   // HỒ SƠ & PORTFOLIO FREELANCER

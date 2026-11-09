@@ -98,6 +98,85 @@ namespace FreelancerStudent.API.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        // =====================================================
+        // TẢI ẢNH BIÊN LAI MINH CHỨNG CHUYỂN TIỀN
+        // =====================================================
+        [HttpPost("UploadBienLai/{maGiaoDich}")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadBienLai([FromRoute] string maGiaoDich, [FromForm] IFormFile file)
+        {
+            if (string.IsNullOrWhiteSpace(maGiaoDich))
+            {
+                return BadRequest(new { success = false, message = "Mã giao dịch không hợp lệ." });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "Vui lòng chọn ảnh biên lai chuyển tiền." });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(new { success = false, message = "Định dạng file không hỗ trợ. Vui lòng tải lên file ảnh (.jpg, .jpeg, .png, .webp)." });
+            }
+
+            if (file.Length > 10 * 1024 * 1024)
+            {
+                return BadRequest(new { success = false, message = "Kích thước ảnh tối đa là 10MB." });
+            }
+
+            try
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "bienlai");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                var fileName = $"bienlai_{maGiaoDich}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
+                var filePath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Đồng bộ sang thư mục Web nếu tồn tại
+                try
+                {
+                    var webFolder = Path.Combine(Directory.GetCurrentDirectory(), "..", "FreelancerStudent.Web", "wwwroot", "uploads", "bienlai");
+                    if (!Directory.Exists(webFolder))
+                    {
+                        Directory.CreateDirectory(webFolder);
+                    }
+                    var webPath = Path.Combine(webFolder, fileName);
+                    System.IO.File.Copy(filePath, webPath, true);
+                }
+                catch { }
+
+                var relativeUrl = $"/uploads/bienlai/{fileName}";
+
+                await _giaoDichNapTienService.capNhatAnhBienLaiAsync(maGiaoDich, relativeUrl);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Tải ảnh biên lai minh chứng thành công! Đang chờ Quản trị viên đối chiếu và phê duyệt.",
+                    fileUrl = relativeUrl
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi khi lưu ảnh biên lai: " + ex.Message });
+            }
+        }
         // =====================================================
         // KIỂM TRA TRẠNG THÁI GIAO DỊCH
         // =====================================================

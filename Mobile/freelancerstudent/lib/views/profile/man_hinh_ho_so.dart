@@ -13,6 +13,8 @@ import '../../viewmodels/viewmodel_yeu_thich.dart';
 import '../danh_gia/man_hinh_danh_gia.dart';
 import '../danh_gia/man_hinh_danh_sach_tat_ca_danh_gia.dart';
 import '../student_posts/man_hinh_quan_ly_bai_dang_sinh_vien.dart';
+import '../chat/man_hinh_chi_tiet_chat.dart';
+import '../employer/man_hinh_gui_yeu_cau_thue.dart';
 import 'man_hinh_chinh_sua_ho_so.dart';
 import 'man_hinh_minh_chung_the_sv.dart';
 
@@ -248,6 +250,105 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
+        bottomNavigationBar: (authUser?.role == 'NhaTuyenDung' &&
+                !canEdit &&
+                data != null)
+            ? Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: const Border(
+                    top: BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(
+                                color: AppColors.primary, width: 1.5),
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                          label: const Text(
+                            'Liên hệ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatDetailScreen(
+                                  receiverId: data.maUser.toString(),
+                                  receiverName: data.hoTen,
+                                  avatarUrl: data.avatarUrl,
+                                  maFreelancerStudent:
+                                      data.maFreelancerStudents,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 3,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 11),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          icon: const Icon(Icons.business_center_outlined,
+                              size: 18),
+                          label: const Text(
+                            'Thuê Freelancer',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ManHinhGuiYeuCauThue(
+                                  maFreelancerStudent:
+                                      data.maFreelancerStudents,
+                                  tenFreelancer: data.hoTen,
+                                  avatarFreelancer: data.avatarUrl,
+                                  chuyenNganh: data.tenChuyenNganh,
+                                  thulaoMacDinh: data.chiPhiTu,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }

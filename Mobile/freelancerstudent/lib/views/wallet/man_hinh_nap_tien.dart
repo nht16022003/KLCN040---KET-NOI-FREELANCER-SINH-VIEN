@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
@@ -18,12 +20,70 @@ class DepositScreen extends StatefulWidget {
 class _DepositScreenState extends State<DepositScreen> {
   final TextEditingController _soTienController = TextEditingController();
   final WalletService _walletService = WalletService();
+  final ImagePicker _picker = ImagePicker();
+
   bool _dangXuLy = false;
-  bool _dangXacNhanMoPhong = false;
   bool _daXacNhanMoPhong = false;
+  bool _dangTaiBienLai = false;
+  bool _daTaiBienLai = false;
+  File? _anhBienLai;
   Map<String, dynamic>? _ketQuaGiaoDich;
 
   final List<double> _mucTienGoiY = [100000, 200000, 500000, 1000000, 2000000];
+
+  Future<void> _chonAnhBienLai(ImageSource source) async {
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (picked != null) {
+        setState(() {
+          _anhBienLai = File(picked.path);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi chọn ảnh: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _guiAnhBienLai(String maGiaoDich) async {
+    if (_anhBienLai == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng chọn ảnh biên lai trước.')),
+      );
+      return;
+    }
+
+    setState(() => _dangTaiBienLai = true);
+
+    final vm = context.read<WalletViewModel>();
+    final res = await vm.uploadBienLaiNapTien(maGiaoDich, _anhBienLai!);
+
+    if (!mounted) return;
+    setState(() => _dangTaiBienLai = false);
+
+    if (res.isSuccess) {
+      setState(() => _daTaiBienLai = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res.message),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res.message),
+          backgroundColor: Colors.red[700],
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -64,7 +124,6 @@ class _DepositScreenState extends State<DepositScreen> {
     if (res.isSuccess && res.data != null) {
       setState(() {
         _ketQuaGiaoDich = res.data;
-        _daXacNhanMoPhong = false;
       });
       context.read<WalletViewModel>().taiThongTinVi(user.userId);
     } else {
@@ -114,31 +173,6 @@ class _DepositScreenState extends State<DepositScreen> {
         );
       }
     }
-  }
-
-  Future<void> _xacNhanMoPhong(String maGiaoDich) async {
-    final user = context.read<AuthViewModel>().currentUser;
-    if (user == null || maGiaoDich.isEmpty) return;
-
-    setState(() => _dangXacNhanMoPhong = true);
-
-    final vm = context.read<WalletViewModel>();
-    final res = await vm.xacNhanNapTienMoPhong(maGiaoDich, user.userId);
-
-    if (!mounted) return;
-    setState(() {
-      _dangXacNhanMoPhong = false;
-      if (res.isSuccess) {
-        _daXacNhanMoPhong = true;
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(res.message),
-        backgroundColor: res.isSuccess ? AppColors.primary : AppColors.error,
-      ),
-    );
   }
 
   @override
@@ -350,69 +384,194 @@ class _DepositScreenState extends State<DepositScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Khối Xác nhận nạp tiền mô phỏng (đồng bộ Web Wallet/Index.cshtml)
+        // Khối tải ảnh biên lai minh chứng (Đồng bộ với Website & Admin)
+        Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.receipt_long, color: AppColors.primary, size: 22),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Minh chứng chuyển khoản (Ảnh biên lai)',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Sau khi hoàn tất chuyển khoản theo mã và nội dung ở trên, hãy đính kèm ảnh chụp biên lai ngân hàng để Quản trị viên đối chiếu và phê duyệt ngay.',
+                  style: TextStyle(fontSize: 12.5, color: Colors.black54),
+                ),
+                const SizedBox(height: 14),
+
+                if (_daTaiBienLai) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFBBF7D0)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Color(0xFF166534), size: 20),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Đã tải ảnh biên lai thành công! Quản trị viên đang đối chiếu và sẽ duyệt số dư vào ví.',
+                            style: TextStyle(
+                              color: Color(0xFF166534),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  if (_anhBienLai != null) ...[
+                    Center(
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              _anhBienLai!,
+                              height: 180,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: InkWell(
+                              onTap: () => setState(() => _anhBienLai = null),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.close, color: Colors.white, size: 16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: _dangTaiBienLai
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.cloud_upload_outlined, size: 20),
+                        label: Text(
+                          _dangTaiBienLai ? 'Đang tải lên...' : 'Gửi ảnh biên lai xác thực',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        onPressed: _dangTaiBienLai ? null : () => _guiAnhBienLai(maGiaoDich),
+                      ),
+                    ),
+                  ] else ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                            label: const Text('Chụp ảnh', style: TextStyle(fontWeight: FontWeight.bold)),
+                            onPressed: () => _chonAnhBienLai(ImageSource.camera),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(Icons.photo_library_outlined, size: 18),
+                            label: const Text('Thư viện', style: TextStyle(fontWeight: FontWeight.bold)),
+                            onPressed: () => _chonAnhBienLai(ImageSource.gallery),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Khối trạng thái chờ Quản trị viên phê duyệt
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.amber.shade50,
+            color: Colors.blue.shade50,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.amber.shade400),
+            border: Border.all(color: Colors.blue.shade300),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(Icons.science_outlined, color: Colors.amber.shade900),
+                  Icon(Icons.hourglass_top_rounded, color: Colors.blue.shade800),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Môi trường Kiểm thử / Demo Khóa luận',
+                      'Trạng thái: Đang chờ Quản trị viên duyệt',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.amber.shade900,
+                        color: Colors.blue.shade900,
+                        fontSize: 15,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(
-                'Bấm nút bên dưới để xác nhận nạp tiền mô phỏng ngay lập tức mà không cần chuyển khoản ngân hàng thật.',
-                style: TextStyle(fontSize: 12.5, color: Colors.amber.shade900),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: (_dangXacNhanMoPhong || _daXacNhanMoPhong)
-                      ? null
-                      : () => _xacNhanMoPhong(maGiaoDich),
-                  icon: _dangXacNhanMoPhong
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Icon(
-                          _daXacNhanMoPhong
-                              ? Icons.check_circle
-                              : Icons.bolt_rounded,
-                        ),
-                  label: Text(
-                    _daXacNhanMoPhong
-                        ? 'ĐÃ XÁC NHẬN CỘNG TIỀN MÔ PHỎNG'
-                        : 'XÁC NHẬN NẠP TIỀN MÔ PHỎNG NGAY',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.amber.shade800,
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                  ),
-                ),
+                'Sau khi thực hiện chuyển khoản với mã và nội dung ở trên, Quản trị viên hệ thống sẽ đối chiếu và phê duyệt số dư vào ví của bạn.',
+                style: TextStyle(fontSize: 13, color: Colors.blue.shade900),
               ),
             ],
           ),

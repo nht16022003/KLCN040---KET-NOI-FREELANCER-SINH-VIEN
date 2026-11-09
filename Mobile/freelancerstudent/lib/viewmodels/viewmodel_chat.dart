@@ -1,4 +1,5 @@
-﻿import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import '../models/mo_hinh_tin_nhan_chat.dart';
 import '../models/mo_hinh_phong_chat.dart';
@@ -186,6 +187,19 @@ class ChatViewModel extends ChangeNotifier {
       _thongBaoLoi = res.message;
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Tải tệp hoặc hình ảnh lên chat
+  Future<Map<String, dynamic>?> uploadFileChat(File file) async {
+    _thongBaoLoi = null;
+    final res = await _chatService.uploadFileChat(file);
+    if (res.isSuccess && res.data != null) {
+      return res.data;
+    } else {
+      _thongBaoLoi = res.message;
+      notifyListeners();
+      return null;
     }
   }
 

@@ -34,6 +34,8 @@ class _MocBanGiaoItem {
 
 /// Màn hình Khởi tạo dự thảo hợp đồng từ ứng viên đã duyệt (dành cho Nhà tuyển dụng).
 /// Tương ứng với Web `HopDongController.TaoHopDong` và API `POST api/HopDong/tao-hop-dong`.
+typedef CreateContractScreen = TaoHopDongScreen;
+
 class TaoHopDongScreen extends StatefulWidget {
   final ApplicationModel applicant;
 

@@ -88,10 +88,12 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen>
       case 'HoanTien':
       case 'HoanTienHopDong':
         return 'Hoàn tiền ký quỹ hợp đồng';
+      case 'AdminCongTien':
       case 'DieuChinhCong':
-        return 'Admin điều chỉnh cộng tiền';
+        return 'Quản trị viên cộng tiền';
+      case 'AdminTruTien':
       case 'DieuChinhTru':
-        return 'Admin điều chỉnh trừ tiền';
+        return 'Quản trị viên trừ tiền';
       default:
         return loai;
     }

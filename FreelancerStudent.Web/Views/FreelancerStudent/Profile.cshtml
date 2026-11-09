@@ -209,12 +209,12 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     /* STATS METRICS STRIP                                          */
     /* ============================================================ */
     .metrics-strip-container {
-        background: #FFFFFF;
+        background: #EAF5EE;
         border-radius: 0;
-        border: 1px solid #E5ECE7;
+        border: 1px solid #C8E6C9;
         padding: 16px 20px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        box-shadow: 0 2px 8px rgba(27, 94, 54, 0.04);
     }
 
     .metric-col {
@@ -222,7 +222,7 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
         align-items: center;
         gap: 14px;
         padding: 4px 12px;
-        border-right: 1px solid #EEF2F6;
+        border-right: 1px solid #D5EBDD;
     }
 
     .metric-col:last-child {
@@ -236,7 +236,7 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     .metric-main-value {
         font-size: 1.15rem;
         font-weight: 800;
-        color: #0F172A;
+        color: #1E5C37;
         line-height: 1.1;
     }
 
@@ -316,8 +316,11 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     .basic-info-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         font-size: 0.88rem;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        padding: 16px 18px;
     }
 
     .basic-info-row {
@@ -348,16 +351,21 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
 
     /* Badges & Projects */
     .skill-tag-badge {
-        background: #EEF6F1;
-        color: #1C5F37;
+        background: #EAF5EE;
+        color: #1E5C37;
         font-weight: 700;
         font-size: 0.82rem;
         padding: 6px 14px;
         border-radius: 0;
-        border: 1px solid #D2E7DC;
+        border: 1px solid #C8E6C9;
         display: inline-block;
         margin-right: 6px;
         margin-bottom: 8px;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .skill-tag-badge:hover {
+        background: #DCEEE2;
+        border-color: #A3D4B6;
     }
 
     .project-grid-box {
@@ -367,14 +375,20 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     }
 
     .project-preview-card {
-        background: #FAFDFB;
+        background: #F8FAF9;
         border: 1px solid #E2E8F0;
         border-radius: 0;
         padding: 14px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .project-preview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+        border-color: #A3D4B6;
+        background: #FFFFFF;
     }
 
     .project-preview-card:hover {
@@ -409,6 +423,9 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
         display: flex;
         align-items: center;
         gap: 14px;
+        background: #F1F7F4;
+        border: 1px solid #D4E8DC;
+        padding: 14px 16px;
     }
 
     .edu-logo-box {
@@ -439,8 +456,9 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     }
 
     .review-item-box {
-        border-bottom: 1px solid #F1F5F9;
-        padding-bottom: 12px;
+        background: #F8FAF9;
+        border: 1px solid #E2E8F0;
+        padding: 14px 16px;
         margin-bottom: 12px;
     }
 
@@ -587,17 +605,38 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     }
 
     .skill-tag-badge {
-        background: #F0F0F0;
-        color: var(--ink);
-        border: 1px solid var(--border);
+        background: #EAF5EE;
+        color: #1E5C37;
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 6px 14px;
         border-radius: 0;
-        font-weight: 600;
+        border: 1px solid #C8E6C9;
+        display: inline-block;
+        margin-right: 6px;
+        margin-bottom: 8px;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .skill-tag-badge:hover {
+        background: #DCEEE2;
+        border-color: #A3D4B6;
     }
 
     .project-preview-card {
-        background: #fff;
-        border: 1px solid var(--border);
+        background: #F8FAF9;
+        border: 1px solid #E2E8F0;
         border-radius: 0;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .project-preview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+        border-color: #A3D4B6;
+        background: #FFFFFF;
     }
 
     .project-preview-card:hover {
@@ -618,7 +657,10 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
     }
 
     .review-item-box {
-        border-bottom-color: #EEE;
+        background: #F8FAF9;
+        border: 1px solid #E2E8F0;
+        padding: 14px 16px;
+        margin-bottom: 12px;
     }
 </style>
 
@@ -1100,29 +1142,39 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
                                                                                                 </div>
 
                                                                                                 <!-- Right: Action Buttons -->
-                                                                                                <div class="d-flex align-items-center gap-2 mb-2">
-                                                                                                    <button type="button" class="btn-contact-green"
-                                                                                                            onclick="alert('Đã gửi thông tin liên hệ tới @Model.User.HotenUser!')">
-                                                                                                        Liên hệ
-                                                                                                    </button>
-                                                                                                    @if (User.IsInRole("NhaTuyenDung") || Context.Session.GetString("tenRole") == "NhaTuyenDung")
+                                                                                                <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                                                                                    @if (!isProfileOwner)
                                                                                                     {
-                                                                                                        bool daLuuFLProfile = (ViewBag.DaLuuFreelancer as bool?) ?? false;
-                                                                                                        <button type="button"
-                                                                                                                class="btn-save-outlined @(daLuuFLProfile ? "text-danger border-danger" : "")"
-                                                                                                                id="btnToggleLuuProfile"
-                                                                                                                onclick="toggleLuuFreelancerProfile(@Model.FreelancerStudent.MaFreelancerStudents)">
-                                                                                                            <i class="bi @(daLuuFLProfile ? "bi-heart-fill text-danger" : "bi-heart")"
-                                                                                                               id="iconLuuProfile" style="display:inline-block !important;"></i>
-                                                                                                            <span id="textLuuProfile">@(daLuuFLProfile ? "Đã lưu yêu thích" : "Lưu yêu thích")</span>
-                                                                                                        </button>
-                                                                                                    }
-                                                                                                    else if (!isProfileOwner)
-                                                                                                    {
-                                                                                                        <button type="button" class="btn-save-outlined"
-                                                                                                                onclick="alert('Chức năng lưu ứng viên dành cho tài khoản Nhà tuyển dụng.')">
-                                                                                                            Lưu hồ sơ
-                                                                                                        </button>
+                                                                                                        var currentRole = Context.Session.GetString("tenRole") ?? Context.Session.GetString("role") ?? "";
+                                                                                                        bool isNtdRole = User.IsInRole("NhaTuyenDung") || currentRole == "NhaTuyenDung" || currentRole == "Employer" || currentRole == "Client";
+
+                                                                                                        if (isNtdRole)
+                                                                                                        {
+                                                                                                            <a href="@Url.Action("ChonJobThueFreelancer", "NhaTuyenDung", new { maFreelancerStudent = Model.FreelancerStudent.MaFreelancerStudents })"
+                                                                                                               class="btn btn-contact-green text-decoration-none shadow-sm"
+                                                                                                               style="background-color: #1b5e20 !important; color: #fff !important; font-weight: 700; padding: 8px 20px;">
+                                                                                                                <i class="bi bi-briefcase-fill me-1"></i> Thuê Freelancer
+                                                                                                            </a>
+                                                                                                        }
+
+                                                                                                        <a href="@Url.Action("Index", "Chat", new { maFreelancerStudent = Model.FreelancerStudent.MaFreelancerStudents })"
+                                                                                                           class="btn btn-save-outlined text-decoration-none"
+                                                                                                           style="font-weight: 600; padding: 8px 18px;">
+                                                                                                            <i class="bi bi-chat-dots-fill me-1 text-success"></i> Liên hệ
+                                                                                                        </a>
+
+                                                                                                        if (isNtdRole)
+                                                                                                        {
+                                                                                                            bool daLuuFLProfile = (ViewBag.DaLuuFreelancer as bool?) ?? false;
+                                                                                                            <button type="button"
+                                                                                                                    class="btn-save-outlined @(daLuuFLProfile ? "text-danger border-danger" : "")"
+                                                                                                                    id="btnToggleLuuProfile"
+                                                                                                                    onclick="toggleLuuFreelancerProfile(@Model.FreelancerStudent.MaFreelancerStudents)">
+                                                                                                                <i class="bi @(daLuuFLProfile ? "bi-heart-fill text-danger" : "bi-heart")"
+                                                                                                                   id="iconLuuProfile" style="display:inline-block !important;"></i>
+                                                                                                                <span id="textLuuProfile">@(daLuuFLProfile ? "Đã lưu yêu thích" : "Lưu yêu thích")</span>
+                                                                                                            </button>
+                                                                                                        }
                                                                                                     }
                                                                                                 </div>
 
@@ -1181,7 +1233,7 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
                                                                                                         @if (Model.FreelancerStudent.SoLuotDanhGia > 0)
                                                                                                         {
                                                                                                             <div class="metric-main-value text-success">
-                                                                                                                @((double)Model.FreelancerStudent.TyLeHaiLong).ToString("0.#")%</div>
+                                                                                                                @(((double)Model.FreelancerStudent.TyLeHaiLong).ToString("0.#"))%</div>
                                                                                                             }
                             else
                                                                                                             {
@@ -1232,7 +1284,7 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
                                                                                                     <h5 class="section-card-title">Đánh giá Freelancer</h5>
                                                                                                     @if (Model.ThongKeDanhGia?.tongLuotDanhGia > 0)
                                                                                                     {
-                                                                                                        <div class="row g-3 mb-4">
+                                                                                                        <div class="row g-3 mb-4 p-3 rounded-0" style="background: #FEF9E7; border: 1px solid #FDE68A;">
                                                                                                             <div class="col-md-3"><strong>@Model.ThongKeDanhGia.diemTrungBinh.ToString("0.0") / 5</strong>
                                                                                                                 <div class="text-muted small">@Model.ThongKeDanhGia.tongLuotDanhGia đánh giá</div></div>
                                                                                                                 <div class="col-md-3"><strong>@Model.ThongKeDanhGia.trungBinhChatLuong.ToString("0.0")</strong>
@@ -1442,10 +1494,20 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
 
                                                                                                                                                         <!-- 3. Dự án nổi bật -->
                                                                                                                                                         <div class="section-card">
+                                                                                                                                                            @{
+                                                                                                                                                                var duAnNoiBats = new List<FreelancerStudent.Web.ViewModels.ProfileProjectViewModel>();
+                                                                                                                                                                if (Model.DuAns != null)
+                                                                                                                                                                {
+                                                                                                                                                                    foreach (var da in Model.DuAns)
+                                                                                                                                                                    {
+                                                                                                                                                                        if (da.LaDuAnNoiBat) { duAnNoiBats.Add(da); }
+                                                                                                                                                                    }
+                                                                                                                                                                }
+                                                                                                                                                            }
                                                                                                                                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                                                                                                                                 <div class="d-flex align-items-center gap-2">
                                                                                                                                                                     <h5 class="section-card-title mb-0">Dự án nổi bật</h5>
-                                                                                                                                                                    <span class="badge bg-light text-muted border">@Model.DuAns.Count(x => x.LaDuAnNoiBat) dự án nổi bật</span>
+                                                                                                                                                                    <span class="badge bg-light text-muted border">@duAnNoiBats.Count dự án nổi bật</span>
                                                                                                                                                                 </div>
                                                                                                                                                                 @if (isProfileOwner)
                                                                                                                                                                 {
@@ -1455,11 +1517,6 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
                                                                                                                                                                     </button>
                                                                                                                                                                 }
                                                                                                                                                             </div>
-
-                                                                                                                                                            @{
-                                                                                                                                                                var duAnNoiBats = Model.DuAns.Where(x => x.LaDuAnNoiBat).ToList();
-                                                                                                                                                            }
-
                                                                                                                                                             @if (!duAnNoiBats.Any())
                                                                                                                                                             {
                                                                                                                                                                 <div class="text-center py-4 text-muted small border rounded-0 bg-light-subtle">
@@ -1583,9 +1640,23 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
                                                                                                                                                                 </div>
 
                                                                                                                                                                 @{
-                                                                                                                                                                    var recentReviewsCol = Model.ThongKeDanhGia?.danhSach?.OrderByDescending(x =>
-                                                                                                                                        x.ngayDanhGia).Take(2).ToList()
-                                                                                                                                                                        ?? Model.FreelancerStudent.DanhGiaGanDay.Take(2).ToList();
+                                                                                                                                                                    var recentReviewsCol = new List<FreelancerStudent.Web.ViewModels.DanhGiaItemViewModel>();
+                                                                                                                                                                    if (Model.ThongKeDanhGia?.danhSach != null && Model.ThongKeDanhGia.danhSach.Any())
+                                                                                                                                                                    {
+                                                                                                                                                                        var tempReviews = new List<FreelancerStudent.Web.ViewModels.DanhGiaItemViewModel>(Model.ThongKeDanhGia.danhSach);
+                                                                                                                                                                        tempReviews.Sort((a, b) => b.ngayDanhGia.CompareTo(a.ngayDanhGia));
+                                                                                                                                                                        for (int rIdx = 0; rIdx < Math.Min(2, tempReviews.Count); rIdx++)
+                                                                                                                                                                        {
+                                                                                                                                                                            recentReviewsCol.Add(tempReviews[rIdx]);
+                                                                                                                                                                        }
+                                                                                                                                                                    }
+                                                                                                                                                                    else if (Model.FreelancerStudent?.DanhGiaGanDay != null)
+                                                                                                                                                                    {
+                                                                                                                                                                        for (int rIdx = 0; rIdx < Math.Min(2, Model.FreelancerStudent.DanhGiaGanDay.Count); rIdx++)
+                                                                                                                                                                        {
+                                                                                                                                                                            recentReviewsCol.Add(Model.FreelancerStudent.DanhGiaGanDay[rIdx]);
+                                                                                                                                                                        }
+                                                                                                                                                                    }
                                                                                                                                                                 }
 
                                                                                                                                                                 @if (!recentReviewsCol.Any())
@@ -1678,16 +1749,26 @@ $"https://ui-avatars.com/api/?size=200&background=E8F5E9&color=1B5E36&name={Uri.
                                                                                                                                                             }
 
                                                                                                                                                             // Quản lý danh sách kỹ năng chuyên ngành trong Modal
-                                                                                                                                                            const initialSkills = [
-                                                                                                                                                                @if (Model.KyNangs != null && Model.KyNangs.Any())
+                                                                                                                                                            @{
+                                                                                                                                                                var initSkillsList = new List<string>();
+                                                                                                                                                                if (Model.KyNangs != null && Model.KyNangs.Any())
                                                                                                                                                                 {
-                                                                                                                                                                                                @Html.Raw(string.Join(",", Model.KyNangs.Select(k => $"\"{k.TenKyNang.Replace("\"", "\\\"")}\"")))
+                                                                                                                                                                    foreach (var k in Model.KyNangs)
+                                                                                                                                                                    {
+                                                                                                                                                                        if (!string.IsNullOrWhiteSpace(k.TenKyNang)) { initSkillsList.Add(k.TenKyNang.Trim()); }
+                                                                                                                                                                    }
                                                                                                                                                                 }
-                                                                                                                                                                                        else if (!string.IsNullOrEmpty(Model.FreelancerStudent?.KyNangCoBan))
+                                                                                                                                                                else if (!string.IsNullOrEmpty(Model.FreelancerStudent?.KyNangCoBan))
                                                                                                                                                                 {
-                                                                                                                                                                                                @Html.Raw(string.Join(",", Model.FreelancerStudent.KyNangCoBan.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(k => $"\"{k.Trim().Replace("\"", "\\\"")}\"")))
+                                                                                                                                                                    var splitted = Model.FreelancerStudent.KyNangCoBan.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                                                                                                                                                    foreach (var s in splitted)
+                                                                                                                                                                    {
+                                                                                                                                                                        if (!string.IsNullOrWhiteSpace(s)) { initSkillsList.Add(s.Trim()); }
+                                                                                                                                                                    }
                                                                                                                                                                 }
-                                                                                                                                                                                    ];
+                                                                                                                                                                var initSkillsJson = System.Text.Json.JsonSerializer.Serialize(initSkillsList);
+                                                                                                                                                            }
+                                                                                                                                                            const initialSkills = @Html.Raw(initSkillsJson);
 
                                                                                                                                                             let currentSkills = [...initialSkills];
                                                                                                                                                             const container = document.getElementById('skillsBadgesContainer');

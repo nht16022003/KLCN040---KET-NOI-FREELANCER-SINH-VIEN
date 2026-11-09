@@ -701,24 +701,56 @@ class _EditJobPostScreenState extends State<EditJobPostScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(
-                      initialValue: _status,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'DangTuyen',
-                          child: Text('Đang tuyển dụng (Mở)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'DaDong',
-                          child: Text('Đã đóng (Tạm dừng nhận ứng viên)'),
-                        ),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _status = val);
+                    Builder(
+                      builder: (context) {
+                        final Map<String, String> statusMap = {
+                          'DangTuyen': 'Đang tuyển dụng (Mở)',
+                          'DaDong': 'Đã đóng (Tạm dừng nhận ứng viên)',
+                          'DaTuyenDu': 'Đã tuyển đủ',
+                          'DangThucHien': 'Đang thực hiện',
+                          'DaHoanThanh': 'Đã hoàn thành',
+                          'BiTuChoi': 'Bị từ chối',
+                          'Huy': 'Đã hủy',
+                        };
+
+                        final current = _status.trim();
+                        final items = statusMap.entries.map((e) {
+                          return DropdownMenuItem<String>(
+                            value: e.key,
+                            child: Text(
+                              e.value,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList();
+
+                        // Nếu trạng thái hiện tại chưa có trong bảng ánh xạ, tự động thêm vào danh sách
+                        if (current.isNotEmpty && !statusMap.containsKey(current)) {
+                          items.add(DropdownMenuItem<String>(
+                            value: current,
+                            child: Text(
+                              current,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ));
+                        }
+
+                        final selectedValue = (current.isNotEmpty && (statusMap.containsKey(current) || items.any((i) => i.value == current)))
+                            ? current
+                            : 'DangTuyen';
+
+                        return DropdownButtonFormField<String>(
+                          value: selectedValue,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          ),
+                          items: items,
+                          onChanged: (val) {
+                            if (val != null) setState(() => _status = val);
+                          },
+                        );
                       },
                     ),
                   ],

@@ -98,12 +98,48 @@ namespace FreelancerStudent.Web.Controllers
                 return Json(new { success = false, message = "Chưa đăng nhập" });
             }
 
-            if (string.IsNullOrWhiteSpace(model.noiDung))
+            if (string.IsNullOrWhiteSpace(model.noiDung) && string.IsNullOrWhiteSpace(model.fileDinhKem))
             {
-                return Json(new { success = false, message = "Nội dung tin nhắn không được để trống" });
+                return Json(new { success = false, message = "Nội dung tin nhắn hoặc tệp đính kèm không được để trống" });
             }
 
-            var result = await _chatWebService.GuiTinNhanAsync(model.maPhongChat, maUser.Value, model.noiDung, model.fileDinhKem);
+            string noiDungGui = string.IsNullOrWhiteSpace(model.noiDung) ? "[Tệp đính kèm]" : model.noiDung;
+            string loaiTin = string.IsNullOrWhiteSpace(model.loaiTinNhan) ? "Text" : model.loaiTinNhan;
+
+            var result = await _chatWebService.GuiTinNhanAsync(model.maPhongChat, maUser.Value, noiDungGui, model.fileDinhKem, loaiTin);
+            return Json(result);
+        }
+
+        // POST: /Chat/UploadFile (AJAX call)
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { success = false, message = "Vui lòng chọn tệp" });
+            }
+
+            var result = await _chatWebService.UploadFileAsync(file);
+            return Json(result);
+        }
+
+        // GET: /Chat/DanhSachFile?maPhongChat=1 (AJAX call)
+        [HttpGet]
+        public async Task<IActionResult> DanhSachFile(int maPhongChat)
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (maUser == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            var result = await _chatWebService.LayDanhSachFileAsync(maPhongChat);
             return Json(result);
         }
 
@@ -119,6 +155,20 @@ namespace FreelancerStudent.Web.Controllers
 
             var result = await _chatWebService.LayLichSuTinNhanAsync(maPhongChat, maUser.Value);
             return Json(result);
+        }
+
+        // GET: /Chat/DemChuaDoc (AJAX sync)
+        [HttpGet]
+        public async Task<IActionResult> DemChuaDoc()
+        {
+            var maUser = HttpContext.Session.GetInt32("maUser");
+            if (!maUser.HasValue)
+            {
+                return Json(new { success = false, data = 0 });
+            }
+
+            var result = await _chatWebService.DemTinNhanChuaDocAsync(maUser.Value);
+            return Json(new { success = result.success, data = result.data });
         }
     }
 }

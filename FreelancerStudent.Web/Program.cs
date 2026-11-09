@@ -50,6 +50,7 @@ builder.Services.AddScoped<IJobPostWebService, JobPostWebService>();
 builder.Services.AddScoped<IFreelancerStudentWebService, FreelancerStudentWebService>();
 builder.Services.AddScoped<IBaiDangTimViecWebService, BaiDangTimViecWebService>();
 builder.Services.AddScoped<IChatWebService, ChatWebService>();
+builder.Services.AddScoped<IUngThueWebService, UngThueWebService>();
 builder.Services.AddScoped<IWalletWebService, WalletWebService>();
 builder.Services.AddScoped<IGiaoDichNapTienWebService, GiaoDichNapTienWebService>();
 builder.Services.AddScoped<IHopDongWebService, HopDongWebService>();

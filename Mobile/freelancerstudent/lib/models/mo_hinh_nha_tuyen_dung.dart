@@ -194,6 +194,14 @@ class NhaTuyenDungProfileModel {
   final int soFreelancerHopTac;
   final List<NhaTuyenDungJobItemModel> danhSachTinTuyenDung;
 
+  String? get tencongty => nhaTuyenDung.tencongty;
+  String? get hotenUser => nhaTuyenDung.hotenUser;
+  String? get sdtUser => nhaTuyenDung.sdtUser;
+  String? get linhvuc => nhaTuyenDung.linhvuc;
+  String? get diachi => nhaTuyenDung.diachi;
+  String? get link => nhaTuyenDung.link;
+  String? get gioithieu => nhaTuyenDung.gioithieu;
+
   const NhaTuyenDungProfileModel({
     required this.nhaTuyenDung,
     this.soLuotDanhGia = 0,

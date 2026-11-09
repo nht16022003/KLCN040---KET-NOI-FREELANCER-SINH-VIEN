@@ -106,6 +106,7 @@ namespace FreelancerStudent.Web.Services
                     hinhthuclamviec = model.hinhthuclamviec,
                     dieuKhoan = model.dieuKhoan,
                     maUngTuyen = model.maUngTuyen,
+                    maYeuCauThue = model.maYeuCauThue,
                     giaiDoans = model.giaiDoans?.Where(g => !string.IsNullOrWhiteSpace(g.tenGiaiDoan)).Select(g => new
                     {
                         tenGiaiDoan = g.tenGiaiDoan.Trim(),
@@ -221,11 +222,12 @@ namespace FreelancerStudent.Web.Services
             return null;
         }
 
-        public async Task<HopDongViewModel?> LayChiTietTheoMaAsync(string maHD)
+        public async Task<HopDongViewModel?> LayChiTietTheoMaAsync(string maHD, int? maUser = null)
         {
             try
             {
-                var url = $"api/HopDong/chi-tiet/{Uri.EscapeDataString(maHD)}";
+                var queryParam = maUser.HasValue && maUser.Value > 0 ? $"?maUser={maUser.Value}" : "";
+                var url = $"api/HopDong/chi-tiet/{Uri.EscapeDataString(maHD)}{queryParam}";
                 using var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {

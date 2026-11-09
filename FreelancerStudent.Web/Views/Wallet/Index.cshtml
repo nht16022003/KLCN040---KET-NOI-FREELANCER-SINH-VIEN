@@ -470,17 +470,30 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Khối xác nhận mô phỏng demo -->
+                                            <!-- Khối gửi minh chứng chuyển tiền -->
                                             <div class="p-3 border rounded bg-light mb-3">
-                                                <div class="fw-semibold small text-dark mb-1">Môi trường kiểm thử Demo:</div>
+                                                <div class="fw-semibold small text-dark mb-1">
+                                                    <i class="bi bi-camera me-1"></i> Tải ảnh biên lai minh chứng chuyển khoản:
+                                                </div>
                                                 <p class="small text-muted mb-2">
-                                                    Trong môi trường thử nghiệm, bạn có thể bấm nút dưới để hệ thống cập nhật tiền vào ví và
-                                                    ghi nhận lịch sử giao dịch trong SQL Server ngay lập tức:
+                                                    Sau khi chuyển tiền thành công, vui lòng đính kèm ảnh chụp màn hình giao dịch để Quản trị viên đối chiếu và phê duyệt cộng tiền vào ví.
                                                 </p>
-                                                <button type="button" id="btnXacNhanMoPhong"
-                                                        class="btn btn-outline-success fw-semibold btn-sm px-3 py-2">
-                                                    Xác nhận nạp tiền mô phỏng
-                                                </button>
+
+                                                <div class="input-group input-group-sm mb-2">
+                                                    <input type="file" id="fileBienLai" accept="image/*" class="form-control" />
+                                                    <button type="button" id="btnGuiBienLai" class="btn btn-primary fw-semibold px-3"
+                                                            style="background:#234E36; border-color:#234E36;">
+                                                        Gửi minh chứng
+                                                    </button>
+                                                </div>
+
+                                                <!-- Preview ảnh biên lai -->
+                                                <div id="bienLaiPreviewContainer" style="display:none;" class="mt-2 text-center">
+                                                    <img id="imgBienLaiPreview" src="" alt="Xem trước biên lai" class="img-thumbnail" style="max-height: 160px;" />
+                                                </div>
+
+                                                <!-- Thông báo kết quả upload -->
+                                                <div id="thongBaoBienLai" class="small mt-2" style="display:none;"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -522,6 +535,11 @@
                                             <label class="form-label small fw-semibold text-dark">Tên chủ tài khoản:</label>
                                             <input type="text" id="rutTenChuTaiKhoan" class="form-control"
                                                    placeholder="Ví dụ: NGUYEN VAN A" />
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label small fw-semibold text-dark">Ảnh mã QR nhận tiền (Tùy chọn):</label>
+                                            <input type="file" id="rutFileQr" accept="image/*" class="form-control" />
+                                            <div class="small text-muted mt-1">Đính kèm ảnh mã QR ngân hàng cá nhân giúp Quản trị viên quét và giải ngân nhanh chóng.</div>
                                         </div>
                                     </div>
 
@@ -689,23 +707,15 @@
                                                             <td>
                                                                 @if (r.trangThai == "ChoXuLy")
                                                                 {
-                                                                    <div class="btn-group btn-group-sm">
-                                                                        <button type="button" class="btn btn-outline-success btn-sm"
-                                                                                onclick="xacNhanRutTienMoPhong(@r.maRutTien, true)">
-                                                                            Duyệt mô phỏng
-                                                                        </button>
-                                                                        <button type="button" class="btn btn-outline-danger btn-sm"
-                                                                                onclick="xacNhanRutTienMoPhong(@r.maRutTien, false)">
-                                                                            Hủy yêu cầu
-                                                                        </button>
-                                                                    </div>
+                                                                    <span class="badge bg-light text-warning border border-warning px-2 py-1 small">
+                                                                        Đang chờ Quản trị viên duyệt
+                                                                    </span>
                                                                 }
                                                                 else
                                                                 {
-                                                                    <span class="text-muted small">@(r.ngayXuLy?.ToString("dd/MM/yyyy HH:mm") ??
-                                                                             "—")</span>
-                                                                    }
-                                                                </td>
+                                                                    <span class="text-muted small">@(r.ngayXuLy?.ToString("dd/MM/yyyy HH:mm") ?? "—")</span>
+                                                                }
+                                                            </td>
                                                             </tr>
                                                         }
                                                     </tbody>
@@ -879,41 +889,76 @@
                                     }
                                 });
 
-                                // Xác nhận nạp tiền mô phỏng (Demo)
-                                if (btnXacNhanMoPhong) {
-                                    btnXacNhanMoPhong.addEventListener("click", async function () {
+                                // Xử lý tải ảnh và gửi minh chứng biên lai nạp tiền
+                                const fileBienLai = document.getElementById("fileBienLai");
+                                const bienLaiPreviewContainer = document.getElementById("bienLaiPreviewContainer");
+                                const imgBienLaiPreview = document.getElementById("imgBienLaiPreview");
+                                const btnGuiBienLai = document.getElementById("btnGuiBienLai");
+                                const thongBaoBienLai = document.getElementById("thongBaoBienLai");
+
+                                if (fileBienLai) {
+                                    fileBienLai.addEventListener("change", function () {
+                                        if (this.files && this.files[0]) {
+                                            const reader = new FileReader();
+                                            reader.onload = function (e) {
+                                                imgBienLaiPreview.src = e.target.result;
+                                                bienLaiPreviewContainer.style.display = "block";
+                                            };
+                                            reader.readAsDataURL(this.files[0]);
+                                        }
+                                    });
+                                }
+
+                                if (btnGuiBienLai) {
+                                    btnGuiBienLai.addEventListener("click", async function () {
                                         if (!maGiaoDichHienTai) {
                                             alert("Chưa có mã giao dịch nào được tạo.");
                                             return;
                                         }
 
-                                        if (!confirm("Xác nhận cộng " + document.getElementById("soTienGiaoDich").innerText + " vào ví mô phỏng của bạn?")) {
+                                        if (!fileBienLai || !fileBienLai.files || fileBienLai.files.length === 0) {
+                                            alert("Vui lòng chọn ảnh chụp màn hình biên lai chuyển tiền.");
                                             return;
                                         }
 
-                                        btnXacNhanMoPhong.disabled = true;
-                                        btnXacNhanMoPhong.innerText = "Đang ghi nhận...";
+                                        const formData = new FormData();
+                                        formData.append("maGiaoDich", maGiaoDichHienTai);
+                                        formData.append("file", fileBienLai.files[0]);
+
+                                        btnGuiBienLai.disabled = true;
+                                        btnGuiBienLai.innerText = "Đang gửi ảnh...";
+                                        thongBaoBienLai.style.display = "none";
 
                                         try {
-                                            const response = await fetch("/Wallet/XacNhanNapTienMoPhong", {
+                                            const response = await fetch("/Wallet/UploadBienLai", {
                                                 method: "POST",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({ maGiaoDich: maGiaoDichHienTai })
+                                                body: formData
                                             });
 
                                             const res = await response.json();
+                                            btnGuiBienLai.disabled = false;
+                                            btnGuiBienLai.innerText = "Gửi minh chứng";
+
                                             if (res.success) {
-                                                alert("Thành công! " + res.message);
-                                                window.location.reload();
+                                                thongBaoBienLai.className = "small mt-2 alert alert-success p-2";
+                                                thongBaoBienLai.innerHTML = "<strong>Thành công!</strong> Đã gửi biên lai minh chứng. Quản trị viên sẽ đối chiếu và phê duyệt số dư vào ví của bạn.";
+                                                thongBaoBienLai.style.display = "block";
+                                                const badgeEl = document.getElementById("trangThaiGiaoDich");
+                                                if (badgeEl) {
+                                                    badgeEl.className = "badge bg-info text-dark";
+                                                    badgeEl.innerText = "Đã gửi minh chứng - Chờ duyệt";
+                                                }
                                             } else {
-                                                alert("Thất bại: " + res.message);
-                                                btnXacNhanMoPhong.disabled = false;
-                                                btnXacNhanMoPhong.innerText = "Xác nhận nạp tiền mô phỏng";
+                                                thongBaoBienLai.className = "small mt-2 alert alert-danger p-2";
+                                                thongBaoBienLai.innerText = res.message || "Tải ảnh thất bại.";
+                                                thongBaoBienLai.style.display = "block";
                                             }
                                         } catch (err) {
-                                            alert("Lỗi khi xác nhận nạp tiền mô phỏng: " + err.message);
-                                            btnXacNhanMoPhong.disabled = false;
-                                            btnXacNhanMoPhong.innerText = "Xác nhận nạp tiền mô phỏng";
+                                            btnGuiBienLai.disabled = false;
+                                            btnGuiBienLai.innerText = "Gửi minh chứng";
+                                            thongBaoBienLai.className = "small mt-2 alert alert-danger p-2";
+                                            thongBaoBienLai.innerText = "Lỗi khi tải ảnh: " + err.message;
+                                            thongBaoBienLai.style.display = "block";
                                         }
                                     });
                                 }
@@ -970,6 +1015,21 @@
                                             btnGuiYeuCauRut.innerText = "Gửi yêu cầu rút tiền";
 
                                             if (res.success) {
+                                                // Nếu có đính kèm ảnh QR cá nhân, gửi lên server
+                                                const rutFileQr = document.getElementById("rutFileQr");
+                                                if (rutFileQr && rutFileQr.files && rutFileQr.files.length > 0) {
+                                                    try {
+                                                        const qrFormData = new FormData();
+                                                        qrFormData.append("file", rutFileQr.files[0]);
+                                                        await fetch("/Wallet/UploadQrRutTien", {
+                                                            method: "POST",
+                                                            body: qrFormData
+                                                        });
+                                                    } catch (e) {
+                                                        console.warn("Lỗi tải ảnh QR nhận tiền:", e);
+                                                    }
+                                                }
+
                                                 alert(res.message);
                                                 window.location.reload();
                                             } else {
@@ -983,32 +1043,6 @@
                                     });
                                 }
                             });
-
-                            // Duyệt / Hủy yêu cầu rút tiền mô phỏng
-                            async function xacNhanRutTienMoPhong(maRutTien, chapNhan) {
-                                const actionText = chapNhan ? "duyệt hoàn thành" : "hủy và hoàn tiền";
-                                if (!confirm("Bạn có chắc chắn muốn " + actionText + " yêu cầu rút tiền #" + maRutTien + "?")) {
-                                    return;
-                                }
-
-                                try {
-                                    const response = await fetch("/Wallet/XacNhanRutTienMoPhong", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({ maRutTien: maRutTien, chapNhan: chapNhan })
-                                    });
-
-                                    const res = await response.json();
-                                    if (res.success) {
-                                        alert(res.message);
-                                        window.location.reload();
-                                    } else {
-                                        alert("Thao tác thất bại: " + res.message);
-                                    }
-                                } catch (err) {
-                                    alert("Lỗi khi xử lý yêu cầu rút tiền: " + err.message);
-                                }
-                            }
 
                             function batDauDemNguoc(ngayHetHan) {
                                 if (intervalDemNguoc) clearInterval(intervalDemNguoc);

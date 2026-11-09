@@ -308,52 +308,116 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _sectionTitle('Học vấn'),
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: DropdownButtonFormField<String>(
-                initialValue: (_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode))
-                    ? _selectedMajorCode
-                    : (_isCustomMajor || (_majorNameController.text.isNotEmpty && _selectedMajorCode != null && _selectedMajorCode!.isNotEmpty))
-                        ? '__NEW__'
-                        : null,
-                decoration: const InputDecoration(
-                  labelText: 'Chuyên ngành',
-                  border: OutlineInputBorder(),
-                  helperText: 'Chọn chuyên ngành có sẵn hoặc chọn nhập mới',
-                ),
-                items: [
-                  ..._majors.map((m) {
-                    final code = (m['maChuyenNganh'] ?? m['MaChuyenNganh'] ?? '').toString();
-                    final name = (m['tenChuyenNganh'] ?? m['TenChuyenNganh'] ?? '').toString();
-                    return DropdownMenuItem<String>(
-                      value: code,
-                      child: Text('$name ($code)'),
-                    );
-                  }),
-                  const DropdownMenuItem<String>(
-                    value: '__NEW__',
-                    child: Text('+ Nhập chuyên ngành khác...'),
-                  ),
-                ],
-                onChanged: (val) {
-                  setState(() {
-                    if (val == '__NEW__') {
-                      _isCustomMajor = true;
-                      _selectedMajorCode = '__NEW__';
-                      _majorCodeController.text = '';
-                    } else if (val != null) {
-                      _isCustomMajor = false;
-                      _selectedMajorCode = val;
-                      _majorCodeController.text = val;
-                      final found = _majors.firstWhere(
-                        (m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == val,
-                        orElse: () => {},
-                      );
-                      _majorNameController.text = (found['tenChuyenNganh'] ?? found['TenChuyenNganh'] ?? '').toString();
+              child: Builder(
+                builder: (context) {
+                  final seen = <String>{};
+                  final items = <DropdownMenuItem<String>>[];
+
+                  // Thêm các chuyên ngành từ danh mục hệ thống (loại bỏ trùng lặp)
+                  for (final m in _majors) {
+                    final code = (m['maChuyenNganh'] ?? m['MaChuyenNganh'] ?? '').toString().trim();
+                    final name = (m['tenChuyenNganh'] ?? m['TenChuyenNganh'] ?? '').toString().trim();
+                    if (code.isNotEmpty && !seen.contains(code)) {
+                      seen.add(code);
+                      items.add(DropdownMenuItem<String>(
+                        value: code,
+                        child: Text(
+                          '$name ($code)',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ));
                     }
-                  });
+                  }
+
+                  // Nếu chuyên ngành hiện tại của hồ sơ không nằm trong danh mục (ví dụ mã OCR hoặc mã riêng)
+                  if (_selectedMajorCode != null &&
+                      _selectedMajorCode!.isNotEmpty &&
+                      _selectedMajorCode != '__NEW__' &&
+                      !seen.contains(_selectedMajorCode)) {
+                    seen.add(_selectedMajorCode!);
+                    final displayName = _majorNameController.text.trim().isNotEmpty
+                        ? '${_majorNameController.text.trim()} (${_selectedMajorCode!})'
+                        : _selectedMajorCode!;
+                    items.insert(
+                      0,
+                      DropdownMenuItem<String>(
+                        value: _selectedMajorCode!,
+                        child: Text(
+                          displayName,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Thêm tùy chọn nhập chuyên ngành khác nếu hồ sơ chưa bị khóa xác minh thẻ
+                  if (!_isCardVerified) {
+                    items.add(const DropdownMenuItem<String>(
+                      value: '__NEW__',
+                      child: Text(
+                        '+ Nhập chuyên ngành khác...',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ));
+                  }
+
+                  // Xác định giá trị đã chọn hợp lệ
+                  String? dropdownValue;
+                  if (_selectedMajorCode != null && seen.contains(_selectedMajorCode)) {
+                    dropdownValue = _selectedMajorCode;
+                  } else if (_isCustomMajor && !_isCardVerified) {
+                    dropdownValue = '__NEW__';
+                  }
+
+                  return DropdownButtonFormField<String>(
+                    value: dropdownValue,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: 'Chuyên ngành',
+                      border: const OutlineInputBorder(),
+                      helperText: _isCardVerified
+                          ? 'Chuyên ngành đã được xác minh theo thẻ sinh viên'
+                          : 'Chọn chuyên ngành có sẵn hoặc chọn nhập mới',
+                      suffixIcon: _isCardVerified
+                          ? const Icon(Icons.lock_outline, size: 18, color: Colors.grey)
+                          : null,
+                      filled: _isCardVerified,
+                      fillColor: _isCardVerified ? const Color(0xFFF1F5F9) : null,
+                    ),
+                    items: items,
+                    onChanged: _isCardVerified
+                        ? null
+                        : (val) {
+                            setState(() {
+                              if (val == '__NEW__') {
+                                _isCustomMajor = true;
+                                _selectedMajorCode = '__NEW__';
+                                _majorCodeController.text = '';
+                              } else if (val != null) {
+                                _isCustomMajor = false;
+                                _selectedMajorCode = val;
+                                _majorCodeController.text = val;
+                                final found = _majors.firstWhere(
+                                  (m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == val,
+                                  orElse: () => {},
+                                );
+                                if (found.isNotEmpty) {
+                                  _majorNameController.text = (found['tenChuyenNganh'] ??
+                                          found['TenChuyenNganh'] ??
+                                          '')
+                                      .toString();
+                                }
+                              }
+                            });
+                          },
+                  );
                 },
               ),
             ),
-            if (_isCustomMajor || (_selectedMajorCode == '__NEW__') || (_majorNameController.text.isNotEmpty && !_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode)))
+            if (!_isCardVerified && (_isCustomMajor || (_selectedMajorCode == '__NEW__') || (_majorNameController.text.isNotEmpty && !_majors.any((m) => (m['maChuyenNganh'] ?? m['MaChuyenNganh']) == _selectedMajorCode))))
               _field(
                 _majorNameController,
                 'Tên chuyên ngành mới (hệ thống tự tạo mã)',
@@ -443,6 +507,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     )
                   : const Text('Lưu thay đổi'),
             ),
+            const SizedBox(height: 36),
           ],
         ),
       ),

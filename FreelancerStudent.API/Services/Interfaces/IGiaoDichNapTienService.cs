@@ -22,5 +22,8 @@ namespace FreelancerStudent.API.Services.Interfaces
 
         // Xác nhận nạp tiền mô phỏng (dành cho Demo và kiểm thử)
         Task<GiaoDichNapTien_ReponseDTO> xacNhanNapTienMoPhongAsync(string maGiaoDich, int maUser);
+
+        // Cập nhật đường dẫn ảnh biên lai minh chứng
+        Task<bool> capNhatAnhBienLaiAsync(string maGiaoDich, string anhBienLaiUrl);
     }
 }

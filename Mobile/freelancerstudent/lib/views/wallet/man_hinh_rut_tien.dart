@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
@@ -20,9 +22,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   final TextEditingController _soTaiKhoanController = TextEditingController();
   final TextEditingController _tenChuTKController = TextEditingController();
   final TextEditingController _ghiChuController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   String _tenNganHang = 'Vietcombank';
   bool _dangXuLy = false;
+  File? _anhQrNhanTien;
 
   final List<String> _danhSachNganHang = [
     'Vietcombank',
@@ -48,6 +52,26 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     _tenChuTKController.dispose();
     _ghiChuController.dispose();
     super.dispose();
+  }
+
+  Future<void> _chonAnhQr(ImageSource source) async {
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (picked != null) {
+        setState(() {
+          _anhQrNhanTien = File(picked.path);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi chọn ảnh QR: ${e.toString()}')),
+      );
+    }
   }
 
   Future<void> _guiYeuCauRutTien() async {
@@ -82,6 +106,15 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     }
 
     setState(() => _dangXuLy = true);
+
+    // Nếu người dùng có chọn ảnh mã QR ngân hàng cá nhân, upload lên server trước
+    if (_anhQrNhanTien != null) {
+      try {
+        await walletVM.uploadQrRutTien(_anhQrNhanTien!);
+      } catch (e) {
+        debugPrint('Lỗi tải ảnh QR nhận tiền: $e');
+      }
+    }
 
     final res = await walletVM.taoYeuCauRutTien(
       user.userId,
@@ -204,12 +237,16 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                           color: AppColors.bodyText,
                         ),
                       ),
-                      Text(
-                        AppFormatters.formatCurrency(soDuKhaDung),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                      Flexible(
+                        child: Text(
+                          AppFormatters.formatCurrency(soDuKhaDung),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
                         ),
                       ),
                     ],
@@ -341,6 +378,109 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
+
+              // Ảnh mã QR nhận tiền cá nhân (Đồng bộ với Website & Admin)
+              const Text(
+                'Ảnh mã QR nhận tiền (Tùy chọn)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.heading,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Đính kèm ảnh mã QR tài khoản ngân hàng cá nhân giúp Quản trị viên quét mã và giải ngân nhanh chóng.',
+                style: TextStyle(fontSize: 12, color: AppColors.bodyText),
+              ),
+              const SizedBox(height: 8),
+
+              if (_anhQrNhanTien != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          _anhQrNhanTien!,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Đã chọn ảnh mã QR',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.5,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Sẽ được đính kèm vào yêu cầu rút tiền',
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => setState(() => _anhQrNhanTien = null),
+                        tooltip: 'Xóa ảnh',
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                        label: const Text('Chụp QR', style: TextStyle(fontWeight: FontWeight.bold)),
+                        onPressed: () => _chonAnhQr(ImageSource.camera),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        icon: const Icon(Icons.photo_library_outlined, size: 18),
+                        label: const Text('Chọn ảnh QR', style: TextStyle(fontWeight: FontWeight.bold)),
+                        onPressed: () => _chonAnhQr(ImageSource.gallery),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 16),
 
               // Ghi chú

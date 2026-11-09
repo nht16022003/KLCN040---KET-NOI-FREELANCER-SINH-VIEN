@@ -1,0 +1,178 @@
+@using FreelancerStudent.Web.ViewModels
+@model List<YeuCauThueViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý yêu cầu thuê Freelancer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/NhaTuyenDung/Profile" class="text-decoration-none text-muted">Nhà tuyển dụng</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Yêu cầu thuê ứng viên</li>
+        </ol>
+    </nav>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success rounded-0 border-0 shadow-sm mb-4 alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger rounded-0 border-0 shadow-sm mb-4 alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Header Card -->
+     <div>
+                <a href="/FreelancerStudent" class="btn btn-success rounded-0 px-4 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                    <i class="bi bi-search me-1"></i> Tìm ứng viên mới
+                </a>
+            </div>
+            <br/>
+
+    <!-- Table of Requests -->
+    <div class="card border rounded-0 shadow-sm bg-white overflow-hidden">
+        <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold text-dark mb-0">
+                Tất cả yêu cầu đã gửi (@Model.Count)
+            </h6>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small text-uppercase">
+                        <tr>
+                            <th class="ps-4">Mã</th>
+                            <th>Ứng viên nhận việc</th>
+                            <th>Nội dung công việc & Bài tuyển dụng</th>
+                            <th>Thù lao đề xuất</th>
+                            <th>Thời hạn</th>
+                            <th>Ngày gửi</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var avatar = !string.IsNullOrEmpty(item.avatarFreelancer)
+                                ? item.avatarFreelancer
+                                : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenFreelancer)}&background=E8F5E9&color=1B5E36";
+
+                            <tr>
+                                <td class="ps-4 fw-bold text-muted small"># @item.maYeuCau</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="@avatar" alt="@item.tenFreelancer" class="border rounded-0" style="width: 40px; height: 40px; object-fit: cover;" />
+                                        <div>
+                                            <a href="@Url.Action("Profile", "FreelancerStudent", new { id = item.maFreelancerStudent })" target="_blank" class="fw-bold text-dark text-decoration-none hover-success small d-block">
+                                                @item.tenFreelancer
+                                            </a>
+                                            <a href="@Url.Action("Index", "Chat", new { maFreelancerStudent = item.maFreelancerStudent, maJob = item.maJob })" class="text-success small text-decoration-none">
+                                                <i class="bi bi-chat-dots-fill me-1"></i>Nhắn tin
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark small text-truncate" style="max-width: 250px;">
+                                        @item.tieuDeCongViec
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.maJob))
+                                    {
+                                        <div class="text-muted small text-truncate" style="max-width: 250px;">
+                                            <span class="badge bg-light text-secondary border rounded-0">#@item.maJob</span>
+                                            @(item.tieuDeJob ?? "Bài tuyển dụng")
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-danger fw-bold small">
+                                        @(item.nganSachDeNghi.HasValue ? item.nganSachDeNghi.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                                    </span>
+                                </td>
+                                <td class="small text-muted">
+                                    @(item.thoiHanDuKien ?? "Không giới hạn")
+                                </td>
+                                <td class="small text-muted">
+                                    @item.ngayGui.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td>
+                                    @if (item.trangThai == "ChoPhanHoi")
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-0 px-2 py-1">
+                                            <i class="bi bi-clock me-1"></i> Chờ phản hồi
+                                        </span>
+                                    }
+                                    else if (item.trangThai == "DaChapNhan")
+                                    {
+                                        <span class="badge bg-success text-white rounded-0 px-2 py-1" style="background-color: #1B5E36 !important;">
+                                            <i class="bi bi-check-circle me-1"></i> Đã chấp nhận
+                                        </span>
+                                    }
+                                    else if (item.trangThai == "DaTuChoi")
+                                    {
+                                        <span class="badge bg-danger rounded-0 px-2 py-1" title="@item.lyDoTuChoi">
+                                            <i class="bi bi-x-circle me-1"></i> Đã từ chối
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(item.lyDoTuChoi))
+                                        {
+                                            <div class="small text-danger text-truncate mt-1" style="max-width: 140px;" title="@item.lyDoTuChoi">
+                                                Lý do: @item.lyDoTuChoi
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary rounded-0 px-2 py-1">@item.trangThai</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end align-items-center gap-2">
+                                        @if (item.trangThai == "DaChapNhan")
+                                        {
+                                            <a href="@Url.Action("TaoHopDong", "HopDong", new { maJob = item.maJob, maFreelancerStudent = item.maFreelancerStudent, maYeuCauThue = item.maYeuCau })" 
+                                               class="btn btn-sm btn-success rounded-0 fw-bold px-3 shadow-sm text-nowrap"
+                                               style="background-color: #1B5E36; border-color: #1B5E36;">
+                                                <i class="bi bi-file-earmark-text-fill me-1"></i> Tạo hợp đồng ngay
+                                            </a>
+                                        }
+                                        <a href="@Url.Action("Index", "Chat", new { maFreelancerStudent = item.maFreelancerStudent, maJob = item.maJob })" 
+                                           class="btn btn-sm btn-outline-secondary rounded-0 px-2 py-1" title="Mở phòng chat trao đổi">
+                                            <i class="bi bi-chat-text"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">Bạn chưa gửi yêu cầu thuê nào</h5>
+                <p class="text-muted small mx-auto" style="max-width: 450px;">
+                    Hãy khám phá danh sách Freelancer sinh viên tài năng và gửi đề xuất thuê công việc trực tiếp ngay hôm nay!
+                </p>
+                <a href="/FreelancerStudent" class="btn btn-success rounded-0 px-4 mt-2 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                    Khám phá ứng viên
+                </a>
+            </div>
+        }
+    </div>
+</div>
+

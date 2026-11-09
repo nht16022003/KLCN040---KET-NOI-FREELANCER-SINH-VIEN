@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/mau_sac_ung_dung.dart';
 import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../models/mo_hinh_hop_dong.dart';
+import '../../models/mo_hinh_nha_tuyen_dung.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_ho_so_freelancer.dart';
 import '../../viewmodels/viewmodel_hop_dong.dart';
@@ -117,10 +118,14 @@ class _HopDongListScreenState extends State<HopDongListScreen> {
       // Tìm mã Nhà tuyển dụng
       final ntdService = NhaTuyenDungService();
       final ntdRes = await ntdService.layDanhSachNhaTuyenDung();
-      final ntd = ntdRes.data?.firstWhere(
-        (item) => item.maUser == user.userId,
-        orElse: () => ntdRes.data!.isNotEmpty ? ntdRes.data!.first : throw Exception(),
-      );
+      NhaTuyenDungModel? ntd;
+      if (ntdRes.data != null && ntdRes.data!.isNotEmpty) {
+        try {
+          ntd = ntdRes.data!.firstWhere((item) => item.maUser == user.userId);
+        } catch (_) {
+          ntd = null;
+        }
+      }
 
       final maNTD = ntd?.maNhaTuyenDung;
       if (maNTD != null && maNTD > 0) {
@@ -131,6 +136,13 @@ class _HopDongListScreenState extends State<HopDongListScreen> {
         );
         if (!mounted) return;
         setState(() => _dangKhoiTao = false);
+        return;
+      } else {
+        if (!mounted) return;
+        setState(() {
+          _dangKhoiTao = false;
+          _loi = 'Chưa tìm thấy thông tin Nhà tuyển dụng của tài khoản này.';
+        });
         return;
       }
     }

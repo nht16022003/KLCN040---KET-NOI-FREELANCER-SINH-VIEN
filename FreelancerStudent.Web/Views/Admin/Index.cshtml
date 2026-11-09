@@ -3,157 +3,143 @@
     ViewData["Title"] = "Tổng quan Quản trị Hệ thống";
 }
 
-<div class="container-fluid px-lg-5 py-4" style="background-color: #F8FAFC; min-height: 85vh;">
-    <!-- Header Page -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <h3 class="fw-bold text-dark mb-1">Tổng quan Quản trị Hệ thống</h3>
-            <p class="text-muted small mb-0">Theo dõi người dùng, tài chính ký quỹ, hợp đồng và giao dịch trong hệ thống.</p>
-        </div>
-        <div class="d-flex gap-2 mt-2 mt-md-0">
-            <a href="/Admin/DuyetMinhChung" class="btn btn-success btn-sm rounded-0 px-3 shadow-sm text-white fw-semibold">
-                Duyệt thẻ SV
-            </a>
-            <a href="/Admin/DuyetRutTien" class="btn btn-warning btn-sm rounded-0 px-3 shadow-sm text-dark fw-semibold">
-                Duyệt rút tiền
-            </a>
-            <a href="/Admin/DanhSachNguoiDung" class="btn btn-outline-dark btn-sm rounded-0 px-3">
-                Quản lý người dùng
-            </a>
-            <a href="/Admin/QuanLyHopDong" class="btn btn-outline-success btn-sm rounded-0 px-3">
-                Quản lý hợp đồng
-            </a>
-            <a href="/Admin/CauHinhHeThong" class="btn btn-primary btn-sm rounded-0 px-3 text-white fw-semibold">
-                Cấu hình Phí hệ thống
-            </a>
-        </div>
-    </div>
+<div class="container-fluid px-3 px-md-4 py-3" style="background-color: #F8FAFC; min-height: 85vh;">
+    <!-- Tiêu đề và thanh thao tác nhanh -->
+    
 
-    <!-- Alert / Toast -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0 mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
             @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
 
-    <!-- Stat KPI Cards -->
-    <div class="row g-3 mb-4">
+    <!-- Khối chỉ số tổng quan (Stat Metrics) -->
+    <div class="row g-3 mb-3">
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-white">
-                <span class="text-muted small fw-semibold text-uppercase">Tổng Người dùng</span>
-                <h3 class="fw-bold text-dark mt-2 mb-0">@Model.TongSoUser</h3>
-                <div class="small text-muted mt-2 pt-2 border-top">
-                    <span class="fw-semibold text-success">@Model.TongSoSinhVien Sinh viên</span> |
-                    <span class="fw-semibold text-primary">@Model.TongSoNhaTuyenDung Nhà tuyển dụng</span>
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Người dùng hệ thống</span>
+                <div class="h4 fw-bold text-dark mb-2">@Model.TongSoUser.ToString("N0")</div>
+                <div class="small text-muted pt-2 border-top">
+                    <span class="text-success fw-semibold">@Model.TongSoSinhVien Sinh viên</span> |
+                    <span class="text-primary fw-semibold">@Model.TongSoNhaTuyenDung NTD</span>
                 </div>
             </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-white">
-                <span class="text-muted small fw-semibold text-uppercase">Doanh Thu Hệ Thống</span>
-                <h3 class="fw-bold text-success mt-2 mb-0">@Model.TongDoanhThuHeThong.ToString("N0") <small class="fs-6">VNĐ</small></h3>
-                <div class="small text-muted mt-2 pt-2 border-top d-flex justify-content-between flex-wrap">
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Tổng doanh thu hệ thống</span>
+                <div class="h4 fw-bold text-success mb-2">@Model.TongDoanhThuHeThong.ToString("N0") <span class="fs-6 fw-normal text-muted">VNĐ</span></div>
+                <div class="small text-muted pt-2 border-top d-flex justify-content-between">
                     <span>Hoa hồng HĐ: @((Model.TongDoanhThuHeThong - Model.TongDoanhThuPhiDangBai).ToString("N0")) đ</span>
-                    <span class="text-primary fw-semibold">Phí đăng tin: @Model.TongDoanhThuPhiDangBai.ToString("N0") đ</span>
+                    <span>Phí đăng tin: @Model.TongDoanhThuPhiDangBai.ToString("N0") đ</span>
                 </div>
             </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-white">
-                <span class="text-muted small fw-semibold text-uppercase">Tin Tuyển Dụng & Hợp Đồng</span>
-                <h3 class="fw-bold text-dark mt-2 mb-0">@Model.TongSoJob <span class="fs-6 fw-normal text-muted">/ @Model.TongSoHopDong hợp đồng</span></h3>
-                <div class="small text-muted mt-2 pt-2 border-top">Chuyển đổi việc làm sinh viên</div>
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Bài đăng & Hợp đồng</span>
+                <div class="h4 fw-bold text-dark mb-2">@Model.TongSoJob <span class="fs-6 fw-normal text-muted">tin tuyển</span></div>
+                <div class="small text-muted pt-2 border-top">
+                    <span>Tổng hợp đồng giao kết: <strong class="text-dark">@Model.TongSoHopDong</strong></span>
+                </div>
             </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-white">
-                <span class="text-muted small fw-semibold text-uppercase">Tiền Ký Quỹ Escrow</span>
-                <h3 class="fw-bold text-danger mt-2 mb-0">@Model.TongTienDangKyQuy.ToString("N0") <small class="fs-6">VNĐ</small></h3>
-                <div class="small text-muted mt-2 pt-2 border-top">Đang đóng băng bảo đảm hợp đồng</div>
+            <div class="border bg-white p-3 h-100">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Tiền ký quỹ</span>
+                <div class="h4 fw-bold text-dark mb-2">@Model.TongTienDangKyQuy.ToString("N0") <span class="fs-6 fw-normal text-muted">VNĐ</span></div>
+                <div class="small text-muted pt-2 border-top">
+                    <span>Bảo chứng hợp đồng dịch vụ</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Section: Quick Actions + Recent Transaction Audit -->
-    <div class="row g-4">
-        <!-- Quick Action Hub -->
-        <div class="col-12 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-3 bg-white p-4 h-100">
-                <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Chức năng Quản trị Thực tế</h5>
-                <div class="row g-2">
-                    <div class="col-12">
-                        <a href="/Admin/DanhSachNguoiDung" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light">
-                            <div class="fw-bold text-primary">Quản lý Người dùng</div>
-                            <div class="small text-muted mt-1">Tìm kiếm, lọc danh sách Freelancer Sinh viên và Nhà tuyển dụng</div>
+    <!-- Bố cục 2 phần: Chức năng quản trị và Nhật ký giao dịch -->
+    <div class="row g-3">
+        <!-- Cột điều hướng chức năng quản trị -->
+        <div class="col-12 col-lg-4">
+            <div class="border bg-white p-3 h-100">
+               
+
+                <div class="mb-3">
+                  
+                    <div class="list-group list-group-flush border-top border-bottom">
+                        <a href="/Admin/DanhSachNguoiDung" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-dark">Danh sách tài khoản người dùng</span>
+                            <span class="small text-muted">&rarr;</span>
+                        </a>
+                        <a href="/Admin/DuyetMinhChung" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-success">Phê duyệt thẻ sinh viên</span>
+                            <span class="small text-muted">&rarr;</span>
+                        </a>
+                        <a href="/Admin/XuLyTaiKhoan" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-danger">Khóa / Mở khóa tài khoản</span>
+                            <span class="small text-muted">&rarr;</span>
                         </a>
                     </div>
-                    <div class="col-12">
-                        <a href="/Admin/XuLyTaiKhoan" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light">
-                            <div class="fw-bold text-danger">Khóa và Mở khóa Tài khoản</div>
-                            <div class="small text-muted mt-1">Đình chỉ hoặc khôi phục hoạt động tài khoản vi phạm kèm lịch sử kiểm toán</div>
+                     <div class="list-group list-group-flush border-top border-bottom">
+                        <a href="/Admin/DuyetNapTien" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-dark">Duyệt yêu cầu nạp tiền</span>
+                            <span class="small text-muted">&rarr;</span>
+                        </a>
+                        <a href="/Admin/DuyetRutTien" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-dark">Duyệt yêu cầu rút tiền</span>
+                            <span class="small text-muted">&rarr;</span>
+                        </a>
+                        <a href="/Admin/DieuChinhSoDu" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-dark">Điều chỉnh số dư ví</span>
+                            <span class="small text-muted">&rarr;</span>
                         </a>
                     </div>
-                    <div class="col-12">
-                        <a href="/Admin/DuyetMinhChung" class="p-3 border rounded-0 d-block text-decoration-none text-dark bg-light border-start border-success border-3">
-                            <div class="fw-bold text-success">Duyệt Minh chứng Thẻ sinh viên</div>
-                            <div class="small text-muted mt-1">Thẩm định thẻ SV, tự động đồng bộ hồ sơ chính thức và khóa các trường từ thẻ</div>
+                    <div>
+           
+                    <div class="list-group list-group-flush border-top border-bottom">
+                        <a href="/Admin/QuanLyHopDong" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-dark">Quản lý hợp đồng & mẫu điều khoản</span>
+                            <span class="small text-muted">&rarr;</span>
                         </a>
-                    </div>
-                    <div class="col-12">
-                        <a href="/Admin/DuyetRutTien" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light border-start border-warning border-3">
-                            <div class="fw-bold text-warning text-dark">Duyệt Yêu cầu Rút tiền</div>
-                            <div class="small text-muted mt-1">Kiểm tra thông tin ngân hàng thụ hưởng, xác nhận giải ngân hoặc từ chối hoàn tiền ví</div>
-                        </a>
-                    </div>
-                    <div class="col-12">
-                        <a href="/Admin/DieuChinhSoDu" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light">
-                            <div class="fw-bold text-secondary">Điều chỉnh Số dư Ví</div>
-                            <div class="small text-muted mt-1">Cộng hoặc trừ số dư ví người dùng khi bồi hoàn hoặc xử lý sự cố có ghi nhận sổ cái</div>
-                        </a>
-                    </div>
-                    <div class="col-12">
-                        <a href="/Admin/QuanLyHopDong" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light">
-                            <div class="fw-bold text-success">Quản lý Hợp đồng & Mẫu Hợp đồng</div>
-                            <div class="small text-muted mt-1">Giám sát hợp đồng đang thực hiện và thiết lập điều khoản mẫu chuẩn</div>
-                        </a>
-                    </div>
-                    <div class="col-12">
-                        <a href="/Admin/CauHinhHeThong" class="p-3 border rounded-3 d-block text-decoration-none text-dark bg-light border-start border-primary border-3">
-                            <div class="fw-bold text-primary">Cấu hình Phí sàn & Phí đăng tin</div>
-                            <div class="small text-muted mt-1">Điều chỉnh mức phí đăng bài của NTD và tỷ lệ hoa hồng giải ngân Escrow</div>
+                        <a href="/Admin/CauHinhHeThong" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center">
+                            <span class="small fw-semibold text-dark">Cấu hình phí sàn & phí đăng tin</span>
+                            <span class="small text-muted">&rarr;</span>
                         </a>
                     </div>
                 </div>
             </div>
+                </div>
+
+               
+
+                
         </div>
 
-        <!-- Recent Transactions Audit Log -->
-        <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-3 bg-white p-4 h-100">
+        <!-- Cột nhật ký giao dịch ví -->
+        <div class="col-12 col-lg-8">
+            <div class="border bg-white p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                    <h5 class="fw-bold text-dark mb-0">Nhật ký Giao dịch Ví gần nhất</h5>
-                    <a href="/Admin/DieuChinhSoDu" class="text-success text-decoration-none small fw-semibold">Quản lý ví</a>
+                    <h2 class="h6 fw-bold text-dark mb-0">Nhật ký giao dịch ví gần nhất</h2>
+                    <a href="/Admin/DieuChinhSoDu" class="text-decoration-none small fw-semibold text-success">Quản lý ví &rarr;</a>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-bordered table-hover align-middle mb-0">
                         <thead class="table-light text-muted small">
                             <tr>
-                                <th>Mã GD</th>
-                                <th>Ví</th>
-                                <th>Loại</th>
+                                <th style="width: 80px;">Mã GD</th>
+                                <th style="width: 90px;">Ví</th>
+                                <th>Loại giao dịch</th>
                                 <th>Số tiền</th>
                                 <th>Trạng thái</th>
                                 <th>Thời gian</th>
@@ -165,12 +151,16 @@
                                 @foreach (var gd in Model.GiaoDichMoiNhat)
                                 {
                                     <tr>
-                                        <td class="fw-bold text-dark small">#@gd.MaGiaoDich</td>
-                                        <td class="small">Ví #@gd.MaWallet</td>
-                                        <td>
-                                            <span class="badge bg-light text-dark border small">@gd.LoaiGiaoDich</span>
+                                        <td class="small fw-bold text-dark">#@gd.MaGiaoDich</td>
+                                        <td class="small text-muted">Ví #@gd.MaWallet</td>
+                                        <td class="small">
+                                            <span class="badge bg-light text-dark border">@gd.LoaiGiaoDich</span>
+                                            @if (!string.IsNullOrEmpty(gd.NoiDung))
+                                            {
+                                                <div class="text-muted" style="font-size: 0.75rem;">@gd.NoiDung</div>
+                                            }
                                         </td>
-                                        <td class="fw-bold small @(gd.SoTien >= 0 ? "text-success" : "text-danger")">
+                                        <td class="small fw-bold @(gd.SoTien >= 0 ? "text-success" : "text-danger")">
                                             @gd.SoTien.ToString("+#,##0;-#,##0;0") VNĐ
                                         </td>
                                         <td>
@@ -183,7 +173,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Chưa có giao dịch nào được ghi nhận trong cơ sở dữ liệu.</td>
+                                    <td colspan="6" class="text-center text-muted py-4 small">Chưa có giao dịch nào được ghi nhận trong cơ sở dữ liệu.</td>
                                 </tr>
                             }
                         </tbody>

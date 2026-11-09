@@ -12,6 +12,7 @@ import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
 import '../danh_gia/man_hinh_danh_gia.dart';
 import '../danh_gia/man_hinh_danh_sach_tat_ca_danh_gia.dart';
+import '../employer/man_hinh_chinh_sua_ho_so_ntd.dart';
 import '../job_detail/man_hinh_chi_tiet_cong_viec.dart';
 
 class NhaTuyenDungProfileScreen extends StatefulWidget {
@@ -154,6 +155,27 @@ class _NhaTuyenDungProfileScreenState extends State<NhaTuyenDungProfileScreen> {
           foregroundColor: AppColors.heading,
           elevation: 0.5,
           actions: [
+            if (isOwner && _profile != null)
+              IconButton(
+                tooltip: 'Chỉnh sửa hồ sơ',
+                icon: const Icon(
+                  Icons.edit_note_rounded,
+                  color: AppColors.primary,
+                  size: 26,
+                ),
+                onPressed: () async {
+                  final saved = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ManHinhChinhSuaHoSoNTD(profile: _profile!),
+                    ),
+                  );
+                  if (saved == true) {
+                    _taiDuLieu();
+                  }
+                },
+              ),
             if (!isOwner && ntd.maUser > 0)
               IconButton(
                 tooltip: 'Nhắn tin liên hệ',

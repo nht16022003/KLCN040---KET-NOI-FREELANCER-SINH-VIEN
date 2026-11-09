@@ -4,20 +4,60 @@
     ViewData["Title"] = "Danh sách công việc đã ứng tuyển";
 }
 
-<div class="container mt-4">
+<style>
+    /* ==========================================================================
+       UI SCOPED STYLING – ĐÃ NỘP TUYỂN (PHƯƠNG ÁN B – BALANCED PROPORTIONS)
+       ========================================================================== */
+    .applied-jobs-scope .card {
+        border-radius: 10px !important;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .applied-jobs-scope .card:hover {
+        border-color: #2B7A4B;
+        box-shadow: 0 4px 14px rgba(43, 122, 75, 0.08);
+    }
+
+    .applied-jobs-scope .btn {
+        border-radius: 6px !important;
+        font-weight: 600;
+    }
+
+    .applied-jobs-scope .badge {
+        border-radius: 6px !important;
+    }
+
+    .applied-jobs-scope .company-avatar {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: 8px !important;
+        border: 1px solid #E2E8F0;
+    }
+
+    .applied-jobs-scope .job-title-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0F172A;
+        line-height: 1.35;
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="applied-jobs-scope container py-4">
     <!-- TIÊU ĐỀ TRANG -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0 fw-bold text-success">
-            Danh sách công việc bạn đã ứng tuyển
-        </h5>
-        <a asp-controller="JobPost" asp-action="Index" class="btn btn-sm btn-outline-success">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        
+        <a asp-controller="JobPost" asp-action="Index" class="btn btn-outline-success">
             Tìm thêm Job mới
         </a>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show p-2 small mb-3">
+        <div class="alert alert-success alert-dismissible fade show p-3 small mb-4 border" style="border-radius: 8px !important;">
             @TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -26,93 +66,99 @@
     <!-- NẾU CHƯA NỘP ĐƠN NÀO -->
     @if (Model == null || !Model.Any())
     {
-        <div class="card border-0 shadow-sm text-center py-5 bg-white rounded-3">
-            <p class="text-muted mt-2 mb-3">Bạn chưa nộp đơn ứng tuyển cho công việc nào.</p>
-            <div>
-                <a asp-controller="JobPost" asp-action="Index" class="btn btn-success">
-                    Khám phá danh sách Job ngay
-                </a>
+        <div class="card border text-center py-5 bg-white shadow-none" style="border-radius: 10px !important;">
+            <div class="py-4">
+                <h5 class="fw-bold text-dark mb-2">Chưa có đơn ứng tuyển nào</h5>
+                <p class="text-muted mb-4">Bạn chưa nộp đơn ứng tuyển cho công việc nào trên hệ thống.</p>
+                <div>
+                    <a asp-controller="JobPost" asp-action="Index" class="btn btn-primary px-4 py-2">
+                        Khám phá danh sách Job ngay
+                    </a>
+                </div>
             </div>
         </div>
     }
     else
     {
         <!-- NẾU ĐÃ CÓ ĐƠN -> LẶP HIỂN THỊ TỪNG DÒNG -->
-        @foreach (var item in Model)
-        {
-            <div class="row align-items-center p-3 mb-3 border rounded-3 bg-white shadow-sm">
-                
-                <!-- Cột 1: Thông tin Bài đăng & Nhà tuyển dụng -->
-                <div class="col-md-5 d-flex align-items-center">
-                    @{
-                        var avatarNTD = !string.IsNullOrEmpty(item.avatarNhaTuyenDung)
-                            ? item.avatarNhaTuyenDung
-                            : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenCongTy ?? "NTD")}&background=E8F5E9&color=1B5E36";
-                    }
-                    <img src="@avatarNTD"
-                         alt="@item.tenCongTy" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;" />
-
-                    <div style="margin-left: 12px;">
-                        <h6 class="mb-1 fw-bold text-dark">
-                            @item.tieude
-                        </h6>
+        <div class="d-flex flex-column gap-3">
+            @foreach (var item in Model)
+            {
+                <div class="card bg-white p-3 p-md-4">
+                    <div class="row align-items-center g-3">
                         
-                        <p class="mb-1 text-muted small">
-                            @(string.IsNullOrEmpty(item.tenCongTy) ? "Nhà tuyển dụng cá nhân" : item.tenCongTy)
-                        </p>
+                        <!-- Cột 1: Thông tin Bài đăng & Nhà tuyển dụng (Chiếm 6/12 - Rộng rãi, không bị ép chữ) -->
+                        <div class="col-12 col-md-6 d-flex align-items-start gap-3">
+                            @{
+                                var avatarNTD = !string.IsNullOrEmpty(item.avatarNhaTuyenDung)
+                                    ? item.avatarNhaTuyenDung
+                                    : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenCongTy ?? "NTD")}&background=E8F5E9&color=1B5E36";
+                            }
+                            <img src="@avatarNTD"
+                                 alt="@item.tenCongTy" class="company-avatar flex-shrink-0" />
 
-                        <div class="text-secondary small">
-                            Ngân sách Job: <strong class="text-danger">@((item.thulao ?? 0).ToString("#,##0")) VNĐ</strong>
+                            <div>
+                                <h5 class="job-title-text">
+                                    @item.tieude
+                                </h5>
+                                
+                                <p class="mb-1 text-muted small">
+                                    @(string.IsNullOrEmpty(item.tenCongTy) ? "Nhà tuyển dụng cá nhân" : item.tenCongTy)
+                                </p>
+
+                                <div class="small text-muted">
+                                    Ngân sách dự án: <strong class="text-danger">@((item.thulao ?? 0).ToString("#,##0")) VNĐ</strong>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Cột 2: Đề xuất mà sinh viên đã gửi đi (Chiếm 3/12) -->
+                        <div class="col-12 col-md-3">
+                            <div class="small mb-1">
+                                <span class="text-muted">Mức thù lao đề xuất:</span>
+                                <strong class="text-success ms-1">@((item.thulaoDeXuat ?? 0).ToString("#,##0")) VNĐ</strong>
+                            </div>
+                            
+                            <div class="text-muted small mb-1">
+                                Thời gian cam kết: <strong class="text-dark">@(string.IsNullOrEmpty(item.thoiGianHoanThanhDeXuat) ? "Theo yêu cầu" : item.thoiGianHoanThanhDeXuat)</strong>
+                            </div>
+
+                            <div class="text-muted small">
+                                Ngày gửi đơn: <span>@item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        </div>
+
+                        <!-- Cột 3: Trạng thái duyệt của Nhà tuyển dụng (Chiếm 3/12 - Cân đối, không thừa khoảng trắng) -->
+                        <div class="col-12 col-md-3 text-md-end">
+                            <div>
+                                @if (item.trangThaiUngTuyen == "ChoDuyet")
+                                {
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 fw-medium">
+                                        Chờ NTD duyệt
+                                    </span>
+                                }
+                                else if (item.trangThaiUngTuyen == "ChapNhan")
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-medium">
+                                        Đã được chấp nhận
+                                    </span>
+                                }
+                                else if (item.trangThaiUngTuyen == "TuChoi")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fw-medium">
+                                        Bị từ chối
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 fw-medium">@item.trangThaiUngTuyen</span>
+                                }
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-
-                <!-- Cột 2: Đề xuất mà sinh viên đã gửi đi -->
-                <div class="col-md-4 my-2 my-md-0">
-                    <div class="small">
-                        <strong class="text-dark">Lương bạn đề xuất:</strong>
-                        <span class="text-success fw-bold">@((item.thulaoDeXuat ?? 0).ToString("#,##0")) VNĐ</span>
-                    </div>
-                    
-                    <div class="text-muted small mt-1">
-                        Cam kết hoàn thành: <strong>@(string.IsNullOrEmpty(item.thoiGianHoanThanhDeXuat) ? "Theo yêu cầu" :
-                                                                                            item.thoiGianHoanThanhDeXuat)</strong>
-                    </div>
-
-                    <div class="text-muted small mt-1" style="font-size: 0.78rem;">
-                        Ngày nộp: @item.ngayUngTuyen.ToString("dd/MM/yyyy HH:mm")
-                    </div>
-                </div>
-
-                <!-- Cột 3: Trạng thái duyệt của Nhà tuyển dụng -->
-                <div class="col-md-3 text-md-end">
-                    <div class="mb-2">
-                        @if (item.trangThaiUngTuyen == "ChoDuyet")
-                        {
-                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3 py-2">
-                                Chờ NTD duyệt
-                            </span>
-                        }
-                        else if (item.trangThaiUngTuyen == "ChapNhan")
-                        {
-                            <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
-                                Đã được chấp nhận
-                            </span>
-                        }
-                        else if (item.trangThaiUngTuyen == "TuChoi")
-                        {
-                            <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">
-                                Bị từ chối
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary px-3 py-2">@item.trangThaiUngTuyen</span>
-                        }
-                    </div>
-                </div>
-
-            </div>
-        }
+            }
+        </div>
     }
 </div>

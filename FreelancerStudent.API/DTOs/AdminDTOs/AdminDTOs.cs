@@ -199,6 +199,45 @@ namespace FreelancerStudent.API.DTOs.AdminDTOs
     }
 
     // ==========================================
+    // 6.1. QUẢN LÝ & DUYỆT NẠP TIỀN
+    // ==========================================
+    public class AdminYeuCauNapTienItemDTO
+    {
+        public int MaNapTien { get; set; }
+        public int MaWallet { get; set; }
+        public int MaUser { get; set; }
+        public string HoTenUser { get; set; } = string.Empty;
+        public string EmailUser { get; set; } = string.Empty;
+        public string? SdtUser { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+        public string MaGiaoDich { get; set; } = string.Empty;
+        public decimal SoTien { get; set; }
+        public string NoiDungChuyenKhoan { get; set; } = string.Empty;
+        public string? AnhBienLai { get; set; } // Đường dẫn ảnh biên lai lưu ở maGiaoDichNganHang
+        public string TrangThai { get; set; } = "DangXuLy"; // DangXuLy, HoanThanh, TuChoi, HetHan
+        public DateTime NgayTao { get; set; }
+        public DateTime NgayHetHan { get; set; }
+        public DateTime? NgayHoanThanh { get; set; }
+        public int? MaAdminXuLy { get; set; }
+        public string? TenAdminXuLy { get; set; }
+        public decimal SoDuKhaDungVi { get; set; }
+        public decimal SoDuDongBangVi { get; set; }
+    }
+
+    public class AdminXuLyNapTienRequestDTO
+    {
+        [Required]
+        public string MaGiaoDich { get; set; } = string.Empty;
+
+        public bool ChapNhan { get; set; } // true: Phê duyệt cộng tiền, false: Từ chối
+
+        [MaxLength(500)]
+        public string? LyDoTuChoi { get; set; }
+
+        public int? MaAdmin { get; set; }
+    }
+
+    // ==========================================
     // 7. CẤU HÌNH PHÍ SÀN & PHÍ ĐĂNG TIN
     // ==========================================
     public class AdminCauHinhPhiDTO

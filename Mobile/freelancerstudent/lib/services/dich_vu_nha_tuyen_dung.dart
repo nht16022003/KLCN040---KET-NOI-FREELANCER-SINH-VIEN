@@ -93,4 +93,78 @@ class NhaTuyenDungService {
       );
     }
   }
+
+  /// Cập nhật thông tin cơ bản Nhà tuyển dụng (PUT api/NhaTuyenDung/CapNhatThongTin)
+  Future<ApiResponse<bool>> capNhatThongTinNTD({
+    required int maUser,
+    String? tencongty,
+    String? linhvuc,
+    String? diachi,
+    String? link,
+    String? hotenNguoiDaiDien,
+    String? sdtLienHe,
+  }) async {
+    try {
+      final res = await _apiClient.put<Map<String, dynamic>>(
+        ApiEndpoints.capNhatThongTinNTD,
+        {
+          'maUser': maUser,
+          if (tencongty != null) 'tencongty': tencongty,
+          if (linhvuc != null) 'linhvuc': linhvuc,
+          if (diachi != null) 'diachi': diachi,
+          if (link != null) 'link': link,
+          if (hotenNguoiDaiDien != null) 'hotenNguoiDaiDien': hotenNguoiDaiDien,
+          if (sdtLienHe != null) 'sdtLienHe': sdtLienHe,
+        },
+      );
+      final body = res.data is Map<String, dynamic>
+          ? res.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      return ApiResponse<bool>(
+        isSuccess: body['success'] != false,
+        data: true,
+        message: body['message']?.toString() ??
+            'Cập nhật thông tin thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        data: false,
+        message:
+            'Lỗi khi cập nhật thông tin nhà tuyển dụng: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Cập nhật phần giới thiệu Nhà tuyển dụng (PUT api/NhaTuyenDung/CapNhatGioiThieu)
+  Future<ApiResponse<bool>> capNhatGioiThieuNTD({
+    required int maUser,
+    String? gioithieu,
+  }) async {
+    try {
+      final res = await _apiClient.put<Map<String, dynamic>>(
+        ApiEndpoints.capNhatGioiThieuNTD,
+        {
+          'maUser': maUser,
+          'gioithieu': gioithieu,
+        },
+      );
+      final body = res.data is Map<String, dynamic>
+          ? res.data as Map<String, dynamic>
+          : <String, dynamic>{};
+      return ApiResponse<bool>(
+        isSuccess: body['success'] != false,
+        data: true,
+        message: body['message']?.toString() ??
+            'Cập nhật giới thiệu thành công!',
+      );
+    } catch (e) {
+      return ApiResponse<bool>(
+        isSuccess: false,
+        data: false,
+        message:
+            'Lỗi khi cập nhật giới thiệu nhà tuyển dụng: ${e.toString()}',
+      );
+    }
+  }
 }

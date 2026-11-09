@@ -82,6 +82,33 @@ namespace FreelancerStudent.API.Services
             };
         }
 
+        // 5. Lấy danh sách file đính kèm trong phòng chat
+        public async Task<List<FileDinhKemChat_DTO>> LayDanhSachFileTheoPhongChatAsync(int maPhongChat)
+        {
+            var tinNhans = await _chatRepo.LayDanhSachFileTheoPhongChatAsync(maPhongChat);
+            return tinNhans.Select(t =>
+            {
+                var filePath = t.fileDinhKem ?? string.Empty;
+                var fileName = System.IO.Path.GetFileName(filePath);
+                var tenHienThi = !string.IsNullOrWhiteSpace(t.noiDung) && t.noiDung != "[Tệp đính kèm]" && !t.noiDung.StartsWith("http")
+                    ? t.noiDung
+                    : fileName;
+
+                return new FileDinhKemChat_DTO
+                {
+                    maTinNhan = t.maTinNhan,
+                    maPhongChat = t.maPhongChat,
+                    tenFile = tenHienThi,
+                    fileUrl = filePath,
+                    loaiFile = t.loaiTinNhan,
+                    maNguoiGui = t.maNguoiGui,
+                    tenNguoiGui = t.NguoiGui?.hotenUser ?? "Người dùng",
+                    avatarNguoiGui = t.NguoiGui?.avatarUrl,
+                    ngayGui = t.ngayGui
+                };
+            }).ToList();
+        }
+
         // Hàm phụ trợ chuyển Entity -> PhongChat_ReponseDTO
         private PhongChat_ReponseDTO ChuyenSangPhongDTO(PhongChat p, int currentUserId)
         {
@@ -107,6 +134,12 @@ namespace FreelancerStudent.API.Services
                 trangThai = p.trangThai,
                 ngayTao = p.ngayTao
             };
+        }
+
+        // 6. Đếm tổng số tin nhắn chưa đọc của người dùng
+        public Task<int> DemTinNhanChuaDocAsync(int maUser)
+        {
+            return _chatRepo.DemTinNhanChuaDocAsync(maUser);
         }
     }
 }

@@ -1,0 +1,230 @@
+@using FreelancerStudent.Web.ViewModels
+@model List<YeuCauThueViewModel>
+
+@{
+    ViewData["Title"] = "Yêu cầu thuê từ Nhà tuyển dụng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/FreelancerStudent" class="text-decoration-none text-muted">Freelancer</a></li>
+            <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Yêu cầu thuê nhận được</li>
+        </ol>
+    </nav>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success rounded-0 border-0 shadow-sm mb-4 alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger rounded-0 border-0 shadow-sm mb-4 alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Header Card -->
+    <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h4 class="fw-bold text-success mb-1">
+                    <i class="bi bi-envelope-open-fill me-2"></i> Yêu cầu thuê từ nhà tuyển dụng
+                </h4>
+                
+            </div>
+            <div>
+                <span class="badge bg-success-subtle text-success border border-success rounded-0 px-3 py-2 fw-semibold fs-6">
+                    Tổng cộng: @Model.Count yêu cầu
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách yêu cầu -->
+    <div class="d-flex flex-column gap-3 mb-4">
+        @if (Model != null && Model.Count > 0)
+        {
+            @foreach (var item in Model)
+            {
+                var ntdAvatar = !string.IsNullOrEmpty(item.avatarNhaTuyenDung)
+                    ? item.avatarNhaTuyenDung
+                    : $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(item.tenNhaTuyenDung)}&background=E8F5E9&color=1B5E36";
+
+                <div class="card border rounded-0 shadow-sm p-4 bg-white">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 border-bottom pb-3 mb-3">
+                        <!-- Left: NTD Info & Job Title -->
+                        <div class="d-flex align-items-start gap-3">
+                            <img src="@ntdAvatar" alt="@item.tenNhaTuyenDung" class="border rounded-0" style="width: 52px; height: 52px; object-fit: cover;" />
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="fw-bold mb-0 text-dark">@item.tieuDeCongViec</h5>
+                                    @if (!string.IsNullOrEmpty(item.maJob))
+                                    {
+                                        <span class="badge bg-light text-secondary border rounded-0 small">#@item.maJob</span>
+                                    }
+                                </div>
+                                <div class="text-muted small">
+                                    <span>Đề xuất bởi: <strong class="text-dark">@item.tenNhaTuyenDung</strong></span>
+                                    <span class="ms-2">• Ngày gửi: @item.ngayGui.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Budget & Status Badge -->
+                        <div class="text-lg-end">
+                            <div class="text-danger fw-bold fs-5 mb-1">
+                                @(item.nganSachDeNghi.HasValue ? item.nganSachDeNghi.Value.ToString("#,##0") + " VNĐ" : "Thỏa thuận")
+                            </div>
+                            <div>
+                                @if (item.trangThai == "ChoPhanHoi")
+                                {
+                                    <span class="badge bg-warning text-dark rounded-0 px-3 py-2 fw-bold">
+                                        <i class="bi bi-hourglass-split me-1"></i> Chờ bạn phản hồi
+                                    </span>
+                                }
+                                else if (item.trangThai == "DaChapNhan")
+                                {
+                                    <span class="badge bg-success text-white rounded-0 px-3 py-2 fw-bold" style="background-color: #1B5E36 !important;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Bạn đã chấp nhận
+                                    </span>
+                                }
+                                else if (item.trangThai == "DaTuChoi")
+                                {
+                                    <span class="badge bg-danger rounded-0 px-3 py-2 fw-bold">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Bạn đã từ chối
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-0 px-3 py-2">@item.trangThai</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Description & Details -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-dark small mb-1">Nội dung công việc & yêu cầu:</h6>
+                        <div class="text-muted small p-3 bg-light border rounded-0" style="white-space: pre-line;">
+                            @item.moTaCongViec
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-2">
+                        <div class="text-muted small">
+                            <i class="bi bi-calendar-event me-1 text-success"></i> Hạn hoàn thành dự kiến: 
+                            <strong class="text-dark">@(item.thoiHanDuKien ?? "Thỏa thuận khi ký hợp đồng")</strong>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <!-- Nút chat trao đổi -->
+                            <a href="@Url.Action("Index", "Chat", new { maUserNTD = item.maUserNTD, maJob = item.maJob })" class="btn btn-outline-secondary rounded-0 btn-sm px-3 fw-semibold">
+                                <i class="bi bi-chat-dots-fill me-1 text-success"></i> Nhắn tin trao đổi
+                            </a>
+
+                            @if (item.trangThai == "ChoPhanHoi")
+                            {
+                                <!-- Nút từ chối mở modal -->
+                                <button type="button" class="btn btn-outline-danger rounded-0 btn-sm px-3 fw-semibold btn-tu-choi"
+                                        data-mayeucau="@item.maYeuCau"
+                                        data-tieude="@item.tieuDeCongViec">
+                                    <i class="bi bi-x-lg me-1"></i> Từ chối
+                                </button>
+
+                                <!-- Nút chấp nhận (Submit trực tiếp) -->
+                                <form asp-action="PhanHoiYeuCauThue" asp-controller="FreelancerStudent" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn chấp nhận yêu cầu thuê này? Nhà tuyển dụng sẽ tiến hành lập hợp đồng và ký quỹ.');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="maYeuCau" value="@item.maYeuCau" />
+                                    <input type="hidden" name="chapNhan" value="true" />
+                                    <button type="submit" class="btn btn-success rounded-0 btn-sm px-4 fw-bold shadow-sm" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                        <i class="bi bi-check2-circle me-1"></i> Chấp nhận đề xuất
+                                    </button>
+                                </form>
+                            }
+                            else if (item.trangThai == "DaChapNhan")
+                            {
+                                <span class="text-success small fw-semibold">
+                                    <i class="bi bi-info-circle me-1"></i> Đang chờ Nhà tuyển dụng lập hợp đồng công việc
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="card border rounded-0 shadow-sm p-5 text-center bg-white">
+                <i class="bi bi-envelope-open fs-1 text-muted d-block mb-3"></i>
+                <h5 class="fw-bold text-dark">Bạn chưa có yêu cầu thuê nào</h5>
+                <p class="text-muted small mx-auto" style="max-width: 450px;">
+                    Hãy cập nhật hồ sơ năng lực đầy đủ và nổi bật để các Nhà tuyển dụng có thể dễ dàng tìm kiếm và gửi đề xuất hợp tác trực tiếp tới bạn!
+                </p>
+                <div class="mt-2">
+                    <a href="/Account/ThietLapTaiKhoan" class="btn btn-success rounded-0 px-4 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                        <i class="bi bi-pencil-square me-1"></i> Cập nhật hồ sơ năng lực
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Từ chối yêu cầu thuê -->
+<div class="modal fade" id="tuChoiModal" tabindex="-1" aria-labelledby="tuChoiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-0">
+            <form asp-action="PhanHoiYeuCauThue" asp-controller="FreelancerStudent" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="modalMaYeuCau" name="maYeuCau" value="" />
+                <input type="hidden" name="chapNhan" value="false" />
+
+                <div class="modal-header border-bottom bg-light">
+                    <h6 class="modal-title fw-bold text-danger mb-0" id="tuChoiModalLabel">
+                        <i class="bi bi-x-circle me-1"></i> Từ chối yêu cầu thuê
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="small text-dark mb-2">
+                        Bạn đang từ chối yêu cầu công việc: <strong id="modalJobTitle" class="text-success"></strong>
+                    </p>
+                    <div class="mb-3">
+                        <label for="modalLyDo" class="form-label small fw-bold text-dark">
+                            Lý do từ chối (không bắt buộc):
+                        </label>
+                        <textarea class="form-control rounded-0" id="modalLyDo" name="lyDoTuChoi" rows="3" placeholder="Ví dụ: Lịch trình hiện tại của mình đang bận, mức ngân sách chưa phù hợp..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top p-2 bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary rounded-0 px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-sm btn-danger rounded-0 px-4 fw-bold">Xác nhận từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.btn-tu-choi').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const maYeuCau = this.getAttribute('data-mayeucau');
+            const tieuDe = this.getAttribute('data-tieude');
+            document.getElementById('modalMaYeuCau').value = maYeuCau;
+            document.getElementById('modalJobTitle').textContent = tieuDe;
+            document.getElementById('modalLyDo').value = '';
+            const modal = new bootstrap.Modal(document.getElementById('tuChoiModal'));
+            modal.show();
+        });
+    });
+</script>

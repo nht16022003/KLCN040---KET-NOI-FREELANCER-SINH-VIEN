@@ -26,5 +26,11 @@ namespace FreelancerStudent.API.Repositories.Interfaces
         //Tuấn
         //Đánh dấu đã đọc cho các tin nhắn được gửi đến cho maUser
         Task DanhDauDaDocAsync(int maPhongChat, int maUserDangXem);
+
+        // Lấy danh sách các tin nhắn có đính kèm file trong 1 phòng chat
+        Task<List<TinNhanChat>> LayDanhSachFileTheoPhongChatAsync(int maPhongChat);
+
+        // Đếm tổng số tin nhắn chưa đọc gửi tới maUser
+        Task<int> DemTinNhanChuaDocAsync(int maUser);
     }
 }

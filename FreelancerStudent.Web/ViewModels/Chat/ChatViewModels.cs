@@ -60,5 +60,21 @@ namespace FreelancerStudent.Web.ViewModels.Chat
         public int maPhongChat { get; set; }
         public string noiDung { get; set; } = string.Empty;
         public string? fileDinhKem { get; set; }
+        public string loaiTinNhan { get; set; } = "Text";
+    }
+
+    public class FileDinhKemChatViewModel
+    {
+        public int maTinNhan { get; set; }
+        public int maPhongChat { get; set; }
+        public string tenFile { get; set; } = string.Empty;
+        public string? fileName { get; set; }
+        public string fileUrl { get; set; } = string.Empty;
+        public string? loaiFile { get; set; }
+        public string? loaiTinNhan { get; set; }
+        public int maNguoiGui { get; set; }
+        public string tenNguoiGui { get; set; } = string.Empty;
+        public string? avatarNguoiGui { get; set; }
+        public DateTime ngayGui { get; set; }
     }
 }

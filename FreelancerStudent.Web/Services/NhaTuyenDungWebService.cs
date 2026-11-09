@@ -106,5 +106,118 @@ namespace FreelancerStudent.Web.Services
                 };
             }
         }
+
+        public async Task<ApiReponse<bool>> capNhatThongTinNTDAsync(CapNhatThongTinNhaTuyenDungViewModel model)
+        {
+            try
+            {
+                var payload = new
+                {
+                    maUser = model.MaUser,
+                    tencongty = model.Tencongty,
+                    linhvuc = model.Linhvuc,
+                    diachi = model.Diachi,
+                    link = model.Link,
+                    hotenNguoiDaiDien = model.HotenNguoiDaiDien,
+                    sdtLienHe = model.SdtLienHe
+                };
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _guiRequest.PutAsync("api/NhaTuyenDung/CapNhatThongTin", content);
+                var json = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(json, _jsonOptions)
+                    ?? new ApiReponse<bool>
+                    {
+                        success = false,
+                        message = "Không nhận được phản hồi hợp lệ từ máy chủ."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> capNhatGioiThieuNTDAsync(CapNhatGioiThieuNhaTuyenDungViewModel model)
+        {
+            try
+            {
+                var payload = new
+                {
+                    maUser = model.MaUser,
+                    gioithieu = model.Gioithieu
+                };
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _guiRequest.PutAsync("api/NhaTuyenDung/CapNhatGioiThieu", content);
+                var json = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(json, _jsonOptions)
+                    ?? new ApiReponse<bool>
+                    {
+                        success = false,
+                        message = "Không nhận được phản hồi hợp lệ từ máy chủ."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiReponse<bool>> capNhatLogoNTDAsync(int maUser, string logoUrl)
+        {
+            try
+            {
+                var payload = new
+                {
+                    maUser = maUser,
+                    logoUrl = logoUrl
+                };
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _guiRequest.PutAsync("api/NhaTuyenDung/CapNhatLogo", content);
+                var json = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<ApiReponse<bool>>(json, _jsonOptions)
+                    ?? new ApiReponse<bool>
+                    {
+                        success = false,
+                        message = "Không nhận được phản hồi hợp lệ từ máy chủ."
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new ApiReponse<bool>
+                {
+                    success = false,
+                    message = "Lỗi kết nối máy chủ API: " + ex.Message
+                };
+            }
+        }
     }
 }

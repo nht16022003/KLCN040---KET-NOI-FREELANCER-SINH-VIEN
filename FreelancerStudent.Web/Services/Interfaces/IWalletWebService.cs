@@ -15,5 +15,7 @@ namespace FreelancerStudent.Web.Services.Interfaces
         Task<ApiReponse<List<YeuCauRutTienItemViewModel>>> layDanhSachRutTien(int maUser);
 
         Task<ApiReponse<bool>> xacNhanRutTienMoPhong(int maRutTien, int maUser, bool chapNhan, string? lyDo = null);
+
+        Task<ApiReponse<string>> uploadQrRutTien(IFormFile file);
     }
 }
