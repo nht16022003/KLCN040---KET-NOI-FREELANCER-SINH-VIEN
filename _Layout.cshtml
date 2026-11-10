@@ -1,0 +1,1423 @@
+@using FreelancerStudent.Web.Services.Interfaces
+@inject IWalletWebService WalletWebService
+@inject IThongBaoWebService ThongBaoWebService
+@inject IChatWebService ChatWebService
+@using Microsoft.AspNetCore.Http
+@{
+    var role = Context.Session.GetString("tenRole");
+    var userName = Context.Session.GetString("hovaten") ?? (role == "NhaTuyenDung" ? "tuan_depzai" : "Son_ko_thogminh");
+    var userRoleTitle = Context.Session.GetString("tenRole") ?? (role == "NhaTuyenDung" ? "Nhà tuyển dụng" :
+"Freelancer Student");
+    var userAvatar = Context.Session.GetString("UserAvatar");
+    if (string.IsNullOrWhiteSpace(userAvatar))
+    {
+        userAvatar = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(userName)}&background=E8F5E9&color=1B5E36";
+    }
+    var maUserDangNhap = Context.Session.GetInt32("maUser");
+
+    decimal soDuKhaDung = 0;
+    int soThongBaoChuaDoc = 0;
+    int soTinNhanChuaDoc = 0;
+
+    var maUser = Context.Session.GetInt32("maUser");
+
+    if (maUser.HasValue && (role == "NhaTuyenDung" || role == "FreelancerStudent"))
+    {
+        var ketQuaVi = await WalletWebService.layViTheoUser(maUser.Value);
+
+        if (ketQuaVi.success && ketQuaVi.data != null)
+        {
+            soDuKhaDung = ketQuaVi.data.soDuKhaDung;
+        }
+
+        try
+        {
+            var ketQuaTB = await ThongBaoWebService.DemChuaDocAsync(maUser.Value);
+            if (ketQuaTB.success)
+            {
+                soThongBaoChuaDoc = ketQuaTB.data;
+            }
+        }
+        catch {}
+
+        try
+        {
+            var ketQuaTN = await ChatWebService.DemTinNhanChuaDocAsync(maUser.Value);
+            if (ketQuaTN.success)
+            {
+                soTinNhanChuaDoc = ketQuaTN.data;
+            }
+        }
+        catch {}
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Freelancer Students</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Caveat:wght@600;700&display=swap"
+    rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <style>
+            :root {
+                --primary-green: #3B6E53;
+                --primary-green-dark: #2A523E;
+                --primary-green-light: #EBF4F0;
+                --primary-green-hover: #325E47;
+                --text-dark: #1E293B;
+                --text-muted: #64748B;
+                --border-color: #E2E8F0;
+                --card-bg: #FFFFFF;
+                --body-bg: #FAFCFB;
+
+                --bs-border-radius: 0 !important;
+                --bs-border-radius-sm: 0 !important;
+                --bs-border-radius-lg: 0 !important;
+                --bs-border-radius-xl: 0 !important;
+                --bs-border-radius-xxl: 0 !important;
+                --bs-border-radius-2xl: 0 !important;
+                --bs-border-radius-pill: 0 !important;
+            }
+
+            *,
+            *::before,
+            *::after,
+            html *,
+            body *,
+            .btn,
+            .form-control,
+            .form-select,
+            .input-group,
+            .input-group-text,
+            .card,
+            .modal-content,
+            .dropdown-menu,
+            .badge,
+            .alert,
+            .rounded,
+            .rounded-1,
+            .rounded-2,
+            .rounded-3,
+            .rounded-4,
+            .rounded-5,
+            .rounded-pill,
+            .rounded-circle {
+                border-radius: 0 !important;
+                box-sizing: border-box;
+            }
+
+            i.bi,
+            i.fa,
+            i.fas,
+            i.far,
+            i.fab,
+            [class^="bi-"],
+            [class*=" bi-"] {
+                display: none !important;
+            }
+
+            body {
+                font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                background-color: var(--body-bg);
+                color: var(--text-dark);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* ============================================================ */
+            /* AUTH & DEFAULT GUEST NAVBAR                                  */
+            /* ============================================================ */
+            .auth-header {
+                background: #FFFFFF;
+                border-bottom: 1px solid #EEF2F6;
+                padding: 14px 0;
+            }
+
+            .brand-logo {
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: #0F172A;
+                text-decoration: none;
+                letter-spacing: -0.5px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .brand-logo span {
+                color: var(--primary-green);
+            }
+
+            .nav-link-custom {
+                color: #475569;
+                font-size: 0.95rem;
+                font-weight: 500;
+                text-decoration: none;
+                padding: 6px 14px;
+                transition: color 0.2s;
+            }
+
+            .nav-link-custom:hover {
+                color: var(--primary-green);
+            }
+
+            .btn-header-login {
+                background: #FFFFFF;
+                border: 1px solid #D0D7DE;
+                color: #334155;
+                font-weight: 600;
+                font-size: 0.9rem;
+                padding: 7px 20px;
+                border-radius: 0;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .btn-header-login:hover {
+                border-color: var(--primary-green);
+                color: var(--primary-green);
+                background: var(--primary-green-light);
+            }
+
+            .btn-header-register {
+                background: var(--primary-green);
+                border: 1px solid var(--primary-green);
+                color: #FFFFFF;
+                font-weight: 600;
+                font-size: 0.9rem;
+                padding: 7px 22px;
+                border-radius: 0;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .btn-header-register:hover {
+                background: var(--primary-green-dark);
+                color: #FFFFFF;
+            }
+
+            /* ============================================================ */
+            /* LOGGED IN TOP NAVBAR (EMPLOYER & FREELANCER)                 */
+            /* ============================================================ */
+            .portal-header {
+                background: #FFFFFF;
+                border-bottom: 1px solid #E5ECE7;
+                padding: 12px 0;
+            }
+
+            .search-pill-btn {
+                background-color: #DDEAE1;
+                border: 1px solid #C4D9CD;
+                border-radius: 0;
+                padding: 6px 14px;
+                font-size: 0.86rem;
+                font-weight: 600;
+                color: #26593D;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+
+            .search-pill-btn:hover {
+                background-color: #CFE2D4;
+                color: #1A442D;
+            }
+
+            .portal-nav-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 0.92rem;
+                font-weight: 600;
+                color: #2D3748;
+                text-decoration: none;
+                padding: 6px 12px;
+                border-radius: 0;
+                transition: all 0.2s ease;
+            }
+
+            .portal-nav-link i {
+                font-size: 1.15rem;
+                color: #334155;
+            }
+
+            .portal-nav-link:hover {
+                color: var(--primary-green);
+                background-color: #F8FAF9;
+            }
+
+            .portal-icon-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 0;
+                background: #F1F5F9;
+                color: #334155;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+
+            .portal-icon-btn:hover {
+                background: #E2E8F0;
+                color: #0F172A;
+            }
+
+            .btn-portal-action-green {
+                background-color: #297746;
+                color: #FFFFFF !important;
+                font-weight: 700;
+                font-size: 0.88rem;
+                padding: 8px 22px;
+                border-radius: 0;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 12px rgba(41, 119, 70, 0.2);
+                white-space: nowrap;
+            }
+
+            .btn-portal-action-green:hover {
+                background-color: #1F5F36;
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(41, 119, 70, 0.3);
+            }
+
+            .portal-user-profile {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                padding: 2px 6px;
+                border-radius: 0;
+                transition: background 0.2s;
+            }
+
+            .portal-user-profile:hover {
+                background: #F8FAFC;
+            }
+
+            .portal-user-avatar {
+                width: 38px;
+                height: 38px;
+                border-radius: 0;
+                object-fit: cover;
+                border: 2px solid #E2E8F0;
+            }
+
+            .portal-user-info {
+                display: flex;
+                flex-direction: column;
+                text-align: left;
+            }
+
+            .portal-user-name {
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: #0F172A;
+                line-height: 1.2;
+            }
+
+            .portal-user-tag {
+                font-size: 0.72rem;
+                color: #64748B;
+                font-weight: 500;
+            }
+
+            /* ============================================================ */
+            /* SUBNAVBAR DÀNH CHO ROLE PORTALS                              */
+            /* ============================================================ */
+            .portal-subnav {
+                background-color: #EEF6F1;
+                border-bottom: 1px solid #DFECE3;
+                padding: 8px 0;
+            }
+
+            .subnav-link-active {
+                background-color: #1E6E38;
+                color: #FFFFFF !important;
+                font-weight: 700;
+                font-size: 0.85rem;
+                padding: 6px 18px;
+                border-radius: 0;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .subnav-link {
+                color: #556B5D;
+                font-weight: 600;
+                font-size: 0.86rem;
+                padding: 6px 14px;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.2s ease;
+                border-radius: 0;
+            }
+
+            .subnav-link:hover {
+                color: #1E6E38;
+                background-color: rgba(30, 110, 56, 0.08);
+            }
+
+            /* ============================================================ */
+            /* AUTH HERO & FORMS (LOGIN & REGISTER)                         */
+            /* ============================================================ */
+            .auth-main-container {
+                flex: 1;
+                padding: 40px 0 60px;
+            }
+
+            /* LEFT COLUMN: HERO */
+            .hero-title-main {
+                font-size: 2.75rem;
+                font-weight: 800;
+                line-height: 1.15;
+                color: var(--primary-green);
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+
+            .hero-title-outlined {
+                color: transparent;
+                -webkit-text-stroke: 2px var(--primary-green);
+                font-weight: 800;
+            }
+
+            .hero-subtitle {
+                color: #475569;
+                font-size: 1.1rem;
+                font-weight: 500;
+                margin-top: 12px;
+                margin-bottom: 30px;
+            }
+
+            .feature-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 22px;
+            }
+
+            .feature-icon-box {
+                width: 46px;
+                height: 46px;
+                border-radius: 0;
+                background: #E2ECE6;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--primary-green-dark);
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .feature-title {
+                font-weight: 700;
+                font-size: 1.02rem;
+                color: #1E293B;
+                margin-bottom: 2px;
+            }
+
+            .feature-desc {
+                color: #64748B;
+                font-size: 0.9rem;
+                line-height: 1.4;
+            }
+
+            .hero-illustration-box {
+                position: relative;
+                margin-top: 30px;
+                max-width: 480px;
+            }
+
+            .hero-student-img {
+                width: 100%;
+                height: auto;
+                border-radius: 0;
+                object-fit: cover;
+                box-shadow: 0 12px 36px rgba(59, 110, 83, 0.12);
+            }
+
+            .doodle-badge,
+            .doodle-text-badge {
+                font-family: 'Caveat', cursive;
+                color: var(--primary-green-dark);
+                font-size: 1.65rem;
+                font-weight: 700;
+                line-height: 1.15;
+                position: absolute;
+                top: 20px;
+                left: -20px;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 8px 16px;
+                border-radius: 0;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+                transform: rotate(-6deg);
+                z-index: 2;
+            }
+
+            /* RIGHT COLUMN: AUTH CARD */
+            .login-card-container {
+                background: #FFFFFF;
+                border: 1px solid #E8EFF2;
+                border-radius: 0;
+                padding: 40px 36px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.04);
+            }
+
+            .login-card-title {
+                font-size: 1.75rem;
+                font-weight: 800;
+                color: #1E293B;
+                text-align: center;
+                margin-bottom: 6px;
+            }
+
+            .login-card-subtitle {
+                color: #64748B;
+                font-size: 0.92rem;
+                text-align: center;
+                margin-bottom: 26px;
+            }
+
+            .btn-social {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                padding: 11px 16px;
+                border-radius: 0;
+                border: 1px solid #E2E8F0;
+                background: #FFFFFF;
+                color: #334155;
+                font-weight: 600;
+                font-size: 0.92rem;
+                margin-bottom: 12px;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .btn-social:hover {
+                background: #F8FAFC;
+                border-color: #CBD5E1;
+                color: #0F172A;
+                transform: translateY(-1px);
+            }
+
+            .auth-divider {
+                display: flex;
+                align-items: center;
+                text-align: center;
+                margin: 20px 0;
+                color: #94A3B8;
+                font-size: 0.85rem;
+            }
+
+            .auth-divider::before,
+            .auth-divider::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px solid #E2E8F0;
+            }
+
+            .auth-divider span {
+                padding: 0 14px;
+            }
+
+            .form-label-auth {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #1E293B;
+                margin-bottom: 6px;
+                display: block;
+            }
+
+            .input-group-auth {
+                position: relative;
+                display: flex;
+                align-items: center;
+                margin-bottom: 18px;
+            }
+
+            .input-icon-left {
+                position: absolute;
+                left: 14px;
+                color: #94A3B8;
+                font-size: 1.1rem;
+                z-index: 5;
+            }
+
+            .form-control-auth {
+                width: 100%;
+                height: 48px;
+                padding: 10px 14px 10px 42px;
+                border-radius: 0;
+                border: 1px solid #CBD5E1;
+                font-size: 0.92rem;
+                color: #1E293B;
+                background-color: #FFFFFF;
+                transition: all 0.2s ease;
+            }
+
+            .form-control-auth:focus {
+                outline: none;
+                border-color: var(--primary-green);
+                box-shadow: 0 0 0 3px rgba(59, 110, 83, 0.12);
+            }
+
+            .input-icon-right {
+                position: absolute;
+                right: 14px;
+                color: #94A3B8;
+                cursor: pointer;
+                font-size: 1.1rem;
+                z-index: 5;
+                background: none;
+                border: none;
+                padding: 0;
+            }
+
+            .input-icon-right:hover {
+                color: #475569;
+            }
+
+            .auth-options-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 22px;
+                font-size: 0.88rem;
+            }
+
+            .form-check-input-green:checked {
+                background-color: var(--primary-green);
+                border-color: var(--primary-green);
+            }
+
+            .link-forgot {
+                color: var(--primary-green);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .link-forgot:hover {
+                text-decoration: underline;
+            }
+
+            .btn-submit-auth {
+                width: 100%;
+                height: 50px;
+                border-radius: 0;
+                background: var(--primary-green);
+                color: #FFFFFF;
+                border: none;
+                font-weight: 700;
+                font-size: 1.02rem;
+                transition: all 0.2s ease;
+                box-shadow: 0 6px 18px rgba(59, 110, 83, 0.25);
+                cursor: pointer;
+            }
+
+            .btn-submit-auth:hover {
+                background: var(--primary-green-dark);
+                transform: translateY(-1px);
+                box-shadow: 0 8px 22px rgba(59, 110, 83, 0.32);
+            }
+
+            .auth-footer-text {
+                text-align: center;
+                margin-top: 18px;
+                font-size: 0.9rem;
+                color: #64748B;
+            }
+
+            .auth-footer-text a {
+                color: var(--primary-green);
+                font-weight: 700;
+                text-decoration: none;
+            }
+
+            .auth-footer-text a:hover {
+                text-decoration: underline;
+            }
+
+            .admin-login-box {
+                text-align: center;
+                margin-top: 24px;
+                padding-top: 18px;
+                border-top: 1px dashed #E2E8F0;
+                font-size: 0.85rem;
+                color: #64748B;
+            }
+
+            .admin-login-box a {
+                color: var(--primary-green);
+                font-weight: 700;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 4px;
+            }
+
+            .quick-fill-section {
+                background: #F8FAFC;
+                border: 1px dashed #CBD5E1;
+                border-radius: 0;
+                padding: 10px 14px;
+                margin-top: 18px;
+            }
+
+            /* ============================================================ */
+            /* FOOTER                                                       */
+            /* ============================================================ */
+            .main-footer {
+                background: #FFFFFF;
+                border-top: 1px solid #EEF2F6;
+                padding: 50px 0 24px;
+                margin-top: auto;
+            }
+
+            .footer-brand {
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--primary-green-dark);
+                margin-bottom: 10px;
+            }
+
+            .footer-desc {
+                color: #64748B;
+                font-size: 0.88rem;
+                line-height: 1.5;
+                margin-bottom: 16px;
+            }
+
+            .footer-social-links a {
+                color: #64748B;
+                font-size: 1.15rem;
+                margin-right: 14px;
+                transition: color 0.2s;
+            }
+
+            .footer-social-links a:hover {
+                color: var(--primary-green);
+            }
+
+            .footer-heading {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #1E293B;
+                margin-bottom: 16px;
+            }
+
+            .footer-links {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .footer-links li {
+                margin-bottom: 10px;
+            }
+
+            .footer-links a {
+                color: #64748B;
+                text-decoration: none;
+                font-size: 0.88rem;
+                transition: color 0.2s;
+            }
+
+            .footer-links a:hover {
+                color: var(--primary-green);
+            }
+
+            .subscribe-form {
+                display: flex;
+                gap: 6px;
+            }
+
+            .subscribe-input {
+                flex: 1;
+                height: 42px;
+                border-radius: 0;
+                border: 1px solid #CBD5E1;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .subscribe-btn {
+                width: 42px;
+                height: 42px;
+                border-radius: 0;
+                background: var(--primary-green);
+                color: #FFFFFF;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .subscribe-btn:hover {
+                background: var(--primary-green-dark);
+            }
+
+            .footer-bottom {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #F1F5F9;
+                font-size: 0.82rem;
+                color: #94A3B8;
+            }
+    </style>
+</head>
+
+<body>
+
+    @if (role == "NhaTuyenDung")
+    {
+        <!-- ==================== HEADER NHÀ TUYỂN DỤNG ==================== -->
+        <header class="portal-header">
+            <div class="container-fluid px-lg-5">
+                <div class="d-flex align-items-center justify-content-between">
+                    
+                    <!-- Cột Trái: Logo + Khám phá + Navigation chính -->
+                    <div class="d-flex align-items-center gap-3 gap-lg-4">
+                        <!-- Logo -->
+                        <a href="/FreelancerStudent/Search" class="brand-logo me-2">
+                            Freelancer <span>Students</span>
+                        </a>
+
+                        <!-- Nút Khám phá Freelancer -->
+                        <a href="/FreelancerStudent/Search" class="search-pill-btn">
+                            <span>Khám phá Freelancer</span>
+                        </a>
+
+                        <!-- Navigation chính -->
+                        <nav class="d-none d-md-flex align-items-center gap-2">
+                            <a href="/JobPost/QuanLyTinTuyenDung" class="portal-nav-link">
+                                <span>Quản lý tuyển dụng</span>
+                            </a>
+                            <a href="/HopDong" class="portal-nav-link">
+                                <span>Hợp đồng</span>
+                            </a>
+                            <a href="/Wallet" class="portal-nav-link">
+                                <span>Nạp tiền</span>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài + Profile User -->
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
+                        <a href="/ThongBao" class="portal-nav-link position-relative" title="Thông báo" id="btnThongBaoNTD">
+                            <i class="bi bi-bell fs-6 me-1"></i>
+                            <span>Thông báo</span>
+                            <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle badge-thong-bao @(soThongBaoChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                @(soThongBaoChuaDoc > 99 ? "99+" : soThongBaoChuaDoc.ToString())
+                            </span>
+                        </a>
+
+                        <!-- Nút Tin Nhắn (FRL-UC-07) -->
+                        <a href="/Chat" class="portal-nav-link position-relative" title="Tin nhắn trao đổi" id="btnTinNhanNTD">
+                            <i class="bi bi-chat-dots fs-6 me-1"></i>
+                            <span>Tin nhắn</span>
+                            <span class="badge rounded-pill bg-success position-absolute top-0 start-100 translate-middle badge-tin-nhan @(soTinNhanChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                @(soTinNhanChuaDoc > 99 ? "99+" : soTinNhanChuaDoc.ToString())
+                            </span>
+                        </a>
+
+                        <!-- Nút Đăng bài tuyển dụng -->
+                        <a href="/JobPost/Create" class="btn-portal-action-green">
+                            Đăng bài tuyển dụng
+                        </a>
+
+                        <!-- User Profile Dropdown -->
+                        <div class="dropdown">
+                            <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
+                                <div class="portal-user-info d-none d-lg-flex">
+                                    <span class="portal-user-name">@userName</span>
+                                    <span class="portal-user-tag">@userRoleTitle</span>
+                                    <span class="portal-user-tag">Số dư: @soDuKhaDung.ToString("N0", new
+                                                                                                                                                                                                    System.Globalization.CultureInfo("vi-VN"))đ</span>
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                           asp-route-tab="thongtin">
+                                            Thiết lập tài khoản
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                           asp-route-tab="baomat">
+                                            Thiết lập bảo mật
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
+                                    <li><a class="dropdown-item" href="/NhaTuyenDung/Profile">Hồ sơ công ty</a></li>
+                                    <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Quản lý tin tuyển dụng</a></li>
+                                    <li><a class="dropdown-item" href="/NhaTuyenDung/QuanLyYeuCauThue">Yêu cầu thuê ứng viên</a></li>
+                                    <li><a class="dropdown-item" href="/NhaTuyenDung/FreelancerYeuThich">Freelancer yêu thích</a></li>
+                                    <li><a class="dropdown-item" href="/HopDong">Quản lý hợp đồng</a></li>
+                                    <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng
+                                        xuất</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </header>
+
+                <!-- SUBNAVBAR CHO NHÀ TUYỂN DỤNG -->
+                <nav class="portal-subnav">
+                    <div class="container-fluid px-lg-5">
+                        <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                            <a href="/JobPost/QuanLyTinTuyenDung" class="subnav-link">Quản lý tin tuyển dụng</a>
+                            <a href="/NhaTuyenDung/QuanLyYeuCauThue" class="subnav-link">Yêu cầu thuê ứng viên</a>
+                            <a href="/NhaTuyenDung/FreelancerYeuThich" class="subnav-link">Freelancer yêu thích</a>
+                            <a href="/NhaTuyenDung/DanhSachUngVien" class="subnav-link">Danh sách ứng viên</a>
+                            <a href="/Wallet" class="subnav-link">Ví điện tử</a>
+                            <a href="/JobPost/Create" class="subnav-link text-success fw-bold">Đăng tin mới</a>
+                            <a href="/HopDong" class="subnav-link">Hợp đồng & Ký quỹ</a>
+                            <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
+                            <a href="/NhaTuyenDung/Profile" class="subnav-link">Hồ sơ công ty</a>
+                        </div>
+                    </div>
+                </nav>
+            }
+    else if (role == "FreelancerStudent")
+            {
+                <!-- ==================== HEADER FREELANCER STUDENT ==================== -->
+                <header class="portal-header">
+                    <div class="container-fluid px-lg-5">
+                        <div class="d-flex align-items-center justify-content-between">
+                    
+                            <!-- Cột Trái: Logo + Khám phá nhà tuyển dụng + Navigation chính -->
+                            <div class="d-flex align-items-center gap-3 gap-lg-4">
+                                <!-- Logo -->
+                                <a href="/JobPost" class="brand-logo me-2">
+                                    Freelancer <span>Students</span>
+                                </a>
+
+                                <!-- Nút Khám phá nhà tuyển dụng -->
+                                <a href="/NhaTuyenDung/Search" class="search-pill-btn">
+                                    <span>Khám phá nhà tuyển dụng</span>
+                                </a>
+
+                                <!-- Navigation chính -->
+                                <nav class="d-none d-md-flex align-items-center gap-2">
+                                    <a href="/FreelancerStudent/QuanLyTimViec" class="portal-nav-link">
+                                        <span style->Quản lý tìm việc</span>
+                                    </a>
+                                    <a href="/FreelancerStudent/YeuCauThue" class="portal-nav-link">
+                                        <span>Lời mời nhận việc</span>
+                                    </a>
+                                    <a href="/HopDong" class="portal-nav-link">
+                                        <span>Hợp đồng</span>
+                                    </a>
+                                    <a href="/Wallet" class="portal-nav-link">
+                                        <span>Ví và thu nhập</span>
+                                    </a>
+                                </nav>
+                            </div>
+
+                            <!-- Cột Phải: Thông báo + Chat + Nút Đăng bài tìm việc + Profile User -->
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- Nút Chuông Thông Báo (CUS-UC-12) -->
+                                <a href="/ThongBao" class="portal-nav-link position-relative" title="Thông báo" id="btnThongBaoFreelancer">
+                                    <i class="bi bi-bell fs-6 me-1"></i>
+                                    <span>Thông báo</span>
+                                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle badge-thong-bao @(soThongBaoChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                        @(soThongBaoChuaDoc > 99 ? "99+" : soThongBaoChuaDoc.ToString())
+                                    </span>
+                                </a>
+
+                                <!-- Nút Tin Nhắn (FRL-UC-07) -->
+                                <a href="/Chat" class="portal-nav-link position-relative" title="Tin nhắn trao đổi" id="btnTinNhanFreelancer">
+                                    <i class="bi bi-chat-dots fs-6 me-1"></i>
+                                    <span>Tin nhắn</span>
+                                    <span class="badge rounded-pill bg-success position-absolute top-0 start-100 translate-middle badge-tin-nhan @(soTinNhanChuaDoc > 0 ? "" : "d-none")" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                        @(soTinNhanChuaDoc > 99 ? "99+" : soTinNhanChuaDoc.ToString())
+                                    </span>
+                                </a>
+
+                                <!-- Nút Đăng bài tìm việc -->
+                                <a href="/FreelancerStudent/DangTinTimViec" class="btn-portal-action-green">
+                                    Đăng bài tìm việc
+                                </a>
+
+                                <!-- User Profile Dropdown -->
+                                <div class="dropdown">
+                                    <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="@userAvatar" alt="@userName" class="portal-user-avatar" />
+                                        <div class="portal-user-info d-none d-lg-flex">
+                                            <span class="portal-user-name">@userName</span>
+
+                                            <span class="portal-user-tag">@userRoleTitle</span>
+
+                                            <span class="portal-user-tag">
+                                                Số dư: @soDuKhaDung.ToString("N0",
+                                                    new System.Globalization.CultureInfo("vi-VN"))đ
+                                            </span>
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                               asp-route-tab="thongtin">
+                                                Thiết lập tài khoản
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="ThietLapTaiKhoan"
+                                               asp-route-tab="baomat">
+                                                Thiết lập bảo mật
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="/Wallet">Ví tài chính & Nạp tiền</a></li>
+                                        <li><a class="dropdown-item" href="/Account/MinhChung">Minh chứng sinh viên</a></li>
+                                        @if (maUserDangNhap.HasValue)
+                                        {
+                                            <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Profile"
+                                                   asp-route-maUser="@maUserDangNhap.Value">Hồ sơ năng lực sinh viên</a></li>
+                                        }
+                                        <li><a class="dropdown-item" asp-controller="FreelancerStudent" asp-action="Portfolio">Portfolio cá nhân</a></li>
+                                        <li><a class="dropdown-item" href="/FreelancerStudent/YeuCauThue">Lời mời nhận việc</a></li>
+                                        <li><a class="dropdown-item" href="/JobPost/ViecDaLuu">Công việc đã lưu</a></li>
+                                        <li><a class="dropdown-item" href="/HopDong">Hợp đồng của tôi</a></li>
+                                        <li><a class="dropdown-item" href="/DanhGia/CongViecDaHoanThanh">Việc đã hoàn thành & Đánh giá</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </header>
+
+                <!-- SUBNAVBAR CHO FREELANCER STUDENT -->
+                <nav class="portal-subnav">
+                    <div class="container-fluid px-lg-5">
+                        <div class="d-flex align-items-center gap-2 overflow-auto text-nowrap py-1">
+                            <a href="/FreelancerStudent/QuanLyTimViec" class="subnav-link">Quản lý tìm việc</a>
+                            
+                            <a href="/JobPost/ViecDaLuu" class="subnav-link">Việc đã lưu</a>
+                           
+                            <a href="/FreelancerStudent/DanhSachNopTuyen" class="subnav-link">Danh sách nộp tuyển</a>
+                         
+                          
+                            <a href="/Account/MinhChung" class="subnav-link text-success fw-bold">Minh chứng sinh viên</a>
+                        
+                            <a href="/DanhGia/CongViecDaHoanThanh" class="subnav-link">Việc đã hoàn thành & Đánh giá</a>
+                            <a href="/FreelancerStudent/HoSo" class="subnav-link">Cài đặt hồ sơ</a>
+                        </div>
+                    </div>
+                </nav>
+                        }
+    else if (role == "Admin" || (Context.Request.Path.Value != null && Context.Request.Path.Value.StartsWith("/Admin",
+    StringComparison.OrdinalIgnoreCase)))
+                        {
+                            <!-- ==================== HEADER QUẢN TRỊ VIÊN (ADMIN) ==================== -->
+                            var adminReqPath = Context.Request.Path.Value ?? "";
+                            <header class="portal-header">
+                                <div class="container-fluid px-3 px-md-4">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <!-- Cột Trái: Brand Admin + Navigation chính -->
+                                        <div class="d-flex align-items-center gap-3">
+                                            <a href="/Admin" class="brand-logo me-2 text-decoration-none">
+                                             <span class="badge  small ms-1">ADMIN SYSTEM</span>
+                                            </a>
+
+                                            <!-- Navigation chính -->
+                                            <nav class="d-none d-md-flex align-items-center gap-1">
+                                                <a href="/Admin" class="portal-nav-link @(adminReqPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || adminReqPath.Equals("/Admin/Index", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Tổng quan</span>
+                                                </a>
+                                                <a href="/Admin/DuyetMinhChung" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DuyetMinhChung", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Duyệt thẻ SV</span>
+                                                </a>
+                                                <a href="/Admin/DanhSachNguoiDung" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DanhSachNguoiDung", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Người dùng</span>
+                                                </a>
+                                                <a href="/Admin/DuyetNapTien" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DuyetNapTien", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Duyệt nạp tiền</span>
+                                                </a>
+                                                <a href="/Admin/DuyetRutTien" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/DuyetRutTien", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Duyệt rút tiền</span>
+                                                </a>
+                                                <a href="/Admin/QuanLyHopDong" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/QuanLyHopDong", StringComparison.OrdinalIgnoreCase) || adminReqPath.StartsWith("/Admin/ChiTietHopDong", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Hợp đồng</span>
+                                                </a>
+                                                <a href="/Admin/CauHinhHeThong" class="portal-nav-link @(adminReqPath.StartsWith("/Admin/CauHinhHeThong", StringComparison.OrdinalIgnoreCase) ? "fw-bold text-success" : "")">
+                                                    <span>Cấu hình phí</span>
+                                                </a>
+                                            </nav>
+                                        </div>
+
+                                        <!-- Cột Phải: Tra cứu + Profile Admin -->
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="/Admin/DanhSachNguoiDung" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-block">
+                                                Tra cứu người dùng
+                                            </a>
+
+                                            <!-- User Profile Dropdown -->
+                                            <div class="dropdown">
+                                                <a href="#" class="portal-user-profile dropdown-toggle text-decoration-none"
+                                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <img src="@userAvatar" alt="@userName"
+                                                         class="portal-user-avatar border" />
+                                                    <div class="portal-user-info d-none d-lg-block">
+                                                        <span class="portal-user-name">@userName</span>
+                                                        <span class="portal-user-tag text-muted">Quản trị viên</span>
+                                                    </div>
+                                                </a>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-1">
+                                                    <li><a class="dropdown-item" href="/Admin">Bảng điều khiển quản trị</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetMinhChung">Duyệt thẻ sinh viên</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DanhSachNguoiDung">Quản lý người dùng</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/XuLyTaiKhoan">Khóa / Mở tài khoản</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetNapTien">Duyệt nạp tiền</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DuyetRutTien">Duyệt rút tiền</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/DieuChinhSoDu">Điều chỉnh số dư ví</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/QuanLyHopDong">Quản lý hợp đồng</a></li>
+                                                    <li><a class="dropdown-item" href="/Admin/CauHinhHeThong">Cấu hình phí hệ thống</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item" href="/JobPost/QuanLyTinTuyenDung">Giao diện Tuyển dụng</a></li>
+                                                    <li><a class="dropdown-item" href="/FreelancerStudent/Index">Giao diện Freelancer</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="DangXuat">Đăng xuất</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <!-- SUBNAVBAR CHO ADMIN (Thanh điều hướng nghiệp vụ quản trị) -->
+                            <nav class="portal-subnav">
+                                <div class="container-fluid px-3 px-md-4">
+                                    <div class="d-flex align-items-center gap-1 overflow-auto text-nowrap py-1">
+                                        <a href="/Admin" class="@(adminReqPath.Equals("/Admin", StringComparison.OrdinalIgnoreCase) || adminReqPath.Equals("/Admin/Index", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Tổng quan</a>
+                                        <a href="/Admin/DuyetMinhChung" class="@(adminReqPath.StartsWith("/Admin/DuyetMinhChung", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Duyệt thẻ SV</a>
+                                        <a href="/Admin/DanhSachNguoiDung" class="@(adminReqPath.StartsWith("/Admin/DanhSachNguoiDung", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Quản lý người dùng</a>
+                                        <a href="/Admin/XuLyTaiKhoan" class="@(adminReqPath.StartsWith("/Admin/XuLyTaiKhoan", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Khóa / Mở tài khoản</a>
+                                        <a href="/Admin/DuyetNapTien" class="@(adminReqPath.StartsWith("/Admin/DuyetNapTien", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Duyệt nạp tiền</a>
+                                        <a href="/Admin/DuyetRutTien" class="@(adminReqPath.StartsWith("/Admin/DuyetRutTien", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Duyệt rút tiền</a>
+                                        <a href="/Admin/DieuChinhSoDu" class="@(adminReqPath.StartsWith("/Admin/DieuChinhSoDu", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Điều chỉnh số dư ví</a>
+                                        <a href="/Admin/QuanLyHopDong" class="@(adminReqPath.StartsWith("/Admin/QuanLyHopDong", StringComparison.OrdinalIgnoreCase) || adminReqPath.StartsWith("/Admin/ChiTietHopDong", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Quản lý hợp đồng</a>
+                                        <a href="/Admin/CauHinhHeThong" class="@(adminReqPath.StartsWith("/Admin/CauHinhHeThong", StringComparison.OrdinalIgnoreCase) ? "subnav-link-active" : "subnav-link")">Cấu hình phí</a>
+                                    </div>
+                                </div>
+                            </nav>
+                        }
+    else
+                                                                {
+                                                                    <!-- ==================== HEADER DEFAULT / GUEST ==================== -->
+                                                                    <header class="auth-header sticky-top bg-white">
+                                                                        <div class="container">
+                                                                            <div class="d-flex align-items-center justify-content-between">
+
+                                                                                <!-- Logo -->
+                                                                                <a href="/" class="brand-logo">
+                                                                                    Freelancer <span>Students</span>
+                                                                                </a>
+
+                                                                                <!-- Nav Links (Điều hướng tới các khu vực của trang Overview) -->
+                                                                                <nav class="d-none d-lg-flex align-items-center gap-1">
+                                                                                    <a href="/#gioi-thieu" class="nav-link-custom">Giới thiệu</a>
+                                                                                    <a href="/#cach-hoat-dong" class="nav-link-custom">Cơ hội & Nhân tài mẫu</a>
+                                                                                    <a href="/#danh-cho-freelancer" class="nav-link-custom">Dành cho Freelancer</a>
+                                                                                    <a href="/#danh-cho-nha-tuyen-dung" class="nav-link-custom">Dành cho Nhà tuyển dụng</a>
+                                                                                </nav>
+
+                                                                                <!-- Right -->
+                                                                                <div class="d-flex align-items-center gap-2 gap-sm-3">
+                                                                                    <span class="badge bg-light text-secondary border px-2 py-1 small d-none d-sm-inline-block">VI</span>
+
+                                                                                    <a asp-controller="Account" asp-action="DangNhap" class="btn-header-login">
+                                                                                        Đăng nhập
+                                                                                    </a>
+
+                                                                                    <a asp-controller="Account" asp-action="DangKy" class="btn-header-register">
+                                                                                        Đăng ký
+                                                                                    </a>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </header>
+                                                                }
+
+                                                                @if (TempData["ErrorMessage"] != null)
+                                                                {
+                                                                    <div class="container mt-3">
+                                                                        <div class="alert alert-danger alert-dismissible fade show border border-danger shadow-sm rounded-0 p-3 mb-3 d-flex align-items-center gap-3" role="alert">
+                                                                            <i class="bi bi-exclamation-triangle-fill fs-4 text-danger flex-shrink-0"></i>
+                                                                            <div class="flex-grow-1 fw-bold text-danger">
+                                                                                @TempData["ErrorMessage"]
+                                                                            </div>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+
+                                                                <!-- NỘI DUNG CỦA TỪNG VIEW -->
+                                                                <main>
+                                                                    @RenderBody()
+                                                                </main>
+
+                                                                <!-- FOOTER CHUNG -->
+                                                                <footer class="main-footer">
+                                                                    <div class="container">
+                                                                        <div class="row g-4">
+                                                                            <!-- Col 1: Brand & Slogan -->
+                                                                            <div class="col-12 col-md-4">
+                                                                                <div class="footer-brand">
+                                                                                    Freelancer <span>Students</span>
+                                                                                </div>
+                                                                                <p class="footer-desc">
+                                                                                    Kết nối sinh viên tài năng với cơ hội thực tế
+                                                                                </p>
+                                                                            </div>
+
+                                                                            <!-- Col 2: Features -->
+                                                                            <div class="col-6 col-md-2">
+                                                                                <h5 class="footer-heading">Khám phá</h5>
+                                                                                <ul class="footer-links">
+                                                                                    <li><a href="/JobPost">Tìm việc làm</a></li>
+                                                                                    <li><a href="/FreelancerStudent">Tìm Freelancer</a></li>
+                                                                                    <li><a asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></li>
+                                                                                </ul>
+                                                                            </div>
+
+                                                                            <!-- Col 3: Services -->
+                                                                            <div class="col-6 col-md-2">
+                                                                                <h5 class="footer-heading">Dịch vụ</h5>
+                                                                                <ul class="footer-links">
+                                                                                    <li><a href="/HopDong">Hợp đồng & Ký quỹ</a></li>
+                                                                                    <li><a href="/Wallet">Ví điện tử</a></li>
+                                                                                    <li><a href="/Account/MinhChung">Minh chứng sinh viên</a></li>
+                                                                                </ul>
+                                                                            </div>
+
+                                                                            <!-- Col 4: Newsletter -->
+                                                                            <div class="col-12 col-md-4">
+                                                                                <h5 class="footer-heading">Kết nối với chúng tôi</h5>
+                                                                                <p class="footer-desc">
+                                                                                    Cập nhật những cơ hội việc làm mới nhất dành cho sinh viên.
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Bottom sublinks -->
+                                                                        <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                                                                            <div>
+                                                                                &copy; 2026 Freelancer Students. All rights reserved.
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </footer>
+
+                                                                <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+                                                                <!-- Global Toast Container cho Thông Báo và Tin Nhắn Mới -->
+                                                                <div aria-live="polite" aria-atomic="true" class="position-relative">
+                                                                    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;" id="globalNotificationToastContainer"></div>
+                                                                </div>
+
+                                                                @if (maUser.HasValue)
+                                                                {
+                                                                    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+                                                                    <script>
+                                                                        (function() {
+                                                                            const globalUserId = @maUser.Value;
+                                                                            const API_URL = "http://localhost:5152";
+
+                                                                            // Hàm cập nhật Badge số lượng
+                                                                            function capNhatBadgeElement(selector, count) {
+                                                                                const badges = document.querySelectorAll(selector);
+                                                                                badges.forEach(badge => {
+                                                                                    const num = parseInt(count) || 0;
+                                                                                    if (num > 0) {
+                                                                                        badge.textContent = num > 99 ? '99+' : num;
+                                                                                        badge.classList.remove('d-none');
+                                                                                    } else {
+                                                                                        badge.textContent = '0';
+                                                                                        badge.classList.add('d-none');
+                                                                                    }
+                                                                                });
+                                                                            }
+
+                                                                            // Hàm phát âm thanh thông báo nhẹ nhàng bằng Web Audio API
+                                                                            function phatAmThanhThongBao() {
+                                                                                try {
+                                                                                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                                                                    const osc = audioCtx.createOscillator();
+                                                                                    const gain = audioCtx.createGain();
+                                                                                    osc.type = "sine";
+                                                                                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                                                                                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                                                                                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                                                                                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                                                                                    osc.connect(gain);
+                                                                                    gain.connect(audioCtx.destination);
+                                                                                    osc.start();
+                                                                                    osc.stop(audioCtx.currentTime + 0.35);
+                                                                                } catch (e) {
+                                                                                    // Trình duyệt có thể chặn audio nếu chưa có user gesture
+                                                                                }
+                                                                            }
+
+                                                                            // Hàm hiển thị Toast thông báo tin nhắn mới
+                                                                            function hienThiToastTinNhan(msg) {
+                                                                                const container = document.getElementById("globalNotificationToastContainer");
+                                                                                if (!container) return;
+
+                                                                                const toastId = "toast_msg_" + Date.now();
+                                                                                const noiDungRutGon = (msg.noiDung && msg.noiDung.length > 80)
+                                                                                    ? msg.noiDung.substring(0, 77) + "..."
+                                                                                    : (msg.noiDung || "[Tệp đính kèm]");
+
+                                                                                const toastHtml = `
+                                                                                    <div id="${toastId}" class="toast align-items-center text-dark bg-white border border-success border-2 shadow-lg mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="border-radius: 12px; min-width: 300px;">
+                                                                                        <div class="toast-header bg-success text-white py-2" style="border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                                                                                            <i class="bi bi-chat-dots-fill me-2"></i>
+                                                                                            <strong class="me-auto text-truncate" style="max-width: 180px;">${msg.tenNguoiGui || 'Tin nhắn mới'}</strong>
+                                                                                            <small class="text-white-50">Vừa xong</small>
+                                                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                                                        </div>
+                                                                                        <div class="toast-body p-3">
+                                                                                            <p class="mb-2 text-secondary small">${noiDungRutGon}</p>
+                                                                                            <div class="text-end">
+                                                                                                <a href="${msg.linkDieuHuong || ('/Chat?maPhongChat=' + msg.maPhongChat)}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-decoration-none">
+                                                                                                    Mở cuộc trò chuyện <i class="bi bi-arrow-right ms-1"></i>
+                                                                                                </a>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                `;
+
+                                                                                container.insertAdjacentHTML("beforeend", toastHtml);
+                                                                                const toastEl = document.getElementById(toastId);
+                                                                                if (toastEl && window.bootstrap && window.bootstrap.Toast) {
+                                                                                    const bsToast = new bootstrap.Toast(toastEl, { delay: 6000 });
+                                                                                    bsToast.show();
+                                                                                }
+                                                                            }
+
+                                                                            // Hàm đồng bộ số lượng từ server
+                                                                            window.dongBoSoLuongHeader = async function() {
+                                                                                try {
+                                                                                    const [resTB, resTN] = await Promise.all([
+                                                                                        fetch('/ThongBao/DemChuaDoc').then(r => r.json()).catch(() => ({ success: false })),
+                                                                                        fetch('/Chat/DemChuaDoc').then(r => r.json()).catch(() => ({ success: false }))
+                                                                                    ]);
+                                                                                    if (resTB && resTB.success) {
+                                                                                        capNhatBadgeElement('.badge-thong-bao', resTB.data);
+                                                                                    }
+                                                                                    if (resTN && resTN.success) {
+                                                                                        capNhatBadgeElement('.badge-tin-nhan', resTN.data);
+                                                                                    }
+                                                                                } catch (e) {}
+                                                                            };
+
+                                                                            // Khởi tạo kết nối SignalR toàn cục
+                                                                            const globalKetNoi = new signalR.HubConnectionBuilder()
+                                                                                .withUrl(`${API_URL}/chatHub?maUser=${globalUserId}`)
+                                                                                .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                                                                                .build();
+
+                                                                            // Lắng nghe sự kiện thông báo tin nhắn mới
+                                                                            globalKetNoi.on("ThongBaoTinNhanMoi", function(msg) {
+                                                                                // Nếu người dùng đang mở đúng phòng chat này, không tăng badge và không hiện toast
+                                                                                if (window.currentChatRoomId && parseInt(window.currentChatRoomId) === parseInt(msg.maPhongChat)) {
+                                                                                    return;
+                                                                                }
+
+                                                                                // Tăng badge tin nhắn hiện tại
+                                                                                const firstBadge = document.querySelector('.badge-tin-nhan');
+                                                                                let currentCount = firstBadge ? (parseInt(firstBadge.textContent) || 0) : 0;
+                                                                                capNhatBadgeElement('.badge-tin-nhan', currentCount + 1);
+
+                                                                                // Hiển thị Toast và phát âm thanh
+                                                                                hienThiToastTinNhan(msg);
+                                                                                phatAmThanhThongBao();
+                                                                            });
+
+                                                                            // Lắng nghe sự kiện cập nhật tin nhắn đã đọc
+                                                                            globalKetNoi.on("CapNhatTinNhanDaDoc", function(data) {
+                                                                                window.dongBoSoLuongHeader();
+                                                                            });
+
+                                                                            // Kết nối tới Hub
+                                                                            async function khoiTaoSignalRToanCuc() {
+                                                                                try {
+                                                                                    if (globalKetNoi.state === signalR.HubConnectionState.Disconnected) {
+                                                                                        await globalKetNoi.start();
+                                                                                        await globalKetNoi.invoke("DangKyUser", globalUserId);
+                                                                                    }
+                                                                                } catch (err) {
+                                                                                    setTimeout(khoiTaoSignalRToanCuc, 5000);
+                                                                                }
+                                                                            }
+
+                                                                            globalKetNoi.onreconnected(async () => {
+                                                                                await globalKetNoi.invoke("DangKyUser", globalUserId);
+                                                                                window.dongBoSoLuongHeader();
+                                                                            });
+
+                                                                            khoiTaoSignalRToanCuc();
+
+                                                                            // Fallback đồng bộ định kỳ mỗi 30 giây
+                                                                            setInterval(window.dongBoSoLuongHeader, 30000);
+                                                                        })();
+                                                                    </script>
+                                                                }
+
+                                                                @await RenderSectionAsync("Scripts", required: false)
+
+                                                            </body>
+
+                                                        </html>

@@ -1,0 +1,2082 @@
+@model FreelancerStudent.Web.ViewModels.HopDongViewModel
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Chi tiết hợp đồng " + Model.maHD;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var dsTrangThai = new Dictionary<string, string>
+    {
+        { "ChoXacNhan", "Chờ Freelancer xác nhận" },
+        { "ChoKyKet", "Chờ ký kết" },
+        { "ChoKyQuy", "Chờ ký quỹ" },
+        { "DangThucHien", "Đang thực hiện" },
+        { "DaHoanThanh", "Đã hoàn thành – chờ thanh toán" },
+        { "DaThanhToan", "Đã thanh toán" },
+        { "DaHuy", "Đã hủy" },
+        { "DaHuyHoanTien", "Đã hủy – đã hoàn tiền" },
+        { "DangTranhChap", "Đang tranh chấp" }
+    };
+
+    var tenTrangThai = dsTrangThai.TryGetValue(Model.trangThai, out var ten) ? ten : Model.trangThai;
+
+    var badgeClass = Model.trangThai switch
+    {
+        "ChoXacNhan" => "bg-warning text-dark",
+        "ChoKyKet" => "bg-info text-dark",
+        "ChoKyQuy" => "bg-primary text-white",
+        "DangThucHien" => "bg-success text-white",
+        "DaHoanThanh" => "bg-dark text-white",
+        "DaThanhToan" => "bg-success text-white",
+        "DaHuy" => "bg-danger text-white",
+        "DaHuyHoanTien" => "bg-danger text-white",
+        _ => "bg-secondary text-white"
+    };
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-controller="HopDong" asp-action="Index" class="text-decoration-none" style="color: #2B7A4B; font-weight: 500;">Quản lý hợp đồng</a></li>
+            <li class="breadcrumb-item active text-muted" aria-current="page">Chi tiết hợp đồng #@Model.maHD</li>
+        </ol>
+    </nav>
+
+    <!-- ================= KHU VỰC THÔNG BÁO TẬP TRUNG (TOP-LEFT) ================= -->
+    <div class="contract-notifications mb-4" style="max-width: 980px;">
+        <!-- Thông báo Thành công từ TempData -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3 d-flex align-items-center justify-content-between" 
+                 style="background-color: #EAF5EE; border-left: 4px solid #2B7A4B; color: #1E5C37; border-top: 1px solid #D2E9DB; border-right: 1px solid #D2E9DB; border-bottom: 1px solid #D2E9DB;" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold">@TempData["SuccessMessage"]</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Thông báo Lỗi từ TempData -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3 d-flex align-items-center justify-content-between" 
+                 style="background-color: #FEF2F2; border-left: 4px solid #DC2626; color: #991B1B; border-top: 1px solid #FECACA; border-right: 1px solid #FECACA; border-bottom: 1px solid #FECACA;" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold">@TempData["ErrorMessage"]</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Thông báo cho Freelancer khi hợp đồng Chờ xác nhận -->
+        @if (Model.CoQuyenXacNhan)
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                 style="background-color: #FFFBEB; border-left: 4px solid #D97706; border-top: 1px solid #FDE68A; border-right: 1px solid #FDE68A; border-bottom: 1px solid #FDE68A; color: #78350F;" role="alert">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="fw-bold mb-1" style="color: #92400E;">
+                            Dự thảo hợp đồng đang chờ bạn xác nhận
+                        </div>
+                        <div class="small" style="color: #78350F; line-height: 1.5;">
+                            Nhà tuyển dụng đã tạo dự thảo hợp đồng này và gửi cho bạn. Vui lòng xem kỹ thông tin công việc, thù lao, các mốc bàn giao và điều khoản cam kết bên dưới trước khi đưa ra quyết định.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-0 px-3 fw-medium" data-bs-toggle="modal" data-bs-target="#modalTuChoi">
+                            Từ chối hợp đồng
+                        </button>
+                        <form asp-controller="HopDong" asp-action="XacNhan" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đồng ý dự thảo hợp đồng này?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="dongY" value="true" />
+                            <button type="submit" class="btn btn-sm text-white rounded-0 px-3 fw-bold shadow-sm" style="background-color: #1B5E36; border-color: #1B5E36;">
+                                Xác nhận hợp đồng
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Thông báo cho Nhà tuyển dụng khi hợp đồng Chờ ký quỹ -->
+        @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                 style="background-color: #EAF5EE; border-left: 4px solid #2B7A4B; border-top: 1px solid #D2E9DB; border-right: 1px solid #D2E9DB; border-bottom: 1px solid #D2E9DB; color: #1E5C37;" role="alert">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="fw-bold mb-1" style="color: #1B5E36;">
+                            Hợp đồng đang chờ bạn ký quỹ bảo chứng (Escrow)
+                        </div>
+                        <div class="small text-muted" style="line-height: 1.5;">
+                            Freelancer đã đồng ý nhận việc! Tổng tiền ký quỹ: <strong style="color: #1B5E36;">@(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ</strong>. Tiền ký quỹ được giữ an toàn tại hệ thống và chỉ giải ngân cho Freelancer khi bạn nghiệm thu đạt.
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm rounded-0 fw-bold px-3 text-white shadow-sm" style="background-color: #2B7A4B; border-color: #2B7A4B;" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
+                            Tiến hành ký quỹ ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Thông báo cho Nhà tuyển dụng khi toàn bộ mốc đã Đạt -->
+        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien" && Model.TatCaMocDaDat)
+        {
+            @if (Model.CoSanPhamBanGiaoChoNghiemThu)
+            {
+                <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                     style="background-color: #EAF5EE; border-left: 4px solid #2B7A4B; border-top: 1px solid #D2E9DB; border-right: 1px solid #D2E9DB; border-bottom: 1px solid #D2E9DB; color: #1E5C37;" role="alert">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <div class="fw-bold mb-1" style="color: #1B5E36;">Freelancer đã bàn giao sản phẩm hoàn chỉnh!</div>
+                            <div class="small text-muted" style="line-height: 1.5;">Toàn bộ mốc tiến độ đã Đạt và sản phẩm hoàn chỉnh đã được gửi nộp. Vui lòng kiểm tra sản phẩm và thực hiện nghiệm thu.</div>
+                        </div>
+                        <a asp-controller="BanGiaoSanPham" asp-action="Index" asp-route-maHD="@Model.maHD" class="btn btn-sm btn-success fw-bold rounded-0 px-3" style="background-color: #2B7A4B; border-color: #2B7A4B;">
+                            Kiểm tra &amp; Nghiệm thu sản phẩm
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                     style="background-color: #F0FDF4; border-left: 4px solid #16A34A; border-top: 1px solid #DCFCE7; border-right: 1px solid #DCFCE7; border-bottom: 1px solid #DCFCE7; color: #15803D;" role="alert">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <div class="fw-bold mb-1" style="color: #15803D;">Toàn bộ mốc tiến độ đã đạt yêu cầu!</div>
+                            <div class="small text-muted" style="line-height: 1.5;">Hệ thống đang chờ Freelancer kiểm tra lại và thực hiện bàn giao sản phẩm hoàn chỉnh.</div>
+                        </div>
+                        <a asp-controller="BanGiaoSanPham" asp-action="Index" asp-route-maHD="@Model.maHD" class="btn btn-sm btn-outline-success rounded-0">
+                            Xem lịch sử bàn giao
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- Thông báo cho Nhà tuyển dụng khi hợp đồng đã hoàn thành chờ thanh toán -->
+        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                 style="background-color: #EFF6FF; border-left: 4px solid #2563EB; border-top: 1px solid #DBEAFE; border-right: 1px solid #DBEAFE; border-bottom: 1px solid #DBEAFE; color: #1E40AF;" role="alert">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="fw-bold mb-1" style="color: #1E40AF;">Hợp đồng đã nghiệm thu hoàn thành!</div>
+                        <div class="small text-muted" style="line-height: 1.5;">Sản phẩm đã được nghiệm thu đạt yêu cầu. Vui lòng xác nhận giải ngân thù lao cho Freelancer để hoàn tất hợp đồng.</div>
+                    </div>
+                    <a asp-controller="HopDong" asp-action="ThanhToan" asp-route-maHD="@Model.maHD" class="btn btn-sm btn-primary rounded-0 fw-bold px-3">
+                        Xác nhận thanh toán &amp; Giải ngân
+                    </a>
+                </div>
+            </div>
+        }
+
+        <!-- Thông báo khi sản phẩm bị yêu cầu chỉnh sửa / Chưa đạt -->
+        @if (Model.trangThai == "DangThucHien" && (Model.TrangThaiBanGiaoMoiNhat == "YeuCauChinhSua" || Model.TrangThaiBanGiaoMoiNhat == "ChuaDat"))
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                 style="background-color: #FEF2F2; border-left: 4px solid #DC2626; border-top: 1px solid #FECACA; border-right: 1px solid #FECACA; border-bottom: 1px solid #FECACA; color: #991B1B;" role="alert">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="fw-bold mb-1" style="color: #991B1B;">Sản phẩm bàn giao (@(Model.PhienBanBanGiaoMoiNhat ?? "Phiên bản mới nhất")) bị đánh giá Chưa đạt:</div>
+                        <div class="small" style="color: #7F1D1D; line-height: 1.5;">@(string.IsNullOrWhiteSpace(Model.PhanHoiBanGiaoMoiNhat) ? "Nhà tuyển dụng yêu cầu chỉnh sửa và bổ sung sản phẩm." : Model.PhanHoiBanGiaoMoiNhat)</div>
+                    </div>
+                    @if (Model.LaFreelancerCuaHopDong)
+                    {
+                        <a asp-controller="BanGiaoSanPham" asp-action="Index" asp-route-maHD="@Model.maHD" asp-route-mode="capnhat" class="btn btn-sm btn-warning rounded-0 fw-bold px-3 text-dark">
+                            Cập nhật lại bàn giao
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Thông báo hợp đồng đã thanh toán -->
+        @if (Model.trangThai == "DaThanhToan")
+        {
+            <div class="alert alert-dismissible fade show rounded-0 shadow-sm mb-3 p-3" 
+                 style="background-color: #EAF5EE; border-left: 4px solid #2B7A4B; border-top: 1px solid #D2E9DB; border-right: 1px solid #D2E9DB; border-bottom: 1px solid #D2E9DB; color: #1E5C37;" role="alert">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="fw-bold mb-1" style="color: #1B5E36;">Hợp đồng đã hoàn thành và thanh toán thành công!</div>
+                        <div class="small text-muted" style="line-height: 1.5;">Thù lao hợp đồng đã được giải ngân an toàn vào ví của Freelancer.</div>
+                    </div>
+                    <a asp-controller="Wallet" asp-action="Index" class="btn btn-sm btn-outline-success rounded-0">
+                        Xem ví tài khoản
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Modal Từ chối hợp đồng cho Freelancer -->
+    @if (Model.CoQuyenXacNhan)
+    {
+        <div class="modal fade" id="modalTuChoi" tabindex="-1" aria-labelledby="modalTuChoiLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-0">
+                    <form asp-controller="HopDong" asp-action="XacNhan" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maHD" value="@Model.maHD" />
+                        <input type="hidden" name="dongY" value="false" />
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title text-danger fw-bold" id="modalTuChoiLabel">
+                                Từ chối dự thảo hợp đồng
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small">
+                                Bạn có chắc chắn muốn từ chối dự thảo hợp đồng này không? Khi từ chối, hợp đồng sẽ bị hủy và thông báo sẽ được gửi đến Nhà tuyển dụng.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Lý do từ chối (tùy chọn):</label>
+                                <textarea name="lyDoTuChoi" class="form-control rounded-0" rows="3" placeholder="Nhập lý do thù lao chưa phù hợp, thời gian không đủ hoặc điều khoản chưa thỏa đáng..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger rounded-0 fw-bold">Xác nhận từ chối</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal Xác nhận Ký quỹ cho Nhà tuyển dụng -->
+    @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
+    {
+        <div class="modal fade" id="modalKyQuy" tabindex="-1" aria-labelledby="modalKyQuyLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+                <div class="modal-content rounded-0 border shadow">
+                    <form asp-controller="HopDong" asp-action="KyQuy" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maHD" value="@Model.maHD" />
+
+                        <!-- 1. Header: Ký quỹ hợp đồng -->
+                        <div class="modal-header rounded-0 py-3 px-4 border-0" style="background-color: #2B7A4B;">
+                            <h5 class="modal-title fw-bold text-white fs-5" id="modalKyQuyLabel">
+                                <i class="bi bi-shield-check me-2"></i>Ký quỹ hợp đồng
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="modal-body p-4 bg-white">
+                            <!-- 2 & 3. Số tiền và mã hợp đồng -->
+                            <div class="text-center pb-3 mb-3 border-bottom">
+                                <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Tổng tiền ký quỹ</div>
+                                <div class="fw-bold my-1" style="color: #1B5E36; font-size: 1.85rem; line-height: 1.2;">
+                                    @(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ
+                                </div>
+                                <span class="badge border rounded-0 px-2 py-1 small fw-normal" 
+                                      style="background-color: #F8FAF9; color: #64748B; border-color: #E2E8F0 !important;">
+                                    Áp dụng cho hợp đồng #@Model.maHD
+                                </span>
+                            </div>
+
+                            <!-- 4. Khung thông tin giải thích ngắn gọn -->
+                            <div class="p-3 mb-3 rounded-0 small" style="background-color: #EAF5EE; border-left: 3px solid #2B7A4B; color: #1E293B;">
+                                Tiền ký quỹ được giữ tại hệ thống và sử dụng để bảo đảm quá trình thực hiện hợp đồng.
+                            </div>
+
+                            <!-- 5. Các lưu ý quan trọng (cô đọng) -->
+                            <div class="small">
+                                <div class="fw-bold mb-2 text-dark">Lưu ý sau khi ký quỹ:</div>
+                                <ul class="list-unstyled mb-0 text-muted ps-1" style="line-height: 1.6;">
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-check-circle-fill text-success me-2 mt-1" style="font-size: 0.85rem;"></i>
+                                        <span>Hợp đồng chuyển sang trạng thái <strong>Đang thực hiện</strong> sau khi ký quỹ thành công.</span>
+                                    </li>
+                                    <li class="mb-1 d-flex align-items-start">
+                                        <i class="bi bi-check-circle-fill text-success me-2 mt-1" style="font-size: 0.85rem;"></i>
+                                        <span>Freelancer có thể bắt đầu công việc.</span>
+                                    </li>
+                                    <li class="d-flex align-items-start">
+                                        <i class="bi bi-check-circle-fill text-success me-2 mt-1" style="font-size: 0.85rem;"></i>
+                                        <span>Nhà tuyển dụng theo dõi tiến độ và nghiệm thu sản phẩm theo từng giai đoạn.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 6. Footer -->
+                        <div class="modal-footer py-3 px-4 border-top" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                            <button type="button" class="btn btn-outline-secondary rounded-0 px-3" data-bs-dismiss="modal">
+                                Hủy bỏ
+                            </button>
+                            <button type="submit" class="btn rounded-0 fw-bold px-4 text-white shadow-sm" style="background-color: #2B7A4B; border-color: #2B7A4B;">
+                                Xác nhận ký quỹ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ================= HEADER VÀ THÔNG TIN TỔNG QUAN HỢP ĐỒNG ================= -->
+    <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" style="border: 1px solid #E2E8F0 !important;">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 pb-3 border-bottom" style="border-color: #E2E8F0 !important;">
+                <div style="flex: 1 1 500px; min-width: 280px;">
+                    <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.5px; color: #64748B;">Hợp đồng dịch vụ Freelance</div>
+                    <h3 class="fw-bold mb-1 mt-1" style="color: #1B5E36; line-height: 1.3;">@Model.tenCongViec</h3>
+                    <div class="text-muted small mt-2 d-flex flex-wrap align-items-center gap-3">
+                        <span>Mã hợp đồng: <strong class="text-dark">#@Model.maHD</strong></span>
+                        <span class="text-muted">|</span>
+                        <span>Mã bài đăng: <strong class="text-dark">#@Model.maJob</strong></span>
+                        <span class="text-muted">|</span>
+                        <span>Ngày tạo: <strong class="text-dark">@(Model.ngayBatDau?.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy"))</strong></span>
+                    </div>
+                </div>
+                <div class="d-flex flex-column align-items-end justify-content-start gap-2" style="min-width: 220px;">
+                    <div class="d-flex align-items-center justify-content-end flex-wrap gap-2">
+                        <span class="badge @badgeClass px-3 py-2 fs-6 rounded-0">
+                            @tenTrangThai
+                        </span>
+                        @if (Model.CoQuyenKyQuy || (!Model.LaFreelancerCuaHopDong && Model.trangThai == "ChoKyQuy"))
+                        {
+                            <button type="button" class="btn rounded-0 fw-bold px-3 py-2 shadow-sm text-white" style="background-color: #2B7A4B; border-color: #2B7A4B;" data-bs-toggle="modal" data-bs-target="#modalKyQuy">
+                                Tiến hành ký quỹ
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 Thông số chính -->
+            <div class="row g-3 text-center mt-2">
+                <div class="col-md-3 col-6">
+                    <div class="p-3 border h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Thù lao thỏa thuận</div>
+                        <div class="fs-5 fw-bold mt-1" style="color: #1B5E36;">
+                            @(Model.sotienkyquy?.ToString("N0") ?? "0") VNĐ
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 border h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Hình thức làm việc</div>
+                        <div class="fs-5 fw-bold text-dark mt-1">
+                            @(string.IsNullOrWhiteSpace(Model.hinhthuclamviec) ? "Remote" : Model.hinhthuclamviec)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 border h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Ngày bắt đầu</div>
+                        <div class="fs-5 fw-bold text-dark mt-1">
+                            @(Model.ngayBatDau?.ToString("dd/MM/yyyy") ?? "-")
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 border h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Hạn chót hoàn thành</div>
+                        <div class="fs-5 fw-bold text-danger mt-1">
+                            @(Model.ngayKetThuc?.ToString("dd/MM/yyyy") ?? "-")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= THÔNG TIN HAI BÊN GIAO KẾT ================= -->
+    <div class="row g-4 mb-4 align-items-start">
+        <!-- Bên A: Khách hàng / Nhà tuyển dụng -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-0 bg-white" style="border: 1px solid #E2E8F0 !important;">
+                <div class="card-header border-bottom py-3 px-4" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small text-uppercase" style="color: #1B5E36; letter-spacing: 0.5px;">
+                            BÊN A: BÊN THUÊ (NHÀ TUYỂN DỤNG)
+                        </span>
+                        <span class="badge border rounded-0 px-2 py-1 small fw-normal" style="background-color: #FFFFFF; color: #64748B; border-color: #E2E8F0 !important;">Bên giao việc</span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <div class="text-muted small fw-medium" style="color: #64748B;">Tên doanh nghiệp / Đơn vị:</div>
+                        <div class="fw-bold fs-6 mt-1" style="color: #1E293B;">@(!string.IsNullOrWhiteSpace(Model.tenNhaTuyenDung) ? Model.tenNhaTuyenDung : "Nhà tuyển dụng")</div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.emailNhaTuyenDung))
+                    {
+                        <div class="mb-3">
+                            <div class="text-muted small fw-medium" style="color: #64748B;">Email liên hệ:</div>
+                            <div class="text-secondary mt-1">@Model.emailNhaTuyenDung</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.sdtNhaTuyenDung))
+                    {
+                        <div class="mb-3">
+                            <div class="text-muted small fw-medium" style="color: #64748B;">Số điện thoại:</div>
+                            <div class="text-secondary mt-1">@Model.sdtNhaTuyenDung</div>
+                        </div>
+                    }
+                    @if (Model.LaFreelancerCuaHopDong)
+                    {
+                        <div class="pt-3 border-top" style="border-color: #E2E8F0 !important;">
+                            <a href="/Chat?maJob=@Model.maJob&maUserNTD=@Model.maUserNhaTuyenDung" class="btn btn-sm btn-outline-success rounded-0 fw-semibold d-inline-flex align-items-center gap-1" style="color: #2B7A4B; border-color: #2B7A4B;">
+                                <i class="bi bi-chat-dots"></i> Nhắn tin trao đổi với Bên A
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Bên B: Freelancer / Sinh viên -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-0 bg-white" style="border: 1px solid #E2E8F0 !important;">
+                <div class="card-header border-bottom py-3 px-4" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small text-uppercase" style="color: #1B5E36; letter-spacing: 0.5px;">
+                            BÊN B: BÊN NHẬN VIỆC (FREELANCER)
+                        </span>
+                        <span class="badge border rounded-0 px-2 py-1 small fw-normal" style="background-color: #FFFFFF; color: #64748B; border-color: #E2E8F0 !important;">Bên thực hiện</span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <div class="text-muted small fw-medium" style="color: #64748B;">Họ và tên Freelancer:</div>
+                        <div class="fw-bold fs-6 mt-1" style="color: #1B5E36;">@(!string.IsNullOrWhiteSpace(Model.tenFreelancer) ? Model.tenFreelancer : "Sinh viên")</div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.truongFreelancer))
+                    {
+                        <div class="mb-3">
+                            <div class="text-muted small fw-medium" style="color: #64748B;">Trường / Học viện:</div>
+                            <div class="text-secondary mt-1">@Model.truongFreelancer</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.chuyenNganhFreelancer))
+                    {
+                        <div class="mb-3">
+                            <div class="text-muted small fw-medium" style="color: #64748B;">Chuyên ngành đào tạo:</div>
+                            <div class="text-secondary mt-1">@Model.chuyenNganhFreelancer</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.emailFreelancer))
+                    {
+                        <div class="mb-3">
+                            <div class="text-muted small fw-medium" style="color: #64748B;">Email sinh viên:</div>
+                            <div class="text-secondary mt-1">@Model.emailFreelancer</div>
+                        </div>
+                    }
+                    @if (!Model.LaFreelancerCuaHopDong)
+                    {
+                        <div class="pt-3 border-top" style="border-color: #E2E8F0 !important;">
+                            <a href="/Chat?maJob=@Model.maJob&maFreelancerStudent=@Model.maFreelancerStudent" class="btn btn-sm btn-outline-success rounded-0 fw-semibold d-inline-flex align-items-center gap-1" style="color: #2B7A4B; border-color: #2B7A4B;">
+                                <i class="bi bi-chat-dots"></i> Nhắn tin trao đổi với Bên B
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MÔ TẢ YÊU CẦU CÔNG VIỆC ================= -->
+    @if (!string.IsNullOrWhiteSpace(Model.moTaCongViec))
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" style="border: 1px solid #E2E8F0 !important;">
+            <div class="card-header border-bottom py-3 px-4" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                <h6 class="mb-0 fw-bold" style="color: #1B5E36;">
+                    MÔ TẢ YÊU CẦU CÔNG VIỆC
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <p class="mb-0" style="color: #334155; white-space: pre-line; line-height: 1.7;">@Model.moTaCongViec</p>
+            </div>
+        </div>
+    }
+
+    <!-- ================= LỘ TRÌNH CÁC MỐC BÀN GIAO (MILESTONES) ================= -->
+    <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" style="border: 1px solid #E2E8F0 !important;">
+        <div class="card-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+            <h5 class="mb-0 fw-bold" style="color: #1B5E36;">
+                Lộ trình các mốc bàn giao (Milestones)
+            </h5>
+            <span class="badge rounded-0" style="background-color: #EAF5EE; color: #1B5E36; border: 1px solid #D2E9DB;">@(Model.giaiDoans?.Count ?? 0) giai đoạn</span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.giaiDoans != null && Model.giaiDoans.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead style="background-color: #F8FAF9;">
+                            <tr style="border-bottom: 2px solid #E2E8F0;">
+                                <th style="width: 50px;" class="text-center text-muted">#</th>
+                                <th style="width: 24%; color: #1E293B;">Tên giai đoạn / Mốc bàn giao</th>
+                                <th style="width: 38%; color: #1E293B;">Mô tả &amp; Tiêu chí nghiệm thu</th>
+                                <th style="width: 14%; color: #1E293B;">Hạn chót mốc</th>
+                                <th style="width: 24%; color: #1E293B;" class="text-end">Trạng thái &amp; Nghiệm thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.giaiDoans.Count; i++)
+                            {
+                                var gd = Model.giaiDoans[i];
+                                <tr style="border-bottom: 1px solid #E2E8F0;">
+                                    <td class="text-center fw-bold text-muted">@(i + 1)</td>
+                                    <td>
+                                        <div class="fw-semibold" style="color: #1E293B;">@gd.tenGiaiDoan</div>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var moTaHienThi = System.Text.RegularExpressions.Regex.Replace(string.IsNullOrWhiteSpace(gd.moTa) ? "Theo yêu cầu chung" : gd.moTa, @"\[Giải ngân:[^\]]*\]\s*", "");
+                                            var linkMoc = gd.linkSanPham;
+                                            if (string.IsNullOrWhiteSpace(linkMoc) && !string.IsNullOrWhiteSpace(gd.moTa))
+                                            {
+                                                var match = System.Text.RegularExpressions.Regex.Match(gd.moTa, @"https?://[^\s]+");
+                                                if (match.Success) { linkMoc = match.Value; }
+                                            }
+                                            if (string.IsNullOrWhiteSpace(linkMoc) && Model.TienDoDuAn?.danhSachGiaiDoan != null)
+                                            {
+                                                var gdTienDo = Model.TienDoDuAn.danhSachGiaiDoan.FirstOrDefault(g => g.maGiaiDoan == gd.maGiaiDoan && !string.IsNullOrWhiteSpace(g.linkSanPham));
+                                                if (gdTienDo != null) { linkMoc = gdTienDo.linkSanPham; }
+                                            }
+                                            if (string.IsNullOrWhiteSpace(linkMoc) && Model.TienDoDuAn?.danhSachTask != null)
+                                            {
+                                                var taskCoLink = Model.TienDoDuAn.danhSachTask.FirstOrDefault(t => t.maGiaiDoan == gd.maGiaiDoan && (!string.IsNullOrWhiteSpace(t.linkSanPham) || (!string.IsNullOrWhiteSpace(t.moTa) && (t.moTa.Contains("[LINK_SAN_PHAM]") || t.moTa.Contains("http")))));
+                                                if (taskCoLink != null)
+                                                {
+                                                    if (!string.IsNullOrWhiteSpace(taskCoLink.linkSanPham))
+                                                    {
+                                                        linkMoc = taskCoLink.linkSanPham;
+                                                    }
+                                                    else
+                                                    {
+                                                        var mTask = System.Text.RegularExpressions.Regex.Match(taskCoLink.moTa, @"https?://[^\s]+");
+                                                        if (mTask.Success) { linkMoc = mTask.Value; }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        <div class="text-muted small" style="line-height: 1.5;">@moTaHienThi</div>
+                                        @if (!string.IsNullOrWhiteSpace(linkMoc))
+                                        {
+                                            <div class="mt-2">
+                                                <a href="@linkMoc" target="_blank" rel="noopener noreferrer" class="btn btn-sm py-1 px-2 fw-semibold rounded-0" style="background-color: #EAF5EE; color: #1B5E36; border: 1px solid #D2E9DB;">
+                                                    Xem sản phẩm mốc
+                                                </a>
+                                                <span class="text-muted small ms-1 text-truncate d-inline-block" style="max-width: 260px; vertical-align: middle;">@linkMoc</span>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="fw-medium text-dark">@gd.hanChot.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">
+                                        @if (gd.trangThai == "Dat" || gd.trangThai == "DaNghiemThu")
+                                        {
+                                            <span class="badge bg-success rounded-0 px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i>Đạt</span>
+                                        }
+                                        else if (gd.trangThai == "ChoDanhGia")
+                                        {
+                                            <span class="badge bg-info text-dark rounded-0 px-2 py-1"><i class="bi bi-clock-history me-1"></i>Chờ NTD đánh giá</span>
+                                        }
+                                        else if (gd.trangThai == "ChuaDat")
+                                        {
+                                            <span class="badge bg-danger rounded-0 px-2 py-1"><i class="bi bi-x-circle-fill me-1"></i>Chưa đạt</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary rounded-0 px-2 py-1">Chưa bàn giao</span>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(gd.lyDoChuaDat) && gd.trangThai != "Dat" && gd.trangThai != "DaNghiemThu")
+                                        {
+                                            <div class="mt-2 p-2 rounded-0 small text-danger text-start" style="background-color: #FEF2F2; border: 1px solid #FECACA;">
+                                                <strong>Lý do chưa đạt:</strong>
+                                                <div>@gd.lyDoChuaDat</div>
+                                            </div>
+                                        }
+
+                                        @if (Model.LaFreelancerCuaHopDong && Model.trangThai == "DangThucHien")
+                                        {
+                                            if (gd.trangThai == "ChuaDat")
+                                            {
+                                                <div class="d-flex justify-content-end mt-2">
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-warning rounded-0 fw-bold shadow-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#modalCapNhatMoc_@gd.maGiaiDoan">
+                                                        <i class="bi bi-pencil-square me-1"></i> Cập nhật lại bàn giao
+                                                    </button>
+                                                </div>
+                                            }
+                                            else if (gd.trangThai == "ChoDanhGia")
+                                            {
+                                                <div class="mt-2 text-muted small fst-italic">
+                                                    <i class="bi bi-hourglass-split me-1"></i>Đã nộp - Chờ NTD đánh giá
+                                                </div>
+                                            }
+                                            else if (gd.trangThai != "Dat" && gd.trangThai != "DaNghiemThu")
+                                            {
+                                                <div class="d-flex justify-content-end mt-2">
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-success rounded-0 fw-semibold shadow-sm" 
+                                                            style="color: #2B7A4B; border-color: #2B7A4B;"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#modalCapNhatMoc_@gd.maGiaiDoan">
+                                                        <i class="bi bi-cloud-arrow-up me-1"></i> Bàn giao mốc này
+                                                    </button>
+                                                </div>
+                                            }
+                                        }
+
+                                        <!-- Modal Cập nhật lại mốc bàn giao cho Freelancer -->
+                                        <div class="modal fade text-start" id="modalCapNhatMoc_@gd.maGiaiDoan" tabindex="-1" aria-labelledby="labelCapNhatMoc_@gd.maGiaiDoan" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content rounded-0">
+                                                    <form asp-controller="HopDong" asp-action="CapNhatMocBanGiao" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                        <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                        <div class="modal-header bg-light">
+                                                            <h6 class="modal-title fw-bold text-dark" id="labelCapNhatMoc_@gd.maGiaiDoan">
+                                                                Cập nhật lại mốc bàn giao: @gd.tenGiaiDoan
+                                                            </h6>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            @if (!string.IsNullOrWhiteSpace(gd.lyDoChuaDat))
+                                                            {
+                                                                <div class="alert alert-danger border-danger small mb-3">
+                                                                    <strong>Lý do Nhà tuyển dụng đánh giá Chưa đạt:</strong>
+                                                                    <div class="mt-1">@gd.lyDoChuaDat</div>
+                                                                </div>
+                                                            }
+                                                            <p class="text-muted small">
+                                                                Vui lòng cung cấp đường dẫn sản phẩm đã hoàn thiện hoặc điều chỉnh theo lý do chưa đạt của Nhà tuyển dụng.
+                                                            </p>
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-semibold small">
+                                                                    Đường dẫn sản phẩm mốc <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="url" 
+                                                                       name="linkSanPham" 
+                                                                       class="form-control rounded-0" 
+                                                                       placeholder="https://drive.google.com/... hoặc link github, figma" 
+                                                                       value="@linkMoc" 
+                                                                       required />
+                                                                <div class="form-text small">Nhập link Google Drive, GitHub hoặc tài liệu nghiệm thu mốc này.</div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-semibold small">
+                                                                    Mô tả nội dung hoàn thiện &amp; giải trình chỉnh sửa
+                                                                </label>
+                                                                <textarea name="moTa" 
+                                                                          class="form-control rounded-0" 
+                                                                          rows="3" 
+                                                                          placeholder="Mô tả tóm tắt nội dung bạn đã chỉnh sửa, khắc phục theo yêu cầu...">@moTaHienThi</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-success rounded-0 fw-bold" style="background-color: #2B7A4B; border-color: #2B7A4B;">
+                                                                Gửi bàn giao lại
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                                        {
+                                            <div class="d-flex justify-content-end gap-1 mt-2">
+                                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                    <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                    <input type="hidden" name="trangThai" value="Dat" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-0" disabled="@(gd.trangThai == "Dat" || gd.trangThai == "DaNghiemThu")">Đạt</button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-0" data-bs-toggle="modal" data-bs-target="#modalChuaDat_@gd.maGiaiDoan">
+                                                    Chưa đạt
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal Nhập Lý Do Chưa Đạt cho từng mốc -->
+                                            <div class="modal fade text-start" id="modalChuaDat_@gd.maGiaiDoan" tabindex="-1" aria-labelledby="labelChuaDat_@gd.maGiaiDoan" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content rounded-0">
+                                                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                            <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                            <input type="hidden" name="trangThai" value="ChuaDat" />
+                                                            <div class="modal-header bg-light">
+                                                                <h6 class="modal-title fw-bold text-danger" id="labelChuaDat_@gd.maGiaiDoan">
+                                                                    Đánh giá Chưa đạt mốc: @gd.tenGiaiDoan
+                                                                </h6>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p class="text-muted small">
+                                                                    Vui lòng cung cấp lý do cụ thể vì sao mốc tiến độ này chưa đạt yêu cầu để Freelancer có căn cứ điều chỉnh và bổ sung.
+                                                                </p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold">Lý do chưa đạt <span class="text-danger">*</span></label>
+                                                                    <textarea name="lyDo" class="form-control rounded-0" rows="3" required placeholder="Nhập lý do chi tiết (bắt buộc)...">@gd.lyDoChuaDat</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy</button>
+                                                                <button type="submit" class="btn btn-danger rounded-0 fw-bold">Xác nhận Chưa đạt</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <!-- Dải ghi chú ký quỹ & giải ngân -->
+                    <div class="p-3 border-top d-flex align-items-center gap-2 small" style="background-color: #EAF5EE; border-color: #D2E9DB !important; color: #1B5E36;">
+                        <span>Toàn bộ thù lao hợp đồng (<strong>@((Model.sotienkyquy ?? 0).ToString("N0")) VNĐ</strong>) được giữ an toàn tại ví ký quỹ. Sau khi nghiệm thu đạt toàn bộ dự án, Nhà tuyển dụng sẽ xác nhận hoàn thành và giải ngân thanh toán 1 lần cho Freelancer.</span>
+                    </div>
+                </div>
+
+                @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                {
+                    <div class="d-flex justify-content-end gap-2 p-3 border-top" style="border-color: #E2E8F0 !important;">
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-0" data-bs-toggle="modal" data-bs-target="#modalChuaDatTatCa">
+                            Đánh dấu tất cả chưa đạt
+                        </button>
+                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" onsubmit="return confirm('Xác nhận tất cả giai đoạn đều đạt yêu cầu?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                            <input type="hidden" name="trangThai" value="Dat" />
+                            <button type="submit" class="btn btn-sm btn-success rounded-0" style="background-color: #2B7A4B; border-color: #2B7A4B;">Đánh dấu tất cả đạt</button>
+                        </form>
+                    </div>
+
+                    <!-- Modal Đánh dấu tất cả chưa đạt -->
+                    <div class="modal fade text-start" id="modalChuaDatTatCa" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-0">
+                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                    <input type="hidden" name="trangThai" value="ChuaDat" />
+                                    <div class="modal-header bg-light">
+                                        <h6 class="modal-title fw-bold text-danger">Đánh dấu tất cả giai đoạn Chưa đạt</h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted small">
+                                            Vui lòng nhập lý do chung áp dụng cho các mốc tiến độ chưa đạt để Freelancer nắm rõ và điều chỉnh.
+                                        </p>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Lý do chưa đạt <span class="text-danger">*</span></label>
+                                            <textarea name="lyDo" class="form-control rounded-0" rows="3" required placeholder="Nhập lý do cụ thể (bắt buộc)..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-danger rounded-0 fw-bold">Xác nhận Chưa đạt tất cả</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    Hợp đồng này nghiệm thu toàn bộ một lần sau khi hoàn thành.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ================= ĐÁNH GIÁ ĐỐI TÁC ================= -->
+    @{
+        var ttHopDong = Model.trangThai?.Trim();
+        var laTrangThaiDanhGia = string.Equals(ttHopDong, "DaThanhToan", StringComparison.OrdinalIgnoreCase) 
+                             || string.Equals(ttHopDong, "DaHoanThanh", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(ttHopDong, "DaHuyHoanTien", StringComparison.OrdinalIgnoreCase);
+    }
+    @if (laTrangThaiDanhGia)
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" style="border: 1px solid #E2E8F0 !important;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-2">
+                    <div>
+                        <h5 class="mb-1 fw-bold" style="color: #1B5E36;">Đánh giá đối tác</h5>
+                        <span class="text-muted small">@(Model.trangThaiDanhGia == "DaDanhGia" ? "Bạn đã gửi đánh giá cho đối tác trên hợp đồng này." : "Chia sẻ trải nghiệm và đánh giá chất lượng làm việc của đối tác.")</span>
+                    </div>
+                    <div>
+                        @if (Model.trangThaiDanhGia == "DaDanhGia")
+                        {
+                            <span class="badge text-bg-success rounded-0 me-2">Đã đánh giá</span>
+                            @if (Model.coTheChinhSuaDanhGia && Model.maDanhGia.HasValue)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-0" onclick="moFormDanhGia('@Model.maHD', @Model.maDanhGia)">Chỉnh sửa đánh giá</button>
+                            }
+                        }
+                        else if (Model.coTheDanhGia)
+                        {
+                            <button type="button" class="btn btn-sm text-white rounded-0" style="background-color: #2B7A4B;" onclick="moFormDanhGia('@Model.maHD')">Gửi đánh giá</button>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Đã hết thời hạn gửi đánh giá.</span>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.ThongTinDanhGiaHienTai != null)
+                {
+                    <div class="p-3 mt-3 border" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div>
+                                <span class="fw-bold text-dark">Đánh giá bạn đã gửi:</span>
+                                <span class="text-warning fw-bold ms-2">
+                                    @for (var s = 1; s <= 5; s++)
+                                    {
+                                        <span>@(Model.ThongTinDanhGiaHienTai.soSaoTongThe >= s ? "★" : "☆")</span>
+                                    }
+                                    <span class="text-dark small fw-normal">(@Model.ThongTinDanhGiaHienTai.soSaoTongThe/5)</span>
+                                </span>
+                            </div>
+                            <small class="text-muted">Ngày gửi: @Model.ThongTinDanhGiaHienTai.ngayDanhGia.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+
+                        <div class="row g-2 small text-secondary mb-2">
+                            @if (Model.ThongTinDanhGiaHienTai.soSaoChatLuong.HasValue)
+                            {
+                                <div class="col-sm-4">Chất lượng: <strong>@Model.ThongTinDanhGiaHienTai.soSaoChatLuong ★</strong></div>
+                            }
+                            @if (Model.ThongTinDanhGiaHienTai.soSaoDungHan.HasValue)
+                            {
+                                <div class="col-sm-4">Đúng hạn: <strong>@Model.ThongTinDanhGiaHienTai.soSaoDungHan ★</strong></div>
+                            }
+                            @if (Model.ThongTinDanhGiaHienTai.soSaoGiaoTiep.HasValue)
+                            {
+                                <div class="col-sm-4">Giao tiếp: <strong>@Model.ThongTinDanhGiaHienTai.soSaoGiaoTiep ★</strong></div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ThongTinDanhGiaHienTai.nhanXet))
+                        {
+                            <div class="mt-2 text-dark bg-white p-2 border-start border-3 border-success small" style="border-color: #2B7A4B !important;">
+                                <em>"@Model.ThongTinDanhGiaHienTai.nhanXet"</em>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-1 text-muted small fst-italic">Không có lời nhận xét kèm theo.</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    <div id="danhGiaModalContainer"></div>
+
+    <!-- ================= KHU VỰC TIẾN ĐỘ DỰ ÁN (PROJECT PROGRESS) ================= -->
+    @{
+        var tienDo = Model.TienDoDuAn;
+        var coTheCapNhat = Model.LaFreelancerCuaHopDong && Model.trangThai == "DangThucHien";
+        var danhSachMoc = Model.giaiDoans ?? new List<FreelancerStudent.Web.ViewModels.GiaiDoanHopDongViewModel>();
+        var tongSoMoc = tienDo?.tongSoMoc > 0 ? tienDo.tongSoMoc : danhSachMoc.Count;
+        var soMocDat = tienDo?.soMocDat ?? danhSachMoc.Count(g => g.trangThai == "Dat" || g.trangThai == "DaNghiemThu");
+        var soMocChuaDat = tienDo?.soMocChuaDat ?? danhSachMoc.Count(g => g.trangThai == "ChuaDat");
+        var soMocChoDanhGia = tienDo?.soMocChoDanhGia ?? danhSachMoc.Count(g => g.trangThai == "ChoDanhGia");
+        var tyLe = tienDo?.tyLeHoanThanh ?? (tongSoMoc > 0 ? Math.Round((decimal)soMocDat / tongSoMoc * 100, 1) : 0);
+        var tongTask = tienDo?.tongSoTask ?? 0;
+        var hoanThanhTask = tienDo?.soTaskHoanThanh ?? 0;
+        var dangThucHienTask = tienDo?.soTaskDangThucHien ?? 0;
+        var chuaThucHienTask = tienDo?.soTaskChuaThucHien ?? 0;
+    }
+
+    <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" id="sectionTienDoDuAn" style="border: 1px solid #E2E8F0 !important;">
+        <div class="card-header border-bottom py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h5 class="mb-0 fw-bold" style="color: #1B5E36;">
+                    Tiến độ dự án (Project Progress)
+                </h5>
+                @if (tongSoMoc > 0)
+                {
+                    <span class="badge @(tyLe == 100 ? "bg-success" : (tyLe >= 50 ? "bg-primary" : "bg-warning text-dark")) rounded-0 px-3 py-1">
+                        @tyLe% hoàn thành (@soMocDat/@tongSoMoc mốc đạt)
+                    </span>
+                }
+            </div>
+
+            @if (coTheCapNhat)
+            {
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-success rounded-0 px-3 fw-medium shadow-sm" style="color: #2B7A4B; border-color: #2B7A4B;" data-bs-toggle="modal" data-bs-target="#modalThemTask">
+                        <i class="bi bi-plus-circle me-1"></i> Thêm đầu việc chi tiết
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Thanh tiến trình tổng thể -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.3px; color: #64748B;">Tỷ lệ hoàn thành tổng thể (dựa trên mốc tiến độ đạt)</span>
+                    <span class="fw-bold fs-5" style="color: #1B5E36;">@tyLe%</span>
+                </div>
+                <div class="progress rounded-0" style="height: 12px; background-color: #E2E8F0;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar"
+                         style="width: @tyLe%; background-color: #2B7A4B !important;"
+                         aria-valuenow="@tyLe"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thống kê 4 mốc tiến độ -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border text-center h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Tổng mốc tiến độ</div>
+                        <div class="fs-4 fw-bold text-dark mt-1">@tongSoMoc</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border text-center h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Chưa đạt / Cần sửa</div>
+                        <div class="fs-4 fw-bold @(soMocChuaDat > 0 ? "text-danger" : "text-secondary") mt-1">@soMocChuaDat</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border text-center h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Chờ NTD đánh giá</div>
+                        <div class="fs-4 fw-bold @(soMocChoDanhGia > 0 ? "text-info" : "text-secondary") mt-1">@soMocChoDanhGia</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 border text-center h-100 d-flex flex-column justify-content-center" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.3px; color: #64748B;">Đã đạt tiêu chuẩn</div>
+                        <div class="fs-4 fw-bold mt-1" style="color: #1B5E36;">@soMocDat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông báo trạng thái nếu không ở DangThucHien -->
+            @if (Model.trangThai != "DangThucHien")
+            {
+                <div class="alert alert-secondary rounded-0 py-2 px-3 small mb-4">
+                    Hợp đồng hiện tại đang ở trạng thái <strong>@tenTrangThai</strong>.
+                    @if (Model.LaFreelancerCuaHopDong)
+                    {
+                        <span>Bạn chỉ có thể tạo và quản lý đầu việc khi hợp đồng đã được ký quỹ và chuyển sang trạng thái <strong>Đang thực hiện</strong>.</span>
+                    }
+                    else
+                    {
+                        <span>Tiến độ đang được hiển thị ở chế độ theo dõi dành cho Nhà tuyển dụng.</span>
+                    }
+                </div>
+            }
+
+            <!-- BẢNG MỐC TIẾN ĐỘ DỰ ÁN HỢP NHẤT -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0" style="color: #1B5E36;">
+                    Danh sách các mốc tiến độ &amp; Đánh giá bàn giao
+                </h6>
+                <span class="text-muted small">Dữ liệu đồng bộ trực tiếp với Lộ trình mốc bàn giao</span>
+            </div>
+
+            @if (danhSachMoc != null && danhSachMoc.Count > 0)
+            {
+                <div class="table-responsive mb-4">
+                    <table class="table table-hover align-middle mb-0 border" style="border-color: #E2E8F0 !important;">
+                        <thead style="background-color: #F8FAF9;">
+                            <tr style="border-bottom: 2px solid #E2E8F0;">
+                                <th style="width: 45px;" class="text-center text-muted">#</th>
+                                <th style="width: 25%; color: #1E293B;">Mốc &amp; Chi tiết</th>
+                                <th style="width: 20%; color: #1E293B;">Minh chứng sản phẩm</th>
+                                <th style="width: 14%; color: #1E293B;">Hạn chót</th>
+                                <th style="width: 18%; color: #1E293B;">Trạng thái</th>
+                                <th style="width: 19%; color: #1E293B;" class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < danhSachMoc.Count; i++)
+                            {
+                                var gd = danhSachMoc[i];
+                                var linkMoc = gd.linkSanPham;
+                                if (string.IsNullOrWhiteSpace(linkMoc) && !string.IsNullOrWhiteSpace(gd.moTa))
+                                {
+                                    var match = System.Text.RegularExpressions.Regex.Match(gd.moTa, @"https?://[^\s]+");
+                                    if (match.Success) { linkMoc = match.Value; }
+                                }
+                                if (string.IsNullOrWhiteSpace(linkMoc) && Model.TienDoDuAn?.danhSachGiaiDoan != null)
+                                {
+                                    var gdTienDo = Model.TienDoDuAn.danhSachGiaiDoan.FirstOrDefault(g => g.maGiaiDoan == gd.maGiaiDoan && !string.IsNullOrWhiteSpace(g.linkSanPham));
+                                    if (gdTienDo != null) { linkMoc = gdTienDo.linkSanPham; }
+                                }
+                                if (string.IsNullOrWhiteSpace(linkMoc) && Model.TienDoDuAn?.danhSachTask != null)
+                                {
+                                    var taskCoLink = Model.TienDoDuAn.danhSachTask.FirstOrDefault(t => t.maGiaiDoan == gd.maGiaiDoan && (!string.IsNullOrWhiteSpace(t.linkSanPham) || (!string.IsNullOrWhiteSpace(t.moTa) && (t.moTa.Contains("[LINK_SAN_PHAM]") || t.moTa.Contains("http")))));
+                                    if (taskCoLink != null)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(taskCoLink.linkSanPham))
+                                        {
+                                            linkMoc = taskCoLink.linkSanPham;
+                                        }
+                                        else
+                                        {
+                                            var mTask = System.Text.RegularExpressions.Regex.Match(taskCoLink.moTa, @"https?://[^\s]+");
+                                            if (mTask.Success) { linkMoc = mTask.Value; }
+                                        }
+                                    }
+                                }
+                                var moTaHienThi = System.Text.RegularExpressions.Regex.Replace(string.IsNullOrWhiteSpace(gd.moTa) ? "Theo yêu cầu chung" : gd.moTa, @"\[Giải ngân:[^\]]*\]\s*", "");
+
+                                <tr style="border-bottom: 1px solid #E2E8F0;">
+                                    <td class="text-center fw-bold text-muted">@(i + 1)</td>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6">@gd.tenGiaiDoan</div>
+                                        <div class="text-muted small mt-1" style="white-space: pre-line; line-height: 1.5;">@moTaHienThi</div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(linkMoc))
+                                        {
+                                            <div>
+                                                <a href="@linkMoc" target="_blank" rel="noopener noreferrer" class="btn btn-sm py-1 px-2 fw-semibold rounded-0" style="background-color: #EAF5EE; color: #1B5E36; border: 1px solid #D2E9DB;">
+                                                    Xem sản phẩm mốc
+                                                </a>
+                                                <div class="text-muted small mt-1 text-truncate" style="max-width: 180px;">@linkMoc</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small fst-italic">Chưa có link minh chứng</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="text-dark small fw-medium">@gd.hanChot.ToString("dd/MM/yyyy")</div>
+                                    </td>
+                                    <td>
+                                        @if (gd.trangThai == "Dat" || gd.trangThai == "DaNghiemThu")
+                                        {
+                                            <span class="badge bg-success rounded-0 px-2 py-1">Đạt</span>
+                                        }
+                                        else if (gd.trangThai == "ChoDanhGia")
+                                        {
+                                            <span class="badge bg-info text-dark rounded-0 px-2 py-1">Chờ NTD đánh giá</span>
+                                        }
+                                        else if (gd.trangThai == "ChuaDat")
+                                        {
+                                            <span class="badge bg-danger rounded-0 px-2 py-1">Chưa đạt</span>
+                                            @if (!string.IsNullOrWhiteSpace(gd.lyDoChuaDat))
+                                            {
+                                                <div class="p-2 mt-2 rounded-0 small text-danger" style="background-color: #FEF2F2; border: 1px solid #FECACA;">
+                                                    <strong>Lý do:</strong>
+                                                    <div>@gd.lyDoChuaDat</div>
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary rounded-0 px-2 py-1">Chưa bàn giao</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (Model.LaFreelancerCuaHopDong && Model.trangThai == "DangThucHien")
+                                        {
+                                            <button type="button" 
+                                                    class="btn btn-sm @(gd.trangThai == "ChuaDat" ? "btn-warning" : "btn-outline-success") rounded-0 fw-medium shadow-sm"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#modalCapNhatMocTienDo_@gd.maGiaiDoan">
+                                                @(gd.trangThai == "ChuaDat" ? "Bàn giao lại" : "Cập nhật / Nộp mốc")
+                                            </button>
+
+                                            <!-- Modal Cập nhật mốc trong Tiến độ dự án -->
+                                            <div class="modal fade text-start" id="modalCapNhatMocTienDo_@gd.maGiaiDoan" tabindex="-1" aria-labelledby="labelCapNhatMocTienDo_@gd.maGiaiDoan" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content rounded-0">
+                                                        <form asp-controller="HopDong" asp-action="CapNhatMocBanGiao" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                            <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                            <div class="modal-header bg-light">
+                                                                <h6 class="modal-title fw-bold text-dark" id="labelCapNhatMocTienDo_@gd.maGiaiDoan">
+                                                                    Cập nhật tiến độ / Bàn giao: @gd.tenGiaiDoan
+                                                                </h6>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                @if (!string.IsNullOrWhiteSpace(gd.lyDoChuaDat) && gd.trangThai == "ChuaDat")
+                                                                {
+                                                                    <div class="alert alert-danger border-danger small mb-3">
+                                                                        <strong>Lý do Nhà tuyển dụng đánh giá Chưa đạt:</strong>
+                                                                        <div class="mt-1">@gd.lyDoChuaDat</div>
+                                                                    </div>
+                                                                }
+                                                                <p class="text-muted small">
+                                                                    Vui lòng cung cấp đường dẫn sản phẩm hoặc tài liệu minh chứng cho mốc này để Nhà tuyển dụng kiểm tra và đánh giá lại.
+                                                                </p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold small">
+                                                                        Đường dẫn sản phẩm / Minh chứng mốc <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <input type="url" 
+                                                                           name="linkSanPham" 
+                                                                           class="form-control rounded-0" 
+                                                                           placeholder="https://drive.google.com/... hoặc link github, figma" 
+                                                                           value="@linkMoc" 
+                                                                           required />
+                                                                    <div class="form-text small">Nhập link Google Drive, GitHub hoặc tài liệu nghiệm thu mốc này.</div>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold small">
+                                                                        Mô tả nội dung hoàn thiện &amp; giải trình chỉnh sửa
+                                                                    </label>
+                                                                    <textarea name="moTa" 
+                                                                              class="form-control rounded-0" 
+                                                                              rows="3" 
+                                                                              placeholder="Mô tả tóm tắt nội dung bạn đã chỉnh sửa, khắc phục theo yêu cầu...">@moTaHienThi</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy</button>
+                                                                <button type="submit" class="btn btn-success rounded-0 fw-bold" style="background-color: #2B7A4B; border-color: #2B7A4B;">
+                                                                    Gửi cập nhật cho NTD
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DangThucHien")
+                                        {
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                    <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                    <input type="hidden" name="trangThai" value="Dat" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-0" disabled="@(gd.trangThai == "Dat" || gd.trangThai == "DaNghiemThu")">Đạt</button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-0" data-bs-toggle="modal" data-bs-target="#modalChuaDatTienDo_@gd.maGiaiDoan">
+                                                    Chưa đạt
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal Chưa Đạt trong Tiến độ dự án cho NTD -->
+                                            <div class="modal fade text-start" id="modalChuaDatTienDo_@gd.maGiaiDoan" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content rounded-0">
+                                                        <form asp-controller="HopDong" asp-action="DanhGiaGiaiDoan" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="maHD" value="@Model.maHD" />
+                                                            <input type="hidden" name="maGiaiDoan" value="@gd.maGiaiDoan" />
+                                                            <input type="hidden" name="trangThai" value="ChuaDat" />
+                                                            <div class="modal-header bg-light">
+                                                                <h6 class="modal-title fw-bold text-danger">
+                                                                    Đánh giá Chưa đạt mốc: @gd.tenGiaiDoan
+                                                                </h6>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p class="text-muted small">
+                                                                    Vui lòng cung cấp lý do cụ thể vì sao mốc tiến độ này chưa đạt yêu cầu để Freelancer có căn cứ điều chỉnh và nộp lại.
+                                                                </p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-semibold">Lý do chưa đạt <span class="text-danger">*</span></label>
+                                                                    <textarea name="lyDo" class="form-control rounded-0" rows="3" required placeholder="Nhập lý do chi tiết (bắt buộc)...">@gd.lyDoChuaDat</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy</button>
+                                                                <button type="submit" class="btn btn-danger rounded-0 fw-bold">Xác nhận Chưa đạt</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Chỉ xem</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 border mb-4" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                    <p class="text-muted mb-0">Hợp đồng này không chia giai đoạn bàn giao theo mốc.</p>
+                </div>
+            }
+
+            <!-- ================= CHECKLIST ĐẦU VIỆC CHI TIẾT ================= -->
+            <div class="pt-4 border-top" style="border-color: #E2E8F0 !important;">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color: #1B5E36;">
+                            Checklist đầu việc chi tiết (@hoanThanhTask/@tongTask hoàn thành)
+                        </h6>
+                        <span class="text-muted small">Các đầu việc phụ chia nhỏ bên trong mốc để theo dõi quá trình thực hiện</span>
+                    </div>
+                    @if (coTheCapNhat)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-0 px-3 fw-medium shadow-sm" style="color: #2B7A4B; border-color: #2B7A4B;" data-bs-toggle="modal" data-bs-target="#modalThemTask">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm đầu việc
+                        </button>
+                    }
+                </div>
+
+                @if (tienDo != null && tienDo.danhSachTask.Count > 0)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 border" style="border-color: #E2E8F0 !important;">
+                            <thead style="background-color: #F8FAF9;">
+                                <tr style="border-bottom: 2px solid #E2E8F0;">
+                                    <th style="width: 45px;" class="text-center text-muted">#</th>
+                                    <th>Đầu việc &amp; Chi tiết</th>
+                                    <th style="width: 170px;">Mốc giai đoạn</th>
+                                    <th style="width: 140px;">Hạn chót</th>
+                                    <th style="width: 160px;">Trạng thái</th>
+                                    <th class="text-end" style="width: 120px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < tienDo.danhSachTask.Count; i++)
+                                {
+                                    var task = tienDo.danhSachTask[i];
+                                    var taskStatusBadge = task.trangThai switch
+                                    {
+                                        "HoanThanh" => "bg-success text-white",
+                                        "DangThucHien" => "bg-primary text-white",
+                                        _ => "bg-secondary text-white"
+                                    };
+                                    var taskStatusText = task.trangThai switch
+                                    {
+                                        "HoanThanh" => "Hoàn thành",
+                                        "DangThucHien" => "Đang thực hiện",
+                                        _ => "Chưa thực hiện"
+                                    };
+
+                                    <tr style="border-bottom: 1px solid #E2E8F0;">
+                                        <td class="text-center fw-bold text-muted">@(i + 1)</td>
+                                        <td>
+                                            <div class="fw-bold text-dark fs-6">@task.tenTask</div>
+                                            @if (!string.IsNullOrWhiteSpace(task.moTa))
+                                            {
+                                                <div class="text-muted small mt-1" style="white-space: pre-line; line-height: 1.5;">@task.moTa</div>
+                                            }
+                                            <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                                Cập nhật: @task.ngayCapNhat.ToString("dd/MM/yyyy HH:mm")
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrWhiteSpace(task.tenGiaiDoan))
+                                            {
+                                                <span class="badge border rounded-0 px-2 py-1 small fw-normal" style="background-color: #F8FAF9; color: #1E293B; border-color: #E2E8F0 !important;">@task.tenGiaiDoan</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">Toàn bộ dự án</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (task.hanHoanThanh.HasValue)
+                                            {
+                                                var isOverdue = task.trangThai != "HoanThanh" && task.hanHoanThanh.Value.Date < DateTime.Now.Date;
+                                                <div class="@(isOverdue ? "text-danger fw-bold" : "text-dark") small">
+                                                    @task.hanHoanThanh.Value.ToString("dd/MM/yyyy")
+                                                </div>
+                                                @if (isOverdue)
+                                                {
+                                                    <span class="badge bg-danger mt-1" style="font-size: 0.7rem;">Quá hạn</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (coTheCapNhat)
+                                            {
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm dropdown-toggle rounded-0 @taskStatusBadge border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        @taskStatusText
+                                                    </button>
+                                                    <ul class="dropdown-menu shadow-sm rounded-0">
+                                                        <li><a class="dropdown-item py-2 small @(task.trangThai == "ChuaThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'ChuaThucHien')">Chưa thực hiện</a></li>
+                                                        <li><a class="dropdown-item py-2 small @(task.trangThai == "DangThucHien" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'DangThucHien')">Đang thực hiện</a></li>
+                                                        <li><a class="dropdown-item py-2 small @(task.trangThai == "HoanThanh" ? "active" : "")" href="javascript:void(0)" onclick="doiTrangThaiTask(@task.maTask, 'HoanThanh')">Hoàn thành</a></li>
+                                                    </ul>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge @taskStatusBadge rounded-0 px-2 py-1">@taskStatusText</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            @if (coTheCapNhat)
+                                            {
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-primary rounded-0 me-1" 
+                                                        title="Chỉnh sửa đầu việc"
+                                                        onclick="moModalSuaTask(@task.maTask, '@Html.Raw(JavaScriptEncoder.Default.Encode(task.tenTask))', '@Html.Raw(JavaScriptEncoder.Default.Encode(task.moTa ?? ""))', '@(task.hanHoanThanh?.ToString("yyyy-MM-dd") ?? "")', '@task.trangThai', '@(task.maGiaiDoan?.ToString() ?? "")')">
+                                                    Sửa
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-danger rounded-0" 
+                                                        title="Xóa đầu việc"
+                                                        onclick="xacNhanXoaTask(@task.maTask, '@Html.Raw(JavaScriptEncoder.Default.Encode(task.tenTask))')">
+                                                    Xóa
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">Chỉ xem</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-3 border" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+                        <span class="text-muted small">Chưa có checklist đầu việc chi tiết nào. Bạn có thể bấm "Thêm đầu việc chi tiết" để tạo thêm nhiệm vụ con nếu cần.</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ĐIỀU KHOẢN GIAO KẾT CỤ THỂ ================= -->
+    <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" style="border: 1px solid #E2E8F0 !important;">
+        <div class="card-header border-bottom py-3 px-4" style="background-color: #F8FAF9; border-color: #E2E8F0 !important;">
+            <h6 class="mb-0 fw-bold" style="color: #1B5E36;">
+                ĐIỀU KHOẢN GIAO KẾT CỤ THỂ
+            </h6>
+        </div>
+        <div class="card-body p-4">
+            @if (!string.IsNullOrWhiteSpace(Model.dieuKhoan))
+            {
+                <div class="p-4 border" style="background-color: #F8FAF9; border-color: #E2E8F0 !important; color: #1E293B; white-space: pre-line; line-height: 1.75; font-size: 0.95rem; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">
+                    @Model.dieuKhoan
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Áp dụng theo các điều khoản tiêu chuẩn của nền tảng kết nối Freelancer Sinh Viên.</p>
+            }
+        </div>
+    </div>
+
+    <!-- ================= BÀN GIAO VÀ NGHIỆM THU SẢN PHẨM ================= -->
+    @if ((Model.LaFreelancerCuaHopDong ||
+        Model.LaNhaTuyenDungCuaHopDong) &&
+        (Model.trangThai == "DangThucHien" ||
+        Model.trangThai == "DaHoanThanh" ||
+        Model.trangThai == "DaThanhToan"))
+    {
+        <div class="card border-0 shadow-sm rounded-0 mb-4 bg-white" id="sectionBanGiaoSanPham" style="border: 1px solid #E2E8F0 !important;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: #1B5E36;">
+                            Bàn giao và nghiệm thu sản phẩm
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Quản lý các phiên bản bàn giao, yêu cầu chỉnh sửa và nghiệm thu sản phẩm hoàn chỉnh.
+                        </p>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <a asp-controller="BanGiaoSanPham"
+                           asp-action="Index"
+                           asp-route-maHD="@Model.maHD"
+                           class="btn btn-outline-success rounded-0">
+                            Xem lịch sử bàn giao
+                        </a>
+
+                        @if (Model.LaFreelancerCuaHopDong && Model.trangThai == "DangThucHien")
+                        {
+                            @if (Model.TrangThaiBanGiaoMoiNhat == "YeuCauChinhSua" || Model.TrangThaiBanGiaoMoiNhat == "ChuaDat")
+                            {
+                                <a asp-controller="BanGiaoSanPham"
+                                   asp-action="Index"
+                                   asp-route-maHD="@Model.maHD"
+                                   asp-route-mode="capnhat"
+                                   class="btn btn-warning rounded-0 fw-bold text-dark shadow-sm">
+                                    <i class="bi bi-pencil-square me-1"></i> Cập nhật lại bàn giao
+                                </a>
+                            }
+                            else if (Model.TatCaMocDaDat)
+                            {
+                                <a asp-controller="BanGiaoSanPham"
+                                   asp-action="Index"
+                                   asp-route-maHD="@Model.maHD"
+                                   class="btn btn-success rounded-0 fw-bold shadow-sm" style="background-color: #2B7A4B; border-color: #2B7A4B;">
+                                    <i class="bi bi-cloud-arrow-up-fill me-1"></i> Bàn giao sản phẩm
+                                </a>
+                            }
+                        }
+
+                        @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+                        {
+                            <a asp-controller="HopDong"
+                               asp-action="ThanhToan"
+                               asp-route-maHD="@Model.maHD"
+                               class="btn btn-primary rounded-0 fw-bold shadow-sm">
+                                Thanh toán cho Freelancer
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.LaFreelancerCuaHopDong && Model.trangThai == "DangThucHien" && !Model.TatCaMocDaDat)
+                {
+                    <div class="alert alert-warning mt-3 mb-0 rounded-0 small border-warning">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                            <div>
+                                <strong>Chưa đủ điều kiện bàn giao sản phẩm:</strong>
+                                <span>Toàn bộ các mốc tiến độ của dự án phải được Nhà tuyển dụng đánh giá <strong>Đạt được</strong> trước khi bạn được phép bàn giao sản phẩm hoàn chỉnh (Hiện tại vẫn còn mốc Chưa đạt hoặc chưa được đánh giá).</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.trangThai == "DangThucHien" && (Model.TrangThaiBanGiaoMoiNhat == "YeuCauChinhSua" || Model.TrangThaiBanGiaoMoiNhat == "ChuaDat"))
+                {
+                    <div class="alert alert-danger mt-3 mb-0 rounded-0 small border-danger">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <strong><i class="bi bi-x-circle-fill me-1"></i> Sản phẩm bàn giao (@(Model.PhienBanBanGiaoMoiNhat ?? "Phiên bản mới nhất")) bị đánh giá Chưa đạt:</strong>
+                                <div class="mt-1 text-dark">@(string.IsNullOrWhiteSpace(Model.PhanHoiBanGiaoMoiNhat) ? "Nhà tuyển dụng yêu cầu chỉnh sửa và bổ sung sản phẩm." : Model.PhanHoiBanGiaoMoiNhat)</div>
+                            </div>
+                            @if (Model.LaFreelancerCuaHopDong)
+                            {
+                                <a asp-controller="BanGiaoSanPham"
+                                   asp-action="Index"
+                                   asp-route-maHD="@Model.maHD"
+                                   asp-route-mode="capnhat"
+                                   class="btn btn-warning btn-sm rounded-0 fw-bold px-3 shadow-sm text-dark">
+                                    <i class="bi bi-pencil-square me-1"></i> Cập nhật lại bàn giao
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.trangThai == "DaThanhToan")
+                {
+                    <div class="alert alert-success mt-3 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-3 rounded-0" style="background-color: #EAF5EE; border-color: #D2E9DB; color: #1E5C37;">
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <strong><i class="bi bi-check-circle-fill me-1"></i> Hợp đồng đã hoàn thành và thanh toán thành công!</strong>
+                                <div class="small">Thù lao hợp đồng đã được giải ngân an toàn vào ví của Freelancer.</div>
+                            </div>
+                        </div>
+                        <a asp-controller="Wallet" asp-action="Index" class="btn btn-outline-success rounded-0">
+                            Xem ví tài khoản
+                        </a>
+                    </div>
+                }
+
+                @if (Model.LaNhaTuyenDungCuaHopDong && Model.trangThai == "DaHoanThanh")
+                {
+                    <div class="alert alert-primary mt-3 mb-0 d-flex justify-content-between align-items-center flex-wrap gap-3 rounded-0">
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <strong>Hợp đồng đã nghiệm thu hoàn thành!</strong>
+                                <div class="small">Sản phẩm đã được nghiệm thu đạt yêu cầu. Vui lòng xác nhận giải ngân thù lao cho Freelancer để hoàn tất hợp đồng.</div>
+                            </div>
+                        </div>
+                        <a asp-controller="HopDong"
+                           asp-action="ThanhToan"
+                           asp-route-maHD="@Model.maHD"
+                           class="btn btn-primary rounded-0 fw-bold text-nowrap">
+                            Xác nhận thanh toán
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Nút quay lại & Hành động cuối trang -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a asp-controller="HopDong" asp-action="Index" class="btn btn-outline-secondary rounded-0">
+            Trở về danh sách hợp đồng
+        </a>
+
+        @if (Model.CoQuyenXacNhan)
+        {
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-danger rounded-0 px-3" data-bs-toggle="modal" data-bs-target="#modalTuChoi">
+                    Từ chối
+                </button>
+                <form asp-controller="HopDong" asp-action="XacNhan" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đồng ý dự thảo hợp đồng này?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maHD" value="@Model.maHD" />
+                    <input type="hidden" name="dongY" value="true" />
+                    <button type="submit" class="btn btn-success rounded-0 px-4 fw-bold" style="background-color: #1B5E36; border-color: #1B5E36;">
+                        Xác nhận hợp đồng
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+
+</div>
+
+<!-- Modal Thêm Đầu Việc -->
+<div class="modal fade" id="modalThemTask" tabindex="-1" aria-labelledby="modalThemTaskLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark" id="modalThemTaskLabel">
+                    <i class="bi bi-plus-square text-success me-1"></i> Thêm đầu việc chi tiết
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="alertThemTask" class="alert alert-danger d-none py-2 px-3 small mb-3 rounded-0"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Tiêu đề đầu việc <span class="text-danger">*</span></label>
+                    <input type="text" id="tenTaskThem" class="form-control rounded-0" placeholder="Ví dụ: Thiết kế wireframe cho màn hình đăng ký" maxlength="200" required />
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Thuộc mốc giai đoạn</label>
+                        <select id="maGiaiDoanThem" class="form-select rounded-0">
+                            <option value="">-- Toàn bộ dự án --</option>
+                            @if (Model.giaiDoans != null)
+                            {
+                                foreach (var gd in Model.giaiDoans)
+                                {
+                                    <option value="@gd.maGiaiDoan">@gd.tenGiaiDoan (@gd.hanChot.ToString("dd/MM/yyyy"))</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Hạn hoàn thành</label>
+                        <input type="date" id="hanHoanThanhThem" class="form-control rounded-0" max="@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")" />
+                        <div class="form-text small text-muted">
+                            @if (Model.ngayKetThuc.HasValue)
+                            {
+                                <span>Không được vượt quá hạn chót hợp đồng: <strong>@Model.ngayKetThuc.Value.ToString("dd/MM/yyyy")</strong></span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Mô tả công việc &amp; Ghi chú link tài liệu <span class="text-danger">*</span></label>
+                    <textarea id="moTaThem" class="form-control rounded-0" rows="4" placeholder="Mô tả các yêu cầu cụ thể, đường dẫn Google Drive, Figma, GitHub repository..."></textarea>
+                    <div class="form-text small text-muted">Tối đa 1000 ký tự. Có thể đính kèm URL tài liệu hoặc ghi chú cho công việc này.</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-success rounded-0 fw-bold px-4" id="btnLuuThemTask" style="background-color: #2B7A4B; border-color: #2B7A4B;" onclick="luuThemTask()">
+                    Lưu đầu việc
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉnh Sửa Đầu Việc -->
+<div class="modal fade" id="modalSuaTask" tabindex="-1" aria-labelledby="modalSuaTaskLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark" id="modalSuaTaskLabel">
+                    <i class="bi bi-pencil-square text-primary me-1"></i> Chỉnh sửa đầu việc
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="alertSuaTask" class="alert alert-danger d-none py-2 px-3 small mb-3 rounded-0"></div>
+                <input type="hidden" id="maTaskSua" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Tiêu đề đầu việc <span class="text-danger">*</span></label>
+                    <input type="text" id="tenTaskSua" class="form-control rounded-0" maxlength="200" required />
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Thuộc mốc giai đoạn</label>
+                        <select id="maGiaiDoanSua" class="form-select rounded-0">
+                            <option value="">-- Toàn bộ dự án --</option>
+                            @if (Model.giaiDoans != null)
+                            {
+                                foreach (var gd in Model.giaiDoans)
+                                {
+                                    <option value="@gd.maGiaiDoan">@gd.tenGiaiDoan</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Hạn hoàn thành</label>
+                        <input type="date" id="hanHoanThanhSua" class="form-control rounded-0" max="@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")" />
+                        <div class="form-text small text-muted">
+                            @if (Model.ngayKetThuc.HasValue)
+                            {
+                                <span>Tối đa: <strong>@Model.ngayKetThuc.Value.ToString("dd/MM/yyyy")</strong></span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Trạng thái</label>
+                        <select id="trangThaiSua" class="form-select rounded-0">
+                            <option value="ChuaThucHien">Chưa thực hiện</option>
+                            <option value="DangThucHien">Đang thực hiện</option>
+                            <option value="HoanThanh">Hoàn thành</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Mô tả công việc &amp; Ghi chú <span class="text-danger">*</span></label>
+                    <textarea id="moTaSua" class="form-control rounded-0" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary rounded-0" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary rounded-0 fw-bold px-4" id="btnLuuSuaTask" style="background-color: #2B7A4B; border-color: #2B7A4B;" onclick="luuSuaTask()">
+                    Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const contractEndDateStr = '@(Model.ngayKetThuc?.ToString("yyyy-MM-dd") ?? "")';
+        const maHDHienTai = '@Model.maHD';
+
+        async function moFormDanhGia(maHD, maDanhGia) {
+            const container = document.getElementById('danhGiaModalContainer');
+            if (!container) return;
+            try {
+                const url = `/DanhGia/Form?maHD=${encodeURIComponent(maHD)}`;
+                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!response.ok) {
+                    let errMsg = 'Không thể tải biểu mẫu đánh giá.';
+                    try {
+                        const errJson = await response.json();
+                        if (errJson && errJson.message) errMsg = errJson.message;
+                    } catch (_) {}
+                    throw new Error(errMsg);
+                }
+                container.innerHTML = await response.text();
+                const modalElement = container.querySelector('.modal');
+                if (!modalElement) throw new Error('Biểu mẫu đánh giá không hợp lệ.');
+                if (maDanhGia) modalElement.dataset.maDanhGia = maDanhGia;
+
+                const form = modalElement.querySelector('form');
+                if (form) {
+                    capNhatDanhGiaTongThe(form);
+                }
+
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+            } catch (error) {
+                alert(error.message || 'Không thể tải biểu mẫu đánh giá.');
+            }
+        }
+
+        async function guiDanhGia(form, event) {
+            event.preventDefault();
+            const modalElement = form.closest('.modal');
+            
+            capNhatDanhGiaTongThe(form);
+
+            const fields = [
+                'soSaoChatLuong',
+                'soSaoDungHan',
+                'soSaoGiaoTiep'
+            ];
+
+            const valid = fields.every(name => {
+                const value = Number(form.querySelector(`[name="${name}"]`)?.value);
+                return value >= 1 && value <= 5;
+            });
+
+            if (!valid) {
+                const message = form.querySelector('[data-review-message]');
+                if (message) {
+                    message.textContent = 'Vui lòng đánh giá đầy đủ 3 tiêu chí.';
+                    message.classList.remove('d-none');
+                }
+                return;
+            }
+
+            const tongSao = Number(
+                form.querySelector('[name="soSaoTongThe"]').value
+            );
+
+            const payload = {
+                maHD: form.querySelector('[name="maHD"]').value,
+                soSaoTongThe: tongSao,
+                soSaoChatLuong: Number(form.querySelector('[name="soSaoChatLuong"]').value) || null,
+                soSaoDungHan: Number(form.querySelector('[name="soSaoDungHan"]').value) || null,
+                soSaoGiaoTiep: Number(form.querySelector('[name="soSaoGiaoTiep"]').value) || null,
+                nhanXet: form.querySelector('[name="nhanXet"]').value
+            };
+            const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const maDanhGia = modalElement.dataset.maDanhGia;
+            const url = maDanhGia ? `/DanhGia/CapNhat?maDanhGia=${encodeURIComponent(maDanhGia)}` : '/DanhGia/Gui';
+            const message = form.querySelector('[data-review-message]');
+            const button = form.querySelector('[type="submit"]');
+            button.disabled = true;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'Không thể lưu đánh giá.');
+                location.reload();
+            } catch (error) {
+                if (message) { message.textContent = error.message; message.classList.remove('d-none'); }
+                button.disabled = false;
+            }
+        }
+
+
+        function capNhatDanhGiaTongThe(form) {
+            const fields = [
+                'soSaoChatLuong',
+                'soSaoDungHan',
+                'soSaoGiaoTiep'
+            ];
+
+            const values = fields.map(name =>
+                Number(form.querySelector(`[name="${name}"]`)?.value || 0)
+            );
+
+            const valid = values.every(value => value >= 1 && value <= 5);
+
+            const tongSao = valid
+                ? Math.round(values.reduce((sum, value) => sum + value, 0) / 3)
+                : 0;
+
+            const input = form.querySelector('[name="soSaoTongThe"]');
+            if (!input) return;
+
+            input.value = tongSao || '';
+
+            form.querySelectorAll(
+                '[data-rating-group="soSaoTongThe"][data-rating-value]'
+            ).forEach(button => {
+                const star = Number(button.dataset.ratingValue);
+
+                button.classList.toggle('text-warning', star <= tongSao);
+                button.classList.toggle('text-secondary', star > tongSao);
+
+                const span = button.querySelector('.star-char');
+                if (span) span.textContent = star <= tongSao ? '★' : '☆';
+            });
+
+            const label = form.querySelector(
+                '[data-rating-label="soSaoTongThe"]'
+            );
+
+            if (label) {
+                label.textContent = valid
+                    ? `${tongSao} trên 5 (tự động)`
+                    : 'Vui lòng chọn đủ 3 tiêu chí';
+            }
+        }
+
+        document.addEventListener('click', event => {
+            
+            const starButton = event.target.closest('[data-rating-group][data-rating-value]');
+            if (starButton) {
+                const form = starButton.closest('form');
+                const groupName = starButton.dataset.ratingGroup;
+                const selectedValue = Number(starButton.dataset.ratingValue);
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+
+                valueInput.value = selectedValue;
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    const value = Number(button.dataset.ratingValue);
+                    const selected = value === selectedValue;
+                    button.setAttribute('aria-checked', selected ? 'true' : 'false');
+                    button.classList.toggle('text-warning', value <= selectedValue);
+                    button.classList.toggle('text-secondary', value > selectedValue);
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-star-fill', value <= selectedValue);
+                        icon.classList.toggle('bi-star', value > selectedValue);
+                    }
+                    const starSpan = button.querySelector('.star-char');
+                    if (starSpan) {
+                        starSpan.textContent = value <= selectedValue ? '★' : '☆';
+                    }
+                });
+
+                const label = form.querySelector(`[data-rating-label="${groupName}"]`);
+                if (label) label.textContent = `${selectedValue} trên 5`;
+                capNhatDanhGiaTongThe(form);
+                return;
+            }
+
+            const clearButton = event.target.closest('[data-rating-clear]');
+            if (clearButton) {
+                const form = clearButton.closest('form');
+                const groupName = clearButton.dataset.ratingClear;
+                const valueInput = form?.querySelector(`[name="${groupName}"]`);
+                if (!valueInput) return;
+                valueInput.value = '';
+                form.querySelectorAll(`[data-rating-group="${groupName}"][data-rating-value]`).forEach(button => {
+                    button.setAttribute('aria-checked', 'false');
+                    button.classList.remove('text-warning');
+                    button.classList.add('text-secondary');
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-star-fill');
+                        icon.classList.add('bi-star');
+                    }
+                    const starSpan = button.querySelector('.star-char');
+                    if (starSpan) {
+                        starSpan.textContent = '☆';
+                    }
+                });
+                capNhatDanhGiaTongThe(form);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const reviewContract = '@(TempData["MoPopupDanhGia"] as string ?? "")';
+            if (reviewContract) moFormDanhGia(reviewContract);
+        });
+
+        function showAlert(alertId, message) {
+            const alertEl = document.getElementById(alertId);
+            if (alertEl) {
+                alertEl.textContent = message;
+                alertEl.classList.remove('d-none');
+            }
+        }
+
+        function hideAlert(alertId) {
+            const alertEl = document.getElementById(alertId);
+            if (alertEl) {
+                alertEl.classList.add('d-none');
+                alertEl.textContent = '';
+            }
+        }
+
+        async function luuThemTask() {
+            hideAlert('alertThemTask');
+            const tenTask = document.getElementById('tenTaskThem').value.trim();
+            const moTa = document.getElementById('moTaThem').value.trim();
+            const hanHoanThanh = document.getElementById('hanHoanThanhThem').value;
+            const maGiaiDoanVal = document.getElementById('maGiaiDoanThem').value;
+
+            if (!tenTask) {
+                showAlert('alertThemTask', 'Tiêu đề đầu việc không được để trống.');
+                return;
+            }
+
+            if (!moTa) {
+                showAlert('alertThemTask', 'Mô tả công việc không được để trống.');
+                return;
+            }
+
+            if (hanHoanThanh && contractEndDateStr) {
+                if (hanHoanThanh > contractEndDateStr) {
+                    showAlert('alertThemTask', 'Deadline của công việc phải trước hoặc trùng với hạn chót bàn giao của hợp đồng.');
+                    return;
+                }
+            }
+
+            const payload = {
+                maHD: maHDHienTai,
+                tenTask: tenTask,
+                moTa: moTa,
+                hanHoanThanh: hanHoanThanh ? hanHoanThanh : null,
+                maGiaiDoan: maGiaiDoanVal ? parseInt(maGiaiDoanVal) : null
+            };
+
+            const btn = document.getElementById('btnLuuThemTask');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+
+            try {
+                const res = await fetch('/HopDong/ThemTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    showAlert('alertThemTask', data.message || 'Có lỗi xảy ra khi thêm đầu việc.');
+                }
+            } catch (err) {
+                showAlert('alertThemTask', 'Lỗi kết nối máy chủ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Lưu đầu việc';
+            }
+        }
+
+        function moModalSuaTask(maTask, tenTask, moTa, hanHoanThanh, trangThai, maGiaiDoan) {
+            hideAlert('alertSuaTask');
+            document.getElementById('maTaskSua').value = maTask;
+            document.getElementById('tenTaskSua').value = tenTask;
+            document.getElementById('moTaSua').value = moTa;
+            document.getElementById('hanHoanThanhSua').value = hanHoanThanh;
+            document.getElementById('trangThaiSua').value = trangThai;
+            document.getElementById('maGiaiDoanSua').value = maGiaiDoan || '';
+
+            const modalEl = document.getElementById('modalSuaTask');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        async function luuSuaTask() {
+            hideAlert('alertSuaTask');
+            const maTask = parseInt(document.getElementById('maTaskSua').value);
+            const tenTask = document.getElementById('tenTaskSua').value.trim();
+            const moTa = document.getElementById('moTaSua').value.trim();
+            const hanHoanThanh = document.getElementById('hanHoanThanhSua').value;
+            const trangThai = document.getElementById('trangThaiSua').value;
+            const maGiaiDoanVal = document.getElementById('maGiaiDoanSua').value;
+
+            if (!tenTask) {
+                showAlert('alertSuaTask', 'Tiêu đề đầu việc không được để trống.');
+                return;
+            }
+
+            if (!moTa) {
+                showAlert('alertSuaTask', 'Mô tả công việc không được để trống.');
+                return;
+            }
+
+            if (hanHoanThanh && contractEndDateStr) {
+                if (hanHoanThanh > contractEndDateStr) {
+                    showAlert('alertSuaTask', 'Deadline của công việc phải trước hoặc trùng với hạn chót bàn giao của hợp đồng.');
+                    return;
+                }
+            }
+
+            const payload = {
+                maTask: maTask,
+                maHD: maHDHienTai,
+                tenTask: tenTask,
+                moTa: moTa,
+                hanHoanThanh: hanHoanThanh ? hanHoanThanh : null,
+                trangThai: trangThai,
+                maGiaiDoan: maGiaiDoanVal ? parseInt(maGiaiDoanVal) : null
+            };
+
+            const btn = document.getElementById('btnLuuSuaTask');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang cập nhật...';
+
+            try {
+                const res = await fetch('/HopDong/CapNhatTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    showAlert('alertSuaTask', data.message || 'Có lỗi xảy ra khi cập nhật.');
+                }
+            } catch (err) {
+                showAlert('alertSuaTask', 'Lỗi kết nối máy chủ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Cập nhật';
+            }
+        }
+
+        async function doiTrangThaiTask(maTask, trangThai) {
+            try {
+                const payload = {
+                    maTask: maTask,
+                    trangThai: trangThai
+                };
+
+                const res = await fetch('/HopDong/CapNhatTrangThaiTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Không thể cập nhật trạng thái.');
+                }
+            } catch (err) {
+                alert('Lỗi kết nối máy chủ: ' + err.message);
+            }
+        }
+
+        async function xacNhanXoaTask(maTask, tenTask) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa đầu việc "${tenTask}" không?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/HopDong/XoaTask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(maTask)
+                });
+
+                const data = await res.json();
+                if (data && data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Không thể xóa đầu việc.');
+                }
+            } catch (err) {
+                alert('Lỗi kết nối máy chủ: ' + err.message);
+            }
+        }
+    </script>
+}
