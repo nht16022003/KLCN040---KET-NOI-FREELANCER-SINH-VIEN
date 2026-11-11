@@ -27,7 +27,7 @@ namespace FreelancerStudent.API.Services
             _noiDungValidator = noiDungValidator;
             _options = options.Value;
         }
-
+        
         public async Task<DanhGia_FormInfo_ReponseDTO> LayThongTinFormAsync(string maHD, int maUser)
         {
             if (string.IsNullOrWhiteSpace(maHD) || maUser <= 0)
@@ -89,7 +89,7 @@ namespace FreelancerStudent.API.Services
                 maHD = request.maHD,
                 maNguoiDanhGia = maUser,
                 maNguoiDuocDanhGia = maNguoiDuocDanhGia,
-                soSao = request.soSaoTongThe,
+                soSao = TinhSaoTongThe(request),
                 soSaoChatLuong = request.soSaoChatLuong,
                 soSaoDungHan = request.soSaoDungHan,
                 soSaoGiaoTiep = request.soSaoGiaoTiep,
@@ -150,7 +150,7 @@ namespace FreelancerStudent.API.Services
                     nhanXet = review.nhanXet,
                     ngayLuu = DateTime.Now
                 });
-                review.soSao = request.soSaoTongThe;
+                review.soSao = TinhSaoTongThe(request);
                 review.soSaoChatLuong = request.soSaoChatLuong;
                 review.soSaoDungHan = request.soSaoDungHan;
                 review.soSaoGiaoTiep = request.soSaoGiaoTiep;
@@ -269,17 +269,26 @@ namespace FreelancerStudent.API.Services
             return response;
         }
 
+        
         private void ValidateRating(DanhGia_RequestDTO request)
         {
-            if (request.soSaoTongThe < 1 || request.soSaoTongThe > 5)
-                throw new InvalidOperationException("Vui lòng chọn số sao đánh giá tổng thể");
-            if (!ValidStar(request.soSaoChatLuong) || !ValidStar(request.soSaoDungHan) || !ValidStar(request.soSaoGiaoTiep))
-                throw new InvalidOperationException("Số sao tiêu chí phải nằm trong khoảng từ 1 đến 5.");
+            // Bắt buộc đủ 3 tiêu chí và kiểm tra số sao từ 1 đến 5.
+            // Điểm tổng thể sẽ được tính tự động.
+            TinhSaoTongThe(request);
+
             if (request.nhanXet?.Length > 1000)
-                throw new InvalidOperationException("Nhận xét không được vượt quá 1000 ký tự.");
+            {
+                throw new InvalidOperationException(
+                    "Nhận xét không được vượt quá 1000 ký tự.");
+            }
+
             if (!_noiDungValidator.HopLe(request.nhanXet))
-                throw new InvalidOperationException("Nội dung nhận xét chứa từ ngữ không phù hợp, vui lòng điều chỉnh lại");
+            {
+                throw new InvalidOperationException(
+                    "Nội dung nhận xét chứa từ ngữ không phù hợp, vui lòng điều chỉnh lại.");
+            }
         }
+
 
         private static bool ValidStar(byte? star) => !star.HasValue || star.Value is >= 1 and <= 5;
 
@@ -337,5 +346,34 @@ namespace FreelancerStudent.API.Services
             var employer = hopDong.JobPost?.NhaTuyenDung;
             return employer?.maUser == maUser ? $"/NhaTuyenDung/ChiTiet/{employer.maNhaTuyenDung}" : "/";
         }
+        
+        private static int TinhSaoTongThe(DanhGia_RequestDTO request)
+        {
+            if (!request.soSaoChatLuong.HasValue ||
+                !request.soSaoDungHan.HasValue ||
+                !request.soSaoGiaoTiep.HasValue)
+            {
+                throw new InvalidOperationException(
+                    "Vui lòng đánh giá đầy đủ 3 tiêu chí.");
+            }
+
+            int chatLuong = request.soSaoChatLuong.Value;
+            int dungHan = request.soSaoDungHan.Value;
+            int giaoTiep = request.soSaoGiaoTiep.Value;
+
+            if (chatLuong < 1 || chatLuong > 5 ||
+                dungHan < 1 || dungHan > 5 ||
+                giaoTiep < 1 || giaoTiep > 5)
+            {
+                throw new InvalidOperationException(
+                    "Số sao phải nằm trong khoảng từ 1 đến 5.");
+            }
+
+            return (int)Math.Round(
+                (chatLuong + dungHan + giaoTiep) / 3.0,
+                MidpointRounding.AwayFromZero
+            );
+        }
+
     }
 }

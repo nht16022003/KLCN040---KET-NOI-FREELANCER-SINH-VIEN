@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/mau_sac_ung_dung.dart';
+import '../../core/utils/dinh_dang_du_lieu.dart';
 import '../../services/dich_vu_cong_viec.dart';
+import '../../services/dich_vu_vi_tien.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_cong_viec.dart';
+import '../wallet/man_hinh_nap_tien.dart';
 
 class CreateJobPostScreen extends StatefulWidget {
   const CreateJobPostScreen({super.key});
@@ -23,6 +26,7 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
   final _customSkillController = TextEditingController();
 
   final JobService _jobService = JobService();
+  final WalletService _walletService = WalletService();
   Timer? _debounceTimer;
   bool _isLoadingSuggestions = false;
   int _searchRequestId = 0;
@@ -30,6 +34,13 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
   DateTime? _deadline;
   final List<String> _selectedSkills = [];
   bool _isSubmitting = false;
+
+  // Quản lý phí đăng bài và số dư ví (Đồng bộ chuẩn hệ thống và Website)
+  double? _phiDangBai;
+  bool _isLoadingFee = true;
+  String? _feeError;
+  double _soDuKhaDung = 0;
+  bool _isLoadingWallet = true;
 
   final List<String> _suggestedSkills = [
     'Photoshop',
@@ -48,6 +59,48 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
   void initState() {
     super.initState();
     _titleController.addListener(_onTitleChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _taiThongTinPhiVaVi();
+    });
+  }
+
+  Future<void> _taiThongTinPhiVaVi() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingFee = true;
+      _isLoadingWallet = true;
+      _feeError = null;
+    });
+
+    final user = context.read<AuthViewModel>().currentUser;
+
+    // 1. Tải mức phí đăng bài hiện hành từ hệ thống (GET api/JobPost/PhiDangBaiHienTai)
+    final feeRes = await _jobService.layPhiDangBaiHienTai();
+
+    // 2. Tải số dư ví khả dụng của Nhà tuyển dụng
+    double soDu = 0;
+    if (user != null && user.userId > 0) {
+      final viRes = await _walletService.layViTheoUser(user.userId);
+      if (viRes.isSuccess && viRes.data != null) {
+        soDu = viRes.data!.soDuKhaDung;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isLoadingFee = false;
+      _isLoadingWallet = false;
+      if (feeRes.isSuccess && feeRes.data != null) {
+        _phiDangBai = feeRes.data;
+        _feeError = null;
+      } else {
+        _phiDangBai = null;
+        _feeError = feeRes.message.isNotEmpty
+            ? feeRes.message
+            : 'Không thể kết nối máy chủ để lấy thông tin phí đăng bài.';
+      }
+      _soDuKhaDung = soDu;
+    });
   }
 
   void _onTitleChanged() {
@@ -157,6 +210,55 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
       return;
     }
 
+    // Kiểm tra trạng thái tải phí đăng bài
+    if (_isLoadingFee || _isLoadingWallet) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hệ thống đang tải mức phí đăng bài, vui lòng đợi trong giây lát.')),
+      );
+      return;
+    }
+
+    if (_phiDangBai == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_feeError ?? 'Không thể xác định mức phí đăng bài. Vui lòng bấm Thử lại.'),
+          backgroundColor: AppColors.error,
+          action: SnackBarAction(
+            label: 'Thử lại',
+            textColor: Colors.white,
+            onPressed: _taiThongTinPhiVaVi,
+          ),
+        ),
+      );
+      return;
+    }
+
+    // Nghiệp vụ đối chiếu chuẩn Website: Nếu có phí và số dư không đủ -> Báo lỗi & hỗ trợ nạp tiền
+    final double phiDangBaiApDung = _phiDangBai!;
+    if (phiDangBaiApDung > 0 && _soDuKhaDung < phiDangBaiApDung) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Số dư khả dụng trong ví (${AppFormatters.formatCurrency(_soDuKhaDung)}) không đủ để thanh toán phí đăng bài (${AppFormatters.formatCurrency(phiDangBaiApDung)}). Vui lòng nạp thêm tiền vào ví trước khi đăng bài.',
+          ),
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Nạp ví ngay',
+            textColor: Colors.white,
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DepositScreen()),
+              );
+              if (mounted) _taiThongTinPhiVaVi();
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     final payload = {
@@ -166,7 +268,7 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
       'mota': _descriptionController.text.trim(),
       'kynangyeucau': _selectedSkills.join(', '),
       'thulao': salary,
-      'phiDangBai': 0,
+      'phiDangBai': phiDangBaiApDung,
       'thoigiandangtuyen': DateTime.now().toIso8601String(),
       'thoigiandukienhoanthanh': _deadline!.toIso8601String(),
       'soluongtuyen': int.tryParse(_slotsController.text.trim()) ?? 1,
@@ -283,12 +385,16 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        const Text(
-                          'Nội dung công việc',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.heading,
+                        const Expanded(
+                          child: Text(
+                            'Nội dung công việc',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.heading,
+                            ),
                           ),
                         ),
                       ],
@@ -539,12 +645,16 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        const Text(
-                          'Ngân sách thù lao & Kế hoạch hoàn thành',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.heading,
+                        const Expanded(
+                          child: Text(
+                            'Ngân sách thù lao & Kế hoạch hoàn thành',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.heading,
+                            ),
                           ),
                         ),
                       ],
@@ -671,53 +781,8 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Chính sách phí đăng bài (Fee Box như Web)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGreenSurface,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(Icons.check, color: Colors.white, size: 18),
-                          ),
-                          const SizedBox(width: 10),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '0 đồng phí đăng tin tuyển dụng',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: AppColors.heading,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Chính sách hỗ trợ doanh nghiệp và sinh viên hiện tại của hệ thống.',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.bodyText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Chính sách phí đăng bài (Fee Box đồng bộ với Web)
+                    _buildFeeBox(),
                   ],
                 ),
               ),
@@ -730,25 +795,31 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Hủy bỏ'),
+                      child: const Text(
+                        'Hủy bỏ',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   Expanded(
                     flex: 2,
                     child: FilledButton(
                       onPressed: _isSubmitting ? null : _submitJob,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         _isSubmitting ? 'Đang đăng tin...' : 'Đăng tin tuyển dụng ngay',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ),
                   ),
@@ -758,6 +829,235 @@ class _CreateJobPostScreenState extends State<CreateJobPostScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Khung hiển thị thông tin phí đăng bài và trạng thái số dư ví đối chiếu chuẩn Website
+  Widget _buildFeeBox() {
+    // 1. Trạng thái đang tải dữ liệu phí hoặc ví
+    if (_isLoadingFee || _isLoadingWallet) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: const Row(
+          children: [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Đang kiểm tra mức phí đăng bài và số dư ví...',
+                style: TextStyle(fontSize: 13, color: AppColors.bodyText),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 2. Trạng thái lỗi không tải được mức phí đăng bài
+    if (_feeError != null && _phiDangBai == null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF5F5),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.error_outline, color: AppColors.error, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Không thể tải phí đăng bài từ hệ thống',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: AppColors.error,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _feeError!,
+                    style: const TextStyle(fontSize: 12, color: AppColors.bodyText),
+                  ),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: _taiThongTinPhiVaVi,
+                    child: const Text(
+                      'Bấm để thử lại ↻',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 3. Hiển thị thông tin phí thực tế & Số dư ví (Đồng bộ chuẩn nghiệp vụ Website)
+    final double fee = _phiDangBai ?? 0;
+    final bool khongDuTien = fee > 0 && _soDuKhaDung < fee;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: khongDuTien ? const Color(0xFFFFF5F5) : AppColors.lightGreenSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: khongDuTien ? AppColors.error : AppColors.primary.withValues(alpha: 0.25),
+          width: khongDuTien ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: khongDuTien ? AppColors.error : AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  khongDuTien ? Icons.priority_high : Icons.check,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            fee == 0
+                                ? 'Miễn phí đăng tin (0 đ)'
+                                : '${AppFormatters.formatCurrency(fee)} phí đăng bài',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: khongDuTien ? AppColors.error : AppColors.heading,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: khongDuTien ? AppColors.error : AppColors.primary,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Ví: ${AppFormatters.formatCurrency(_soDuKhaDung)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Phí đăng tin được trừ trực tiếp từ số dư khả dụng khi xuất bản bài đăng thành công (không ký quỹ).',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.bodyText,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (khongDuTien) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '⚠️ Thiếu: ${AppFormatters.formatCurrency(fee - _soDuKhaDung)}',
+                      style: const TextStyle(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const DepositScreen()),
+                      );
+                      if (mounted) _taiThongTinPhiVaVi();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'Nạp ví ngay →',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

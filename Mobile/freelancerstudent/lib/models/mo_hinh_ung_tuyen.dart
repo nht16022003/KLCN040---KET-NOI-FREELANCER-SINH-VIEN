@@ -7,6 +7,7 @@ class ApplicationModel {
   final String trangThaiUngTuyen;
 
   // Thuộc tính bổ sung từ UngTuyen_ReponseDTO
+  final int? maUser;
   final String tieude;
   final String? tenUser;
   final String? emailUser;
@@ -25,6 +26,7 @@ class ApplicationModel {
     String thuGioiThieu = '',
     double thulaoDeXuat = 0,
     String trangThaiUngTuyen = 'ChoDuyet',
+    this.maUser,
     this.tieude = '',
     this.tenUser,
     this.emailUser,
@@ -55,6 +57,7 @@ class ApplicationModel {
   String get maSinhVien => maFreelancerStudents;
   String get tieuDeCongViec => tieude;
   String get tenUngVien => tenUser ?? '';
+  String? get avatarUrl => avatar;
   String get trangThai => trangThaiUngTuyen;
   double get thuLaoDeXuat => thulaoDeXuat;
   bool get daCoHopDong =>
@@ -71,6 +74,7 @@ class ApplicationModel {
   String get status => trangThaiUngTuyen;
 
   ApplicationModel copyWith({
+    int? maUser,
     String? status,
     String? trangThaiHopDong,
     String? maHopDong,
@@ -81,6 +85,7 @@ class ApplicationModel {
     thuGioiThieu: thuGioiThieu,
     thulaoDeXuat: thulaoDeXuat,
     trangThaiUngTuyen: status ?? trangThaiUngTuyen,
+    maUser: maUser ?? this.maUser,
     tieude: tieude,
     tenUser: tenUser,
     emailUser: emailUser,
@@ -100,6 +105,9 @@ class ApplicationModel {
     final rawCover = json['thuGioiThieu'] ?? json['coverLetter'] ?? '';
     final rawBudget = json['thulaoDeXuat'] ?? json['thulao'] ?? json['proposedBudget'] ?? 0;
     final rawStatus = json['trangThaiUngTuyen'] ?? json['status'] ?? 'ChoDuyet';
+    final parsedMaUser = json['maUser'] is int
+        ? json['maUser'] as int
+        : int.tryParse(json['maUser']?.toString() ?? '');
 
     return ApplicationModel(
       maUngTuyen: rawId.toString(),
@@ -110,6 +118,7 @@ class ApplicationModel {
           ? rawBudget.toDouble()
           : double.tryParse(rawBudget.toString()) ?? 0,
       trangThaiUngTuyen: rawStatus.toString(),
+      maUser: parsedMaUser,
       tieude: (json['tieude'] ?? json['title'] ?? '').toString(),
       tenUser: json['tenUser']?.toString() ?? json['hovaten']?.toString(),
       emailUser: json['emailUser']?.toString() ?? json['email']?.toString(),
@@ -130,6 +139,7 @@ class ApplicationModel {
     'thuGioiThieu': thuGioiThieu,
     'thulaoDeXuat': thulaoDeXuat,
     'trangThaiUngTuyen': trangThaiUngTuyen,
+    'maUser': maUser,
     'tieude': tieude,
     'tenUser': tenUser,
     'emailUser': emailUser,

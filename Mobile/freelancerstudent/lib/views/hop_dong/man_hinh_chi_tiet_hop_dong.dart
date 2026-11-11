@@ -1215,7 +1215,7 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 OutlinedButton.icon(
-                                  onPressed: _dangXuLy || !daDat
+                                  onPressed: _dangXuLy
                                       ? null
                                       : () => _danhGiaGiaiDoan(hd, g, 'ChuaDat'),
                                   icon: const Icon(Icons.close, size: 15),
@@ -1577,6 +1577,7 @@ class _HopDongDetailScreenState extends State<HopDongDetailScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => ChatDetailScreen(
+                        maFreelancerStudent: hd.maFreelancerStudent,
                         receiverId: hd.maUserFreelancer.toString(),
                         receiverName: hd.tenFreelancer,
                         maJob: hd.maJob,

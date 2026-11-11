@@ -25,19 +25,21 @@
                         var canSubmit = Model.coTheDanhGia || canEdit;
                     }
                     <div class="mb-3">
-                        <label class="form-label fw-semibold d-block">Đánh giá tổng thể <span class="text-danger">*</span></label>
+                        <div class="fw-semibold mb-2">
+                            Đánh giá tổng thể
+                        </div>
                         <input type="hidden" name="soSaoTongThe" value="@(review?.soSaoTongThe > 0 ? review.soSaoTongThe : "")" />
                         <div class="d-flex align-items-center gap-1" role="radiogroup" aria-label="Đánh giá tổng thể">
                             @for (var star = 1; star <= 5; star++)
                             {
-                                <button type="button" class="btn btn-link p-1 fs-3 text-decoration-none rounded-0 @(review?.soSaoTongThe >= star ? "text-warning" : "text-secondary")" data-rating-group="soSaoTongThe" data-rating-value="@star" role="radio" aria-checked="@(review?.soSaoTongThe == star ? "true" : "false")" aria-label="@star sao" disabled="@(!canSubmit)"><span class="star-char">@(review?.soSaoTongThe >= star ? "★" : "☆")</span></button>
+                                <button type="button" class="btn btn-link p-1 fs-3 text-decoration-none rounded-0 @(review?.soSaoTongThe >= star ? "text-warning" : "text-secondary")" data-rating-group="soSaoTongThe" data-rating-value="@star" role="radio" aria-checked="@(review?.soSaoTongThe == star ? "true" : "false")" aria-label="@star sao" disabled><span class="star-char">@(review?.soSaoTongThe >= star ? "★" : "☆")</span></button>
                             }
                             <span class="small text-muted ms-2" data-rating-label="soSaoTongThe">@(review?.soSaoTongThe > 0 ? $"{review.soSaoTongThe} trên 5" : "Chọn mức đánh giá")</span>
                         </div>
                     </div>
 
                     <div class="border rounded-0 p-3 mb-3">
-                        <div class="fw-semibold mb-2">Đánh giá chi tiết <span class="text-muted fw-normal small">(không bắt buộc)</span></div>
+                        <div class="fw-semibold mb-2">Đánh giá chi tiết <span class="text-muted fw-normal small"></span></div>
                         @foreach (var criterion in new[] {
                             (Name: "soSaoChatLuong", Label: "Chất lượng công việc", Value: review?.soSaoChatLuong),
                             (Name: "soSaoDungHan", Label: "Đúng hạn", Value: review?.soSaoDungHan),

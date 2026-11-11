@@ -10,6 +10,7 @@ import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../employer/man_hinh_tao_hop_dong.dart';
 import '../hop_dong/man_hinh_chi_tiet_hop_dong.dart';
 import '../profile/man_hinh_ho_so.dart';
+import '../chat/man_hinh_chi_tiet_chat.dart';
 
 class ApplicantListScreen extends StatefulWidget {
   final String? maJob;
@@ -511,6 +512,30 @@ class _ApplicantListScreenState extends State<ApplicantListScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                       ],
+                                      OutlinedButton.icon(
+                                        onPressed: () async {
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => ChatDetailScreen(
+                                                maFreelancerStudent: int.tryParse(applicant.maFreelancerStudents),
+                                                receiverId: applicant.maUser?.toString() ?? applicant.maFreelancerStudents,
+                                                receiverName: applicant.tenUser ?? applicant.tenUngVien,
+                                                avatarUrl: applicant.avatarUrl,
+                                                maJob: applicant.maJob,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.chat_outlined, size: 16),
+                                        label: const Text('Trao đổi'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColors.primary,
+                                          side: const BorderSide(color: AppColors.primary),
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
                                       ElevatedButton.icon(
                                         onPressed: () async {
                                           await Navigator.push(

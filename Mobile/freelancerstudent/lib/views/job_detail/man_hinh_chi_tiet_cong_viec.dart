@@ -14,6 +14,7 @@ import '../employer/man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
 import '../profile/man_hinh_ho_so_nha_tuyen_dung.dart';
 import '../profile/man_hinh_minh_chung_the_sv.dart';
 import 'bang_ung_tuyen_cong_viec.dart';
+import '../../services/dich_vu_ung_tuyen.dart';
 
 /// Chi tiết công việc: dữ liệu thật từ `GET api/JobPost/ChiTietJobPost/{maJob}`.
 class JobDetailScreen extends StatefulWidget {
@@ -34,11 +35,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   bool _dangTai = false;
   String? _loi;
 
+  final ApplicationService _applicationService = ApplicationService();
+  String? _trangThaiUngTuyen;
+  bool _dangKiemTraUngTuyen = true;
+  bool _loiKiemTraUngTuyen = false;
+
   @override
   void initState() {
     super.initState();
     _job = widget.job ?? JobPostModel.taoMoi(maJob: widget.maJob ?? '');
     _taiChiTiet();
+    _kiemTraTrangThaiUngTuyen();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authUser = context.read<AuthViewModel>().currentUser;
       if (authUser != null) {
@@ -52,6 +59,66 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         }
       }
     });
+  }
+
+  Future<void> _kiemTraTrangThaiUngTuyen() async {
+    if (!mounted) return;
+    setState(() {
+      _dangKiemTraUngTuyen = true;
+      _loiKiemTraUngTuyen = false;
+    });
+
+    final user = context.read<AuthViewModel>().currentUser;
+    if (user == null || user.userId <= 0) {
+      if (!mounted) return;
+      setState(() {
+        _trangThaiUngTuyen = null;
+        _dangKiemTraUngTuyen = false;
+      });
+      return;
+    }
+
+    try {
+      final response = await _applicationService
+          .layDanhSachUngTuyenTheoUser(user.userId);
+      if (!mounted) return;
+
+      if (!response.isSuccess || response.data == null) {
+        setState(() {
+          _loiKiemTraUngTuyen = true;
+          _dangKiemTraUngTuyen = false;
+        });
+        return;
+      }
+
+      final maJob = _job.maJob.trim().isNotEmpty
+          ? _job.maJob.trim()
+          : (widget.maJob ?? widget.job?.maJob ?? '').trim();
+      if (maJob.isEmpty) {
+        setState(() {
+          _loiKiemTraUngTuyen = true;
+          _dangKiemTraUngTuyen = false;
+        });
+        return;
+      }
+
+      final don = response.data!
+          .where((item) => item.maJob.trim() == maJob)
+          .toList();
+
+      setState(() {
+        _trangThaiUngTuyen =
+            don.isEmpty ? null : don.first.trangThaiUngTuyen;
+        _loiKiemTraUngTuyen = false;
+        _dangKiemTraUngTuyen = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loiKiemTraUngTuyen = true;
+        _dangKiemTraUngTuyen = false;
+      });
+    }
   }
 
   Future<void> _taiChiTiet() async {
@@ -111,6 +178,18 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _ungTuyen() async {
+    await _kiemTraTrangThaiUngTuyen();
+    if (!mounted || _dangKiemTraUngTuyen || _loiKiemTraUngTuyen) return;
+
+    if (_trangThaiUngTuyen == 'ChoDuyet' ||
+        _trangThaiUngTuyen == 'DangCho' ||
+        _trangThaiUngTuyen == 'ChapNhan') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bạn đã ứng tuyển công việc này.')),
+      );
+      return;
+    }
+
     if (_job.isDaHoanThanh) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -183,7 +262,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (ctx) => ApplyJobBottomSheet(job: _job),
     );
     if (daUngTuyen == true && mounted) {
-      Navigator.pop(context, true);
+      await _kiemTraTrangThaiUngTuyen();
     }
   }
 
@@ -212,6 +291,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final isDaHoanThanh = _job.isDaHoanThanh;
     final isDaTuyenDu = _job.isDaTuyenDu;
     final dangTuyen = !isDaHoanThanh && !isDaTuyenDu && (statusStr == 'dangtuyen' || statusStr.isEmpty);
+    final daUngTuyen = _trangThaiUngTuyen == 'ChoDuyet' ||
+        _trangThaiUngTuyen == 'DangCho' ||
+        _trangThaiUngTuyen == 'ChapNhan';
+    final biTuChoi = _trangThaiUngTuyen == 'TuChoi';
+    final coTheUngTuyen = dangTuyen &&
+        !_dangKiemTraUngTuyen &&
+        !_loiKiemTraUngTuyen &&
+        !daUngTuyen;
     final String trangThaiHienThi = isDaHoanThanh
         ? 'Đã hoàn thành'
         : (isDaTuyenDu
@@ -289,7 +376,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       ),
       body: RefreshIndicator(
         color: AppColors.primary,
-        onRefresh: _taiChiTiet,
+        onRefresh: () async {
+          await _taiChiTiet();
+          await _kiemTraTrangThaiUngTuyen();
+        },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -717,7 +807,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   : SizedBox(
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: dangTuyen ? _ungTuyen : null,
+                        onPressed: coTheUngTuyen ? _ungTuyen : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: dangTuyen
                               ? AppColors.primary
@@ -731,13 +821,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           elevation: 0,
                         ),
                         child: Text(
-                          isDaHoanThanh
-                              ? 'Công việc đã hoàn thành'
-                              : (isDaTuyenDu
-                                  ? 'Công việc đã tuyển đủ'
-                                  : (dangTuyen
-                                      ? 'Ứng tuyển công việc này'
-                                      : 'Công việc đã đóng tuyển')),
+                          _dangKiemTraUngTuyen
+                              ? 'Đang kiểm tra...'
+                              : _loiKiemTraUngTuyen
+                                  ? 'Không thể kiểm tra ứng tuyển'
+                                  : daUngTuyen
+                                      ? 'Đã ứng tuyển'
+                                      : isDaHoanThanh
+                                          ? 'Công việc đã hoàn thành'
+                                          : isDaTuyenDu
+                                              ? 'Công việc đã tuyển đủ'
+                                              : !dangTuyen
+                                                  ? 'Công việc đã đóng tuyển'
+                                                  : biTuChoi
+                                                      ? 'Ứng tuyển lại'
+                                                      : 'Ứng tuyển công việc này',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -787,6 +885,8 @@ class _TheChiTietItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               giaTri,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,

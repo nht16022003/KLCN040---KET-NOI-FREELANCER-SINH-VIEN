@@ -123,6 +123,47 @@ class JobService {
     }
   }
 
+  /// Lấy mức phí đăng bài tuyển dụng hiện hành (JobPostController.LayPhiDangBaiHienTai)
+  Future<ApiResponse<double>> layPhiDangBaiHienTai() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.phiDangBaiHienTai,
+      );
+      final body = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : <String, dynamic>{};
+
+      final bool isSuccess = body['success'] == true;
+      if (!isSuccess && response.statusCode != 200) {
+        return ApiResponse<double>(
+          isSuccess: false,
+          data: null,
+          message: body['message']?.toString() ?? 'Không lấy được phí đăng bài.',
+        );
+      }
+
+      double fee = 0;
+      final rawData = body['data'];
+      if (rawData is num) {
+        fee = rawData.toDouble();
+      } else if (rawData != null) {
+        fee = double.tryParse(rawData.toString()) ?? 0;
+      }
+
+      return ApiResponse<double>(
+        isSuccess: true,
+        data: fee,
+        message: body['message']?.toString() ?? '',
+      );
+    } catch (e) {
+      return ApiResponse<double>(
+        isSuccess: false,
+        data: null,
+        message: 'Lỗi khi lấy phí đăng bài: ${e.toString()}',
+      );
+    }
+  }
+
   /// Nhà tuyển dụng tạo Job mới (JobPostController.TaoJob)
   Future<ApiResponse<JobPostModel>> taoJob(
     Map<String, dynamic> duLieuJob,
@@ -206,6 +247,8 @@ class JobService {
 
   Future<ApiResponse<JobPostModel>> getJobDetail(String id) =>
       layChiTietJobPost(id);
+
+  Future<ApiResponse<double>> getPostingFee() => layPhiDangBaiHienTai();
 
   Future<ApiResponse<JobPostModel>> createJob(Map<String, dynamic> payload) =>
       taoJob(payload);

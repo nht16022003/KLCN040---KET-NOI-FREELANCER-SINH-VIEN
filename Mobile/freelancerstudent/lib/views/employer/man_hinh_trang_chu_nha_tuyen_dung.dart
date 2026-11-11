@@ -11,6 +11,7 @@ import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_yeu_thich.dart';
 import '../applications/man_hinh_danh_sach_ung_vien.dart';
 import '../auth/man_hinh_dang_nhap.dart';
+import '../chat/man_hinh_danh_sach_chat.dart';
 import '../danh_gia/man_hinh_danh_gia.dart';
 import '../hop_dong/man_hinh_danh_sach_hop_dong.dart';
 import '../job_detail/man_hinh_chi_tiet_cong_viec.dart';
@@ -117,6 +118,12 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
           MaterialPageRoute(
             builder: (_) => const ManHinhQuanLyYeuCauThueNTD(),
           ),
+        );
+        break;
+      case 'chat':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ChatListScreen()),
         );
         break;
       case 'contracts':
@@ -367,6 +374,16 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                 ),
               ),
               PopupMenuItem(
+                value: 'chat',
+                child: Row(
+                  children: [
+                    Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Chat'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
                 value: 'contracts',
                 child: Row(
                   children: [
@@ -550,14 +567,19 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Tin tuyển dụng của tôi',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.heading,
+                  const Expanded(
+                    child: Text(
+                      'Tin tuyển dụng của tôi',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.heading,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   TextButton.icon(
                     onPressed: () async {
                       await Navigator.push(
@@ -570,6 +592,7 @@ class _EmployerHomeScreenState extends State<EmployerHomeScreen> {
                     label: const Text('Tạo tin mới'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                   ),
                 ],
@@ -732,14 +755,19 @@ class _SummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.bodyText,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.bodyText,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 6),
                 Container(
                   width: 36,
                   height: 36,
@@ -754,6 +782,8 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -813,6 +843,8 @@ class _EmployerJobItemCard extends StatelessWidget {
                   children: [
                     Text(
                       job.tieude,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -827,8 +859,14 @@ class _EmployerJobItemCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Chip(
-                label: Text(
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: dangTuyen ? AppColors.lightGreenSurface : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
                   dangTuyen ? 'Đang tuyển' : 'Đã đóng',
                   style: TextStyle(
                     color: dangTuyen ? AppColors.success : AppColors.bodyText,
@@ -836,9 +874,6 @@ class _EmployerJobItemCard extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-                backgroundColor: dangTuyen ? AppColors.lightGreenSurface : Colors.grey.shade200,
-                side: BorderSide.none,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
               ),
             ],
           ),
@@ -852,73 +887,187 @@ class _EmployerJobItemCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // Thông tin thù lao & hạn hoàn thành
-          Row(
+          // Thông tin thù lao & hạn hoàn thành (Wrap tự động xuống dòng khi màn hình hẹp)
+          Wrap(
+            spacing: 14,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Icon(Icons.payments_outlined, size: 16, color: AppColors.primary),
-              const SizedBox(width: 6),
-              Text(
-                AppFormatters.formatCurrency(job.thulao),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                  fontSize: 13,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.payments_outlined, size: 16, color: AppColors.primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    AppFormatters.formatCurrency(job.thulao),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              const Icon(Icons.event_outlined, size: 16, color: Colors.grey),
-              const SizedBox(width: 6),
-              Text(
-                'Hạn: ${job.hanHoanThanh.day}/${job.hanHoanThanh.month}/${job.hanHoanThanh.year}',
-                style: const TextStyle(color: AppColors.bodyText, fontSize: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.event_outlined, size: 16, color: Colors.grey),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Hạn: ${job.hanHoanThanh.day}/${job.hanHoanThanh.month}/${job.hanHoanThanh.year}',
+                    style: const TextStyle(color: AppColors.bodyText, fontSize: 12),
+                  ),
+                ],
               ),
             ],
           ),
           const Divider(height: 20),
 
-          // Các nút hành động
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onXemUngVien,
-                  icon: const Icon(Icons.people_outline, size: 16),
-                  label: const Text('Ứng viên'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+          // Các nút hành động responsive đa kích thước màn hình
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 320;
+              if (isNarrow) {
+                // Layout 2 dòng cho màn hình nhỏ
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onXemUngVien,
+                            icon: const Icon(Icons.people_outline, size: 16),
+                            label: const Text(
+                              'Ứng viên',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          tooltip: 'Xem chi tiết',
+                          icon: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primary),
+                          onPressed: onChiTiet,
+                          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: onChinhSua,
+                            icon: const Icon(Icons.edit_outlined, size: 16),
+                            label: const Text(
+                              'Sửa',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.heading,
+                              side: const BorderSide(color: AppColors.border),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: onDoiTrangThai,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: dangTuyen ? AppColors.error : AppColors.success,
+                              side: BorderSide(
+                                color: dangTuyen
+                                    ? AppColors.error.withValues(alpha: 0.5)
+                                    : AppColors.success,
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                            child: Text(
+                              dangTuyen ? 'Đóng tin' : 'Mở lại',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }
+
+              // Layout 1 dòng cho màn hình tiêu chuẩn & lớn
+              return Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onXemUngVien,
+                      icon: const Icon(Icons.people_outline, size: 16),
+                      label: const Text(
+                        'Ứng viên',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: onChinhSua,
-                icon: const Icon(Icons.edit_outlined, size: 16),
-                label: const Text('Sửa'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.heading,
-                  side: const BorderSide(color: AppColors.border),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                ),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: onDoiTrangThai,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: dangTuyen ? AppColors.error : AppColors.success,
-                  side: BorderSide(color: dangTuyen ? AppColors.error.withValues(alpha: 0.5) : AppColors.success),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                ),
-                child: Text(dangTuyen ? 'Đóng tin' : 'Mở lại'),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                tooltip: 'Xem chi tiết',
-                icon: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.primary),
-                onPressed: onChiTiet,
-              ),
-            ],
+                  const SizedBox(width: 6),
+                  OutlinedButton.icon(
+                    onPressed: onChinhSua,
+                    icon: const Icon(Icons.edit_outlined, size: 15),
+                    label: const Text(
+                      'Sửa',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.heading,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  OutlinedButton(
+                    onPressed: onDoiTrangThai,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: dangTuyen ? AppColors.error : AppColors.success,
+                      side: BorderSide(
+                        color: dangTuyen
+                            ? AppColors.error.withValues(alpha: 0.5)
+                            : AppColors.success,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    ),
+                    child: Text(
+                      dangTuyen ? 'Đóng tin' : 'Mở lại',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  IconButton(
+                    tooltip: 'Xem chi tiết',
+                    icon: const Icon(Icons.arrow_forward_ios, size: 15, color: AppColors.primary),
+                    onPressed: onChiTiet,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    padding: EdgeInsets.zero,
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

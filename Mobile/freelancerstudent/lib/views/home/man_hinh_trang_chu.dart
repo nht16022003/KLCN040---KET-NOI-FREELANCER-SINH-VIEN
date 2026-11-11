@@ -868,15 +868,19 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 20),
           Row(
             children: [
-              const Text(
-                'Gợi ý việc làm phù hợp',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.heading,
+              const Expanded(
+                child: Text(
+                  'Gợi ý việc làm phù hợp',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.heading,
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -951,14 +955,19 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Tất cả việc làm',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.heading,
+            const Expanded(
+              child: Text(
+                'Tất cả việc làm',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.heading,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               '${jobs.length} kết quả',
               style: const TextStyle(
@@ -1521,6 +1530,8 @@ class _JobCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               job.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
@@ -1646,31 +1657,37 @@ class _JobCard extends StatelessWidget {
             ],
 
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
               children: [
                 _TheThongTin(nhan: location),
-                const SizedBox(width: 8),
                 _TheThongTin(nhan: type),
               ],
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Text(
-                  '${job.budget.toStringAsFixed(0)} VNĐ',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: AppColors.primary,
+                Flexible(
+                  child: Text(
+                    '${job.budget.toStringAsFixed(0)} VNĐ',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 if ((job.tenNhaTuyenDung ?? '').isNotEmpty)
                   Flexible(
                     child: Text(
                       job.tenNhaTuyenDung!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.bodyText,

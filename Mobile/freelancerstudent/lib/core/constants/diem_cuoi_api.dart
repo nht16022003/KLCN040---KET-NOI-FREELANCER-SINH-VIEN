@@ -1,7 +1,7 @@
 class ApiEndpoints {
   // Cấu hình địa chỉ máy chủ
   // Dùng 10.0.2.2 cho Android Emulator, hoặc thay bằng IP mạng LAN máy tính (ví dụ: 192.168.1.x) khi chạy trên thiết bị thật
-  static const String serverHost = '10.0.2.2';
+  static const String serverHost = '192.168.1.162';
   static const String apiBaseUrl = 'http://$serverHost:5152';
   static const String webBaseUrl = 'http://$serverHost:5290';
   static const String baseUrl = '$apiBaseUrl/api';
@@ -51,6 +51,7 @@ class ApiEndpoints {
   static const String duyetUngTuyen = '$baseUrl/JobPost/DuyetUngTuyen';
   static const String jobGoiY = '$baseUrl/JobPost/GoiYChoFreelancer';
   static const String goiYKyNang = '$baseUrl/JobPost/GoiYKyNangTheoTieuDe';
+  static const String phiDangBaiHienTai = '$baseUrl/JobPost/PhiDangBaiHienTai';
 
   // ==========================================
   // BÀI ĐĂNG TÌM VIỆC CỦA SINH VIÊN (STUDENT POSTS)

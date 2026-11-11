@@ -281,6 +281,12 @@
                 const modalElement = container.querySelector('.modal');
                 if (!modalElement) throw new Error('Biểu mẫu đánh giá không hợp lệ.');
                 if (maDanhGia) modalElement.dataset.maDanhGia = maDanhGia;
+
+                const form = modalElement.querySelector('form');
+                if (form) {
+                    capNhatDanhGiaTongThe(form);
+                }
+
                 bootstrap.Modal.getOrCreateInstance(modalElement).show();
             } catch (error) {
                 alert(error.message || 'Không thể tải biểu mẫu đánh giá.');
@@ -289,16 +295,34 @@
 
         async function guiDanhGia(form, event) {
             event.preventDefault();
+
             const modalElement = form.closest('.modal');
-            const tongSao = Number(form.querySelector('[name="soSaoTongThe"]').value);
-            if (!tongSao) {
+
+            capNhatDanhGiaTongThe(form);
+
+            const fields = [
+                'soSaoChatLuong',
+                'soSaoDungHan',
+                'soSaoGiaoTiep'
+            ];
+
+            const valid = fields.every(name => {
+                const value = Number(form.querySelector(`[name="${name}"]`)?.value);
+                return value >= 1 && value <= 5;
+            });
+
+            if (!valid) {
                 const message = form.querySelector('[data-review-message]');
                 if (message) {
-                    message.textContent = 'Vui lòng chọn số sao đánh giá tổng thể.';
+                    message.textContent = 'Vui lòng đánh giá đầy đủ 3 tiêu chí.';
                     message.classList.remove('d-none');
                 }
                 return;
             }
+
+            const tongSao = Number(
+                form.querySelector('[name="soSaoTongThe"]').value
+            );
             const payload = {
                 maHD: form.querySelector('[name="maHD"]').value,
                 soSaoTongThe: tongSao,
@@ -328,8 +352,67 @@
             }
         }
 
+        function capNhatDanhGiaTongThe(form) {
+            const fields = [
+                'soSaoChatLuong',
+                'soSaoDungHan',
+                'soSaoGiaoTiep'
+            ];
+
+            const values = fields.map(name =>
+                Number(form.querySelector(`[name="${name}"]`)?.value || 0)
+            );
+
+            const valid = values.every(value => value >= 1 && value <= 5);
+
+            const tongSao = valid
+                ? Math.round(values.reduce((sum, value) => sum + value, 0) / 3)
+                : 0;
+
+            const input = form.querySelector('[name="soSaoTongThe"]');
+            if (!input) return;
+
+            input.value = tongSao || '';
+
+            form.querySelectorAll(
+                '[data-rating-group="soSaoTongThe"][data-rating-value]'
+            ).forEach(button => {
+                const star = Number(button.dataset.ratingValue);
+
+                button.classList.toggle('text-warning', star <= tongSao);
+                button.classList.toggle('text-secondary', star > tongSao);
+
+                const span = button.querySelector('.star-char');
+                if (span) span.textContent = star <= tongSao ? '★' : '☆';
+                const icon = button.querySelector('i');
+
+                if (icon) {
+                    icon.classList.toggle('bi-star-fill', star <= tongSao);
+                    icon.classList.toggle('bi-star', star > tongSao);
+                }
+
+                button.setAttribute(
+                    'aria-checked',
+                    star === tongSao ? 'true' : 'false'
+                );
+            });
+
+            const label = form.querySelector(
+                '[data-rating-label="soSaoTongThe"]'
+            );
+
+            if (label) {
+                label.textContent = valid
+                    ? `${tongSao} trên 5 (tự động)`
+                    : 'Vui lòng chọn đủ 3 tiêu chí';
+            }
+        }
+
+
         // Star rating clicks
         document.addEventListener('click', event => {
+            
+
             const starButton = event.target.closest('[data-rating-group][data-rating-value]');
             if (starButton) {
                 const form = starButton.closest('form');
@@ -358,6 +441,7 @@
 
                 const label = form.querySelector(`[data-rating-label="${groupName}"]`);
                 if (label) label.textContent = `${selectedValue} trên 5`;
+                capNhatDanhGiaTongThe(form);
                 return;
             }
 
@@ -382,6 +466,7 @@
                         starSpan.textContent = '☆';
                     }
                 });
+                capNhatDanhGiaTongThe(form);
             }
         });
 
