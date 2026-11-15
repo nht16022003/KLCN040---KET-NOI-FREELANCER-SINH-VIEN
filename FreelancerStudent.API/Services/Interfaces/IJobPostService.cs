@@ -7,10 +7,10 @@ namespace FreelancerStudent.API.Services.Interfaces
     public interface IJobPostService
     {
         //Lấy danh sách JobPost
-        Task<List<JobPost_ReponseDTO>> layDanhSachJobPostAsync();
+        Task<List<JobPost_ReponseDTO>> layDanhSachJobPostAsync(int? maUser = null);
 
         //XS
-        Task<JobPostDetail_ReponsesDTO?> layChiTietJobPostAsync(string maJob);
+        Task<JobPostDetail_ReponsesDTO?> layChiTietJobPostAsync(string maJob, int? maUser = null);
 
         Task<JobPost_ReponseDTO> taoJobPostAsync(JobPost_RequestDTO request);
 

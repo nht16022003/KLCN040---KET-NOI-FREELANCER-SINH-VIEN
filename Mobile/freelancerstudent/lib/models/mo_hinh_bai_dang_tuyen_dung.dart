@@ -31,6 +31,11 @@ class JobPostModel {
   final String? lyDoGoiY;
   final List<String> kyNangTrungKhop;
 
+  // Thuộc tính trạng thái ứng tuyển của sinh viên hiện tại
+  final String? trangThaiUngTuyen;
+  final bool daUngTuyen;
+  final int? maUngTuyen;
+
   const JobPostModel({
     required this.maJob,
     required this.maNhaTuyenDung,
@@ -53,6 +58,9 @@ class JobPostModel {
     this.doPhuHop,
     this.lyDoGoiY,
     this.kyNangTrungKhop = const [],
+    this.trangThaiUngTuyen,
+    this.daUngTuyen = false,
+    this.maUngTuyen,
   });
 
   factory JobPostModel.taoMoi({required String maJob}) {
@@ -93,6 +101,22 @@ class JobPostModel {
       status.toLowerCase() == 'datuyendu' ||
       status.toLowerCase() == 'da_tuyen_du' ||
       isDaHoanThanh;
+
+  // Trạng thái ứng tuyển của sinh viên hiện tại
+  bool get isDaUngTuyen =>
+      daUngTuyen ||
+      (trangThaiUngTuyen != null &&
+          trangThaiUngTuyen!.isNotEmpty &&
+          trangThaiUngTuyen != 'TuChoi');
+
+  bool get isChoDuyet =>
+      trangThaiUngTuyen == 'ChoDuyet' ||
+      trangThaiUngTuyen == 'DangCho' ||
+      trangThaiUngTuyen == 'DaUngTuyen';
+
+  bool get isChapNhan => trangThaiUngTuyen == 'ChapNhan';
+
+  bool get isTuChoi => trangThaiUngTuyen == 'TuChoi';
 
   // Getter tương thích ngược cho giao diện cũ
   String get id => maJob;
@@ -152,6 +176,27 @@ class JobPostModel {
         employerMap?['avatar']?.toString() ??
         employerMap?['logo']?.toString();
 
+    final trangThaiUngTuyenVal = jobMap['trangThaiUngTuyenCuaToi']?.toString() ??
+        jobMap['trangThaiUngTuyen']?.toString() ??
+        json['trangThaiUngTuyenCuaToi']?.toString() ??
+        json['trangThaiUngTuyen']?.toString();
+
+    final daUngTuyenVal = jobMap['daUngTuyen'] == true ||
+        jobMap['DaUngTuyen'] == true ||
+        json['daUngTuyen'] == true ||
+        json['DaUngTuyen'] == true ||
+        (trangThaiUngTuyenVal != null &&
+            trangThaiUngTuyenVal.isNotEmpty &&
+            trangThaiUngTuyenVal != 'TuChoi');
+
+    final maUngTuyenVal = jobMap['maUngTuyenCuaToi'] is int
+        ? jobMap['maUngTuyenCuaToi'] as int
+        : (jobMap['maUngTuyen'] is int
+            ? jobMap['maUngTuyen'] as int
+            : int.tryParse(jobMap['maUngTuyenCuaToi']?.toString() ??
+                jobMap['maUngTuyen']?.toString() ??
+                ''));
+
     return JobPostModel(
       maJob: idValue.toString(),
       maNhaTuyenDung: (jobMap['maNhaTuyenDung'] ?? jobMap['employerId'] ?? '').toString(),
@@ -186,6 +231,9 @@ class JobPostModel {
       kyNangTrungKhop: jobMap['kyNangTrungKhop'] is List
           ? (jobMap['kyNangTrungKhop'] as List).map((e) => e.toString()).toList()
           : const [],
+      trangThaiUngTuyen: trangThaiUngTuyenVal,
+      daUngTuyen: daUngTuyenVal,
+      maUngTuyen: maUngTuyenVal,
     );
   }
 
@@ -211,6 +259,9 @@ class JobPostModel {
     'doPhuHop': doPhuHop,
     'lyDoGoiY': lyDoGoiY,
     'kyNangTrungKhop': kyNangTrungKhop,
+    'trangThaiUngTuyen': trangThaiUngTuyen,
+    'daUngTuyen': daUngTuyen,
+    'maUngTuyen': maUngTuyen,
   };
 
   JobPostModel copyWith({
@@ -235,6 +286,9 @@ class JobPostModel {
     double? doPhuHop,
     String? lyDoGoiY,
     List<String>? kyNangTrungKhop,
+    String? trangThaiUngTuyen,
+    bool? daUngTuyen,
+    int? maUngTuyen,
   }) {
     return JobPostModel(
       maJob: maJob ?? this.maJob,
@@ -258,6 +312,9 @@ class JobPostModel {
       doPhuHop: doPhuHop ?? this.doPhuHop,
       lyDoGoiY: lyDoGoiY ?? this.lyDoGoiY,
       kyNangTrungKhop: kyNangTrungKhop ?? this.kyNangTrungKhop,
+      trangThaiUngTuyen: trangThaiUngTuyen ?? this.trangThaiUngTuyen,
+      daUngTuyen: daUngTuyen ?? this.daUngTuyen,
+      maUngTuyen: maUngTuyen ?? this.maUngTuyen,
     );
   }
 }

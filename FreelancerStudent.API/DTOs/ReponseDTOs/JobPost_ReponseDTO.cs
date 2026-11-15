@@ -48,5 +48,10 @@ namespace FreelancerStudent.API.DTOs.ReponsesDTO
         public int soLuotDanhGiaNhaTuyenDung { get; set; }
         public string? diaChiNhaTuyenDung { get; set; }
         public string? linhVucNhaTuyenDung { get; set; }
+
+        // Trạng thái ứng tuyển của sinh viên đang đăng nhập (nếu có)
+        public string? trangThaiUngTuyenCuaToi { get; set; }
+        public bool daUngTuyen { get; set; }
+        public int? maUngTuyenCuaToi { get; set; }
     }
 }

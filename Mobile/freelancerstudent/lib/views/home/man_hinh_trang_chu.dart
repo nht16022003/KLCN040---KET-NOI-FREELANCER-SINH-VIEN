@@ -48,10 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authUser = context.read<AuthViewModel>().currentUser;
       // Tải cả danh sách nhà tuyển dụng và việc làm khi vào màn hình
       context.read<NhaTuyenDungViewModel>().taiDanhSachNhaTuyenDung();
-      context.read<JobViewModel>().fetchJobs();
-      final authUser = context.read<AuthViewModel>().currentUser;
+      context.read<JobViewModel>().taiDanhSachJobPost(maUser: authUser?.userId);
       if (authUser != null) {
         context.read<JobViewModel>().taiDanhSachJobGoiY(authUser.userId);
         context.read<YeuThichViewModel>().taiDanhSachViecDaLuu(authUser.userId);
@@ -72,7 +72,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _xuLyTimKiemViecLam(String tuKhoa) {
-    context.read<JobViewModel>().fetchJobs(keyword: tuKhoa.trim());
+    final authUser = context.read<AuthViewModel>().currentUser;
+    context.read<JobViewModel>().taiDanhSachJobPost(
+      tuKhoa: tuKhoa.trim(),
+      maUser: authUser?.userId,
+    );
   }
 
   @override
@@ -311,8 +315,10 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_tabHienTai == 0) {
               await nhaTuyenDungVM.taiDanhSachNhaTuyenDung();
             } else {
-              await jobViewModel.refreshJobs(
-                keyword: _boDieuKhienTimKiemViecLam.text.trim(),
+              await jobViewModel.taiDanhSachJobPost(
+                tuKhoa: _boDieuKhienTimKiemViecLam.text.trim(),
+                lamMoi: true,
+                maUser: authUser?.userId,
               );
               if (authUser != null) {
                 await jobViewModel.taiDanhSachJobGoiY(authUser.userId);
@@ -919,6 +925,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                   if (applied == true && context.mounted) {
+                    context.read<JobViewModel>().capNhatTrangThaiUngTuyen(job.maJob, 'ChoDuyet');
+                    final authUser = context.read<AuthViewModel>().currentUser;
+                    context.read<JobViewModel>().taiDanhSachJobPost(lamMoi: true, maUser: authUser?.userId);
+                    if (authUser != null) {
+                      context.read<JobViewModel>().taiDanhSachJobGoiY(authUser.userId);
+                    }
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -935,6 +947,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (_) => ApplyJobBottomSheet(job: job),
                   );
                   if (applied == true && context.mounted) {
+                    context.read<JobViewModel>().capNhatTrangThaiUngTuyen(job.maJob, 'ChoDuyet');
+                    final authUser = context.read<AuthViewModel>().currentUser;
+                    context.read<JobViewModel>().taiDanhSachJobPost(lamMoi: true, maUser: authUser?.userId);
+                    if (authUser != null) {
+                      context.read<JobViewModel>().taiDanhSachJobGoiY(authUser.userId);
+                    }
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -1010,6 +1028,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                   if (applied == true && context.mounted) {
+                    context.read<JobViewModel>().capNhatTrangThaiUngTuyen(job.maJob, 'ChoDuyet');
+                    final authUser = context.read<AuthViewModel>().currentUser;
+                    context.read<JobViewModel>().taiDanhSachJobPost(lamMoi: true, maUser: authUser?.userId);
+                    if (authUser != null) {
+                      context.read<JobViewModel>().taiDanhSachJobGoiY(authUser.userId);
+                    }
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -1025,6 +1049,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (_) => ApplyJobBottomSheet(job: job),
                   );
                   if (applied == true && context.mounted) {
+                    context.read<JobViewModel>().capNhatTrangThaiUngTuyen(job.maJob, 'ChoDuyet');
+                    final authUser = context.read<AuthViewModel>().currentUser;
+                    context.read<JobViewModel>().taiDanhSachJobPost(lamMoi: true, maUser: authUser?.userId);
+                    if (authUser != null) {
+                      context.read<JobViewModel>().taiDanhSachJobGoiY(authUser.userId);
+                    }
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -1462,6 +1492,54 @@ class _JobCard extends StatelessWidget {
     final location = job.kynangyeucau.isEmpty ? 'Online' : 'Remote';
     final isDaHoanThanh = job.isDaHoanThanh;
     final isDaTuyenDu = job.isDaTuyenDu;
+    final isChoDuyet = job.isChoDuyet;
+    final isChapNhan = job.isChapNhan;
+    final isTuChoi = job.isTuChoi;
+
+    final String nutText;
+    final VoidCallback? nutOnPressed;
+    final Color nutBgColor;
+    final Color nutTextColor;
+    final BorderSide nutBorder;
+
+    if (isDaHoanThanh) {
+      nutText = 'Đã hoàn thành';
+      nutOnPressed = null;
+      nutBgColor = Colors.grey.shade400;
+      nutTextColor = Colors.white;
+      nutBorder = BorderSide.none;
+    } else if (isDaTuyenDu) {
+      nutText = 'Đã tuyển đủ';
+      nutOnPressed = null;
+      nutBgColor = Colors.amber.shade200;
+      nutTextColor = Colors.brown.shade800;
+      nutBorder = BorderSide.none;
+    } else if (isChapNhan) {
+      nutText = 'Đã chấp nhận';
+      nutOnPressed = null;
+      nutBgColor = const Color(0xFFE8F5E9);
+      nutTextColor = const Color(0xFF2E7D32);
+      nutBorder = const BorderSide(color: Color(0xFF81C784));
+    } else if (isChoDuyet) {
+      nutText = 'Đã ứng tuyển';
+      nutOnPressed = null;
+      nutBgColor = Colors.grey.shade200;
+      nutTextColor = Colors.grey.shade700;
+      nutBorder = BorderSide(color: Colors.grey.shade400);
+    } else if (isTuChoi) {
+      nutText = 'Ứng tuyển lại';
+      nutOnPressed = onApply;
+      nutBgColor = const Color(0xFFFFF3E0);
+      nutTextColor = const Color(0xFFE65100);
+      nutBorder = const BorderSide(color: Color(0xFFFFB74D));
+    } else {
+      nutText = 'Ứng tuyển';
+      nutOnPressed = onApply;
+      nutBgColor = AppColors.primary;
+      nutTextColor = Colors.white;
+      nutBorder = BorderSide.none;
+    }
+
     final type = isDaHoanThanh
         ? 'Đã hoàn thành'
         : (isDaTuyenDu
@@ -1722,21 +1800,21 @@ class _JobCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: (isDaHoanThanh || isDaTuyenDu) ? null : onApply,
+                    onPressed: nutOnPressed,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDaHoanThanh
-                          ? Colors.grey.shade400
-                          : (isDaTuyenDu ? Colors.amber.shade200 : AppColors.primary),
-                      foregroundColor: isDaTuyenDu ? Colors.brown.shade800 : Colors.white,
+                      backgroundColor: nutBgColor,
+                      foregroundColor: nutTextColor,
+                      disabledBackgroundColor: nutBgColor,
+                      disabledForegroundColor: nutTextColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
+                        side: nutBorder,
                       ),
+                      elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
                     child: Text(
-                      isDaHoanThanh
-                          ? 'Đã hoàn thành'
-                          : (isDaTuyenDu ? 'Đã tuyển đủ' : 'Ứng tuyển'),
+                      nutText,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ),

@@ -20,13 +20,12 @@ namespace FreelancerStudent.API.Controllers
         }
 
         [HttpGet("DanhSachJobPost")]
-
-        public async Task<IActionResult> layDanhSachJobPost()
+        public async Task<IActionResult> layDanhSachJobPost([FromQuery] int? maUser = null)
         {
             try
             {
                 //Gọi service
-                var ketquads = await _jobPostService.layDanhSachJobPostAsync();
+                var ketquads = await _jobPostService.layDanhSachJobPostAsync(maUser);
 
                 return Ok(new
                 {
@@ -46,11 +45,11 @@ namespace FreelancerStudent.API.Controllers
         }
 
         [HttpGet("ChiTietJobPost/{maJob}")]
-        public async Task<IActionResult> layChiTietJobPost(string maJob)
+        public async Task<IActionResult> layChiTietJobPost(string maJob, [FromQuery] int? maUser = null)
         {
             try
             {
-                var ketqua = await _jobPostService.layChiTietJobPostAsync(maJob);
+                var ketqua = await _jobPostService.layChiTietJobPostAsync(maJob, maUser);
 
                 if (ketqua == null)
                 {

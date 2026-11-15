@@ -15,6 +15,7 @@ class JobViewModel extends ChangeNotifier {
   List<JobPostModel> _tatCaJobPost = <JobPostModel>[];
   bool _daTaiDanhSach = false;
   int _requestId = 0;
+  int? _maUserHienTai;
 
   // Bộ lọc nâng cao đồng bộ Web Views/JobPost/Index.cshtml
   String _tuKhoaHienTai = '';
@@ -66,7 +67,11 @@ class JobViewModel extends ChangeNotifier {
     int trang = 1,
     String tuKhoa = '',
     bool lamMoi = false,
+    int? maUser,
   }) async {
+    if (maUser != null) {
+      _maUserHienTai = maUser;
+    }
     _tuKhoaHienTai = tuKhoa.trim().toLowerCase();
     if (_daTaiDanhSach && _tuKhoaHienTai.isNotEmpty && !lamMoi) {
       _requestId++;
@@ -88,6 +93,7 @@ class JobViewModel extends ChangeNotifier {
     final response = await _jobService.layDanhSachJobPost(
       page: trang,
       tuKhoa: tuKhoa,
+      maUser: _maUserHienTai,
     );
     if (requestId != _requestId) return;
 
@@ -107,6 +113,49 @@ class JobViewModel extends ChangeNotifier {
 
     _dangTai = false;
     notifyListeners();
+  }
+
+  /// Cập nhật ngay trạng thái ứng tuyển của một Job trong danh sách (đồng bộ UI tức thời)
+  void capNhatTrangThaiUngTuyen(String maJob, String trangThaiMoi, {int? maUngTuyen}) {
+    bool hasChanged = false;
+
+    _tatCaJobPost = _tatCaJobPost.map((job) {
+      if (job.maJob == maJob) {
+        hasChanged = true;
+        return job.copyWith(
+          trangThaiUngTuyen: trangThaiMoi,
+          daUngTuyen: trangThaiMoi != 'TuChoi',
+          maUngTuyen: maUngTuyen ?? job.maUngTuyen,
+        );
+      }
+      return job;
+    }).toList();
+
+    _danhSachJobPost = _danhSachJobPost.map((job) {
+      if (job.maJob == maJob) {
+        return job.copyWith(
+          trangThaiUngTuyen: trangThaiMoi,
+          daUngTuyen: trangThaiMoi != 'TuChoi',
+          maUngTuyen: maUngTuyen ?? job.maUngTuyen,
+        );
+      }
+      return job;
+    }).toList();
+
+    _danhSachJobGoiY = _danhSachJobGoiY.map((job) {
+      if (job.maJob == maJob) {
+        return job.copyWith(
+          trangThaiUngTuyen: trangThaiMoi,
+          daUngTuyen: trangThaiMoi != 'TuChoi',
+          maUngTuyen: maUngTuyen ?? job.maUngTuyen,
+        );
+      }
+      return job;
+    }).toList();
+
+    if (hasChanged) {
+      notifyListeners();
+    }
   }
 
   void datBoLocThuLao(String mucThuLao) {

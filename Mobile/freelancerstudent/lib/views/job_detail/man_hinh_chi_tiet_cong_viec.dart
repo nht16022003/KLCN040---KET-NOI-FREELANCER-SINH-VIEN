@@ -8,6 +8,7 @@ import '../../services/dich_vu_cong_viec.dart';
 import '../../services/dich_vu_minh_chung.dart';
 import '../../viewmodels/viewmodel_xac_thuc.dart';
 import '../../viewmodels/viewmodel_yeu_thich.dart';
+import '../../viewmodels/viewmodel_cong_viec.dart';
 import '../applications/man_hinh_danh_sach_ung_vien.dart';
 import '../chat/man_hinh_chi_tiet_chat.dart';
 import '../employer/man_hinh_chinh_sua_bai_dang_tuyen_dung.dart';
@@ -39,6 +40,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   String? _trangThaiUngTuyen;
   bool _dangKiemTraUngTuyen = true;
   bool _loiKiemTraUngTuyen = false;
+  bool _daThayDoiUngTuyen = false;
 
   @override
   void initState() {
@@ -135,7 +137,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       _loi = null;
     });
 
-    final res = await _jobService.layChiTietJobPost(effectiveMaJob);
+    final authUser = context.read<AuthViewModel>().currentUser;
+    final res = await _jobService.layChiTietJobPost(
+      effectiveMaJob,
+      maUser: authUser?.userId,
+    );
     if (!mounted) return;
     setState(() {
       _dangTai = false;
@@ -159,18 +165,31 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               ? chiTietMoi.soluongtuyen
               : cu.soluongtuyen,
           daTuyenDu: chiTietMoi.daTuyenDu || cu.daTuyenDu,
+          maUser: chiTietMoi.maUser ?? cu.maUser,
           nganSachMin: chiTietMoi.nganSachMin ?? cu.nganSachMin,
           nganSachMax: chiTietMoi.nganSachMax ?? cu.nganSachMax,
           tenNhaTuyenDung: chiTietMoi.tenNhaTuyenDung ?? cu.tenNhaTuyenDung,
           avatarNhaTuyenDung:
               chiTietMoi.avatarNhaTuyenDung ?? cu.avatarNhaTuyenDung,
           ngayHetHan: chiTietMoi.ngayHetHan ?? cu.ngayHetHan,
+          thoigiandukienhoanthanh: chiTietMoi.thoigiandukienhoanthanh ??
+              cu.thoigiandukienhoanthanh,
+          ngaydang: chiTietMoi.ngaydang ?? cu.ngaydang,
+          phiDangBai: chiTietMoi.phiDangBai ?? cu.phiDangBai,
           doPhuHop: cu.doPhuHop ?? chiTietMoi.doPhuHop,
           lyDoGoiY: cu.lyDoGoiY ?? chiTietMoi.lyDoGoiY,
           kyNangTrungKhop: cu.kyNangTrungKhop.isNotEmpty
               ? cu.kyNangTrungKhop
               : chiTietMoi.kyNangTrungKhop,
+          trangThaiUngTuyen: chiTietMoi.trangThaiUngTuyen ?? cu.trangThaiUngTuyen,
+          daUngTuyen: chiTietMoi.daUngTuyen || cu.daUngTuyen,
+          maUngTuyen: chiTietMoi.maUngTuyen ?? cu.maUngTuyen,
         );
+
+        if (chiTietMoi.trangThaiUngTuyen != null) {
+          _trangThaiUngTuyen = chiTietMoi.trangThaiUngTuyen;
+          _dangKiemTraUngTuyen = false;
+        }
       } else if (!res.isSuccess) {
         _loi = res.message;
       }
@@ -182,10 +201,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     if (!mounted || _dangKiemTraUngTuyen || _loiKiemTraUngTuyen) return;
 
     if (_trangThaiUngTuyen == 'ChoDuyet' ||
-        _trangThaiUngTuyen == 'DangCho' ||
-        _trangThaiUngTuyen == 'ChapNhan') {
+        _trangThaiUngTuyen == 'DangCho') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bạn đã ứng tuyển công việc này.')),
+        const SnackBar(content: Text('Hồ sơ của bạn đang được xét duyệt.')),
+      );
+      return;
+    }
+    if (_trangThaiUngTuyen == 'ChapNhan') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hồ sơ của bạn đã được nhà tuyển dụng chấp nhận.')),
       );
       return;
     }
@@ -262,6 +286,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       builder: (ctx) => ApplyJobBottomSheet(job: _job),
     );
     if (daUngTuyen == true && mounted) {
+      _daThayDoiUngTuyen = true;
+      _trangThaiUngTuyen = 'ChoDuyet';
+      final effectiveMaJob = _job.maJob.trim().isNotEmpty ? _job.maJob.trim() : (widget.maJob ?? '');
+      context.read<JobViewModel>().capNhatTrangThaiUngTuyen(effectiveMaJob, 'ChoDuyet');
       await _kiemTraTrangThaiUngTuyen();
     }
   }
@@ -291,10 +319,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final isDaHoanThanh = _job.isDaHoanThanh;
     final isDaTuyenDu = _job.isDaTuyenDu;
     final dangTuyen = !isDaHoanThanh && !isDaTuyenDu && (statusStr == 'dangtuyen' || statusStr.isEmpty);
-    final daUngTuyen = _trangThaiUngTuyen == 'ChoDuyet' ||
+    final isChoDuyet = _trangThaiUngTuyen == 'ChoDuyet' ||
         _trangThaiUngTuyen == 'DangCho' ||
-        _trangThaiUngTuyen == 'ChapNhan';
+        _trangThaiUngTuyen == 'DaUngTuyen';
+    final isChapNhan = _trangThaiUngTuyen == 'ChapNhan';
     final biTuChoi = _trangThaiUngTuyen == 'TuChoi';
+    final daUngTuyen = isChoDuyet || isChapNhan;
     final coTheUngTuyen = dangTuyen &&
         !_dangKiemTraUngTuyen &&
         !_loiKiemTraUngTuyen &&
@@ -318,6 +348,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context, _daThayDoiUngTuyen),
+        ),
         title: const Text(
           'Chi tiết công việc',
           style: TextStyle(
@@ -374,15 +408,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               )
             : null,
       ),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () async {
-          await _taiChiTiet();
-          await _kiemTraTrangThaiUngTuyen();
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          Navigator.pop(context, _daThayDoiUngTuyen);
         },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async {
+            await _taiChiTiet();
+            await _kiemTraTrangThaiUngTuyen();
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
             if (_loi != null)
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -720,6 +760,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           ],
         ),
       ),
+    ),
       bottomNavigationBar: SafeArea(
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -809,14 +850,41 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       child: ElevatedButton(
                         onPressed: coTheUngTuyen ? _ungTuyen : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: dangTuyen
-                              ? AppColors.primary
-                              : (isDaHoanThanh
-                                  ? Colors.grey.shade600
-                                  : (isDaTuyenDu ? Colors.amber.shade700 : Colors.grey)),
-                          foregroundColor: Colors.white,
+                          backgroundColor: isChapNhan
+                              ? const Color(0xFFE8F5E9)
+                              : isChoDuyet
+                                  ? Colors.grey.shade300
+                                  : (dangTuyen
+                                      ? (biTuChoi ? const Color(0xFFFFF3E0) : AppColors.primary)
+                                      : (isDaHoanThanh
+                                          ? Colors.grey.shade600
+                                          : (isDaTuyenDu ? Colors.amber.shade700 : Colors.grey))),
+                          foregroundColor: isChapNhan
+                              ? const Color(0xFF2E7D32)
+                              : isChoDuyet
+                                  ? Colors.grey.shade700
+                                  : (biTuChoi ? const Color(0xFFE65100) : Colors.white),
+                          disabledBackgroundColor: isChapNhan
+                              ? const Color(0xFFE8F5E9)
+                              : isChoDuyet
+                                  ? Colors.grey.shade300
+                                  : (isDaHoanThanh
+                                      ? Colors.grey.shade400
+                                      : (isDaTuyenDu ? Colors.amber.shade200 : Colors.grey.shade300)),
+                          disabledForegroundColor: isChapNhan
+                              ? const Color(0xFF2E7D32)
+                              : isChoDuyet
+                                  ? Colors.grey.shade700
+                                  : (isDaTuyenDu ? Colors.brown.shade800 : Colors.white),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
+                            side: isChoDuyet
+                                ? BorderSide(color: Colors.grey.shade400)
+                                : (isChapNhan
+                                    ? const BorderSide(color: Color(0xFF81C784))
+                                    : (biTuChoi
+                                        ? const BorderSide(color: Color(0xFFFFB74D))
+                                        : BorderSide.none)),
                           ),
                           elevation: 0,
                         ),
@@ -825,20 +893,27 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                               ? 'Đang kiểm tra...'
                               : _loiKiemTraUngTuyen
                                   ? 'Không thể kiểm tra ứng tuyển'
-                                  : daUngTuyen
-                                      ? 'Đã ứng tuyển'
-                                      : isDaHoanThanh
-                                          ? 'Công việc đã hoàn thành'
-                                          : isDaTuyenDu
-                                              ? 'Công việc đã tuyển đủ'
-                                              : !dangTuyen
-                                                  ? 'Công việc đã đóng tuyển'
-                                                  : biTuChoi
-                                                      ? 'Ứng tuyển lại'
-                                                      : 'Ứng tuyển công việc này',
-                          style: const TextStyle(
+                                  : isChapNhan
+                                      ? 'Đã chấp nhận'
+                                      : isChoDuyet
+                                          ? 'Đã ứng tuyển'
+                                          : isDaHoanThanh
+                                              ? 'Công việc đã hoàn thành'
+                                              : isDaTuyenDu
+                                                  ? 'Công việc đã tuyển đủ'
+                                                  : !dangTuyen
+                                                      ? 'Công việc đã đóng tuyển'
+                                                      : biTuChoi
+                                                          ? 'Ứng tuyển lại'
+                                                          : 'Ứng tuyển công việc này',
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
+                            color: isChapNhan
+                                ? const Color(0xFF2E7D32)
+                                : isChoDuyet
+                                    ? Colors.grey.shade700
+                                    : (biTuChoi ? const Color(0xFFE65100) : Colors.white),
                           ),
                         ),
                       ),

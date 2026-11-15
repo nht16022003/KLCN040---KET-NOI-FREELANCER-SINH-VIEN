@@ -14,11 +14,16 @@ class JobService {
   Future<ApiResponse<List<JobPostModel>>> layDanhSachJobPost({
     int page = 1,
     String tuKhoa = '',
+    int? maUser,
   }) async {
     try {
+      final queryParams = <String, dynamic>{'page': page, 'tuKhoa': tuKhoa};
+      if (maUser != null && maUser > 0) {
+        queryParams['maUser'] = maUser;
+      }
       final response = await _apiClient.get<Map<String, dynamic>>(
         ApiEndpoints.danhSachJobPost,
-        queryParameters: {'page': page, 'tuKhoa': tuKhoa},
+        queryParameters: queryParams,
       );
       final body = response.data is Map<String, dynamic>
           ? response.data as Map<String, dynamic>
@@ -44,10 +49,15 @@ class JobService {
   }
 
   /// Lấy chi tiết công việc theo mã Job
-  Future<ApiResponse<JobPostModel>> layChiTietJobPost(String maJob) async {
+  Future<ApiResponse<JobPostModel>> layChiTietJobPost(String maJob, {int? maUser}) async {
     try {
+      final queryParams = <String, dynamic>{};
+      if (maUser != null && maUser > 0) {
+        queryParams['maUser'] = maUser;
+      }
       final response = await _apiClient.get<Map<String, dynamic>>(
         '${ApiEndpoints.chiTietJobPost}/$maJob',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
       final body = response.data is Map<String, dynamic>
           ? response.data as Map<String, dynamic>
