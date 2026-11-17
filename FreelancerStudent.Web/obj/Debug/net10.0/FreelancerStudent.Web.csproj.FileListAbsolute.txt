@@ -230,3 +230,4 @@ D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\o548dg5n
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\61fv8abb4x-{0}-l17c9m0bfb-l17c9m0bfb.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\bxck7hdiux-{0}-l17c9m0bfb-l17c9m0bfb.gz
 D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\lqvcja4pqu-{0}-kag5xxg7x8-kag5xxg7x8.gz
+D:\KLTN\KLTN\Improve\FreelancerStudent.Web\obj\Debug\net10.0\compressed\9a3q39jikj-{0}-kmgxv6e5f5-kmgxv6e5f5.gz
