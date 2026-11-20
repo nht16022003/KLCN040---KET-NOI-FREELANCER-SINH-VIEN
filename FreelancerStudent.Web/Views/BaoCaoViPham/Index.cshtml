@@ -1,0 +1,73 @@
+@model FreelancerStudent.Web.Controllers.BaoCaoViPhamTrangViewModel
+@{
+    ViewData["Title"] = "Báo cáo vi phạm và điểm uy tín";
+}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h2 class="h4 mb-1">Báo cáo vi phạm hợp đồng</h2><p class="text-muted mb-0">Theo dõi giải trình, kết luận xử lý và lịch sử điểm uy tín.</p></div>
+        <a asp-controller="HopDong" asp-action="Index" class="btn btn-outline-success">Danh sách hợp đồng</a>
+    </div>
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+
+    @if (Model.DiemUyTin != null)
+    {
+        <section class="card mb-4"><div class="card-body">
+            <h3 class="h5">Điểm uy tín Freelancer</h3>
+            <div class="display-6 fw-bold text-success">@Model.DiemUyTin.diemUyTin.ToString("0.##")</div>
+            <div class="text-muted">Số lần vi phạm: @Model.DiemUyTin.soLanViPham</div>
+            <h4 class="h6 mt-4">Lịch sử thay đổi điểm</h4>
+            @if (Model.DiemUyTin.LichSu.Count == 0) { <div class="text-muted">Chưa có thay đổi điểm.</div> }
+            else
+            {
+                <div class="table-responsive"><table class="table table-sm align-middle">
+                    <thead><tr><th>Ngày</th><th>Lý do</th><th>Trước</th><th>Thay đổi</th><th>Sau</th></tr></thead>
+                    <tbody>@foreach (var entry in Model.DiemUyTin.LichSu) { <tr><td>@entry.NgayTao.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td><td>@entry.LyDo</td><td>@entry.DiemTruoc.ToString("0.##")</td><td class="@(entry.SoDiemThayDoi < 0 ? "text-success" : "text-danger")">@entry.SoDiemThayDoi.ToString("+0.##;-0.##;0")</td><td>@entry.DiemSau.ToString("0.##")</td></tr> }</tbody>
+                </table></div>
+            }
+        </div></section>
+    }
+
+    @if (Model.KhieuNais.Count > 0)
+    {
+        <section class="card mb-4"><div class="card-body">
+            <h3 class="h5">Khiếu nại chờ xử lý</h3>
+            @foreach (var appeal in Model.KhieuNais)
+            {
+                <div class="border p-3 mb-3">
+                    <div class="d-flex justify-content-between"><strong>Hợp đồng @appeal.BaoCao?.MaHD · @appeal.FreelancerStudent?.tenUser</strong><span>@appeal.NgayTao.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span></div>
+                    <p class="my-2">@appeal.NoiDung</p>
+                    <form asp-action="KetLuanKhieuNai" method="post" class="row g-2">
+                        @Html.AntiForgeryToken()<input type="hidden" name="MaKhieuNai" value="@appeal.MaKhieuNai" />
+                        <div class="col-md-3"><select class="form-select" name="ChapNhan"><option value="true">Chấp nhận khiếu nại</option><option value="false">Từ chối khiếu nại</option></select></div>
+                        <div class="col-md-7"><input class="form-control" name="KetQua" required maxlength="2000" placeholder="Kết quả và lý do xử lý" /></div>
+                        <div class="col-md-2"><button class="btn btn-success w-100" type="submit">Gửi kết quả</button></div>
+                    </form>
+                </div>
+            }
+        </div></section>
+    }
+
+    <section class="card"><div class="card-body">
+        <h3 class="h5">Danh sách hồ sơ</h3>
+        @if (Model.BaoCaos.Count == 0) { <div class="text-muted py-3">Chưa có báo cáo vi phạm nào.</div> }
+        else
+        {
+            <div class="table-responsive"><table class="table table-hover align-middle">
+                <thead><tr><th>Mã hợp đồng</th><th>Vi phạm</th><th>Đối tác</th><th>Ngày báo cáo</th><th>Trạng thái</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.BaoCaos)
+                {
+                    <tr>
+                        <td>@item.MaHD</td><td>@item.LoaiViPham</td>
+                        <td>@(Model.Role == "FreelancerStudent" ? item.TenNhaTuyenDung : item.TenFreelancer)</td>
+                        <td>@item.NgayBaoCao.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                        <td><span class="badge text-bg-secondary">@item.TrangThai</span></td>
+                        <td><a asp-action="ChiTiet" asp-route-id="@item.MaBaoCao" class="btn btn-sm btn-outline-primary">Xem hồ sơ</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table></div>
+        }
+    </div></section>
+</div>

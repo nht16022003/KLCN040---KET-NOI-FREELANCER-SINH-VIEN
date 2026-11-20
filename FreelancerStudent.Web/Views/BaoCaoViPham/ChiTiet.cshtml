@@ -1,0 +1,113 @@
+@model FreelancerStudent.Web.ViewModels.BaoCaoViPhamChiTietViewModel
+@{
+    ViewData["Title"] = "Hồ sơ báo cáo vi phạm";
+    var report = Model.BaoCao;
+    var role = ViewBag.Role as string ?? "";
+    var canAppeal = report.KetLuan is "XAC_DINH_VI_PHAM" or "YEU_CAU_KHAC_PHUC";
+}
+<div class="container py-4">
+    <div class="mb-3"><a asp-action="Index">← Danh sách báo cáo</a></div>
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+    <div class="card mb-3"><div class="card-body">
+        <div class="d-flex justify-content-between flex-wrap"><div><h2 class="h4">Báo cáo hợp đồng @report.MaHD</h2><div class="text-muted">@Model.HopDong.TenCongViec · @report.LoaiViPham</div></div><span class="badge text-bg-secondary align-self-start">@report.TrangThai</span></div>
+        <hr />
+        <dl class="row mb-0">
+            <dt class="col-md-3">Nhà tuyển dụng</dt><dd class="col-md-9">@Model.HopDong.TenNhaTuyenDung</dd>
+            <dt class="col-md-3">Freelancer</dt><dd class="col-md-9">@Model.HopDong.TenFreelancer</dd>
+            <dt class="col-md-3">Thời gian vi phạm</dt><dd class="col-md-9">@(report.ThoiGianViPham?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "Không nêu")</dd>
+            <dt class="col-md-3">Ngày báo cáo / hạn giải trình</dt><dd class="col-md-9">@report.NgayBaoCao.ToLocalTime().ToString("dd/MM/yyyy HH:mm") / @report.HanGiaiTrinh.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            <dt class="col-md-3">Mô tả vi phạm</dt><dd class="col-md-9" style="white-space:pre-wrap">@report.MoTa</dd>
+        </dl>
+    </div></div>
+
+    <div class="card mb-3"><div class="card-body">
+        <h3 class="h5">Điều khoản và tiến độ hợp đồng</h3>
+        <p><strong>Trạng thái:</strong> @Model.HopDong.trangThai · <strong>Ký quỹ:</strong> @Model.HopDong.sotienkyquy?.ToString("N0") VNĐ</p>
+        <p><strong>Thời hạn:</strong> @Model.HopDong.ngayBatDau?.ToLocalTime().ToString("dd/MM/yyyy") – @Model.HopDong.ngayKetThuc?.ToLocalTime().ToString("dd/MM/yyyy")</p>
+        <p style="white-space:pre-wrap"><strong>Điều khoản:</strong> @Model.HopDong.dieuKhoan</p>
+        @if (Model.Tasks.Count > 0) { <h4 class="h6">Tiến độ công việc</h4><ul>@foreach (var task in Model.Tasks) { <li>@task.tenTask — @task.trangThai; hạn @task.hanHoanThanh?.ToLocalTime().ToString("dd/MM/yyyy")</li> }</ul> }
+        @if (Model.LoTrinhBanGiao.Count > 0) { <h4 class="h6">Lộ trình bàn giao</h4><ul>@foreach (var phase in Model.LoTrinhBanGiao) { <li>@phase.tenGiaiDoan — @phase.trangThai; hạn @phase.hanChot.ToLocalTime().ToString("dd/MM/yyyy")</li> }</ul> }
+        @if (Model.SanPhamDaBanGiao.Count > 0) { <h4 class="h6">Sản phẩm đã bàn giao</h4><ul>@foreach (var handoff in Model.SanPhamDaBanGiao) { <li><a href="@handoff.fileSanPhamUrl" target="_blank" rel="noopener">@handoff.phienBan</a> — @handoff.motaBanGiao; @handoff.trangThai; @handoff.ngayNop.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</li> }</ul> }
+        @if (Model.LichSuTraoDoi.Count > 0) { <h4 class="h6">Lịch sử trao đổi</h4><div class="border p-2" style="max-height:260px;overflow:auto">@foreach (var message in Model.LichSuTraoDoi) { <div class="border-bottom py-2"><small class="text-muted">User #@message.maNguoiGui · @message.ngayGui.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small><div style="white-space:pre-wrap">@message.noiDung</div>@if (!string.IsNullOrWhiteSpace(message.fileDinhKem)) { <a href="@message.fileDinhKem" target="_blank" rel="noopener">Tệp đính kèm</a> }</div> }</div> }
+    </div></div>
+
+    <div class="card mb-3"><div class="card-body">
+        <h3 class="h5">Bằng chứng</h3>
+        @if (report.TepMinhChungs.Count == 0) { <div class="text-muted">Không có tệp minh chứng.</div> }
+        else { <ul class="mb-0">@foreach (var file in report.TepMinhChungs) { <li><a href="@file.DuongDan" target="_blank" rel="noopener">@file.TenTep</a> <span class="text-muted">(@file.LoaiTep · user #@file.MaNguoiTai · @file.NgayTai.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))</span></li> }</ul> }
+    </div></div>
+
+    @if (!string.IsNullOrWhiteSpace(report.GiaiTrinh))
+    {
+        <div class="card mb-3"><div class="card-body"><h3 class="h5">Giải trình Freelancer</h3><div class="mb-2">@(report.FreelancerDongY == true ? "Freelancer đồng ý nội dung báo cáo." : "Freelancer không đồng ý nội dung báo cáo.")</div><div style="white-space:pre-wrap">@report.GiaiTrinh</div><div class="small text-muted mt-2">Gửi lúc @report.NgayGiaiTrinh?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") · Đồng ý gia hạn: @(report.FreelancerDongYGiaHan ? "Có" : "Không")</div></div></div>
+    }
+    @if (!string.IsNullOrWhiteSpace(report.PhanHoiNhaTuyenDung))
+    {
+        <div class="card mb-3"><div class="card-body"><h3 class="h5">Phản hồi nhà tuyển dụng</h3><div style="white-space:pre-wrap">@report.PhanHoiNhaTuyenDung</div><div class="small text-muted mt-2">Gửi lúc @report.NgayPhanHoiNhaTuyenDung?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") · Đồng ý gia hạn: @(report.NhaTuyenDungDongYGiaHan ? "Có" : "Không")</div></div></div>
+    }
+
+    @if (role == "FreelancerStudent" && report.TrangThai == "CHO_TIEP_NHAN" && DateTime.UtcNow <= report.HanGiaiTrinh)
+    {
+        <div class="card mb-3"><div class="card-body"><h3 class="h5">Gửi giải trình</h3>
+            <form asp-action="GuiGiaiTrinh" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()<input type="hidden" name="MaBaoCao" value="@report.MaBaoCao" />
+                <div class="mb-2"><label class="form-label">Bạn có đồng ý nội dung báo cáo?</label><select class="form-select" name="DongYNoiDung"><option value="false">Không đồng ý</option><option value="true">Đồng ý</option></select></div>
+                <div class="mb-2"><label class="form-label">Giải thích nguyên nhân, phương án khắc phục/tiếp tục</label><textarea class="form-control" name="NoiDung" required maxlength="2000" rows="4"></textarea></div>
+                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" value="true" name="DongYGiaHan" id="freeExtend" /><label class="form-check-label" for="freeExtend">Tôi đồng ý phương án gia hạn hợp đồng nếu Admin xem xét</label></div>
+                <div class="mb-3"><label class="form-label">Tài liệu, hình ảnh hoặc bằng chứng</label><input class="form-control" type="file" name="TepMinhChungs" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z" /></div>
+                <button class="btn btn-primary" type="submit">Gửi giải trình</button>
+            </form>
+        </div></div>
+    }
+
+    @if (role == "NhaTuyenDung" && report.TrangThai == "CHO_ADMIN" && report.NgayXuLy == null)
+    {
+        <div class="card mb-3"><div class="card-body"><h3 class="h5">Bổ sung ý kiến (không bắt buộc)</h3>
+            <form asp-action="PhanHoi" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()<input type="hidden" name="MaBaoCao" value="@report.MaBaoCao" />
+                <div class="mb-2"><label class="form-label">Ý kiến / bằng chứng bổ sung</label><textarea class="form-control" name="NoiDung" required maxlength="2000" rows="3"></textarea></div>
+                <div class="form-check mb-2"><input class="form-check-input" type="checkbox" value="true" name="DongYGiaHan" id="ntdExtend" /><label class="form-check-label" for="ntdExtend">Tôi đồng ý gia hạn hợp đồng</label></div>
+                <div class="mb-3"><label class="form-label">Tệp đính kèm</label><input class="form-control" type="file" name="TepMinhChungs" multiple /></div>
+                <button class="btn btn-outline-primary" type="submit">Gửi phản hồi</button>
+            </form>
+        </div></div>
+    }
+
+    @if (role == "Admin" && report.NgayXuLy == null && report.TrangThai != "CHUYEN_TRANH_CHAP")
+    {
+        <div class="card mb-3"><div class="card-body"><h3 class="h5">Kết luận và xử lý của Admin</h3>
+            <form asp-action="KetLuan" method="post">
+                @Html.AntiForgeryToken()<input type="hidden" name="MaBaoCao" value="@report.MaBaoCao" />
+                <div class="row g-2">
+                    <div class="col-md-6"><label class="form-label">Kết luận</label><select class="form-select" name="KetLuan" required><option value="CHAP_NHAN_GIAI_TRINH">Chấp nhận giải trình, không xác định vi phạm</option><option value="XAC_DINH_VI_PHAM">Xác định có vi phạm</option><option value="YEU_CAU_KHAC_PHUC">Yêu cầu Freelancer khắc phục/tiếp tục</option><option value="GIA_HAN_HOP_DONG">Chấp thuận gia hạn (cần hai bên đồng ý)</option><option value="CHUYEN_TRANH_CHAP">Chuyển sang quy trình tranh chấp</option></select></div>
+                    <div class="col-md-3"><label class="form-label">Mức độ vi phạm</label><select class="form-select" name="MucDoViPham"><option value="">Không áp dụng</option><option value="NHE">Nhẹ</option><option value="TRUNG_BINH">Trung bình</option><option value="NGHIEM_TRONG">Nghiêm trọng</option></select></div>
+                    <div class="col-md-3"><label class="form-label">Số ngày gia hạn</label><input class="form-control" type="number" name="SoNgayGiaHan" min="0" max="365" value="0" /></div>
+                    <div class="col-12"><label class="form-label">Nhận định và lý do quyết định</label><textarea class="form-control" name="GhiChu" maxlength="2000" rows="3"></textarea></div>
+                    <div class="col-12"><button class="btn btn-success" type="submit">Phê duyệt kết luận</button></div>
+                </div>
+            </form>
+            <p class="small text-muted mt-2 mb-0">Điểm trừ được áp dụng theo số lần vi phạm: lần 1 trừ 1; lần 2 trừ một nửa điểm hiện có; lần 3 về 0 và khóa tài khoản. Chuyển tranh chấp sẽ đặt trạng thái hợp đồng tương ứng.</p>
+        </div></div>
+    }
+
+    @if (canAppeal && role == "FreelancerStudent" && Model.KhieuNai == null)
+    {
+        <div class="card mb-3"><div class="card-body"><h3 class="h5">Khiếu nại kết quả</h3>
+            <form asp-action="GuiKhieuNai" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()<input type="hidden" name="MaBaoCao" value="@report.MaBaoCao" />
+                <div class="mb-2"><label class="form-label">Nội dung khiếu nại</label><textarea class="form-control" name="NoiDung" required maxlength="2000" rows="3"></textarea></div>
+                <div class="mb-3"><label class="form-label">Bằng chứng bổ sung</label><input class="form-control" type="file" name="TepMinhChungs" multiple /></div>
+                <button class="btn btn-outline-danger" type="submit">Gửi khiếu nại</button>
+            </form>
+        </div></div>
+    }
+    @if (Model.KhieuNai != null)
+    {
+        <div class="alert alert-info"><strong>Khiếu nại:</strong> @Model.KhieuNai.TrangThai · @Model.KhieuNai.NoiDung @if (!string.IsNullOrWhiteSpace(Model.KhieuNai.KetQuaAdmin)) { <span>— Kết quả Admin: @Model.KhieuNai.KetQuaAdmin</span> }</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(report.KetLuan))
+    {
+        <div class="alert alert-secondary"><strong>Kết luận:</strong> @report.KetLuan · Mức độ: @report.MucDoViPham · @report.GhiChuAdmin @if (report.SoLanViPham.HasValue) { <span> · Vi phạm lần @report.SoLanViPham; điểm @report.DiemTruocXuLy → @report.DiemSauXuLy (trừ @report.SoDiemTru)</span> }</div>
+    }
+</div>

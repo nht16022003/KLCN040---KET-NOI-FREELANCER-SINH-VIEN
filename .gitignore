@@ -1,3 +1,59 @@
 .vs/
 **/bin/
 **/obj/
+TrienKhaiKiemThu.*
+
+# Build artifacts
+bin/
+obj/
+Debug/
+Release/
+**/Debug/
+**/Release/
+.dart_tool/
+**/.dart_tool/
+build/
+**/build/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# IDE & moi truong ca nhan
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+*.user
+*.suo
+*.cache
+**/*.user
+**/*.suo
+**/*.cache
+
+# File tam & log
+*.log
+*.tmp
+*.bak
+*.temp
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.temp
+Thumbs.db
+desktop.ini
+**/Thumbs.db
+**/desktop.ini
+
+# File nhay cam & khoa tam
+.env
+**/.env
+temp-keys/
+**/temp-keys/
+
+# File Markdown (khong dua bat ky file .md nao len GitHub)
+*.md
+**/*.md
+
+*.slnx
+*.slnLaunch.user
